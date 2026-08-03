@@ -1,0 +1,32 @@
+{
+  "name": "bettracker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Liiga-vedonlyönnin value-analyysijärjestelmä",
+  "scripts": {
+    "pipeline": "npx tsx src/pipeline.ts",
+    "ingest": "npx tsx src/ingest/liiga.ts",
+    "analyze": "npx tsx src/analyze/elo.ts",
+    "typecheck": "npx tsc --noEmit",
+    "test": "npx vitest run",
+    "test:watch": "npx vitest",
+    "demo": "npx tsx demo/server.ts",
+    "e2e": "npx playwright test --config=e2e/playwright.config.ts",
+    "e2e:ui": "npx playwright test --ui --config=e2e/playwright.config.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.0",
+    "playwright": "^1.52.0",
+    "rss-parser": "^3.13.0",
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "tsx": "^4.19.0",
+    "vitest": "^3.1.0",
+    "@playwright/test": "^1.52.0"
+  }
+}

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BetTracker — Liiga Value Analyzer</title>
+  <style>
+    :root {
+      --bg: #0f172a; --card: #1e293b; --text: #e2e8f0;
+      --accent: #38bdf8; --green: #22c55e; --red: #ef4444;
+      --yellow: #eab308; --muted: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 16px; }
+    h1 { font-size: 1.4rem; margin-bottom: 16px; }
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+    .tab { padding: 8px 16px; background: var(--card); border: none; color: var(--text); border-radius: 8px 8px 0 0; cursor: pointer; font-size: 0.9rem; }
+    .tab.active { background: var(--accent); color: var(--bg); font-weight: 600; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .card { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+    .card h3 { font-size: 1rem; margin-bottom: 6px; }
+    .row { display: flex; justify-content: space-between; align-items: center; }
+    .badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-green { background: var(--green); color: #000; }
+    .badge-yellow { background: var(--yellow); color: #000; }
+    .badge-red { background: var(--red); color: #fff; }
+    .badge-muted { background: var(--muted); color: #fff; }
+    .edge-strong { color: var(--green); font-weight: 700; }
+    .edge-candidate { color: var(--yellow); font-weight: 600; }
+    .metric { font-size: 1.6rem; font-weight: 700; }
+    .metric-label { font-size: 0.8rem; color: var(--muted); }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .loading { text-align: center; padding: 40px; color: var(--muted); }
+    .empty { text-align: center; padding: 40px; color: var(--muted); font-style: italic; }
+  </style>
+</head>
+<body>
+  <h1>🏒 BetTracker</h1>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('value')">💎 Value-flagit</button>
+    <button class="tab" onclick="switchTab('predictions')">🎯 Ennusteet</button>
+    <button class="tab" onclick="switchTab('teams')">📊 Joukkueet</button>
+  </div>
+
+  <div id="value" class="view active">
+    <div class="grid-2" id="metrics"></div>
+    <div id="value-list"></div>
+  </div>
+  <div id="predictions" class="view">
+    <div id="accuracy-metrics"></div>
+    <div id="predictions-list"></div>
+  </div>
+  <div id="teams" class="view">
+    <div id="teams-list"></div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR-ANON-KEY';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // === Tab switching ===
+    window.switchTab = function(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelector(`.tab:nth-child(${{value:1, predictions:2, teams:3}[name]})`).classList.add('active');
+      document.getElementById(name).classList.add('active');
+      if (name === 'value') loadValueFlags();
+      if (name === 'predictions') loadPredictions();
+      if (name === 'teams') loadTeams();
+    };
+
+    // === Value-flagit ===
+    async function loadValueFlags() {
+      const { data, error } = await supabase
+        .from('value_flags')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      const list = document.getElementById('value-list');
+      const metrics = document.getElementById('metrics');
+      if (error) { list.innerHTML = `<div class="loading">⚠️ ${error.message}</div>`; return; }
+      if (!data?.length) { list.innerHTML = '<div class="empty">Ei value-flageja vielä — dataa kerätään...</div>'; return; }
+
+      const strong = data.filter(f => f.edge > 0.05).length;
+      metrics.innerHTML = `
+        <div class="card"><div class="metric-label">Value-flageja</div><div class="metric">${data.length}</div></div>
+        <div class="card"><div class="metric-label">Vahvoja (edge &gt; 5 %)</div><div class="metric">${strong}</div></div>`;
+
+      list.innerHTML = data.map(f => `
+        <div class="card">
+          <div class="row">
+            <strong>${f.market}</strong>
+            <span class="badge ${f.edge > 0.05 ? 'badge-green' : 'badge-yellow'}">${(f.edge * 100).toFixed(1)}% edge</span>
+          </div>
+          <div class="row" style="margin-top:6px; font-size:0.85rem; color:var(--muted)">
+            <span>Model: ${(f.model_prob * 100).toFixed(1)}%</span>
+            <span>Implied: ${(f.implied_prob * 100).toFixed(1)}%</span>
+            <span>${new Date(f.created_at).toLocaleDateString('fi')}</span>
+          </div>
+        </div>`).join('');
+    }
+
+    // === Ennusteet ===
+    async function loadPredictions() {
+      const { data, error } = await supabase
+        .from('game_predictions')
+        .select('*')
+        .order('predicted_at', { ascending: false })
+        .limit(20);
+      const list = document.getElementById('predictions-list');
+      const metrics = document.getElementById('accuracy-metrics');
+      if (error) { list.innerHTML = `<div class="loading">⚠️ ${error.message}</div>`; return; }
+      if (!data?.length) { list.innerHTML = '<div class="empty">Ei ennusteita vielä...</div>'; return; }
+
+      const resolved = data.filter(p => p.was_correct !== null);
+      const correct = resolved.filter(p => p.was_correct).length;
+      const rate = resolved.length > 0 ? (correct / resolved.length * 100).toFixed(1) : '—';
+
+      metrics.innerHTML = `
+        <div class="grid-2">
+          <div class="card"><div class="metric-label">Osumatarkkuus</div><div class="metric">${rate === '—' ? rate : rate + '%'}</div></div>
+          <div class="card"><div class="metric-label">Ratkenneita</div><div class="metric">${resolved.length}</div></div>
+        </div>`;
+
+      list.innerHTML = data.map(p => {
+        const statusIcon = p.was_correct === true ? '✅' : p.was_correct === false ? '❌' : '⏳';
+        return `
+        <div class="card">
+          <div class="row">
+            <strong>${statusIcon} ${p.predicted_winner?.toUpperCase() || '—'}</strong>
+            <span class="badge ${p.was_correct === true ? 'badge-green' : p.was_correct === false ? 'badge-red' : 'badge-muted'}">${p.was_correct === true ? 'Oikein' : p.was_correct === false ? 'Väärin' : 'Odottaa'}</span>
+          </div>
+          <div class="row" style="margin-top:6px; font-size:0.85rem; color:var(--muted)">
+            <span>Koti: ${(p.home_win_prob * 100).toFixed(0)}%</span>
+            <span>Tasa: ${(p.draw_prob * 100).toFixed(0)}%</span>
+            <span>Vieras: ${(p.away_win_prob * 100).toFixed(0)}%</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // === Joukkueet ===
+    async function loadTeams() {
+      const { data, error } = await supabase
+        .from('team_ratings')
+        .select('*')
+        .order('elo', { ascending: false })
+        .limit(15);
+      const list = document.getElementById('teams-list');
+      if (error) { list.innerHTML = `<div class="loading">⚠️ ${error.message}</div>`; return; }
+      if (!data?.length) { list.innerHTML = '<div class="empty">Ei joukkuetietoja vielä...</div>'; return; }
+
+      list.innerHTML = data.map(t => `
+        <div class="card">
+          <div class="row">
+            <strong>🏒 Joukkue #${t.team_id}</strong>
+            <span style="font-weight:700">Elo: ${t.elo.toFixed(0)}</span>
+          </div>
+          <div class="row" style="margin-top:4px; font-size:0.85rem; color:var(--muted)">
+            <span>PDO: ${t.pdo ? t.pdo.toFixed(1) : '—'}</span>
+            <span>${new Date(t.date).toLocaleDateString('fi')}</span>
+          </div>
+        </div>`).join('');
+    }
+
+    // Alustava lataus
+    loadValueFlags();
+  </script>
+</body>
+</html>
