@@ -134,6 +134,7 @@ body{
 }
 .pressure-toggle:hover{border-color:var(--c-orange);color:var(--c-text)}
 .pressure-toggle.active{background:var(--c-orange);color:#fff;border-color:var(--c-orange);font-weight:700;box-shadow:0 0 12px oklch(0.58 0.18 50 / 0.3)}
+.factor-badge{display:inline-block;padding:1px 6px;border-radius:8px;background:oklch(1 1 0 / 0.06);margin:1px 2px;cursor:help;font-weight:500}
 /* Modal */
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:oklch(0 0 0 / 0.7);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;animation:fadeIn .2s ease}
 /* a11y */
@@ -187,7 +188,7 @@ let bets=JSON.parse(localStorage.getItem('bt_bets')||'[]');
 let betHistory=JSON.parse(localStorage.getItem('bt_history')||'[]');
 let simResults=JSON.parse(localStorage.getItem('bt_simResults')||'null');
 let pressureTeam=localStorage.getItem('bt_pressure')||'';
-let teams=[],games=[],predictions=[],valueFlags=[],oddsSnapshots=[],ratings=[];
+let teams=[],games=[],predictions=[],valueFlags=[],oddsSnapshots=[],ratings=[],news=[];
 
 function save(){localStorage.setItem('bt_bankroll',bankroll.toFixed(2));localStorage.setItem('bt_bets',JSON.stringify(bets));localStorage.setItem('bt_history',JSON.stringify(betHistory));localStorage.setItem('bt_simResults',JSON.stringify(simResults));localStorage.setItem('bt_pressure',pressureTeam)}
 function updateBankroll(){const e=document.getElementById('bankroll-display');e.textContent=bankroll.toFixed(2)+' €';e.className='bankroll-amount '+(bankroll>=100?'positive':'negative')}
@@ -199,8 +200,8 @@ function getGame(id){return games.find(g=>g.id===id)}
 function getOdds(gid){return oddsSnapshots.find(o=>o.game_id===gid)}
 
 async function loadData(){
-  const[g,t,p,v,o,r]=await Promise.all([fetch(API+'/games').then(r=>r.json()),fetch(API+'/teams').then(r=>r.json()),fetch(API+'/game_predictions').then(r=>r.json()),fetch(API+'/value_flags').then(r=>r.json()),fetch(API+'/odds_snapshots').then(r=>r.json()),fetch(API+'/team_ratings').then(r=>r.json())]);
-  games=g;teams=t;predictions=p;valueFlags=v;oddsSnapshots=o;ratings=r;
+  const[g,t,p,v,o,r,n]=await Promise.all([fetch(API+'/games').then(r=>r.json()),fetch(API+'/teams').then(r=>r.json()),fetch(API+'/game_predictions').then(r=>r.json()),fetch(API+'/value_flags').then(r=>r.json()),fetch(API+'/odds_snapshots').then(r=>r.json()),fetch(API+'/team_ratings').then(r=>r.json()),fetch(API+'/news_events').then(r=>r.json())]);
+  games=g;teams=t;predictions=p;valueFlags=v;oddsSnapshots=o;ratings=r;news=n||[];
 }
 
 function renderRound(){
@@ -233,7 +234,25 @@ function renderUpcoming(g){
   // Per-game pressure toggles
   const homePressed=pressureTeam===String(g.home_team_id);
   const awayPressed=pressureTeam===String(g.away_team_id);
-  const pressHtml=`<div style="margin-top:4px;display:flex;gap:4px;font-size:.65rem">
+
+  // Factor badges
+  let factorHtml='';
+  const hElo=getRating(g.home_team_id)?.elo||1500,aElo=getRating(g.away_team_id)?.elo||1500;
+  const hPdo=getRating(g.home_team_id)?.pdo||100,aPdo=getRating(g.away_team_id)?.pdo||100;
+  const factors=[];
+  factors.push({l:'🏠 Kotietu',c:'var(--c-accent)',t:'Kotijoukkueella ~55% voittotodennäköisyys Liigassa'});
+  const eloDiff=Math.abs(hElo-aElo);
+  if(eloDiff>60)factors.push({l:`⚡ Elo-ero ${eloDiff.toFixed(0)}pt`,c:'var(--c-warning)',t:`Elo-ero ${(hElo>aElo?home:away)} eduksi`});
+  if(hPdo>102)factors.push({l:`📈 ${home} ylisuorittaa`,c:'var(--c-orange)',t:`PDO ${hPdo.toFixed(1)} — regressoituu kohti 100`});
+  if(aPdo>102)factors.push({l:`📈 ${away} ylisuorittaa`,c:'var(--c-orange)',t:`PDO ${aPdo.toFixed(1)} — regressoituu kohti 100`});
+  if(hPdo<98)factors.push({l:`📉 ${home} alisuorittaa`,c:'oklch(0.52 0.22 25)',t:`PDO ${hPdo.toFixed(1)} — todennäköinen nousu tulossa`});
+  if(aPdo<98)factors.push({l:`📉 ${away} alisuorittaa`,c:'oklch(0.52 0.22 25)',t:`PDO ${aPdo.toFixed(1)} — todennäköinen nousu tulossa`});
+  // Check for injuries in news
+  const injuryCount=news.filter(e=>e.confidence>0.7&&(e.team_id===g.home_team_id||e.team_id===g.away_team_id)).length;
+  if(injuryCount>0)factors.push({l:`🤕 Loukkaantuminen`,c:'var(--c-danger)',t:'Korkean confidencen loukkaantumisuutinen'});
+  factorHtml=factors.map(f=>`<span class="factor-badge" style="color:${f.c}" title="${f.t}">${f.l}</span>`).join(' ');
+
+  const pressHtml=`<div style="margin-top:6px;display:flex;gap:4px;font-size:.65rem">
     <button class="pressure-toggle ${homePressed?'active':''}" onclick="event.stopPropagation();togglePressure(${g.home_team_id})">${home} 🔥</button>
     <button class="pressure-toggle ${awayPressed?'active':''}" onclick="event.stopPropagation();togglePressure(${g.away_team_id})">${away} 🔥</button>
   </div>`;
@@ -252,7 +271,7 @@ function renderUpcoming(g){
   if(odds&&homeV&&drawV&&awayV)oh=`<div class="grid-3" style="margin-top:4px">${oddsBtn('home',odds.home_odds,homeV.mp,homeV.ip,homeV.edge)}${oddsBtn('draw',odds.draw_odds,drawV.mp,drawV.ip,drawV.edge)}${oddsBtn('away',odds.away_odds,awayV.mp,awayV.ip,awayV.edge)}</div>`;
   else if(odds)oh=`<div class="grid-3" style="margin-top:4px"><button class="odds-btn" onclick="placeBet(${g.id},'home',${odds.home_odds})"><span class="odds-val">${odds.home_odds.toFixed(2)}</span><span class="odds-label">1</span></button><button class="odds-btn" onclick="placeBet(${g.id},'draw',${odds.draw_odds})"><span class="odds-val">${odds.draw_odds.toFixed(2)}</span><span class="odds-label">X</span></button><button class="odds-btn" onclick="placeBet(${g.id},'away',${odds.away_odds})"><span class="odds-val">${odds.away_odds.toFixed(2)}</span><span class="odds-label">2</span></button></div>`;
 
-  return `<div class="card"><div class="row"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${home}</strong><span class="vs">vs</span><strong>${away}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span>${vfHtml}</div>${ph}${oh}${pressHtml}</div>`;
+  return `<div class="card"><div class="row"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${home}</strong><span class="vs">vs</span><strong>${away}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span>${vfHtml}</div><div style="font-size:.6rem;margin-top:4px;line-height:1.8">${factorHtml}</div>${ph}${oh}${pressHtml}</div>`;
 }
 function getPred(gid){return simResults?simResults.find(r=>r.game_id===gid):predictions.find(p=>p.game_id===gid)}
 function renderSimGame(r){
