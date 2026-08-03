@@ -138,23 +138,6 @@ export const mockPredictions = [
     predicted_winner: 'home', predicted_at: '2026-07-31T10:00:00Z',
     actual_winner: 'home', was_correct: true, notes: null,
   },
-  {
-    id: 6, game_id: 6,
-    home_win_prob: 0.36, draw_prob: 0.28, away_win_prob: 0.36,
-    predicted_winner: 'away', predicted_at: '2026-08-01T10:00:00Z',
-    actual_winner: 'draw', was_correct: false, notes: null,
-  },
-];
-
-export const mockTeamRatings = [
-  { team_id: 1, date: '2026-08-03', elo: 1580, pdo: 101.5, notes: null },
-  { team_id: 2, date: '2026-08-03', elo: 1540, pdo: 99.2, notes: null },
-  { team_id: 3, date: '2026-08-03', elo: 1520, pdo: 103.1, notes: null },
-  { team_id: 4, date: '2026-08-03', elo: 1510, pdo: 98.5, notes: null },
-  { team_id: 5, date: '2026-08-03', elo: 1490, pdo: 100.8, notes: null },
-  { team_id: 6, date: '2026-08-03', elo: 1480, pdo: 97.0, notes: null },
-  { team_id: 7, date: '2026-08-03', elo: 1470, pdo: 102.2, notes: null },
-  { team_id: 8, date: '2026-08-03', elo: 1450, pdo: 100.0, notes: null },
 ];
 
 export const mockNewsEvents = [
@@ -173,5 +156,4 @@ export const mockOddsSnapshots = [
   { id: 3, game_id: 3, bookmaker: 'Veikkaus', market: '1X2', home_odds: 1.95, draw_odds: 3.60, away_odds: 3.50, fetched_at: '2026-08-02T09:00:00Z' },
   { id: 4, game_id: 4, bookmaker: 'Veikkaus', market: '1X2', home_odds: 3.10, draw_odds: 3.40, away_odds: 2.20, fetched_at: '2026-08-02T09:00:00Z' },
   { id: 5, game_id: 5, bookmaker: 'Veikkaus', market: '1X2', home_odds: 2.40, draw_odds: 3.20, away_odds: 2.90, fetched_at: '2026-07-31T09:00:00Z' },
-  { id: 6, game_id: 6, bookmaker: 'Veikkaus', market: '1X2', home_odds: 2.50, draw_odds: 3.30, away_odds: 2.70, fetched_at: '2026-08-01T09:00:00Z' },
 ];
