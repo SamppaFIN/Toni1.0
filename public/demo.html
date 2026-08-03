@@ -158,10 +158,12 @@ body{
   <button class="tab" data-tab="admin">⚙️ Admin</button>
 </div>
 <div id="round" class="view active">
-  <button class="btn btn-success btn-block" onclick="runSimulation()" id="sim-btn">▶️ Käynnistä pelipäivän simulaatio</button>
-  <div id="round-games" style="margin-top:8px"></div>
+  <div id="round-games" style="margin-top:2px"></div>
 </div>
-<div id="tracker" class="view"><div id="tracker-list"></div></div>
+<div id="tracker" class="view">
+  <button class="btn btn-success btn-block" onclick="runSimulation()" id="sim-btn">▶️ Käynnistä pelipäivän simulaatio</button>
+  <div id="tracker-list" style="margin-top:8px"></div>
+</div>
 <div id="slip" class="view"><div class="grid-2" id="slip-metrics"></div><div id="slip-list"></div><button class="btn btn-danger btn-block" style="margin-top:8px" onclick="clearSlip()">🗑️ Tyhjennä lappu</button></div>
 <div id="history" class="view"><div class="grid-2" id="history-metrics"></div><div id="history-list"></div></div>
 <div id="teams" class="view"><div id="teams-list"></div></div>
@@ -190,7 +192,8 @@ let teams=[],games=[],predictions=[],valueFlags=[],oddsSnapshots=[],ratings=[];
 function save(){localStorage.setItem('bt_bankroll',bankroll.toFixed(2));localStorage.setItem('bt_bets',JSON.stringify(bets));localStorage.setItem('bt_history',JSON.stringify(betHistory));localStorage.setItem('bt_simResults',JSON.stringify(simResults));localStorage.setItem('bt_pressure',pressureTeam)}
 function updateBankroll(){const e=document.getElementById('bankroll-display');e.textContent=bankroll.toFixed(2)+' €';e.className='bankroll-amount '+(bankroll>=100?'positive':'negative')}
 const teamColors={'Tappara':'#005B9F','Ilves':'#006400','Kärpät':'#DEB906','HIFK':'#E31E26','TPS':'#000000','Lukko':'#003D7C','KalPa':'#FFCC00','Pelicans':'#00A9A5','HPK':'#E87722','Jukurit':'#B9975B','Sport':'#C41230','Ässät':'#D41B2C','SaiPa':'#FFD700','JYP':'#C8102E','KooKoo':'#000000'};
-function teamLogo(t,s){s=s||28;const n=t&&t.name?t.name.charAt(0):'?';const c=teamColors[t&&t.name?t.name:'']||'#64748b';return`<span class="team-logo" style="background:${c};width:${s}px;height:${s}px;font-size:${s*0.35}px">${n}</span>`}
+const teamAbbr={'Tappara':'Ta','Ilves':'Il','Kärpät':'Kä','HIFK':'HF','TPS':'TP','Lukko':'Lu','KalPa':'Ka','Pelicans':'Pe','HPK':'HP','Jukurit':'Ju','Sport':'Sp','Ässät':'Äs','SaiPa':'Sa','JYP':'JY','KooKoo':'Ko'};
+function teamLogo(t,s){s=s||30;const n=t&&t.name?t.name:'?';const abbr=t&&t.name&&teamAbbr[t.name]?teamAbbr[t.name]:n.charAt(0);const c=teamColors[t&&t.name?t.name:'']||'#64748b';return`<span class="team-logo" style="background:${c};width:${s}px;height:${s}px;font-size:${s*0.3}px;letter-spacing:-0.5px" title="${n}">${abbr}</span>`}
 function teamName(id){const t=teams.find(x=>x.id===id);return t?t.name:'Joukkue '+id}
 function getGame(id){return games.find(g=>g.id===id)}
 function getOdds(gid){return oddsSnapshots.find(o=>o.game_id===gid)}
