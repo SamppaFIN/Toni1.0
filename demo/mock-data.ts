@@ -141,13 +141,10 @@ export const mockPredictions = [
 ];
 
 export const mockNewsEvents = [
-  {
-    id: 1, source_url: 'https://example.com/news1',
-    published_at: '2026-08-03T07:30:00Z',
-    event_type: 'injury', team_id: 2, player_id: 3,
-    confidence: 0.9, raw_text: 'Eemeli Suomi loukkaantui harjoituksissa...',
-    extracted_json: { event_type: 'injury', team: 'Ilves', player: 'Eemeli Suomi', confidence: 0.9 },
-  },
+  { id: 1, source_url: 'https://example.com/news1', published_at: '2025-09-10T07:30Z', event_type: 'injury', team_id: 2, player_id: 3, confidence: 0.92, raw_text: 'Ilveksen Eemeli Suomi loukkaantui harjoituksissa — poissa avauskierrokselta', extracted_json: { event_type: 'injury', team: 'Ilves', player: 'Eemeli Suomi', confidence: 0.92 } },
+  { id: 2, source_url: 'https://example.com/news2', published_at: '2025-09-10T06:00Z', event_type: 'hot_streak', team_id: 4, player_id: 11, confidence: 0.85, raw_text: 'HIFK:n Juhani Tyrväinen hurjassa vireessä — 7 pistettä harjoituspeleissä', extracted_json: { event_type: 'hot_streak', team: 'HIFK', player: 'Juhani Tyrväinen', confidence: 0.85 } },
+  { id: 3, source_url: 'https://example.com/news3', published_at: '2025-09-09T18:00Z', event_type: 'lineup_change', team_id: 7, player_id: null, confidence: 0.78, raw_text: 'KalPan ykkösketju uusiksi — Kantner nostettu ylös', extracted_json: { event_type: 'lineup_change', team: 'KalPa', confidence: 0.78 } },
+  { id: 4, source_url: 'https://example.com/news4', published_at: '2025-09-10T05:00Z', event_type: 'bench', team_id: 9, player_id: null, confidence: 0.65, raw_text: 'HPK:n päävalmentaja tyytymätön harjoitusotteluiden esitykseen', extracted_json: { event_type: 'bench', team: 'HPK', confidence: 0.65 } },
 ];
 
 export const mockOddsSnapshots = [
