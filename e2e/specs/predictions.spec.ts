@@ -56,7 +56,10 @@ test.describe('Ennusteet ja simulaatio', () => {
     await page.click('#sim-btn');
     // Odota raporttia (simulaatio kestää 20s)
     await expect(page.locator('h3:has-text("Kierrosraportti")')).toBeVisible({ timeout: 30000 });
-    await expect(page.locator('text=Osumia')).toBeVisible();
+    // Vedonlyöntitulokset-osio näyttää jokaisen vedon odotuksen/toteuman/tuloksen
+    await expect(page.locator('h4:has-text("Vedonlyöntitulokset")')).toBeVisible();
+    await expect(page.locator('text=Odotus:')).toBeVisible();
+    await expect(page.locator('text=Toteuma:')).toBeVisible();
   });
 
   test('Historia-välilehti näyttää vedonlyöntihistorian', async ({ page }) => {
