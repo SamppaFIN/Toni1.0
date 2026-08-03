@@ -88,7 +88,7 @@
       "kuvaus": "Datan keruu ja varastointi. Ilman dataa ei ole mitään analysoitavaa.",
       "tiketit": [1, 2, 3, 5],
       "user_story": "Datainsinöörinä haluan että järjestelmä kerää ja tallentaa Liiga-tilastot, uutiset ja vedonlyöntikertoimet automaattisesti ja luotettavasti, jotta analyysimoottoreilla on aina tuoretta dataa.",
-      "valmius": 0
+      "valmius": 100
     },
     {
       "id": "aly",
@@ -96,7 +96,7 @@
       "kuvaus": "Uutisten rakenteinen erittely LLM:llä ja tilastollisten voimamittarien laskenta.",
       "tiketit": [4, 6, 7],
       "user_story": "Analyytikkona haluan että järjestelmä ymmärtää uutisten sisällön (loukkaantumiset, kokoonpanomuutokset) ja laskee joukkueille Elo-/PDO-voimaluvut sekä pelaajille kuuma/kylmä-z-scoret, jotta minulla on dataa value-analyysiin.",
-      "valmius": 0
+      "valmius": 100
     },
     {
       "id": "arvo",
@@ -104,7 +104,7 @@
       "kuvaus": "Ylikertoimien tunnistus ja oman ennustemallin validointi.",
       "tiketit": [8, 12],
       "user_story": "Vedonlyöjänä haluan että järjestelmä tunnistaa tilanteet joissa vedonlyöntimarkkina on hinnoitellut kohteen väärin (edge > 3 %), ja että malli ennustaa jokaisen ottelun ja träkkää osumatarkkuuttaan, jotta tiedän voinko luottaa value-flagien signaaleihin.",
-      "valmius": 0
+      "valmius": 100
     },
     {
       "id": "toimitus",
@@ -112,7 +112,7 @@
       "kuvaus": "Hälytykset, ajastus ja mobiili-web-käyttöliittymä.",
       "tiketit": [9, 10, 11],
       "user_story": "Kännykän käyttäjänä haluan saada Telegram-hälytyksen kun ylikerroin löytyy, ja selata value-flagit, ennusteet ja joukkuetilastot mobiilioptimoidulla verkkosivulla missä ja milloin tahansa.",
-      "valmius": 0
+      "valmius": 100
     }
   ],
   "tiketit": [
@@ -128,14 +128,14 @@
     { "id": 10, "epic": "toimitus", "nimi": "Cron-ajastus + monitorointi", "effort": "S", "riippuvuudet": [8], "status": "done", "acceptance_criteria": ["GitHub Actions workflow ajastettu (esim. 2x päivässä)", "Workflow ajaa: ingestio → analyysi → value → hälytykset järjestyksessä", "Lokitus: jokainen vaihe kirjaa onnistumisen/epäonnistumisen"], "valmius": 100 },
     { "id": 11, "epic": "toimitus", "nimi": "Web UI — GitHub Pages + Supabase JS", "effort": "M", "riippuvuudet": [1, 8], "status": "done", "acceptance_criteria": ["Staattinen SPA: index.html + app.js + Supabase CDN", "Mobiilioptimoitu (viewport meta, CSS Grid/Flexbox)", "Kolme näkymää: Value-flagit, Ennusteet + onnistumis-%, Joukkueet/pelaajat", "Deploy GitHub Pagesiin (peaceiris/actions-gh-pages)"], "valmius": 100 },
     { "id": 12, "epic": "arvo", "nimi": "Otteluennusteet + onnistumisseuranta", "effort": "S", "riippuvuudet": [7], "status": "done", "acceptance_criteria": ["Ennuste generoitu jokaiselle upcoming-ottelulle (game_predictions)", "1X2-todennäköisyydet laskettu Elo-kaavalla + kotiedulla (H≈30-50)", "Ottelun päätyttyä: was_correct päivitetty (vain varsinainen peliaika)", "Onnistumis-% näkyvissä web UI:ssa (kokonais- ja liukuva 10/30)"], "valmius": 100 },
-    { "id": 13, "epic": "demo", "nimi": "Demo UI — interaktiivinen vetolappu", "effort": "M", "riippuvuudet": [11], "status": "done", "acceptance_criteria": ["Käyttäjä voi valita ottelun ja lyödä vetoa (1X2)", "Panoksen syöttö ja validointi (ei yli kassan)", "Vetolappu näyttää avoimet vedot ja mahdollisen voiton", "Vedot tallentuvat localStorageen (säilyy sivun päivityksen yli)"], "valmius": 0 },
-    { "id": 14, "epic": "demo", "nimi": "Demo UI — pelipäiväsimulaatio", "effort": "L", "riippuvuudet": [13], "status": "todo", "acceptance_criteria": ["Start Simulation -nappi käynnistää kaikkien upcoming-pelien simuloinnin", "Simulaatio generoi realistiset maalimäärät (Liiga-ka ~5.5 maalia/peli)", "Maalintekijät listataan pelaajanimillä (mock-data)", "Ylivoima/alivoima-tilastot näkyvät (PP/PK)", "Simulaation tulos ratkaisee avoimet vedot"], "valmius": 0 },
-    { "id": 15, "epic": "demo", "nimi": "Demo UI — vedonlyöntikassa ja hallinta", "effort": "S", "riippuvuudet": [13], "status": "todo", "acceptance_criteria": ["Kassa näkyy yläpalkissa (alkusaldo 100 €)", "Talletus- ja nostomodaali (+/- napit)", "Vedonlyönti vähentää kassasta, voitot lisäävät", "Kassan tila säilyy localStoragessa"], "valmius": 0 },
-    { "id": 16, "epic": "demo", "nimi": "Demo UI — paine-mekaniikka", "effort": "S", "riippuvuudet": [14], "status": "todo", "acceptance_criteria": ["Käyttäjä voi valita joukkueen joka 'painaa päälle'", "Valinta muuttaa simulaation todennäköisyyksiä (+80 Elo-pt kotiedun lisäksi)", "Painevalinta näkyy visuaalisesti (oranssi korostus)", "Paineen voi poistaa klikkaamalla uudelleen"], "valmius": 0 },
-    { "id": 17, "epic": "demo", "nimi": "Demo UI — historia-sivu ja ROI-seuranta", "effort": "S", "riippuvuudet": [14, 15], "status": "todo", "acceptance_criteria": ["Historia-välilehti näyttää kaikki ratkenneet vedot", "Voitetut/hävityt vedot merkattu ✅/❌", "ROI-% laskettu (tuotto/panokset × 100)", "Kokonaistulos euroina näkyvissä"], "valmius": 0 },
-    { "id": 18, "epic": "demo", "nimi": "Demo UI — joukkueiden logot, nimet ja tunnusluvut", "effort": "S", "riippuvuudet": [11], "status": "todo", "acceptance_criteria": ["Joukkueiden logot näkyvät värikoodattuina ympyröinä (CSS, ei kuvia)", "Joukkueiden nimet haetaan teams-taulusta (ei ID:t)", "Ennusteissa näkyy kertoimet ja mallin todennäköisyydet rinnakkain", "Tulevan kierroksen sivu näyttää kaikki pelit kertoimineen"], "valmius": 0 },
-    { "id": 19, "epic": "demo", "nimi": "Info-sivu — käyttöohje uudelle käyttäjälle", "effort": "S", "riippuvuudet": [], "status": "todo", "acceptance_criteria": ["Info-välilehti kertoo järjestelmän peruskäytön", "Selittää value-flagien merkityksen (edge > 3% / > 5 %)", "Selittää Elo/PDO/z-score -mittarit kansantajuisesti", "Ohjeet demo-simulaation käyttöön"], "valmius": 0 },
-    { "id": 20, "epic": "demo", "nimi": "Admin-sivu — API-konfiguraatio", "effort": "S", "riippuvuudet": [], "status": "todo", "acceptance_criteria": ["Admin-välilehti näyttää nykyiset API-asetukset", "Mahdollisuus syöttää Supabase URL + anon key", "Mahdollisuus syöttää Odds API key", "Asetukset tallentuvat localStorageen (demo-tilassa)"], "valmius": 0 }
+    { "id": 13, "epic": "demo", "nimi": "Demo UI — interaktiivinen vetolappu", "effort": "M", "riippuvuudet": [11], "status": "done", "acceptance_criteria": ["Käyttäjä voi valita ottelun ja lyödä vetoa (1X2)", "Panoksen syöttö ja validointi (ei yli kassan)", "Vetolappu näyttää avoimet vedot ja mahdollisen voiton", "Vedot tallentuvat localStorageen (säilyy sivun päivityksen yli)"], "valmius": 100 },
+    { "id": 14, "epic": "demo", "nimi": "Demo UI — pelipäiväsimulaatio", "effort": "L", "riippuvuudet": [13], "status": "done", "acceptance_criteria": ["Start Simulation -nappi käynnistää kaikkien upcoming-pelien simuloinnin", "Simulaatio generoi realistiset maalimäärät (Liiga-ka ~5.5 maalia/peli)", "Maalintekijät listataan pelaajanimillä (mock-data)", "Ylivoima/alivoima-tilastot näkyvät (PP/PK)", "Simulaation tulos ratkaisee avoimet vedot"], "valmius": 100 },
+    { "id": 15, "epic": "demo", "nimi": "Demo UI — vedonlyöntikassa ja hallinta", "effort": "S", "riippuvuudet": [13], "status": "done", "acceptance_criteria": ["Kassa näkyy yläpalkissa (alkusaldo 100 €)", "Talletus- ja nostomodaali (+/- napit)", "Vedonlyönti vähentää kassasta, voitot lisäävät", "Kassan tila säilyy localStoragessa"], "valmius": 100 },
+    { "id": 16, "epic": "demo", "nimi": "Demo UI — paine-mekaniikka", "effort": "S", "riippuvuudet": [14], "status": "done", "acceptance_criteria": ["Käyttäjä voi valita joukkueen joka 'painaa päälle'", "Valinta muuttaa simulaation todennäköisyyksiä (+80 Elo-pt kotiedun lisäksi)", "Painevalinta näkyy visuaalisesti (oranssi korostus)", "Paineen voi poistaa klikkaamalla uudelleen"], "valmius": 100 },
+    { "id": 17, "epic": "demo", "nimi": "Demo UI — historia-sivu ja ROI-seuranta", "effort": "S", "riippuvuudet": [14, 15], "status": "done", "acceptance_criteria": ["Historia-välilehti näyttää kaikki ratkenneet vedot", "Voitetut/hävityt vedot merkattu ✅/❌", "ROI-% laskettu (tuotto/panokset × 100)", "Kokonaistulos euroina näkyvissä"], "valmius": 100 },
+    { "id": 18, "epic": "demo", "nimi": "Demo UI — joukkueiden logot, nimet ja tunnusluvut", "effort": "S", "riippuvuudet": [11], "status": "done", "acceptance_criteria": ["Joukkueiden logot näkyvät värikoodattuina ympyröinä (CSS, ei kuvia)", "Joukkueiden nimet haetaan teams-taulusta (ei ID:t)", "Ennusteissa näkyy kertoimet ja mallin todennäköisyydet rinnakkain", "Tulevan kierroksen sivu näyttää kaikki pelit kertoimineen"], "valmius": 100 },
+    { "id": 19, "epic": "demo", "nimi": "Info-sivu — käyttöohje uudelle käyttäjälle", "effort": "S", "riippuvuudet": [], "status": "done", "acceptance_criteria": ["Info-välilehti kertoo järjestelmän peruskäytön", "Selittää value-flagien merkityksen (edge > 3% / > 5 %)", "Selittää Elo/PDO/z-score -mittarit kansantajuisesti", "Ohjeet demo-simulaation käyttöön"], "valmius": 100 },
+    { "id": 20, "epic": "demo", "nimi": "Admin-sivu — API-konfiguraatio", "effort": "S", "riippuvuudet": [], "status": "done", "acceptance_criteria": ["Admin-välilehti näyttää nykyiset API-asetukset", "Mahdollisuus syöttää Supabase URL + anon key", "Mahdollisuus syöttää Odds API key", "Asetukset tallentuvat localStorageen (demo-tilassa)"], "valmius": 100 }
   ],
   "mvp_scope": "Tiketit 1–20. Yksi uutislähde, yksi odds-provider, yksi hälytyskanava. Staattinen mobiili-web UI GitHub Pagesissa. Malli ennustaa jokaisen ottelun ja träkkää osumatarkkuutta. Interaktiivinen demo pelipäiväsimulaatiolla ja vedonlyöntikassalla.",
   "out_of_scope_mvp": [

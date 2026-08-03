@@ -26,7 +26,7 @@ test.describe('Joukkueet -näkymä', () => {
     const count = await pdoBadges.count();
     expect(count).toBeGreaterThan(0);
     const texts = await pdoBadges.allTextContents();
-    const hasPdoLabel = texts.some(t => ['Yli', 'Ali', '—'].includes(t));
+    const hasPdoLabel = texts.some(t => ['Yli', 'Ali', 'Norm'].includes(t.trim()));
     expect(hasPdoLabel).toBe(true);
   });
 
