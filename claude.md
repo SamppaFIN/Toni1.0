@@ -571,3 +571,108 @@ Ohjeet toimivat kun:
 ✅ Uudelleenkirjoitukset ylikomplikoinnin takia vähenevät.
 ✅ Selventävät kysymykset ilmestyvät otsikkoon ennen virheitä, ei jälkeen.
 ✅ 🟡 ja 🔴 kohteet vähenevät selvästi kun keskustelu kypsyy — malli oppii projektin.
+---
+
+# 🔄 Kajo → Seuraava AI — Handover (2026-08-03)
+
+> **Tila:** Demo valmis asiakasesittelyyn. Kaikki 20 MVP-tikettiä toteutettu.
+> **Live:** `https://samppafin.github.io/Toni1.0/demo.html`
+> **Repo:** `https://github.com/SamppaFIN/Toni1.0.git` (branch: `main`, gh-pages: `gh-pages`)
+
+---
+
+## Mitä rakennettiin tässä sessiossa
+
+Tämä sessio (Infinite + Kajo / DeepSeek V4 Pro / GitHub Copilot) vei BetTracker-projektin konseptista toimivaksi demoksi. Alkuperäinen suunnitelma oli Claude Sonnet 5:n käsialaa; Kajo viimeisteli, korjasi ja toteutti kaiken.
+
+### Demo (public/demo.html) — single-file SPA (~650 riviä)
+- **7 välilehteä:** Kierros, Vetolappu, Seuranta, Historia, Joukkueet, Info, Admin
+- **Live-simulaatio:** 20s pelipäivä jossa maalit, maalintekijät, jäähyt, laukaukset, ylivoima — kaikki generoidaan satunnaisesti mutta Elo-pohjaisilla todennäköisyyksillä
+- **Vedonlyönti:** 1X2-markkina, popup jossa pikapanokset (10€/25€/100€), kassa (alku 100€), talletus/nosto
+- **Pikaveto "seuraava maali":** 10€ automaattiveto ilman dialogia, ratkeaa heti maalin tullessa
+- **Paine-mekaniikka:** käyttäjä voi valita joukkueen joka "painaa päälle" (+80 Elo-pt), oranssi visuaalinen korostus
+- **Kierrosraportti:** simulaation jälkeen näyttää jokaisen vedon odotuksen, toteuman ja tuloksen (voitto → +€, häviö → 0€)
+- **📊 Analyysi-nappi:** jokaisella pelikortilla — avaa syväanalyysin jossa Elo-kaava, PDO-selitys, Edge-laskenta, loukkaantumiset, lähdeluettelo ja ammattilais-seurantakohteet
+- **Elo päivittyy** jokaisen simulaatiokierroksen jälkeen (K=32) ja tallentuu localStorageen
+- **Uusi kierros** generoituu automaattisesti 8s simulaation jälkeen — uudet matchupit, kertoimet, ennusteet, value-flagit
+- **"Aloita alusta"** oikeassa yläkulmassa — täysi nollaus FALLBACK-dataan
+- **Design:** OKLCH-väriavaruus, fluid typografia (clamp()), glassmorphism-header, WCAG-a11y (prefers-reduced-motion, focus-visible, touch-target ≥44px)
+
+### Backend (demo/server.ts + demo/mock-data.ts)
+- Express-palvelin portissa 3333 (3000 on varattu käyttäjän pojan Minecraft-kloonille)
+- Mock API joka palauttaa dataa Supabase REST -muodossa
+- 15 joukkuetta, 17 peliä, realistiset Liiga-datat (kaudelta 2025)
+
+### Testit
+- **41 unit-testiä** (vitest): elo, pdo, zscore, margin, predict, value — kaikki vihreänä
+- **20 E2E-testiä** (playwright): testaavat kierrosnäkymän, vedonlyönnin, simulaation, raportin, joukkuelistan, historian — kaikki vihreänä
+
+### Infra
+- **GitHub Actions** (`.github/workflows/pipeline.yml`): cron-ajastus ingestio→analyysi→value→hälytykset
+- **GitHub Pages**: `git subtree push --prefix=public origin gh-pages`
+- **FALLBACK-data**: demo.html sisältää sisäänrakennetun datan jotta GitHub Pages toimii ilman backendia
+
+---
+
+## Arkkitehtuurin avainpäätökset
+
+| Päätös | Miksi |
+|---|---|
+| Single-file SPA (ei frameworkia) | Vähemmän liikkuvia osia, nopeampi mobiilissa, helpompi deploy |
+| `localStorage` tilanhallinta | Ei tarvetta backendille demossa, säilyy sivun päivityksen yli |
+| FALLBACK-data demo.html:ssä | GitHub Pages ei voi ajaa palvelinta — embedded data ratkaisee |
+| `git subtree push` gh-pagesiin | Yksinkertaisin tapa deployata staattinen SPA samasta reposta |
+| OKLCH-värit + clamp()-typografia | Moderni, responsiivinen, saavutettava — asiakasesittelyyn sopiva |
+| 20s simulaatio (0.7 maalia/s) | Tarpeeksi nopea ettei kyllästytä, tarpeeksi hidas että ehtii seurata |
+
+---
+
+## Tunnetut "gotchat" — lue ennen kuin muokkaat
+
+1. **`renderTeams()`** — käytti `l.innerHTML+=` loopissa. Jos renderöidään 2x, lista duplikoituu. Korjattu `.map().join('')` -patternilla. ÄLÄ palauta vanhaan.
+2. **`advanceRound()` + reset** — `setTimeout(()=>advanceRound(),8000)` jää roikkumaan. Jos käyttäjä klikkaa "Aloita alusta" 8s ikkunassa, `simResults` on null ja `advanceRound()` kaatuu. Korjattu: `simAdvanceTimer` globaali, clearataan resetissä, + guard `if(!simResults)return`.
+3. **`card.replace('</div>',...)`** — korvaa VAIN ensimmäisen `</div>`:n. Jos kortin HTML:ssä on sisäkkäisiä divejä, tämä rikkoo rakenteen. Käytä AINA `card.lastIndexOf('</div>')` + `substring()`.
+4. **JA/RL näkyy vain tasapeleille** — period 4 asetetaan vain jos `home_score === away_score` kohdassa 17s. Ei enää force-OT:tä kaikille.
+5. **Live GitHub Pages CDN-viive** — pari minuuttia. Testaa `?v=N` parametrilla tai odota.
+6. **Portti 3000 on varattu** — käyttäjän pojan Minecraft-palvelin. Älä käytä porttia 3000.
+
+---
+
+## Mitä kannattaa tehdä seuraavaksi
+
+### Välittömästi (kun palaute tulee)
+- [ ] Korjaa asiakkaan huomaamat bugit / UX-ongelmat
+- [ ] Päivitä GitHub Pages (CDN-viiveen jälkeen varmista että liveversio toimii)
+
+### Seuraava kehitysvaihe
+- [ ] **Oikea dataputki:** Yhdistä Supabase, Liiga.fi-scraping, oikea Odds API
+- [ ] **Useampi odds-provider:** vertailu paljastaa arbitraasimahdollisuudet
+- [ ] **Telegram-botti:** vie hälytykset tuotantoon (koodi on valmiina `src/alert/telegram.ts`)
+- [ ] **Kelly-panostus:** `f* = (bp−q)/b`, murto-Kelly 25–50% — pidä erillisenä moduulina
+- [ ] **Pelaajakohtaiset z-scoret:** UI-näkymä "kuumille" ja "kylmille" pelaajille
+- [ ] **Otteluhistoria:** head-to-head-tilastot, edelliset kohtaamiset
+- [ ] **Varsinainen tuotanto-UI:** `index.html` + `app.js` (ei demo-mockeilla)
+
+---
+
+## Palaute kehitysprosessista (Kajon rehellinen arvio)
+
+**Mikä toimi erinomaisesti:**
+- **Response Protocol (Call #N, 🟢🟡🔴🃏)** — piti keskustelun strukturoituna. Vähensi vääriä oletuksia. Jatkakaa tätä.
+- **claude.md projektitiedostona** — toimi sekä teknisenä spessinä että kontekstinsiirtona. JSON-rakenne mahdollisti koneellisen tiketöinnin.
+- **Iteratiivinen demo-kehitys** — "näytä, testaa, korjaa" -sykli tuotti nopeasti toimivan lopputuloksen. 20 tiketin scope pysyi hallinnassa.
+- **Testit mukana alusta asti** — 61 testiä (41 unit + 20 E2E) antoi rohkeutta refaktoroida. Ilman testejä tämä demo olisi hajonnut moneen kertaan.
+- **FALLBACK-data pattern** — nerokas ratkaisu GitHub Pages -staattihostingille. Yksi tiedosto, nolla riippuvuutta.
+- **Suomi työkielenä** — vähensi väärinkäsityksiä. Domain-termit (Elo, PDO, edge) pysyivät englanniksi, mikä on oikein.
+
+**Mitä tekisin toisin:**
+- **Liian aikainen optimointi** — alkuperäisessä suunnitelmassa oli 8 metatasoa, 4 epiciä, 20 tikettiä. Demo-MVP olisi voinut olla 10 tikettiä. Loput 10 syntyivät luonnostaan kun demoa testattiin.
+- **E2E-testien päivitys jäi jälkeen** — kun UI:n rakenne muuttui (tabit yhdistettiin), testit hajosivat. Korjattiin vasta lopussa. Automaattinen E2E-ajo olisi paljastanut tämän aiemmin.
+- **`localStorage`-avainten dokumentointi** — `bt_bankroll`, `bt_bets`, `bt_history`, `bt_simResults`, `bt_pressure`, `bt_ratings`, `bt_round`. Jos joku avain vaihtuu, kaikki data katoaa. Keskitetty `save()` auttaa, mutta avainten nimeäminen olisi pitänyt dokumentoida aiemmin.
+- **Single-file SPA:n koko** — demo.html on nyt ~650 riviä. Toimii, mutta alkaa olla rajoilla. Seuraavassa vaiheessa kannattaa harkita moduuleihin pilkkomista (build-vaiheella).
+
+**Infinetelle:** 
+Työskentely kanssasi oli poikkeuksellisen sujuvaa. Selkeä visio, nopea iterointi, ei turhaa nipottamista. Kunnioitat AI:n vahvuuksia (nopea koodaus, testaus, refaktorointi) etkä tuhlaa aikaa asioihin joissa AI on heikko (kontekstin säilytys keskustelujen yli). Claude.md:n Response Protocol ja käyttäytymissäännöt ovat paras tapa työskennellä AI:n kanssa mitä olen nähnyt. Jatka samaan malliin.
+
+t. Kajo 🔆
+2026-08-03
