@@ -1,188 +1,254 @@
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BetTracker — Demo</title>
-  <style>
-    :root {
-      --bg: #0f172a; --card: #1e293b; --text: #e2e8f0;
-      --accent: #38bdf8; --green: #22c55e; --red: #ef4444;
-      --yellow: #eab308; --muted: #64748b;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 12px; max-width: 480px; margin: 0 auto; }
-    header { text-align: center; margin-bottom: 12px; }
-    h1 { font-size: 1.2rem; }
-    .demo-badge { display: inline-block; background: var(--yellow); color: #000; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 700; margin-left: 8px; vertical-align: middle; }
-    .tabs { display: flex; gap: 4px; margin-bottom: 12px; }
-    .tab { flex: 1; padding: 8px 4px; background: var(--card); border: none; color: var(--text); border-radius: 8px 8px 0 0; cursor: pointer; font-size: 0.75rem; text-align: center; }
-    .tab.active { background: var(--accent); color: var(--bg); font-weight: 600; }
-    .view { display: none; }
-    .view.active { display: block; }
-    .card { background: var(--card); border-radius: 10px; padding: 12px; margin-bottom: 8px; }
-    .card h3 { font-size: 0.9rem; margin-bottom: 4px; }
-    .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
-    .badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 12px; font-weight: 600; }
-    .badge-green { background: var(--green); color: #000; }
-    .badge-yellow { background: var(--yellow); color: #000; }
-    .badge-red { background: var(--red); color: #fff; }
-    .badge-muted { background: var(--muted); color: #fff; }
-    .metric { font-size: 1.4rem; font-weight: 700; }
-    .metric-label { font-size: 0.7rem; color: var(--muted); }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .loading { text-align: center; padding: 30px; color: var(--muted); }
-    .empty { text-align: center; padding: 30px; color: var(--muted); font-style: italic; }
-    .team-name { font-size: 0.85rem; }
-    .progress-bar { height: 4px; background: var(--muted); border-radius: 2px; margin-top: 4px; overflow: hidden; }
-    .progress-fill { height: 100%; border-radius: 2px; }
-    .fill-home { background: var(--accent); }
-    .fill-draw { background: var(--yellow); }
-    .fill-away { background: var(--red); }
-    .prob-text { font-size: 0.7rem; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>BetTracker — Demo</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--accent:#38bdf8;--green:#22c55e;--red:#ef4444;--yellow:#eab308;--muted:#64748b;--orange:#f97316}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);padding:8px;max-width:500px;margin:0 auto;padding-bottom:80px}
+header{text-align:center;padding:8px 0 4px}
+h1{font-size:1.1rem}
+.demo-badge{display:inline-block;background:var(--yellow);color:#000;font-size:.6rem;padding:1px 6px;border-radius:8px;font-weight:700;margin-left:6px;vertical-align:middle}
+.bankroll-bar{background:var(--card);border-radius:8px;padding:6px 10px;margin:4px 0 8px;display:flex;justify-content:space-between;align-items:center;font-size:.85rem}
+.bankroll-amount{font-weight:700;font-size:1rem}
+.bankroll-amount.positive{color:var(--green)}.bankroll-amount.negative{color:var(--red)}
+.tabs{display:flex;gap:2px;margin-bottom:8px;overflow-x:auto}
+.tab{flex-shrink:0;padding:6px 10px;background:var(--card);border:none;color:var(--muted);border-radius:6px;cursor:pointer;font-size:.7rem;white-space:nowrap}
+.tab.active{background:var(--accent);color:var(--bg);font-weight:600}
+.view{display:none}.view.active{display:block}
+.card{background:var(--card);border-radius:10px;padding:10px;margin-bottom:6px}
+.row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px}
+.badge{font-size:.6rem;padding:1px 6px;border-radius:10px;font-weight:600}
+.badge-green{background:var(--green);color:#000}.badge-yellow{background:var(--yellow);color:#000}.badge-red{background:var(--red);color:#fff}.badge-muted{background:var(--muted);color:#fff}.badge-orange{background:var(--orange);color:#fff}
+.metric{font-size:1.2rem;font-weight:700}.metric-label{font-size:.65rem;color:var(--muted)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+.team-logo{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.65rem;color:#fff;flex-shrink:0}
+.matchup{display:flex;align-items:center;gap:6px;font-size:.85rem}
+.matchup .vs{margin:0 4px;color:var(--muted);font-size:.7rem}
+.odds-btn{padding:6px 10px;border-radius:6px;border:1px solid var(--muted);background:transparent;color:var(--text);cursor:pointer;font-size:.75rem;text-align:center;min-width:55px;transition:all .15s}
+.odds-btn:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.odds-btn.selected{background:var(--green);color:#000;border-color:var(--green);font-weight:700}
+.odds-btn .odds-val{font-weight:700;display:block}
+.odds-btn .odds-label{font-size:.55rem;color:var(--muted)}
+.btn{display:inline-block;padding:8px 16px;border-radius:8px;border:none;font-weight:600;cursor:pointer;font-size:.8rem;text-align:center}
+.btn-primary{background:var(--accent);color:var(--bg)}.btn-danger{background:var(--red);color:#fff}.btn-success{background:var(--green);color:#000}.btn-block{display:block;width:100%}
+.input-group{margin:6px 0}.input-group label{display:block;font-size:.7rem;color:var(--muted);margin-bottom:2px}
+.input-group input{width:100%;padding:8px;border-radius:6px;border:1px solid var(--muted);background:var(--bg);color:var(--text);font-size:.85rem}
+.progress-bar{height:4px;background:var(--muted);border-radius:2px;margin-top:3px;overflow:hidden;display:flex}.progress-fill{height:100%}
+.fill-home{background:var(--accent)}.fill-draw{background:var(--yellow)}.fill-away{background:var(--red)}
+.goal-list{font-size:.7rem;color:var(--muted);margin-top:4px}.penalty-row{font-size:.65rem;color:var(--orange)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:10px 20px;border-radius:20px;font-weight:600;font-size:.8rem;z-index:100;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.empty{text-align:center;padding:24px;color:var(--muted);font-style:italic}
+.pressure-toggle{padding:4px 10px;border-radius:12px;border:1px dashed var(--muted);background:transparent;color:var(--muted);cursor:pointer;font-size:.65rem;transition:all .2s}
+.pressure-toggle.active{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:600}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1s infinite;margin-right:4px}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:.7}}
+.scorer-emoji{font-size:.8rem}
+</style>
 </head>
 <body>
-  <header>
-    <h1>🏒 BetTracker <span class="demo-badge">DEMO</span></h1>
-  </header>
-
-  <div class="tabs">
-    <button class="tab active" data-tab="value">💎 Value</button>
-    <button class="tab" data-tab="predictions">🎯 Ennusteet</button>
-    <button class="tab" data-tab="teams">📊 Joukkueet</button>
+<header><h1>🏒 BetTracker <span class="demo-badge">DEMO</span></h1></header>
+<div class="bankroll-bar">
+  <span>💰 Kassa</span>
+  <span class="bankroll-amount" id="bankroll-display">100.00 €</span>
+  <button class="btn btn-primary" style="font-size:.65rem;padding:4px 10px" onclick="showBankrollModal()">➕</button>
+</div>
+<div class="tabs" id="tab-bar">
+  <button class="tab active" data-tab="round">📅 Kierros</button>
+  <button class="tab" data-tab="slip">🎫 Vetolappu <span id="slip-count"></span></button>
+  <button class="tab" data-tab="value">💎 Value</button>
+  <button class="tab" data-tab="predictions">🎯 Ennusteet</button>
+  <button class="tab" data-tab="history">📜 Historia</button>
+  <button class="tab" data-tab="teams">📊 Joukkueet</button>
+  <button class="tab" data-tab="info">ℹ️ Info</button>
+  <button class="tab" data-tab="admin">⚙️ Admin</button>
+</div>
+<div id="round" class="view active">
+  <button class="btn btn-success btn-block" onclick="runSimulation()" id="sim-btn">▶️ Käynnistä pelipäivän simulaatio</button>
+  <div id="round-games" style="margin-top:8px"></div>
+  <div id="pressure-select" style="margin-top:8px;padding:8px;background:var(--card);border-radius:8px;font-size:.75rem">
+    <span>🔥 Painaa päälle: </span><span id="pressure-buttons"></span>
   </div>
+</div>
+<div id="slip" class="view"><div class="grid-2" id="slip-metrics"></div><div id="slip-list"></div><button class="btn btn-danger btn-block" style="margin-top:8px" onclick="clearSlip()">🗑️ Tyhjennä lappu</button></div>
+<div id="value" class="view"><div class="grid-2" id="value-metrics"></div><div id="value-list"></div></div>
+<div id="predictions" class="view"><div class="grid-2" id="pred-metrics"></div><div id="pred-list"></div></div>
+<div id="history" class="view"><div class="grid-2" id="history-metrics"></div><div id="history-list"></div></div>
+<div id="teams" class="view"><div id="teams-list"></div></div>
+<div id="info" class="view"><div id="info-content"></div></div>
+<div id="admin" class="view"><div id="admin-content"></div></div>
 
-  <div id="value" class="view active">
-    <div class="grid-2" id="metrics"></div>
-    <div id="value-list"></div>
+<div id="bankroll-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);z-index:50;align-items:center;justify-content:center">
+  <div class="card" style="width:90%;max-width:360px">
+    <h3 style="margin-bottom:8px">💰 Hallitse kassaa</h3>
+    <div class="input-group"><label>Summa (€)</label><input type="number" id="deposit-amount" value="20" min="1" max="1000"></div>
+    <div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-success" style="flex:1" onclick="deposit()">➕ Talleta</button><button class="btn btn-danger" style="flex:1" onclick="withdraw()">➖ Nosta</button></div>
+    <button class="btn btn-block" style="margin-top:6px;background:var(--muted)" onclick="closeBankrollModal()">Sulje</button>
   </div>
-  <div id="predictions" class="view">
-    <div class="grid-2" id="accuracy-metrics"></div>
-    <div id="predictions-list"></div>
-  </div>
-  <div id="teams" class="view">
-    <div id="teams-list"></div>
-  </div>
+</div>
 
-  <script>
-    const API = '/rest/v1';
+<script>
+const API='/rest/v1';
+let bankroll=parseFloat(localStorage.getItem('bt_bankroll')||'100');
+let bets=JSON.parse(localStorage.getItem('bt_bets')||'[]');
+let betHistory=JSON.parse(localStorage.getItem('bt_history')||'[]');
+let simResults=JSON.parse(localStorage.getItem('bt_simResults')||'null');
+let pressureTeam=localStorage.getItem('bt_pressure')||'';
+let teams=[],games=[],predictions=[],valueFlags=[],oddsSnapshots=[],ratings=[];
 
-    // Tab switching
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById(tab.dataset.tab).classList.add('active');
+function save(){localStorage.setItem('bt_bankroll',bankroll.toFixed(2));localStorage.setItem('bt_bets',JSON.stringify(bets));localStorage.setItem('bt_history',JSON.stringify(betHistory));localStorage.setItem('bt_simResults',JSON.stringify(simResults));localStorage.setItem('bt_pressure',pressureTeam)}
+function updateBankroll(){const e=document.getElementById('bankroll-display');e.textContent=bankroll.toFixed(2)+' €';e.className='bankroll-amount '+(bankroll>=100?'positive':'negative')}
+const teamColors={'Tappara':'#005B9F','Ilves':'#006400','Kärpät':'#DEB906','HIFK':'#E31E26','TPS':'#000000','Lukko':'#003D7C','KalPa':'#FFCC00','Pelicans':'#00A9A5','HPK':'#E87722','Jukurit':'#B9975B','Sport':'#C41230','Ässät':'#D41B2C','SaiPa':'#FFD700','JYP':'#C8102E','KooKoo':'#000000'};
+function teamLogo(t,s){s=s||28;const n=t&&t.name?t.name.charAt(0):'?';const c=teamColors[t&&t.name?t.name:'']||'#64748b';return`<span class="team-logo" style="background:${c};width:${s}px;height:${s}px;font-size:${s*0.35}px">${n}</span>`}
+function teamName(id){const t=teams.find(x=>x.id===id);return t?t.name:'Joukkue '+id}
+function getGame(id){return games.find(g=>g.id===id)}
+function getOdds(gid){return oddsSnapshots.find(o=>o.game_id===gid)}
 
-        if (tab.dataset.tab === 'value') loadValueFlags();
-        if (tab.dataset.tab === 'predictions') loadPredictions();
-        if (tab.dataset.tab === 'teams') loadTeams();
-      });
-    });
+async function loadData(){
+  const[g,t,p,v,o,r]=await Promise.all([fetch(API+'/games').then(r=>r.json()),fetch(API+'/teams').then(r=>r.json()),fetch(API+'/game_predictions').then(r=>r.json()),fetch(API+'/value_flags').then(r=>r.json()),fetch(API+'/odds_snapshots').then(r=>r.json()),fetch(API+'/team_ratings').then(r=>r.json())]);
+  games=g;teams=t;predictions=p;valueFlags=v;oddsSnapshots=o;ratings=r;
+}
 
-    // === Value-flagit ===
-    async function loadValueFlags() {
-      const res = await fetch(`${API}/value_flags`);
-      const data = await res.json();
-      const list = document.getElementById('value-list');
-      const metrics = document.getElementById('metrics');
+function renderRound(){
+  const upcoming=games.filter(g=>g.status==='upcoming');
+  const c=document.getElementById('round-games');
+  const b=document.getElementById('sim-btn');
+  if(simResults){b.textContent='🔄 Käynnistä uudelleen';b.className='btn btn-primary btn-block';c.innerHTML=simResults.map(r=>renderSimGame(r)).join('')}
+  else{b.textContent='▶️ Käynnistä pelipäivän simulaatio';b.className='btn btn-success btn-block';c.innerHTML=upcoming.map(g=>renderUpcoming(g)).join('')}
+  renderPressure();
+}
+function renderUpcoming(g){
+  const home=teamName(g.home_team_id),away=teamName(g.away_team_id);
+  const odds=getOdds(g.id);const pred=getPred(g.id)||{};
+  let oh='';if(odds)oh=`<div class="grid-3" style="margin-top:4px"><button class="odds-btn" onclick="placeBet(${g.id},'home',${odds.home_odds})"><span class="odds-val">${odds.home_odds.toFixed(2)}</span><span class="odds-label">1</span></button><button class="odds-btn" onclick="placeBet(${g.id},'draw',${odds.draw_odds})"><span class="odds-val">${odds.draw_odds.toFixed(2)}</span><span class="odds-label">X</span></button><button class="odds-btn" onclick="placeBet(${g.id},'away',${odds.away_odds})"><span class="odds-val">${odds.away_odds.toFixed(2)}</span><span class="odds-label">2</span></button></div>`;
+  let ph='';if(pred.home_win_prob){const h=(pred.home_win_prob*100).toFixed(0),d=(pred.draw_prob*100).toFixed(0),a=(pred.away_win_prob*100).toFixed(0);ph=`<div style="font-size:.7rem;margin-top:4px"><span>Malli: ${h}% / ${d}% / ${a}%</span></div><div class="progress-bar"><span class="progress-fill fill-home" style="width:${h}%"></span><span class="progress-fill fill-draw" style="width:${d}%"></span><span class="progress-fill fill-away" style="width:${a}%"></span></div>`}
+  return `<div class="card"><div class="row"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${home}</strong><span class="vs">vs</span><strong>${away}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span></div>${ph}${oh}</div>`;
+}
+function getPred(gid){return simResults?simResults.find(r=>r.game_id===gid):predictions.find(p=>p.game_id===gid)}
+function renderSimGame(r){
+  const h=teamName(r.home_team_id),a=teamName(r.away_team_id);
+  const ot=r.period>3?' (JA/RL)':'';
+  let sc='';if(r.scorers&&r.scorers.length)sc='<div class="goal-list">'+r.scorers.map(s=>`<span class="scorer-emoji">🥅</span> ${s.player} (${s.period}.erä ${s.time})`).join('<br>')+'</div>';
+  let pe='';if(r.penalties&&r.penalties.length)pe='<div class="penalty-row">🚨 '+r.penalties.map(p=>`${p.team_short} ${p.min}min (${p.reason})`).join(' | ')+'</div>';
+  let pp='';if(r.pp_goals_home!=null)pp=`<div style="font-size:.65rem;color:var(--muted);margin-top:3px">YV: ${h} ${r.pp_goals_home}/${r.pp_chances_home} — ${a} ${r.pp_goals_away}/${r.pp_chances_away}</div>`;
+  const w=r.home_score>r.away_score?'fill-home':r.away_score>r.home_score?'fill-away':'fill-draw';
+  return `<div class="card"><div class="row"><span class="matchup">${teamLogo(teams.find(t=>t.id===r.home_team_id),22)} ${h}</span><span style="font-size:1.2rem;font-weight:800">${r.home_score} - ${r.away_score}${ot}</span><span class="matchup">${a} ${teamLogo(teams.find(t=>t.id===r.away_team_id),22)}</span></div><div class="progress-bar" style="margin-top:6px;height:6px"><span class="progress-fill ${w}" style="width:${r.home_score/(r.home_score+r.away_score||1)*100}%"></span></div>${sc}${pe}${pp}<div style="font-size:.65rem;color:var(--muted);margin-top:3px">🏟️ Laukaukset: ${h} ${r.shots_home||0} - ${r.shots_away||0} ${a}</div></div>`;
+}
+function renderPressure(){
+  if(simResults){document.getElementById('pressure-select').style.display='none';return}
+  const ids=new Set();games.filter(g=>g.status==='upcoming').forEach(g=>{ids.add(g.home_team_id);ids.add(g.away_team_id)});
+  document.getElementById('pressure-buttons').innerHTML=Array.from(ids).map(id=>`<button class="pressure-toggle ${pressureTeam===String(id)?'active':''}" onclick="togglePressure(${id})">${teamName(id)} 🔥</button>`).join(' ')||'<span style="color:var(--muted)">Valitse joukkue joka painaa päälle</span>';
+}
+function togglePressure(id){pressureTeam=pressureTeam===String(id)?'':String(id);save();renderPressure();toast(pressureTeam?'🔥 '+teamName(id)+' painaa päälle!':'🔥 Paine poistettu')}
 
-      if (!data.length) { list.innerHTML = '<div class="empty">Ei value-flageja — odotetaan dataa...</div>'; return; }
+function placeBet(gid,side,odds){
+  if(simResults){toast('⚠️ Kierros simuloitu — käynnistä uudelleen');return}
+  const stake=parseFloat(prompt(`Panos (€) — ${side.toUpperCase()} @ ${odds.toFixed(2)}`,'10'));
+  if(!stake||stake<=0||stake>bankroll){toast('⚠️ Virheellinen panos');return}
+  bankroll-=stake;bets.push({id:Date.now(),game_id:gid,side,odds,stake});
+  save();updateBankroll();renderSlip();updateSlipBadge();toast(`✅ Veto: ${side.toUpperCase()} ${stake.toFixed(2)}€ @ ${odds.toFixed(2)}`)
+}
+function clearSlip(){bets.forEach(b=>bankroll+=b.stake);bets=[];save();updateBankroll();renderSlip();updateSlipBadge();toast('🗑️ Lappu tyhjennetty')}
+function renderSlip(){
+  const l=document.getElementById('slip-list'),m=document.getElementById('slip-metrics');
+  if(!bets.length){l.innerHTML='<div class="empty">Ei vetoja — palaa Kierros-välilehdelle</div>';m.innerHTML='';return}
+  const ts=bets.reduce((s,b)=>s+b.stake,0),pw=bets.reduce((s,b)=>s+b.stake*b.odds,0);
+  m.innerHTML=`<div class="card"><div class="metric-label">Panokset</div><div class="metric">${ts.toFixed(2)}€</div></div><div class="card"><div class="metric-label">Mahd. voitto</div><div class="metric" style="color:var(--green)">${pw.toFixed(2)}€</div></div>`;
+  l.innerHTML=bets.map(b=>{const g=getGame(b.game_id);const sl=b.side==='home'?teamName(g?.home_team_id):b.side==='away'?teamName(g?.away_team_id):'Tasapeli';return`<div class="card"><div class="row"><strong>${sl}</strong><span class="badge badge-yellow">${b.odds.toFixed(2)}</span></div><div class="row" style="font-size:.7rem;color:var(--muted)"><span>${teamName(g?.home_team_id)} vs ${teamName(g?.away_team_id)}</span><span>Panos: ${b.stake.toFixed(2)}€</span></div></div>`}).join('')}
+function updateSlipBadge(){const e=document.getElementById('slip-count');e.textContent=bets.length?`(${bets.length})`:''}
 
-      const strong = data.filter(f => f.edge > 0.05).length;
-      metrics.innerHTML = `
-        <div class="card"><div class="metric-label">Flageja</div><div class="metric">${data.length}</div></div>
-        <div class="card"><div class="metric-label">Vahvoja (&gt;5%)</div><div class="metric">${strong}</div></div>`;
+function runSimulation(){
+  if(!bets.length&&!simResults){toast('⚠️ Aseta ensin vetoja');return}
+  const upcoming=games.filter(g=>g.status==='upcoming');
+  simResults=upcoming.map(g=>simulateGame(g));
+  resolveBets();save();toast('🏒 Pelipäivä simuloitu!');renderAll()
+}
+function simulateGame(g){
+  const he=getRating(g.home_team_id)?.elo||1500,ae=getRating(g.away_team_id)?.elo||1500;
+  let ha=40;if(pressureTeam===String(g.home_team_id))ha+=80;if(pressureTeam===String(g.away_team_id))ha-=80;
+  const ed=he+ha-ae,hp=1/(1+Math.pow(10,-ed/400)),dp=Math.max(.12,.26-Math.abs(ed)/1500),ap=1-hp-dp;
+  const r=Math.random();let w,hs,as;
+  if(r<hp){w='home';hs=2+Math.floor(Math.random()*4);as=Math.floor(Math.random()*(hs-1))}
+  else if(r<hp+dp){w='draw';hs=as=1+Math.floor(Math.random()*3)}
+  else{w='away';as=2+Math.floor(Math.random()*4);hs=Math.floor(Math.random()*(as-1))}
+  if(!hs&&!as)hs=1;hs=Math.min(hs,7);as=Math.min(as,7);
+  const hp_=['Lehterä','Savinainen','Kemiläinen','Tanus','Puhakka'];const ap_=['Suomi','Turunen','Tyrväinen','Nurmi','Oksanen'];
+  const scorers=[];const up=new Set();
+  for(let i=0;i<hs;i++){const n=hp_[i%hp_.length];if(!up.has(n)){up.add(n);scorers.push({player:n,team:teamName(g.home_team_id),period:1+Math.floor(Math.random()*3),time:`${1+Math.floor(Math.random()*3)}.erä ${String(1+Math.floor(Math.random()*19)).padStart(2,'0')}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}`})}}
+  for(let i=0;i<as;i++){const n=ap_[i%ap_.length];if(!up.has(n)){up.add(n);scorers.push({player:n,team:teamName(g.away_team_id),period:1+Math.floor(Math.random()*3),time:`${1+Math.floor(Math.random()*3)}.erä ${String(1+Math.floor(Math.random()*19)).padStart(2,'0')}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}`})}}
+  const reasons=['Koukkaaminen','Kampitus','Kiinnipitäminen','Poikittainen maila','Korkea maila'];const np=1+Math.floor(Math.random()*5);const penalties=[];
+  for(let i=0;i<np;i++)penalties.push({team_short:Math.random()>.5?teamName(g.home_team_id).substring(0,3).toUpperCase():teamName(g.away_team_id).substring(0,3).toUpperCase(),min:[2,2,2,2,5][Math.floor(Math.random()*5)],reason:reasons[Math.floor(Math.random()*reasons.length)]});
+  const hn=teamName(g.home_team_id).substring(0,3);const pph=penalties.filter(p=>!p.team_short.startsWith(hn)).length,ppa=penalties.filter(p=>p.team_short.startsWith(hn)).length;
+  return{game_id:g.id,home_team_id:g.home_team_id,away_team_id:g.away_team_id,home_score:hs,away_score:as,winner:w,period:3,scorers:scorers.sort((a,b)=>a.period-b.period),penalties,pp_chances_home:pph,pp_chances_away:ppa,pp_goals_home:Math.min(pph,Math.floor(Math.random()*(pph+1))),pp_goals_away:Math.min(ppa,Math.floor(Math.random()*(ppa+1))),shots_home:20+Math.floor(Math.random()*20),shots_away:20+Math.floor(Math.random()*20)}
+}
+function getRating(tid){return ratings.find(r=>r.team_id===tid)}
+function resolveBets(){
+  bets.forEach(b=>{const r=simResults.find(r=>r.game_id===b.game_id);if(!r)return;const won=(b.side==='home'&&r.winner==='home')||(b.side==='away'&&r.winner==='away')||(b.side==='draw'&&r.winner==='draw');const profit=won?b.stake*b.odds:0;bankroll+=profit;betHistory.push({...b,won,profit,resolved_at:new Date().toISOString(),game_result:`${r.home_score}-${r.away_score}`})});
+  bets=[]
+}
 
-      list.innerHTML = data.map(f => {
-        const cls = f.edge > 0.05 ? 'badge-green' : 'badge-yellow';
-        return `<div class="card">
-          <div class="row"><strong>${f.market}</strong><span class="badge ${cls}">${(f.edge*100).toFixed(1)}% edge</span></div>
-          <div class="row" style="margin-top:4px; font-size:0.75rem; color:var(--muted)">
-            <span>Malli: ${(f.model_prob*100).toFixed(0)}%</span>
-            <span>Markkina: ${(f.implied_prob*100).toFixed(0)}%</span>
-          </div>
-        </div>`;
-      }).join('');
-    }
+function showBankrollModal(){document.getElementById('bankroll-modal').style.display='flex'}
+function closeBankrollModal(){document.getElementById('bankroll-modal').style.display='none'}
+function deposit(){const a=parseFloat(document.getElementById('deposit-amount').value);if(!a||a<=0)return;bankroll+=a;save();updateBankroll();closeBankrollModal();toast(`💰 Talletettu ${a.toFixed(2)}€`)}
+function withdraw(){const a=parseFloat(document.getElementById('deposit-amount').value);if(!a||a>bankroll){toast('⚠️ Ei tarpeeksi varoja');return}bankroll-=a;save();updateBankroll();closeBankrollModal();toast(`💸 Nostettu ${a.toFixed(2)}€`)}
 
-    // === Ennusteet ===
-    async function loadPredictions() {
-      const res = await fetch(`${API}/game_predictions`);
-      const data = await res.json();
-      const list = document.getElementById('predictions-list');
-      const metrics = document.getElementById('accuracy-metrics');
+function renderValue(){
+  const l=document.getElementById('value-list'),m=document.getElementById('value-metrics');
+  if(!valueFlags.length){l.innerHTML='<div class="empty">Ei value-flageja</div>';return}
+  const s=valueFlags.filter(f=>f.edge>0.05).length;
+  m.innerHTML=`<div class="card"><div class="metric-label">Flageja</div><div class="metric">${valueFlags.length}</div></div><div class="card"><div class="metric-label">Vahvoja</div><div class="metric">${s}</div></div>`;
+  l.innerHTML=valueFlags.map(f=>{const g=getGame(f.game_id);const ml=g?`${teamName(g.home_team_id)} vs ${teamName(g.away_team_id)}`:'Peli #'+f.game_id;const cls=f.edge>0.05?'badge-green':'badge-yellow';return`<div class="card"><div class="row"><strong>${ml}</strong><span class="badge ${cls}">${(f.edge*100).toFixed(1)}% edge</span></div><div class="row" style="font-size:.7rem;color:var(--muted);margin-top:3px"><span>Malli: ${(f.model_prob*100).toFixed(0)}%</span><span>Markkina: ${(f.implied_prob*100).toFixed(0)}%</span></div></div>`}).join('')
+}
+function renderPredictions(){
+  const l=document.getElementById('pred-list'),m=document.getElementById('pred-metrics');
+  if(!predictions.length){l.innerHTML='<div class="empty">Ei ennusteita</div>';return}
+  const res=predictions.filter(p=>p.was_correct!==null);const cor=res.filter(p=>p.was_correct).length;const rate=res.length?(cor/res.length*100).toFixed(1):'—';
+  m.innerHTML=`<div class="card"><div class="metric-label">Osumatarkkuus</div><div class="metric">${rate==='—'?rate:rate+'%'}</div></div><div class="card"><div class="metric-label">Ratkenneita</div><div class="metric">${res.length}</div></div>`;
+  l.innerHTML=predictions.map(p=>{const g=getGame(p.game_id);const icon=p.was_correct===true?'✅':p.was_correct===false?'❌':'⏳';const cls=p.was_correct===true?'badge-green':p.was_correct===false?'badge-red':'badge-muted';const lbl=p.was_correct===true?'Oikein':p.was_correct===false?'Väärin':'Odottaa';return`<div class="card"><div class="row"><strong>${icon} ${teamName(g?.home_team_id)} vs ${teamName(g?.away_team_id)}</strong><span class="badge ${cls}">${lbl}</span></div><div class="row" style="font-size:.7rem;margin-top:3px"><span>${(p.home_win_prob*100).toFixed(0)}% / ${(p.draw_prob*100).toFixed(0)}% / ${(p.away_win_prob*100).toFixed(0)}%</span><span style="color:var(--muted)">→ ${p.predicted_winner?.toUpperCase()||'—'}</span></div></div>`}).join('')
+}
+function renderHistory(){
+  const l=document.getElementById('history-list'),m=document.getElementById('history-metrics');
+  if(!betHistory.length){l.innerHTML='<div class="empty">Ei historiaa — simuloi pelipäivä ensin</div>';return}
+  const won=betHistory.filter(b=>b.won).length;const tp=betHistory.reduce((s,b)=>s+(b.won?b.stake*b.odds-b.stake:-b.stake),0);const ts=betHistory.reduce((s,b)=>s+b.stake,0);const roi=ts>0?(tp/ts*100).toFixed(1):'0';
+  m.innerHTML=`<div class="card"><div class="metric-label">Vetoja</div><div class="metric">${betHistory.length}</div></div><div class="card"><div class="metric-label">Osumia</div><div class="metric">${won} (${(won/betHistory.length*100).toFixed(0)}%)</div></div><div class="card"><div class="metric-label">Tulos</div><div class="metric" style="color:${tp>=0?'var(--green)':'var(--red)'}">${tp>=0?'+':''}${tp.toFixed(2)}€</div></div><div class="card"><div class="metric-label">ROI</div><div class="metric">${roi}%</div></div>`;
+  l.innerHTML=betHistory.slice().reverse().map(b=>{const g=getGame(b.game_id);const sl=b.side==='home'?teamName(g?.home_team_id):b.side==='away'?teamName(g?.away_team_id):'Tasapeli';const cls=b.won?'badge-green':'badge-red';return`<div class="card"><div class="row"><strong>${sl}</strong><span class="badge ${cls}">${b.won?'✅ Voitto':'❌ Häviö'}</span></div><div class="row" style="font-size:.7rem;color:var(--muted);margin-top:3px"><span>${teamName(g?.home_team_id)} vs ${teamName(g?.away_team_id)} (${b.game_result})</span><span style="color:${b.won?'var(--green)':'var(--red)'}">${b.won?'+':''}${(b.won?b.stake*b.odds-b.stake:-b.stake).toFixed(2)}€</span></div><div class="row" style="font-size:.65rem;color:var(--muted)"><span>Panos ${b.stake.toFixed(2)}€ @ ${b.odds.toFixed(2)}</span><span>${new Date(b.resolved_at).toLocaleDateString('fi')}</span></div></div>`}).join('')
+}
+function renderTeams(){
+  const l=document.getElementById('teams-list');if(!ratings.length){l.innerHTML='<div class="empty">Ei joukkuetietoja</div>';return}
+  [...ratings].sort((a,b)=>b.elo-a.elo).forEach((t,i)=>{const n=teamName(t.team_id);const pCls=t.pdo>102?'badge-green':t.pdo<98?'badge-red':'badge-muted';const pLbl=t.pdo>102?'Yli':t.pdo<98?'Ali':'Norm';l.innerHTML+=`<div class="card"><div class="row"><div class="matchup">${teamLogo(teams.find(x=>x.id===t.team_id),22)} <strong>#${i+1} ${n}</strong></div><span style="font-weight:700">Elo: ${t.elo.toFixed(0)}</span></div><div class="row" style="font-size:.7rem;color:var(--muted);margin-top:3px"><span>PDO: ${t.pdo?.toFixed(1)||'—'} <span class="badge ${pCls}">${pLbl}</span></span><span>${t.date}</span></div></div>`})}
+function renderInfo(){
+  document.getElementById('info-content').innerHTML=`<div class="card"><h3>ℹ️ Tervetuloa BetTrackeriin!</h3><p style="font-size:.8rem;line-height:1.5;color:var(--muted);margin-top:8px">BetTracker on Liiga-vedonlyönnin value-analyysijärjestelmä. Se auttaa tunnistamaan tilanteet, joissa vedonlyöntimarkkina on hinnoitellut kohteen väärin.</p></div>
+<div class="card"><h3>💎 Value-flagit</h3><p style="font-size:.75rem;line-height:1.5;color:var(--muted);margin-top:4px"><b>Edge > 3 %</b> = ylikerroinkandidaatti (keltainen)<br><b>Edge > 5 %</b> = vahva signaali (vihreä)<br>Edge = mallin todennäköisyys × kerroin − 1. Positiivinen edge tarkoittaa, että vedonlyöntikohde on aliarvostettu.</p></div>
+<div class="card"><h3>📊 Mittarit</h3><p style="font-size:.75rem;line-height:1.5;color:var(--muted);margin-top:4px"><b>Elo</b> — jatkuvasti päivittyvä voimaestimaatti (1500 = keskiarvo).<br><b>PDO</b> — yli-/alisuorituksen mittari. >102 = ylisuorittaa, <98 = alisuorittaa. Regressoituu aina kohti 100.<br><b>Z-score</b> — pelaajan kuumuusmittari. |z| > 1.5 = selvä poikkeama omasta normaalista.</p></div>
+<div class="card"><h3>🎮 Demon käyttö</h3><p style="font-size:.75rem;line-height:1.5;color:var(--muted);margin-top:4px">1. Valitse 📅 Kierros -välilehti<br>2. Klikkaa kertoimia lyödäksesi vetoa<br>3. Valitse halutessasi joukkue joka 🔥 painaa päälle<br>4. Paina ▶️ Käynnistä pelipäivän simulaatio<br>5. Katso tulokset ja 📜 Historia-välilehti</p></div>`
+}
+function renderAdmin(){
+  const supabaseUrl=localStorage.getItem('bt_supabase_url')||'';const supabaseKey=localStorage.getItem('bt_supabase_key')||'';const oddsKey=localStorage.getItem('bt_odds_key')||'';
+  document.getElementById('admin-content').innerHTML=`<div class="card"><h3>⚙️ API-asetukset</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Demo-tilassa asetukset tallentuvat selaimeen. Tuotannossa käytetään ympäristömuuttujia.</p>
+<div class="input-group"><label>Supabase URL</label><input type="text" id="admin-supabase-url" value="${supabaseUrl}" placeholder="https://xxx.supabase.co"></div>
+<div class="input-group"><label>Supabase Anon Key</label><input type="text" id="admin-supabase-key" value="${supabaseKey}" placeholder="eyJh..."></div>
+<div class="input-group"><label>Odds API Key</label><input type="text" id="admin-odds-key" value="${oddsKey}" placeholder="abc123..."></div>
+<div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-primary" style="flex:1" onclick="saveAdmin()">💾 Tallenna</button><button class="btn btn-danger" style="flex:1" onclick="resetAdmin()">🔄 Palauta</button></div></div>`
+}
+function saveAdmin(){localStorage.setItem('bt_supabase_url',document.getElementById('admin-supabase-url').value);localStorage.setItem('bt_supabase_key',document.getElementById('admin-supabase-key').value);localStorage.setItem('bt_odds_key',document.getElementById('admin-odds-key').value);toast('💾 Asetukset tallennettu')}
+function resetAdmin(){['bt_supabase_url','bt_supabase_key','bt_odds_key'].forEach(k=>localStorage.removeItem(k));toast('🔄 Asetukset palautettu');renderAdmin()}
 
-      if (!data.length) { list.innerHTML = '<div class="empty">Ei ennusteita...</div>'; return; }
+function toast(msg){const e=document.createElement('div');e.className='toast';e.textContent=msg;document.body.appendChild(e);setTimeout(()=>e.remove(),2000)}
 
-      const resolved = data.filter(p => p.was_correct !== null);
-      const correct = resolved.filter(p => p.was_correct).length;
-      const rate = resolved.length ? (correct/resolved.length*100).toFixed(1) : '—';
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelector(`[data-tab="${name}"]`).classList.add('active');document.getElementById(name).classList.add('active');
+  if(name==='round')renderRound();if(name==='slip')renderSlip();if(name==='value')renderValue();if(name==='predictions')renderPredictions();if(name==='history')renderHistory();if(name==='teams')renderTeams();if(name==='info')renderInfo();if(name==='admin')renderAdmin()
+}
+function renderAll(){renderRound();renderSlip();renderValue();renderPredictions();renderHistory();renderTeams();renderInfo();renderAdmin();updateBankroll();updateSlipBadge();if(simResults)switchTab('history')}
 
-      metrics.innerHTML = `
-        <div class="card"><div class="metric-label">Osumatarkkuus</div><div class="metric">${rate === '—' ? rate : rate+'%'}</div></div>
-        <div class="card"><div class="metric-label">Ratkenneita</div><div class="metric">${resolved.length}/${data.length}</div></div>`;
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
+document.getElementById('bankroll-modal').addEventListener('click',function(e){if(e.target===this)closeBankrollModal()});
 
-      list.innerHTML = data.map(p => {
-        const icon = p.was_correct === true ? '✅' : p.was_correct === false ? '❌' : '⏳';
-        const cls = p.was_correct === true ? 'badge-green' : p.was_correct === false ? 'badge-red' : 'badge-muted';
-        const label = p.was_correct === true ? 'Oikein' : p.was_correct === false ? 'Väärin' : 'Odottaa';
-        const homeW = (p.home_win_prob*100).toFixed(0);
-        const drawW = (p.draw_prob*100).toFixed(0);
-        const awayW = (p.away_win_prob*100).toFixed(0);
-        return `<div class="card">
-          <div class="row"><strong>${icon} ${p.predicted_winner?.toUpperCase()||'—'}</strong><span class="badge ${cls}">${label}</span></div>
-          <div class="row prob-text" style="margin-top:6px;">
-            <span>Koti ${homeW}%</span><span>Tasa ${drawW}%</span><span>Vieras ${awayW}%</span>
-          </div>
-          <div class="progress-bar">
-            <span style="display:flex;height:100%">
-              <span class="progress-fill fill-home" style="width:${homeW}%"></span>
-              <span class="progress-fill fill-draw" style="width:${drawW}%"></span>
-              <span class="progress-fill fill-away" style="width:${awayW}%"></span>
-            </span>
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    // === Joukkueet ===
-    async function loadTeams() {
-      const [ratingsRes, teamsRes] = await Promise.all([
-        fetch(`${API}/team_ratings`),
-        fetch(`${API}/teams`),
-      ]);
-      const ratings = await ratingsRes.json();
-      const teams = await teamsRes.json();
-
-      const list = document.getElementById('teams-list');
-      if (!ratings.length) { list.innerHTML = '<div class="empty">Ei joukkuetietoja...</div>'; return; }
-
-      const teamMap = Object.fromEntries(teams.map(t => [t.id, t.name]));
-
-      // Järjestä Elo-järjestykseen
-      const sorted = [...ratings].sort((a, b) => b.elo - a.elo);
-
-      list.innerHTML = sorted.map((t, i) => {
-        const pdoCls = t.pdo > 102 ? 'badge-green' : t.pdo < 98 ? 'badge-red' : 'badge-muted';
-        const pdoLabel = t.pdo > 102 ? 'Yli' : t.pdo < 98 ? 'Ali' : '—';
-        return `<div class="card">
-          <div class="row">
-            <strong class="team-name">#${i+1} ${teamMap[t.team_id] || `Joukkue ${t.team_id}`}</strong>
-            <span style="font-weight:700">Elo: ${t.elo.toFixed(0)}</span>
-          </div>
-          <div class="row" style="margin-top:4px; font-size:0.75rem; color:var(--muted)">
-            <span>PDO: ${t.pdo?.toFixed(1)||'—'} <span class="badge ${pdoCls}">${pdoLabel}</span></span>
-            <span>${t.date}</span>
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    // Alustava lataus
-    loadValueFlags();
-  </script>
+loadData().then(()=>{renderAll();updateBankroll();updateSlipBadge()});
+</script>
 </body>
 </html>
