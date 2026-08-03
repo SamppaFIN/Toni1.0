@@ -5,56 +5,148 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>BetTracker — Demo</title>
 <style>
-:root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--accent:#38bdf8;--green:#22c55e;--red:#ef4444;--yellow:#eab308;--muted:#64748b;--orange:#f97316}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);padding:8px;max-width:500px;margin:0 auto;padding-bottom:80px}
-header{text-align:center;padding:8px 0 4px}
-h1{font-size:1.1rem}
-.demo-badge{display:inline-block;background:var(--yellow);color:#000;font-size:.6rem;padding:1px 6px;border-radius:8px;font-weight:700;margin-left:6px;vertical-align:middle}
-.bankroll-bar{background:var(--card);border-radius:8px;padding:6px 10px;margin:4px 0 8px;display:flex;justify-content:space-between;align-items:center;font-size:.85rem}
-.bankroll-amount{font-weight:700;font-size:1rem}
-.bankroll-amount.positive{color:var(--green)}.bankroll-amount.negative{color:var(--red)}
-.tabs{display:flex;gap:2px;margin-bottom:8px;overflow-x:auto}
-.tab{flex-shrink:0;padding:6px 10px;background:var(--card);border:none;color:var(--muted);border-radius:6px;cursor:pointer;font-size:.7rem;white-space:nowrap}
-.tab.active{background:var(--accent);color:var(--bg);font-weight:600}
-.view{display:none}.view.active{display:block}
-.card{background:var(--card);border-radius:10px;padding:10px;margin-bottom:6px}
-.row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px}
-.badge{font-size:.6rem;padding:1px 6px;border-radius:10px;font-weight:600}
-.badge-green{background:var(--green);color:#000}.badge-yellow{background:var(--yellow);color:#000}.badge-red{background:var(--red);color:#fff}.badge-muted{background:var(--muted);color:#fff}.badge-orange{background:var(--orange);color:#fff}
-.metric{font-size:1.2rem;font-weight:700}.metric-label{font-size:.65rem;color:var(--muted)}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:6px}.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
-.team-logo{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.65rem;color:#fff;flex-shrink:0}
-.matchup{display:flex;align-items:center;gap:6px;font-size:.85rem}
-.matchup .vs{margin:0 4px;color:var(--muted);font-size:.7rem}
-.odds-btn{padding:6px 10px;border-radius:6px;border:1px solid var(--muted);background:transparent;color:var(--text);cursor:pointer;font-size:.75rem;text-align:center;min-width:55px;transition:all .15s}
-.odds-btn:hover{background:var(--accent);color:var(--bg);border-color:var(--accent)}
-.odds-btn.selected{background:var(--green);color:#000;border-color:var(--green);font-weight:700}
-.odds-btn .odds-val{font-weight:700;display:block}
-.odds-btn .odds-label{font-size:.55rem;color:var(--muted)}
-.btn{display:inline-block;padding:8px 16px;border-radius:8px;border:none;font-weight:600;cursor:pointer;font-size:.8rem;text-align:center}
-.btn-primary{background:var(--accent);color:var(--bg)}.btn-danger{background:var(--red);color:#fff}.btn-success{background:var(--green);color:#000}.btn-block{display:block;width:100%}
-.input-group{margin:6px 0}.input-group label{display:block;font-size:.7rem;color:var(--muted);margin-bottom:2px}
-.input-group input{width:100%;padding:8px;border-radius:6px;border:1px solid var(--muted);background:var(--bg);color:var(--text);font-size:.85rem}
-.progress-bar{height:4px;background:var(--muted);border-radius:2px;margin-top:3px;overflow:hidden;display:flex}.progress-fill{height:100%}
-.fill-home{background:var(--accent)}.fill-draw{background:var(--yellow)}.fill-away{background:var(--red)}
-.goal-list{font-size:.7rem;color:var(--muted);margin-top:4px}.penalty-row{font-size:.65rem;color:var(--orange)}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:10px 20px;border-radius:20px;font-weight:600;font-size:.8rem;z-index:100;animation:slideUp .3s ease}
-@keyframes slideUp{from{transform:translateX(-50%) translateY(20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
-.empty{text-align:center;padding:24px;color:var(--muted);font-style:italic}
-.pressure-toggle{padding:4px 10px;border-radius:12px;border:1px dashed var(--muted);background:transparent;color:var(--muted);cursor:pointer;font-size:.65rem;transition:all .2s}
-.pressure-toggle.active{background:var(--orange);color:#fff;border-color:var(--orange);font-weight:600}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;animation:pulse 1s infinite;margin-right:4px}
-@keyframes pulse{0%,100%{opacity:.3}50%{opacity:.7}}
-.scorer-emoji{font-size:.8rem}
+/* === BetTracker Design System — OKLCH + Fluid + Glass === */
+:root{
+  --c-bg: oklch(0.12 0.02 260);
+  --c-surface: oklch(0.17 0.02 260);
+  --c-surface-hover: oklch(0.22 0.03 260);
+  --c-text: oklch(0.92 0.01 260);
+  --c-text-muted: oklch(0.55 0.02 260);
+  --c-accent: oklch(0.62 0.18 240);
+  --c-success: oklch(0.62 0.20 145);
+  --c-danger: oklch(0.52 0.22 25);
+  --c-warning: oklch(0.72 0.16 85);
+  --c-orange: oklch(0.58 0.18 50);
+  --radius-sm: 8px; --radius-md: clamp(10px, 2vw, 16px); --radius-pill: 20px;
+  --shadow-card: 0 1px 3px rgba(0,0,0,.4);
+  --shadow-elevated: 0 4px 16px rgba(0,0,0,.5);
+  --touch-target: 44px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:100%;-webkit-text-size-adjust:100%}
+body{
+  font-family:system-ui,-apple-system,sans-serif;
+  background:var(--c-bg);color:var(--c-text);
+  padding:0;max-width:500px;margin:0 auto;padding-bottom:80px;
+  line-height:1.5;font-size:clamp(0.875rem, 1.5vw, 1rem);
+}
+/* Glass header */
+.glass-header{
+  position:sticky;top:0;z-index:100;
+  background:oklch(0.12 0.02 260 / 0.85);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  padding:clamp(8px,2vw,12px) clamp(12px,3vw,16px);
+  border-bottom:1px solid oklch(1 0 0 / 0.06);
+  text-align:center;
+}
+.glass-header h1{font-size:clamp(1rem,3vw,1.3rem);font-weight:800;letter-spacing:-0.02em}
+.demo-badge{display:inline-block;background:var(--c-warning);color:#000;font-size:clamp(0.55rem,1vw,0.65rem);padding:1px 8px;border-radius:var(--radius-pill);font-weight:700;margin-left:6px;vertical-align:middle}
+/* Bankroll bar */
+.bankroll-bar{
+  position:sticky;top:clamp(48px,8vw,56px);z-index:99;
+  background:var(--c-surface);padding:clamp(6px,1.5vw,10px) clamp(10px,2vw,14px);
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid oklch(1 0 0 / 0.04);
+}
+.bankroll-amount{font-weight:800;font-size:clamp(1rem,2.5vw,1.2rem)}
+.bankroll-amount.positive{color:var(--c-success)}.bankroll-amount.negative{color:var(--c-danger)}
+/* Tabs — horizontal scroll */
+.tabs{display:flex;gap:4px;padding:clamp(6px,1.5vw,10px);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex-shrink:0;min-height:var(--touch-target);
+  padding:6px clamp(8px,2vw,14px);
+  background:var(--c-surface);border:none;color:var(--c-text-muted);
+  border-radius:var(--radius-sm);cursor:pointer;
+  font-size:clamp(0.65rem,1.2vw,0.75rem);font-weight:500;white-space:nowrap;
+  transition:all .2s ease;
+}
+.tab:hover{background:var(--c-surface-hover);color:var(--c-text)}
+.tab.active{background:var(--c-accent);color:#000;font-weight:600}
+/* Views */
+.view{display:none;padding:clamp(8px,2vw,12px);animation:fadeIn .25s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+/* Cards */
+.card{
+  background:var(--c-surface);border-radius:var(--radius-md);
+  padding:clamp(10px,2.5vw,14px);margin-bottom:clamp(6px,1.5vw,10px);
+  box-shadow:var(--shadow-card);
+  border:1px solid oklch(1 0 0 / 0.04);
+  transition:transform .15s ease,box-shadow .15s ease;
+}
+.card:hover{transform:translateY(-1px);box-shadow:var(--shadow-elevated)}
+.row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+/* Badges */
+.badge{font-size:clamp(0.55rem,1vw,0.65rem);padding:2px 8px;border-radius:var(--radius-pill);font-weight:600}
+.badge-green{background:var(--c-success);color:#000}.badge-yellow{background:var(--c-warning);color:#000}.badge-red{background:var(--c-danger);color:#fff}.badge-muted{background:var(--c-text-muted);color:#fff}.badge-orange{background:var(--c-orange);color:#fff}
+/* Metrics */
+.metric{font-size:clamp(1.1rem,3vw,1.4rem);font-weight:800;font-variant-numeric:tabular-nums}
+.metric-label{font-size:clamp(0.6rem,1vw,0.7rem);color:var(--c-text-muted)}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(6px,1.5vw,8px)}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px}
+/* Team logo */
+.team-logo{width:clamp(24px,6vw,32px);height:clamp(24px,6vw,32px);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:clamp(0.55rem,1.5vw,0.7rem);color:#fff;flex-shrink:0}
+.matchup{display:flex;align-items:center;gap:6px;font-size:clamp(0.8rem,1.5vw,0.9rem)}
+.matchup .vs{margin:0 2px;color:var(--c-text-muted);font-size:0.7em}
+/* Odds buttons */
+.odds-btn{
+  min-height:var(--touch-target);padding:6px 8px;border-radius:var(--radius-sm);
+  border:1.5px solid oklch(1 0 0 / 0.12);background:transparent;
+  color:var(--c-text);cursor:pointer;text-align:center;
+  transition:all .15s ease;font-size:clamp(0.7rem,1.2vw,0.8rem);
+}
+.odds-btn:hover{background:var(--c-accent);color:#000;border-color:var(--c-accent);transform:translateY(-1px)}
+.odds-btn:active{transform:scale(0.97)}
+.odds-btn .odds-val{font-weight:700;display:block;font-variant-numeric:tabular-nums}
+.odds-btn .odds-label{font-size:0.7em;color:var(--c-text-muted)}
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:var(--touch-target);padding:10px clamp(14px,3vw,20px);
+  border-radius:var(--radius-sm);border:none;font-weight:600;cursor:pointer;
+  font-size:clamp(0.75rem,1.5vw,0.85rem);
+  transition:all .15s ease;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-elevated)}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--c-accent);color:#000}.btn-danger{background:var(--c-danger);color:#fff}.btn-success{background:var(--c-success);color:#000}.btn-block{display:flex;width:100%}
+/* Input */
+.input-group{margin:8px 0}.input-group label{display:block;font-size:clamp(0.65rem,1vw,0.75rem);color:var(--c-text-muted);margin-bottom:4px}
+.input-group input{width:100%;min-height:var(--touch-target);padding:8px 12px;border-radius:var(--radius-sm);border:1.5px solid oklch(1 0 0 / 0.12);background:var(--c-bg);color:var(--c-text);font-size:clamp(0.8rem,1.2vw,0.9rem);transition:border-color .15s ease}
+.input-group input:focus{outline:none;border-color:var(--c-accent);box-shadow:0 0 0 3px oklch(0.62 0.18 240 / 0.2)}
+/* Progress bar */
+.progress-bar{height:clamp(3px,1vw,5px);background:oklch(1 0 0 / 0.08);border-radius:3px;margin-top:4px;overflow:hidden;display:flex}.progress-fill{height:100%;transition:width .3s ease}
+.fill-home{background:var(--c-accent)}.fill-draw{background:var(--c-warning)}.fill-away{background:var(--c-danger)}
+/* Sim game details */
+.goal-list{font-size:clamp(0.65rem,1vw,0.75rem);color:var(--c-text-muted);margin-top:6px;line-height:1.6}
+.penalty-row{font-size:clamp(0.6rem,1vw,0.7rem);color:var(--c-orange);margin-top:4px}
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--c-surface);border:1px solid oklch(1 0 0 / 0.1);color:var(--c-text);padding:12px 24px;border-radius:var(--radius-pill);font-weight:600;font-size:clamp(0.75rem,1.2vw,0.85rem);z-index:9999;box-shadow:var(--shadow-elevated);animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateX(-50%) translateY(16px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+.empty{text-align:center;padding:32px 16px;color:var(--c-text-muted);font-style:italic;font-size:clamp(0.8rem,1.2vw,0.9rem)}
+/* Pressure toggle */
+.pressure-toggle{
+  min-height:var(--touch-target);padding:6px 14px;border-radius:var(--radius-pill);
+  border:1.5px dashed oklch(1 0 0 / 0.15);background:transparent;
+  color:var(--c-text-muted);cursor:pointer;font-size:clamp(0.6rem,1vw,0.7rem);
+  transition:all .2s ease;margin:2px;
+}
+.pressure-toggle:hover{border-color:var(--c-orange);color:var(--c-text)}
+.pressure-toggle.active{background:var(--c-orange);color:#fff;border-color:var(--c-orange);font-weight:700;box-shadow:0 0 12px oklch(0.58 0.18 50 / 0.3)}
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:oklch(0 0 0 / 0.7);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;animation:fadeIn .2s ease}
+/* a11y */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+:focus-visible{outline:2px solid var(--c-accent);outline-offset:2px}
 </style>
 </head>
 <body>
-<header><h1>🏒 BetTracker <span class="demo-badge">DEMO</span></h1></header>
+<header class="glass-header"><h1>🏒 BetTracker <span class="demo-badge">DEMO</span></h1></header>
 <div class="bankroll-bar">
   <span>💰 Kassa</span>
   <span class="bankroll-amount" id="bankroll-display">100.00 €</span>
-  <button class="btn btn-primary" style="font-size:.65rem;padding:4px 10px" onclick="showBankrollModal()">➕</button>
+  <button class="btn btn-primary" style="font-size:clamp(0.6rem,1vw,0.7rem);padding:4px 10px;min-height:32px" onclick="showBankrollModal()">➕</button>
 </div>
 <div class="tabs" id="tab-bar">
   <button class="tab active" data-tab="round">📅 Kierros</button>
@@ -81,9 +173,10 @@ h1{font-size:1.1rem}
 <div id="info" class="view"><div id="info-content"></div></div>
 <div id="admin" class="view"><div id="admin-content"></div></div>
 
-<div id="bankroll-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);z-index:50;align-items:center;justify-content:center">
-  <div class="card" style="width:90%;max-width:360px">
-    <h3 style="margin-bottom:8px">💰 Hallitse kassaa</h3>
+<!-- Bankroll modal -->
+<div class="modal-overlay" id="bankroll-modal">
+  <div class="card" style="width:90%;max-width:360px;margin:0">
+    <h3 style="margin-bottom:8px;font-size:clamp(1rem,2vw,1.2rem);font-weight:700">💰 Hallitse kassaa</h3>
     <div class="input-group"><label>Summa (€)</label><input type="number" id="deposit-amount" value="20" min="1" max="1000"></div>
     <div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-success" style="flex:1" onclick="deposit()">➕ Talleta</button><button class="btn btn-danger" style="flex:1" onclick="withdraw()">➖ Nosta</button></div>
     <button class="btn btn-block" style="margin-top:6px;background:var(--muted)" onclick="closeBankrollModal()">Sulje</button>
