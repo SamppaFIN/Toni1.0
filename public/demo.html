@@ -151,8 +151,7 @@ body{
 <div class="tabs" id="tab-bar">
   <button class="tab active" data-tab="round">📅 Kierros</button>
   <button class="tab" data-tab="slip">🎫 Vetolappu <span id="slip-count"></span></button>
-  <button class="tab" data-tab="value">💎 Value</button>
-  <button class="tab" data-tab="predictions">🎯 Ennusteet</button>
+  <button class="tab" data-tab="tracker">🏒 Seuranta</button>
   <button class="tab" data-tab="history">📜 Historia</button>
   <button class="tab" data-tab="teams">📊 Joukkueet</button>
   <button class="tab" data-tab="info">ℹ️ Info</button>
@@ -161,13 +160,9 @@ body{
 <div id="round" class="view active">
   <button class="btn btn-success btn-block" onclick="runSimulation()" id="sim-btn">▶️ Käynnistä pelipäivän simulaatio</button>
   <div id="round-games" style="margin-top:8px"></div>
-  <div id="pressure-select" style="margin-top:8px;padding:8px;background:var(--card);border-radius:8px;font-size:.75rem">
-    <span>🔥 Painaa päälle: </span><span id="pressure-buttons"></span>
-  </div>
 </div>
+<div id="tracker" class="view"><div id="tracker-list"></div></div>
 <div id="slip" class="view"><div class="grid-2" id="slip-metrics"></div><div id="slip-list"></div><button class="btn btn-danger btn-block" style="margin-top:8px" onclick="clearSlip()">🗑️ Tyhjennä lappu</button></div>
-<div id="value" class="view"><div class="grid-2" id="value-metrics"></div><div id="value-list"></div></div>
-<div id="predictions" class="view"><div class="grid-2" id="pred-metrics"></div><div id="pred-list"></div></div>
 <div id="history" class="view"><div class="grid-2" id="history-metrics"></div><div id="history-list"></div></div>
 <div id="teams" class="view"><div id="teams-list"></div></div>
 <div id="info" class="view"><div id="info-content"></div></div>
@@ -211,14 +206,50 @@ function renderRound(){
   const b=document.getElementById('sim-btn');
   if(simResults){b.textContent='🔄 Käynnistä uudelleen';b.className='btn btn-primary btn-block';c.innerHTML=simResults.map(r=>renderSimGame(r)).join('')}
   else{b.textContent='▶️ Käynnistä pelipäivän simulaatio';b.className='btn btn-success btn-block';c.innerHTML=upcoming.map(g=>renderUpcoming(g)).join('')}
-  renderPressure();
+}
+function valueForGame(gid,side){
+  const vf=valueFlags.find(f=>f.game_id===gid);
+  if(!vf)return null;
+  const o=getOdds(gid);if(!o)return null;
+  const p=getPred(gid);if(!p)return null;
+  if(side==='home'){return{mp:p.home_win_prob,ip:1/o.home_odds/(1/o.home_odds+1/o.draw_odds+1/o.away_odds),edge:p.home_win_prob*o.home_odds-1}}
+  if(side==='draw'){return{mp:p.draw_prob,ip:1/o.draw_odds/(1/o.home_odds+1/o.draw_odds+1/o.away_odds),edge:p.draw_prob*o.draw_odds-1}}
+  if(side==='away'){return{mp:p.away_win_prob,ip:1/o.away_odds/(1/o.home_odds+1/o.draw_odds+1/o.away_odds),edge:p.away_win_prob*o.away_odds-1}}
+  return null;
 }
 function renderUpcoming(g){
   const home=teamName(g.home_team_id),away=teamName(g.away_team_id);
   const odds=getOdds(g.id);const pred=getPred(g.id)||{};
-  let oh='';if(odds)oh=`<div class="grid-3" style="margin-top:4px"><button class="odds-btn" onclick="placeBet(${g.id},'home',${odds.home_odds})"><span class="odds-val">${odds.home_odds.toFixed(2)}</span><span class="odds-label">1</span></button><button class="odds-btn" onclick="placeBet(${g.id},'draw',${odds.draw_odds})"><span class="odds-val">${odds.draw_odds.toFixed(2)}</span><span class="odds-label">X</span></button><button class="odds-btn" onclick="placeBet(${g.id},'away',${odds.away_odds})"><span class="odds-val">${odds.away_odds.toFixed(2)}</span><span class="odds-label">2</span></button></div>`;
-  let ph='';if(pred.home_win_prob){const h=(pred.home_win_prob*100).toFixed(0),d=(pred.draw_prob*100).toFixed(0),a=(pred.away_win_prob*100).toFixed(0);ph=`<div style="font-size:.7rem;margin-top:4px"><span>Malli: ${h}% / ${d}% / ${a}%</span></div><div class="progress-bar"><span class="progress-fill fill-home" style="width:${h}%"></span><span class="progress-fill fill-draw" style="width:${d}%"></span><span class="progress-fill fill-away" style="width:${a}%"></span></div>`}
-  return `<div class="card"><div class="row"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${home}</strong><span class="vs">vs</span><strong>${away}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span></div>${ph}${oh}</div>`;
+  const homeV=valueForGame(g.id,'home'),drawV=valueForGame(g.id,'draw'),awayV=valueForGame(g.id,'away');
+  const vf=valueFlags.find(f=>f.game_id===g.id);
+
+  // Value flag badge
+  let vfHtml='';
+  if(vf)vfHtml=`<span class="badge ${vf.edge>0.05?'badge-green':'badge-yellow'}" style="margin-left:4px" title="Edge: ${(vf.edge*100).toFixed(1)}% | Malli: ${(vf.model_prob*100).toFixed(0)}% vs Markkina: ${(vf.implied_prob*100).toFixed(0)}%">💎 ${(vf.edge*100).toFixed(1)}%</span>`;
+
+  // Per-game pressure toggles
+  const homePressed=pressureTeam===String(g.home_team_id);
+  const awayPressed=pressureTeam===String(g.away_team_id);
+  const pressHtml=`<div style="margin-top:4px;display:flex;gap:4px;font-size:.65rem">
+    <button class="pressure-toggle ${homePressed?'active':''}" onclick="event.stopPropagation();togglePressure(${g.home_team_id})">${home} 🔥</button>
+    <button class="pressure-toggle ${awayPressed?'active':''}" onclick="event.stopPropagation();togglePressure(${g.away_team_id})">${away} 🔥</button>
+  </div>`;
+
+  function oddsBtn(side,oddsVal,modelProb,impliedProb,edge){
+    const isValue=edge>0.03; const isStrong=edge>0.05;
+    const bg=isStrong?'oklch(0.62 0.20 145 / 0.3)':isValue?'oklch(0.62 0.20 145 / 0.15)':edge<-0.03?'oklch(0.52 0.22 25 / 0.15)':'';
+    const border=isStrong?'oklch(0.62 0.20 145)':isValue?'oklch(0.62 0.20 145 / 0.5)':edge<-0.03?'oklch(0.52 0.22 25 / 0.5)':'';
+    const title=`Mallin tn: ${(modelProb*100).toFixed(1)}% | Markkinan tn: ${(impliedProb*100).toFixed(1)}% | Edge: ${(edge*100).toFixed(1)}%`;
+    return`<button class="odds-btn" style="background:${bg};border-color:${border}" onclick="placeBet(${g.id},'${side}',${oddsVal})" title="${title}"><span class="odds-val">${oddsVal.toFixed(2)}</span><span class="odds-label">${side==='home'?'1':side==='draw'?'X':'2'}</span></button>`;
+  }
+
+  let oh='';let ph='';
+  if(pred.home_win_prob){const h=(pred.home_win_prob*100).toFixed(0),d=(pred.draw_prob*100).toFixed(0),a=(pred.away_win_prob*100).toFixed(0);
+    ph=`<div style="font-size:.7rem;margin-top:4px">Malli: ${h}% / ${d}% / ${a}%</div><div class="progress-bar"><span class="progress-fill fill-home" style="width:${h}%"></span><span class="progress-fill fill-draw" style="width:${d}%"></span><span class="progress-fill fill-away" style="width:${a}%"></span></div>`}
+  if(odds&&homeV&&drawV&&awayV)oh=`<div class="grid-3" style="margin-top:4px">${oddsBtn('home',odds.home_odds,homeV.mp,homeV.ip,homeV.edge)}${oddsBtn('draw',odds.draw_odds,drawV.mp,drawV.ip,drawV.edge)}${oddsBtn('away',odds.away_odds,awayV.mp,awayV.ip,awayV.edge)}</div>`;
+  else if(odds)oh=`<div class="grid-3" style="margin-top:4px"><button class="odds-btn" onclick="placeBet(${g.id},'home',${odds.home_odds})"><span class="odds-val">${odds.home_odds.toFixed(2)}</span><span class="odds-label">1</span></button><button class="odds-btn" onclick="placeBet(${g.id},'draw',${odds.draw_odds})"><span class="odds-val">${odds.draw_odds.toFixed(2)}</span><span class="odds-label">X</span></button><button class="odds-btn" onclick="placeBet(${g.id},'away',${odds.away_odds})"><span class="odds-val">${odds.away_odds.toFixed(2)}</span><span class="odds-label">2</span></button></div>`;
+
+  return `<div class="card"><div class="row"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${home}</strong><span class="vs">vs</span><strong>${away}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span>${vfHtml}</div>${ph}${oh}${pressHtml}</div>`;
 }
 function getPred(gid){return simResults?simResults.find(r=>r.game_id===gid):predictions.find(p=>p.game_id===gid)}
 function renderSimGame(r){
@@ -230,12 +261,12 @@ function renderSimGame(r){
   const w=r.home_score>r.away_score?'fill-home':r.away_score>r.home_score?'fill-away':'fill-draw';
   return `<div class="card"><div class="row"><span class="matchup">${teamLogo(teams.find(t=>t.id===r.home_team_id),22)} ${h}</span><span style="font-size:1.2rem;font-weight:800">${r.home_score} - ${r.away_score}${ot}</span><span class="matchup">${a} ${teamLogo(teams.find(t=>t.id===r.away_team_id),22)}</span></div><div class="progress-bar" style="margin-top:6px;height:6px"><span class="progress-fill ${w}" style="width:${r.home_score/(r.home_score+r.away_score||1)*100}%"></span></div>${sc}${pe}${pp}<div style="font-size:.65rem;color:var(--muted);margin-top:3px">🏟️ Laukaukset: ${h} ${r.shots_home||0} - ${r.shots_away||0} ${a}</div></div>`;
 }
-function renderPressure(){
-  if(simResults){document.getElementById('pressure-select').style.display='none';return}
-  const ids=new Set();games.filter(g=>g.status==='upcoming').forEach(g=>{ids.add(g.home_team_id);ids.add(g.away_team_id)});
-  document.getElementById('pressure-buttons').innerHTML=Array.from(ids).map(id=>`<button class="pressure-toggle ${pressureTeam===String(id)?'active':''}" onclick="togglePressure(${id})">${teamName(id)} 🔥</button>`).join(' ')||'<span style="color:var(--muted)">Valitse joukkue joka painaa päälle</span>';
+function renderTracker(){
+  if(!simResults){document.getElementById('tracker-list').innerHTML='<div class="empty">Ei seurattavaa — käynnistä ensin simulaatio Kierros-välilehdellä</div>';return}
+  document.getElementById('tracker-list').innerHTML=simResults.map(r=>renderSimGame(r)).join('');
 }
-function togglePressure(id){pressureTeam=pressureTeam===String(id)?'':String(id);save();renderPressure();toast(pressureTeam?'🔥 '+teamName(id)+' painaa päälle!':'🔥 Paine poistettu')}
+
+function togglePressure(id){pressureTeam=pressureTeam===String(id)?'':String(id);save();renderRound();toast(pressureTeam?'🔥 '+teamName(id)+' painaa päälle!':'🔥 Paine poistettu')}
 
 function placeBet(gid,side,odds){
   if(simResults){toast('⚠️ Kierros simuloitu — käynnistä uudelleen');return}
@@ -288,20 +319,6 @@ function closeBankrollModal(){document.getElementById('bankroll-modal').style.di
 function deposit(){const a=parseFloat(document.getElementById('deposit-amount').value);if(!a||a<=0)return;bankroll+=a;save();updateBankroll();closeBankrollModal();toast(`💰 Talletettu ${a.toFixed(2)}€`)}
 function withdraw(){const a=parseFloat(document.getElementById('deposit-amount').value);if(!a||a>bankroll){toast('⚠️ Ei tarpeeksi varoja');return}bankroll-=a;save();updateBankroll();closeBankrollModal();toast(`💸 Nostettu ${a.toFixed(2)}€`)}
 
-function renderValue(){
-  const l=document.getElementById('value-list'),m=document.getElementById('value-metrics');
-  if(!valueFlags.length){l.innerHTML='<div class="empty">Ei value-flageja</div>';return}
-  const s=valueFlags.filter(f=>f.edge>0.05).length;
-  m.innerHTML=`<div class="card"><div class="metric-label">Flageja</div><div class="metric">${valueFlags.length}</div></div><div class="card"><div class="metric-label">Vahvoja</div><div class="metric">${s}</div></div>`;
-  l.innerHTML=valueFlags.map(f=>{const g=getGame(f.game_id);const ml=g?`${teamName(g.home_team_id)} vs ${teamName(g.away_team_id)}`:'Peli #'+f.game_id;const cls=f.edge>0.05?'badge-green':'badge-yellow';return`<div class="card"><div class="row"><strong>${ml}</strong><span class="badge ${cls}">${(f.edge*100).toFixed(1)}% edge</span></div><div class="row" style="font-size:.7rem;color:var(--muted);margin-top:3px"><span>Malli: ${(f.model_prob*100).toFixed(0)}%</span><span>Markkina: ${(f.implied_prob*100).toFixed(0)}%</span></div></div>`}).join('')
-}
-function renderPredictions(){
-  const l=document.getElementById('pred-list'),m=document.getElementById('pred-metrics');
-  if(!predictions.length){l.innerHTML='<div class="empty">Ei ennusteita</div>';return}
-  const res=predictions.filter(p=>p.was_correct!==null);const cor=res.filter(p=>p.was_correct).length;const rate=res.length?(cor/res.length*100).toFixed(1):'—';
-  m.innerHTML=`<div class="card"><div class="metric-label">Osumatarkkuus</div><div class="metric">${rate==='—'?rate:rate+'%'}</div></div><div class="card"><div class="metric-label">Ratkenneita</div><div class="metric">${res.length}</div></div>`;
-  l.innerHTML=predictions.map(p=>{const g=getGame(p.game_id);const icon=p.was_correct===true?'✅':p.was_correct===false?'❌':'⏳';const cls=p.was_correct===true?'badge-green':p.was_correct===false?'badge-red':'badge-muted';const lbl=p.was_correct===true?'Oikein':p.was_correct===false?'Väärin':'Odottaa';return`<div class="card"><div class="row"><strong>${icon} ${teamName(g?.home_team_id)} vs ${teamName(g?.away_team_id)}</strong><span class="badge ${cls}">${lbl}</span></div><div class="row" style="font-size:.7rem;margin-top:3px"><span>${(p.home_win_prob*100).toFixed(0)}% / ${(p.draw_prob*100).toFixed(0)}% / ${(p.away_win_prob*100).toFixed(0)}%</span><span style="color:var(--muted)">→ ${p.predicted_winner?.toUpperCase()||'—'}</span></div></div>`}).join('')
-}
 function renderHistory(){
   const l=document.getElementById('history-list'),m=document.getElementById('history-metrics');
   if(!betHistory.length){l.innerHTML='<div class="empty">Ei historiaa — simuloi pelipäivä ensin</div>';return}
@@ -334,9 +351,9 @@ function toast(msg){const e=document.createElement('div');e.className='toast';e.
 function switchTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelector(`[data-tab="${name}"]`).classList.add('active');document.getElementById(name).classList.add('active');
-  if(name==='round')renderRound();if(name==='slip')renderSlip();if(name==='value')renderValue();if(name==='predictions')renderPredictions();if(name==='history')renderHistory();if(name==='teams')renderTeams();if(name==='info')renderInfo();if(name==='admin')renderAdmin()
+  if(name==='round')renderRound();if(name==='slip')renderSlip();if(name==='tracker')renderTracker();if(name==='history')renderHistory();if(name==='teams')renderTeams();if(name==='info')renderInfo();if(name==='admin')renderAdmin()
 }
-function renderAll(){renderRound();renderSlip();renderValue();renderPredictions();renderHistory();renderTeams();renderInfo();renderAdmin();updateBankroll();updateSlipBadge();if(simResults)switchTab('history')}
+function renderAll(){renderRound();renderSlip();renderTracker();renderHistory();renderTeams();renderInfo();renderAdmin();updateBankroll();updateSlipBadge();if(simResults)switchTab('history')}
 
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.getElementById('bankroll-modal').addEventListener('click',function(e){if(e.target===this)closeBankrollModal()});
