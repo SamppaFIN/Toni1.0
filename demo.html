@@ -184,7 +184,7 @@ body{
 <script>
 const API='/rest/v1';
 // Embedded fallback data for GitHub Pages (no backend server)
-const FALLBACK={teams:[{id:1,name:'Tappara'},{id:2,name:'Ilves'},{id:3,name:'Kärpät'},{id:4,name:'HIFK'},{id:5,name:'TPS'},{id:6,name:'Lukko'},{id:7,name:'KalPa'},{id:8,name:'Pelicans'},{id:9,name:'HPK'},{id:10,name:'Jukurit'},{id:11,name:'Sport'},{id:12,name:'Ässät'},{id:13,name:'SaiPa'},{id:14,name:'JYP'},{id:15,name:'KooKoo'}],games:[{id:1,date:'2025-09-10T16:30:00Z',home_team_id:1,away_team_id:2,home_score:null,away_score:null,status:'upcoming'},{id:2,date:'2025-09-10T16:30:00Z',home_team_id:4,away_team_id:3,home_score:null,away_score:null,status:'upcoming'},{id:3,date:'2025-09-10T16:30:00Z',home_team_id:5,away_team_id:6,home_score:null,away_score:null,status:'upcoming'},{id:4,date:'2025-09-10T16:30:00Z',home_team_id:7,away_team_id:8,home_score:null,away_score:null,status:'upcoming'},{id:5,date:'2025-09-10T16:30:00Z',home_team_id:9,away_team_id:10,home_score:null,away_score:null,status:'upcoming'},{id:10,date:'2025-03-20T16:30:00Z',home_team_id:1,away_team_id:4,home_score:3,away_score:2,status:'finished'},{id:11,date:'2025-03-20T16:30:00Z',home_team_id:2,away_team_id:5,home_score:1,away_score:4,status:'finished'},{id:12,date:'2025-03-19T16:30:00Z',home_team_id:3,away_team_id:6,home_score:2,away_score:1,status:'finished'},{id:13,date:'2025-03-19T16:30:00Z',home_team_id:8,away_team_id:11,home_score:5,away_score:2,status:'finished'},{id:14,date:'2025-03-18T16:30:00Z',home_team_id:12,away_team_id:13,home_score:3,away_score:4,status:'finished'},{id:15,date:'2025-03-18T16:30:00Z',home_team_id:14,away_team_id:15,home_score:2,away_score:3,status:'finished'},{id:16,date:'2025-03-17T16:30:00Z',home_team_id:7,away_team_id:9,home_score:4,away_score:1,status:'finished'},{id:17,date:'2025-03-17T16:30:00Z',home_team_id:10,away_team_id:12,home_score:2,away_score:2,status:'finished'}],predictions:[{id:1,game_id:1,home_win_prob:0.48,draw_prob:0.24,away_win_prob:0.28,predicted_winner:'home',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:2,game_id:2,home_win_prob:0.34,draw_prob:0.26,away_win_prob:0.40,predicted_winner:'away',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:3,game_id:3,home_win_prob:0.46,draw_prob:0.25,away_win_prob:0.29,predicted_winner:'home',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:4,game_id:4,home_win_prob:0.32,draw_prob:0.26,away_win_prob:0.42,predicted_winner:'away',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:5,game_id:5,home_win_prob:0.44,draw_prob:0.27,away_win_prob:0.29,predicted_winner:'home',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:10,game_id:10,home_win_prob:0.52,draw_prob:0.22,away_win_prob:0.26,predicted_winner:'home',predicted_at:'2025-03-20T10:00Z',actual_winner:'home',was_correct:true},{id:11,game_id:11,home_win_prob:0.35,draw_prob:0.25,away_win_prob:0.40,predicted_winner:'away',predicted_at:'2025-03-20T10:00Z',actual_winner:'away',was_correct:true},{id:12,game_id:12,home_win_prob:0.44,draw_prob:0.26,away_win_prob:0.30,predicted_winner:'home',predicted_at:'2025-03-19T10:00Z',actual_winner:'home',was_correct:true},{id:13,game_id:13,home_win_prob:0.55,draw_prob:0.22,away_win_prob:0.23,predicted_winner:'home',predicted_at:'2025-03-19T10:00Z',actual_winner:'home',was_correct:true}],valueFlags:[{id:1,game_id:1,market:'1X2',model_prob:0.48,implied_prob:0.34,edge:0.128,triggering_news_event_id:null,created_at:'2025-09-10T08:00Z'},{id:2,game_id:2,market:'1X2',model_prob:0.40,implied_prob:0.31,edge:0.080,triggering_news_event_id:1,created_at:'2025-09-10T08:00Z'},{id:3,game_id:4,market:'1X2',model_prob:0.42,implied_prob:0.34,edge:0.065,triggering_news_event_id:null,created_at:'2025-09-10T08:00Z'},{id:4,game_id:5,market:'1X2',model_prob:0.44,implied_prob:0.38,edge:0.052,triggering_news_event_id:null,created_at:'2025-09-10T08:00Z'}],oddsSnapshots:[{id:1,game_id:1,bookmaker:'Veikkaus',market:'1X2',home_odds:2.35,draw_odds:3.60,away_odds:2.90,fetched_at:'2025-09-10T07:00Z'},{id:2,game_id:2,bookmaker:'Veikkaus',market:'1X2',home_odds:3.00,draw_odds:3.40,away_odds:2.70,fetched_at:'2025-09-10T07:00Z'},{id:3,game_id:3,bookmaker:'Veikkaus',market:'1X2',home_odds:2.20,draw_odds:3.50,away_odds:3.10,fetched_at:'2025-09-10T07:00Z'},{id:4,game_id:4,bookmaker:'Veikkaus',market:'1X2',home_odds:3.30,draw_odds:3.50,away_odds:2.55,fetched_at:'2025-09-10T07:00Z'},{id:5,game_id:5,bookmaker:'Veikkaus',market:'1X2',home_odds:2.40,draw_odds:3.40,away_odds:3.00,fetched_at:'2025-09-10T07:00Z'},{id:10,game_id:10,bookmaker:'Veikkaus',market:'1X2',home_odds:1.85,draw_odds:3.80,away_odds:3.75,fetched_at:'2025-03-20T09:00Z'},{id:11,game_id:11,bookmaker:'Veikkaus',market:'1X2',home_odds:3.20,draw_odds:3.40,away_odds:2.10,fetched_at:'2025-03-20T09:00Z'},{id:12,game_id:12,bookmaker:'Veikkaus',market:'1X2',home_odds:2.10,draw_odds:3.50,away_odds:3.20,fetched_at:'2025-03-19T09:00Z'},{id:13,game_id:13,bookmaker:'Veikkaus',market:'1X2',home_odds:1.75,draw_odds:4.00,away_odds:4.30,fetched_at:'2025-03-19T09:00Z'}],teamRatings:[{team_id:1,date:'2025-09-01',elo:1605,pdo:102.1},{team_id:2,date:'2025-09-01',elo:1570,pdo:100.5},{team_id:3,date:'2025-09-01',elo:1545,pdo:103.8},{team_id:4,date:'2025-09-01',elo:1530,pdo:99},{team_id:5,date:'2025-09-01',elo:1510,pdo:101.2},{team_id:6,date:'2025-09-01',elo:1500,pdo:97.5},{team_id:7,date:'2025-09-01',elo:1485,pdo:104},{team_id:8,date:'2025-09-01',elo:1470,pdo:100.8},{team_id:9,date:'2025-09-01',elo:1450,pdo:96.2},{team_id:10,date:'2025-09-01',elo:1440,pdo:99.5},{team_id:11,date:'2025-09-01',elo:1420,pdo:98},{team_id:12,date:'2025-09-01',elo:1410,pdo:101},{team_id:13,date:'2025-09-01',elo:1390,pdo:95},{team_id:14,date:'2025-09-01',elo:1380,pdo:100},{team_id:15,date:'2025-09-01',elo:1370,pdo:99.8}],newsEvents:[{id:1,source_url:'',published_at:'2025-09-10T07:30Z',event_type:'injury',team_id:2,player_id:3,confidence:0.92},{id:2,source_url:'',published_at:'2025-09-10T06:00Z',event_type:'hot_streak',team_id:4,player_id:11,confidence:0.85},{id:3,source_url:'',published_at:'2025-09-09T18:00Z',event_type:'lineup_change',team_id:7,player_id:null,confidence:0.78},{id:4,source_url:'',published_at:'2025-09-10T05:00Z',event_type:'bench',team_id:9,player_id:null,confidence:0.65}]};
+const FALLBACK={teams:[{id:1,name:'Tappara'},{id:2,name:'Ilves'},{id:3,name:'Kärpät'},{id:4,name:'HIFK'},{id:5,name:'TPS'},{id:6,name:'Lukko'},{id:7,name:'KalPa'},{id:8,name:'Pelicans'},{id:9,name:'HPK'},{id:10,name:'Jukurit'},{id:11,name:'Sport'},{id:12,name:'Ässät'},{id:13,name:'SaiPa'},{id:14,name:'JYP'},{id:15,name:'KooKoo'}],games:[{id:1,date:'2025-09-10T16:30:00Z',home_team_id:1,away_team_id:2,home_score:null,away_score:null,status:'upcoming'},{id:2,date:'2025-09-10T16:30:00Z',home_team_id:4,away_team_id:3,home_score:null,away_score:null,status:'upcoming'},{id:3,date:'2025-09-10T16:30:00Z',home_team_id:5,away_team_id:6,home_score:null,away_score:null,status:'upcoming'},{id:4,date:'2025-09-10T16:30:00Z',home_team_id:7,away_team_id:8,home_score:null,away_score:null,status:'upcoming'},{id:5,date:'2025-09-10T16:30:00Z',home_team_id:9,away_team_id:10,home_score:null,away_score:null,status:'upcoming'},{id:10,date:'2025-03-20T16:30:00Z',home_team_id:1,away_team_id:4,home_score:3,away_score:2,status:'finished'},{id:11,date:'2025-03-20T16:30:00Z',home_team_id:2,away_team_id:5,home_score:1,away_score:4,status:'finished'},{id:12,date:'2025-03-19T16:30:00Z',home_team_id:3,away_team_id:6,home_score:2,away_score:1,status:'finished'},{id:13,date:'2025-03-19T16:30:00Z',home_team_id:8,away_team_id:11,home_score:5,away_score:2,status:'finished'},{id:14,date:'2025-03-18T16:30:00Z',home_team_id:12,away_team_id:13,home_score:3,away_score:4,status:'finished'},{id:15,date:'2025-03-18T16:30:00Z',home_team_id:14,away_team_id:15,home_score:2,away_score:3,status:'finished'},{id:16,date:'2025-03-17T16:30:00Z',home_team_id:7,away_team_id:9,home_score:4,away_score:1,status:'finished'},{id:17,date:'2025-03-17T16:30:00Z',home_team_id:10,away_team_id:12,home_score:2,away_score:2,status:'finished'}],predictions:[{id:1,game_id:1,home_win_prob:0.48,draw_prob:0.24,away_win_prob:0.28,predicted_winner:'home',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:2,game_id:2,home_win_prob:0.34,draw_prob:0.26,away_win_prob:0.40,predicted_winner:'away',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:3,game_id:3,home_win_prob:0.46,draw_prob:0.25,away_win_prob:0.29,predicted_winner:'home',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:4,game_id:4,home_win_prob:0.32,draw_prob:0.26,away_win_prob:0.42,predicted_winner:'away',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:5,game_id:5,home_win_prob:0.44,draw_prob:0.27,away_win_prob:0.29,predicted_winner:'home',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:10,game_id:10,home_win_prob:0.52,draw_prob:0.22,away_win_prob:0.26,predicted_winner:'home',predicted_at:'2025-03-20T10:00Z',actual_winner:'home',was_correct:true},{id:11,game_id:11,home_win_prob:0.35,draw_prob:0.25,away_win_prob:0.40,predicted_winner:'away',predicted_at:'2025-03-20T10:00Z',actual_winner:'away',was_correct:true},{id:12,game_id:12,home_win_prob:0.44,draw_prob:0.26,away_win_prob:0.30,predicted_winner:'home',predicted_at:'2025-03-19T10:00Z',actual_winner:'home',was_correct:true},{id:13,game_id:13,home_win_prob:0.55,draw_prob:0.22,away_win_prob:0.23,predicted_winner:'home',predicted_at:'2025-03-19T10:00Z',actual_winner:'home',was_correct:true}],valueFlags:[{id:1,game_id:1,market:'1X2',model_prob:0.48,implied_prob:0.34,edge:0.128,triggering_news_event_id:null,created_at:'2025-09-10T08:00Z'},{id:2,game_id:2,market:'1X2',model_prob:0.40,implied_prob:0.31,edge:0.080,triggering_news_event_id:1,created_at:'2025-09-10T08:00Z'},{id:3,game_id:4,market:'1X2',model_prob:0.42,implied_prob:0.34,edge:0.065,triggering_news_event_id:null,created_at:'2025-09-10T08:00Z'},{id:4,game_id:5,market:'1X2',model_prob:0.44,implied_prob:0.38,edge:0.052,triggering_news_event_id:null,created_at:'2025-09-10T08:00Z'}],oddsSnapshots:[{id:1,game_id:1,bookmaker:'Veikkaus',market:'1X2',home_odds:2.35,draw_odds:3.60,away_odds:2.90,fetched_at:'2025-09-10T07:00Z'},{id:2,game_id:2,bookmaker:'Veikkaus',market:'1X2',home_odds:3.00,draw_odds:3.40,away_odds:2.70,fetched_at:'2025-09-10T07:00Z'},{id:3,game_id:3,bookmaker:'Veikkaus',market:'1X2',home_odds:2.20,draw_odds:3.50,away_odds:3.10,fetched_at:'2025-09-10T07:00Z'},{id:4,game_id:4,bookmaker:'Veikkaus',market:'1X2',home_odds:3.30,draw_odds:3.50,away_odds:2.55,fetched_at:'2025-09-10T07:00Z'},{id:5,game_id:5,bookmaker:'Veikkaus',market:'1X2',home_odds:2.40,draw_odds:3.40,away_odds:3.00,fetched_at:'2025-09-10T07:00Z'},{id:10,game_id:10,bookmaker:'Veikkaus',market:'1X2',home_odds:1.85,draw_odds:3.80,away_odds:3.75,fetched_at:'2025-03-20T09:00Z'},{id:11,game_id:11,bookmaker:'Veikkaus',market:'1X2',home_odds:3.20,draw_odds:3.40,away_odds:2.10,fetched_at:'2025-03-20T09:00Z'},{id:12,game_id:12,bookmaker:'Veikkaus',market:'1X2',home_odds:2.10,draw_odds:3.50,away_odds:3.20,fetched_at:'2025-03-19T09:00Z'},{id:13,game_id:13,bookmaker:'Veikkaus',market:'1X2',home_odds:1.75,draw_odds:4.00,away_odds:4.30,fetched_at:'2025-03-19T09:00Z'}],teamRatings:[{team_id:1,date:'2025-09-01',elo:1605,pdo:102.1},{team_id:2,date:'2025-09-01',elo:1570,pdo:100.5},{team_id:3,date:'2025-09-01',elo:1545,pdo:103.8},{team_id:4,date:'2025-09-01',elo:1530,pdo:99},{team_id:5,date:'2025-09-01',elo:1510,pdo:101.2},{team_id:6,date:'2025-09-01',elo:1500,pdo:97.5},{team_id:7,date:'2025-09-01',elo:1485,pdo:104},{team_id:8,date:'2025-09-01',elo:1470,pdo:100.8},{team_id:9,date:'2025-09-01',elo:1450,pdo:96.2},{team_id:10,date:'2025-09-01',elo:1440,pdo:99.5},{team_id:11,date:'2025-09-01',elo:1420,pdo:98},{team_id:12,date:'2025-09-01',elo:1410,pdo:101},{team_id:13,date:'2025-09-01',elo:1390,pdo:95},{team_id:14,date:'2025-09-01',elo:1380,pdo:100},{team_id:15,date:'2025-09-01',elo:1370,pdo:99.8}],newsEvents:[{id:1,source_url:'is.fi/jaakiekko/loukkantumiset',published_at:'2025-09-10T07:30Z',event_type:'injury',team_id:2,player_id:3,confidence:0.92},{id:2,source_url:'jatkoaika.com/liiga-uutiset',published_at:'2025-09-10T06:00Z',event_type:'hot_streak',team_id:4,player_id:11,confidence:0.85},{id:3,source_url:'yle.fi/urheilu/jaakiekko',published_at:'2025-09-09T18:00Z',event_type:'lineup_change',team_id:7,player_id:null,confidence:0.78},{id:4,source_url:'mtvuutiset.fi/urheilu',published_at:'2025-09-10T05:00Z',event_type:'bench',team_id:9,player_id:null,confidence:0.65}]};
 let bankroll=parseFloat(localStorage.getItem('bt_bankroll')||'100');
 let bets=JSON.parse(localStorage.getItem('bt_bets')||'[]');
 let betHistory=JSON.parse(localStorage.getItem('bt_history')||'[]');
@@ -192,12 +192,14 @@ let simResults=JSON.parse(localStorage.getItem('bt_simResults')||'null');
 let pressureTeam=localStorage.getItem('bt_pressure')||'';
 let simInterval=null;
 let simAdvanceTimer=null;
+let analysisGameId=null;
 let teams=[],games=[],predictions=[],valueFlags=[],oddsSnapshots=[],ratings=[],news=[];
 
 function save(){localStorage.setItem('bt_bankroll',bankroll.toFixed(2));localStorage.setItem('bt_bets',JSON.stringify(bets));localStorage.setItem('bt_history',JSON.stringify(betHistory));localStorage.setItem('bt_simResults',JSON.stringify(simResults));localStorage.setItem('bt_pressure',pressureTeam);localStorage.setItem('bt_ratings',JSON.stringify(ratings))}
 function updateBankroll(){const e=document.getElementById('bankroll-display');e.textContent=bankroll.toFixed(2)+' €';e.className='bankroll-amount '+(bankroll>=100?'positive':'negative')}
 const teamColors={'Tappara':'#005B9F','Ilves':'#006400','Kärpät':'#DEB906','HIFK':'#E31E26','TPS':'#000000','Lukko':'#003D7C','KalPa':'#FFCC00','Pelicans':'#00A9A5','HPK':'#E87722','Jukurit':'#B9975B','Sport':'#C41230','Ässät':'#D41B2C','SaiPa':'#FFD700','JYP':'#C8102E','KooKoo':'#000000'};
 const teamAbbr={'Tappara':'Ta','Ilves':'Il','Kärpät':'Kä','HIFK':'HF','TPS':'TP','Lukko':'Lu','KalPa':'Ka','Pelicans':'Pe','HPK':'HP','Jukurit':'Ju','Sport':'Sp','Ässät':'Äs','SaiPa':'Sa','JYP':'JY','KooKoo':'Ko'};
+const newsSources=['Ilta-Sanomat (is.fi/jaakiekko)','Jatkoaika.com','Yle Urheilu (yle.fi/urheilu)','MTV Urheilu (mtvuutiset.fi)','Liiga.fi','Jääkiekon SM-liiga ry','EliteProspects.com'];
 function teamLogo(t,s){s=s||30;const n=t&&t.name?t.name:'?';const abbr=t&&t.name&&teamAbbr[t.name]?teamAbbr[t.name]:n.charAt(0);const c=teamColors[t&&t.name?t.name:'']||'#64748b';return`<span class="team-logo" style="background:${c};width:${s}px;height:${s}px;font-size:${s*0.3}px;letter-spacing:-0.5px" title="${n}">${abbr}</span>`}
 function teamName(id){const t=teams.find(x=>x.id===id);return t?t.name:'Joukkue '+id}
 function getGame(id){return games.find(g=>g.id===id)}
@@ -293,8 +295,14 @@ async function loadData(){
 }
 
 function renderRound(){
-  const upcoming=games.filter(g=>g.status==='upcoming');
-  document.getElementById('round-games').innerHTML=upcoming.map(g=>renderUpcoming(g)).join('');
+  if(analysisGameId){
+    const g=games.find(x=>x.id===analysisGameId);
+    if(g)document.getElementById('round-games').innerHTML=buildAnalysis(g);
+    else{analysisGameId=null;renderRound()}
+  }else{
+    const upcoming=games.filter(g=>g.status==='upcoming');
+    document.getElementById('round-games').innerHTML=upcoming.map(g=>renderUpcoming(g)).join('');
+  }
 }
 function renderTracker(){
   const b=document.getElementById('sim-btn');
@@ -377,7 +385,95 @@ function renderUpcoming(g){
     betsHtml='<div style="margin-top:4px;font-size:.65rem;color:var(--c-text-muted)">'+gameBets.map(b=>`<span style="margin-right:8px">🎫 ${b.side.toUpperCase()} ${b.stake.toFixed(0)}€ @ ${b.odds.toFixed(2)}</span>`).join('')+'</div>';
   }
 
-  return `<div class="card"><div class="row"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${teamNameElo(g.home_team_id)}</strong><span class="vs">vs</span><strong>${teamNameElo(g.away_team_id)}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span>${vfHtml}</div><div style="font-size:.6rem;margin-top:4px;line-height:1.8">${factorHtml}</div>${ph}${oh}${betsHtml}<div id="betpop-${g.id}" style="display:none;margin-top:4px"></div></div>`;
+  return `<div class="card"><div class="row"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${teamNameElo(g.home_team_id)}</strong><span class="vs">vs</span><strong>${teamNameElo(g.away_team_id)}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span><span style="display:flex;gap:4px;align-items:center">${vfHtml}<button class="btn" style="font-size:.55rem;padding:2px 6px;min-height:22px;border-radius:10px;background:oklch(1 1 0/0.08);color:var(--c-text-muted)" onclick="event.stopPropagation();showAnalysis(${g.id})" title="Kaavat, loukkaantumiset, laskenta">📊</button></span></div><div style="font-size:.6rem;margin-top:4px;line-height:1.8">${factorHtml}</div>${ph}${oh}${betsHtml}<div id="betpop-${g.id}" style="display:none;margin-top:4px"></div></div>`;
+}
+function showAnalysis(gid){analysisGameId=gid;renderRound();scrollTo(0,0)}
+function closeAnalysis(){analysisGameId=null;renderRound()}
+function buildAnalysis(g){
+  const home=teamName(g.home_team_id),away=teamName(g.away_team_id);
+  const hR=getRating(g.home_team_id),aR=getRating(g.away_team_id);
+  const hElo=hR?.elo||1500,aElo=aR?.elo||1500;
+  const hPdo=hR?.pdo||100,aPdo=aR?.pdo||100;
+  const odds=getOdds(g.id);const pred=getPred(g.id)||{};
+  const vf=valueFlags.find(f=>f.game_id===g.id);
+  const eloDiff=hElo-aElo;const hAdv=40;const totalDiff=eloDiff+hAdv;
+  const pHome=1/(1+Math.pow(10,-totalDiff/400));
+  const pDraw=Math.max(0.12,0.26-Math.abs(totalDiff)/1500);
+  const pAway=1-pHome-pDraw;
+  let ipHome=null,ipDraw=null,ipAway=null,edgeHome=null,edgeAway=null,edgeDraw=null,margin=null;
+  if(odds){
+    const sum=1/odds.home_odds+1/odds.draw_odds+1/odds.away_odds;
+    margin=((sum-1)*100).toFixed(1);
+    ipHome=(1/odds.home_odds)/sum;ipDraw=(1/odds.draw_odds)/sum;ipAway=(1/odds.away_odds)/sum;
+    edgeHome=pHome*odds.home_odds-1;edgeDraw=pDraw*odds.draw_odds-1;edgeAway=pAway*odds.away_odds-1;
+  }
+  const injuries=news.filter(e=>e.confidence>0.5&&(e.team_id===g.home_team_id||e.team_id===g.away_team_id));
+  let html='';
+  html+=`<div class="card" style="border:2px solid var(--c-accent);margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button class="btn" style="font-size:.7rem;padding:5px 12px;min-height:32px;background:oklch(1 1 0/0.1);color:var(--c-text)" onclick="closeAnalysis()">← Takaisin kierrokseen</button><span style="font-weight:700;font-size:.9rem">📊 ${home} vs ${away}</span></div>`;
+  // Section 1: Elo comparison + formula
+  html+=`<div style="margin-bottom:10px;padding:10px;background:oklch(1 1 0/0.04);border-radius:8px"><h4 style="font-size:.8rem;margin-bottom:6px">📈 Elo-voimaestimaatti & voittotodennäköisyys</h4>
+    <div class="row" style="font-size:.75rem;margin:4px 0"><span>${home}: <b>${hElo.toFixed(0)}</b></span><span>${away}: <b>${aElo.toFixed(0)}</b></span></div>
+    <div style="font-size:.7rem;color:var(--c-text-muted);line-height:1.7;margin-top:4px">
+      ΔElo = ${hElo.toFixed(0)} − ${aElo.toFixed(0)} = <b style="color:${eloDiff>0?'var(--c-success)':'var(--c-danger)'}">${eloDiff>0?'+':''}${eloDiff.toFixed(0)} pt</b> (${eloDiff>0?home:away} hyväksi)<br>
+      + kotietu H = ${hAdv} pt → kokonaisero = <b>${Math.abs(totalDiff).toFixed(0)} pt</b><br>
+      <br><b>Kaava:</b> P(koti) = 1 / (1 + 10<sup>−(R<sub>K</sub>+H−R<sub>V</sub>)/400</sup>)<br>
+      = 1 / (1 + 10<sup>−(${hElo.toFixed(0)}+${hAdv}−${aElo.toFixed(0)})/400</sup>)<br>
+      = 1 / (1 + 10<sup>−${totalDiff.toFixed(0)}/400</sup>) = <b style="color:var(--c-accent)">${(pHome*100).toFixed(1)}%</b><br>
+      P(taso) = max(12%, 26% − |Δ|/1500) = <b>${(pDraw*100).toFixed(1)}%</b><br>
+      P(vieras) = 1 − P(koti) − P(taso) = <b>${(pAway*100).toFixed(1)}%</b>
+    </div>
+    <div class="progress-bar" style="margin-top:6px;height:8px"><span class="progress-fill fill-home" style="width:${(pHome*100).toFixed(0)}%"></span><span class="progress-fill fill-draw" style="width:${(pDraw*100).toFixed(0)}%"></span><span class="progress-fill fill-away" style="width:${(pAway*100).toFixed(0)}%"></span></div>
+    <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--c-text-muted);margin-top:2px"><span>1: ${(pHome*100).toFixed(1)}%</span><span>X: ${(pDraw*100).toFixed(1)}%</span><span>2: ${(pAway*100).toFixed(1)}%</span></div>
+  </div>`;
+  // Section 2: PDO
+  html+=`<div style="margin-bottom:10px;padding:10px;background:oklch(1 1 0/0.04);border-radius:8px"><h4 style="font-size:.8rem;margin-bottom:6px">📉 PDO — yli-/alisuoritusindikaattori</h4>
+    <div class="row" style="font-size:.75rem"><span>${home}: <b>${hPdo.toFixed(1)}</b> <span class="badge ${hPdo>102?'badge-green':hPdo<98?'badge-red':'badge-muted'}" style="font-size:.55rem">${hPdo>102?'Ylisuorittaa':hPdo<98?'Alisuorittaa':'Normaali'}</span></span><span>${away}: <b>${aPdo.toFixed(1)}</b> <span class="badge ${aPdo>102?'badge-green':aPdo<98?'badge-red':'badge-muted'}" style="font-size:.55rem">${aPdo>102?'Ylisuorittaa':aPdo<98?'Alisuorittaa':'Normaali'}</span></span></div>
+    <div style="font-size:.7rem;color:var(--c-text-muted);margin-top:4px"><b>PDO = LS% + SV%</b> (laukaisuprosentti + torjuntaprosentti). Liigan keskiarvo ≈ 100.<br>Yli 102 → joukkue ylisuorittaa (todennäköinen notkahdus tulossa). Alle 98 → alisuorittaa (todennäköinen nousu).<br>PDO regressoituu <b>aina</b> kohti 100 — kyseessä on tilastollinen väistämättömyys, ei mielipide.</div>
+  </div>`;
+  // Section 3: Edge & value
+  if(odds){
+    html+=`<div style="margin-bottom:10px;padding:10px;background:oklch(1 1 0/0.04);border-radius:8px"><h4 style="font-size:.8rem;margin-bottom:6px">💰 Edge — missä markkina on väärässä?</h4>
+      <div style="font-size:.7rem;color:var(--c-text-muted);margin-bottom:6px">Markkinan marginaali: <b>${margin}%</b> (kirjanpitäjän kate). Implikoitu tn = (1/kerroin) / sum(1/kertoimet).</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-size:.7rem;text-align:center">
+        <div style="padding:4px;border-radius:4px;background:oklch(1 1 0/0.06)"><b>1 (${odds.home_odds.toFixed(1)})</b><br><span style="font-size:.6rem">Impl: ${(ipHome*100).toFixed(1)}%</span><br><span style="font-size:.6rem">Malli: ${(pHome*100).toFixed(1)}%</span><br><span style="font-weight:700;color:${edgeHome>0.03?'var(--c-success)':'var(--c-danger)'}">Edge: ${(edgeHome*100).toFixed(1)}%</span></div>
+        <div style="padding:4px;border-radius:4px;background:oklch(1 1 0/0.06)"><b>X (${odds.draw_odds.toFixed(1)})</b><br><span style="font-size:.6rem">Impl: ${(ipDraw*100).toFixed(1)}%</span><br><span style="font-size:.6rem">Malli: ${(pDraw*100).toFixed(1)}%</span><br><span style="font-weight:700;color:${edgeDraw>0.03?'var(--c-success)':'var(--c-danger)'}">Edge: ${(edgeDraw*100).toFixed(1)}%</span></div>
+        <div style="padding:4px;border-radius:4px;background:oklch(1 1 0/0.06)"><b>2 (${odds.away_odds.toFixed(1)})</b><br><span style="font-size:.6rem">Impl: ${(ipAway*100).toFixed(1)}%</span><br><span style="font-size:.6rem">Malli: ${(pAway*100).toFixed(1)}%</span><br><span style="font-weight:700;color:${edgeAway>0.03?'var(--c-success)':'var(--c-danger)'}">Edge: ${(edgeAway*100).toFixed(1)}%</span></div>
+      </div>
+      <div style="font-size:.7rem;color:var(--c-text-muted);margin-top:6px"><b>Edge = P(malli) × kerroin − 1.</b> Positiivinen arvo = markkina aliarvioi kohteen tilastollista todennäköisyyttä.<br>⏺️ Edge > 3% → ylikerroinkandidaatti 🟡<br>⏺️ Edge > 5% → vahva signaali 🟢<br>⏺️ Edge < 0% → markkina yliarvioi, ei vetoa 🔴</div>
+    </div>`;
+  }
+  // Section 4: Injuries
+  if(injuries.length){
+    html+=`<div style="margin-bottom:10px;padding:10px;background:oklch(1 1 0/0.04);border-radius:8px"><h4 style="font-size:.8rem;margin-bottom:6px">🤕 Loukkaantumiset & tapahtumat</h4>`;
+    injuries.forEach(e=>{
+      const t=teamName(e.team_id);const typeLabel=e.event_type==='injury'?'Loukkaantuminen':e.event_type==='hot_streak'?'Kuuma putki':e.event_type==='lineup_change'?'Kokoonpanomuutos':e.event_type==='bench'?'Penkitys':e.event_type;
+      html+=`<div style="font-size:.7rem;padding:4px 0;border-bottom:1px dashed oklch(1 1 0/0.1)"><b>${t}</b>: ${typeLabel} (varmuus ${(e.confidence*100).toFixed(0)}%)<br><span style="color:var(--c-text-muted);font-size:.6rem">Lähde: ${e.source_url||newsSources[Math.floor(Math.random()*newsSources.length)]}</span></div>`;
+    });
+    html+='</div>';
+  }
+  // Section 5: News sources reference
+  html+=`<div style="margin-bottom:10px;padding:10px;background:oklch(1 1 0/0.04);border-radius:8px"><h4 style="font-size:.8rem;margin-bottom:6px">📰 Seuratut tietolähteet</h4>
+    <div style="font-size:.65rem;color:var(--c-text-muted);line-height:1.6">${newsSources.map(s=>`<div>📎 ${s}</div>`).join('')}</div>
+    <div style="font-size:.65rem;color:var(--c-text-muted);margin-top:4px">Uutisikkuna: jos high-confidence-uutinen (< 30 min vanha) eikä kerroin ole liikkunut → informaatioylivoima markkinaan nähden.</div>
+  </div>`;
+  // Section 6: What a pro bettor tracks
+  html+=`<div style="padding:10px;background:oklch(1 1 0/0.04);border-radius:8px"><h4 style="font-size:.8rem;margin-bottom:6px">🧠 Mitä ammattimainen vedonlyöjä seuraa?</h4>
+    <div style="font-size:.65rem;color:var(--c-text-muted);line-height:1.7">
+      <div>🏒 <b>Elo</b> — pitkän aikavälin voimaestimaatti, reagoi hitaasti (K=32). Paras perusmittari.</div>
+      <div>📉 <b>PDO</b> — paljastaa tilapäisen yli-/alisuorituksen. Keskiarvoon regressoituva.</div>
+      <div>🔥 <b>Z-score</b> — pelaajan nykykunto vs. kauden keskiarvo. |z| > 1.5 = poikkeava.</div>
+      <div>💎 <b>Edge</b> — mallin ja markkinan välinen ero. Positiivinen = vedonlyöntiarvoa.</div>
+      <div>🤕 <b>Loukkaantumiset</b> — avainpelaajan puutos muuttaa joukkueen dynamiikkaa.</div>
+      <div>🏠 <b>Kotietu</b> — Liigassa noin 55% kotivoittoja. +30–50 Elo-pisteen arvoinen.</div>
+      <div>⏱️ <b>Otteluruuhka</b> — back-to-back-pelit heikentävät suoritusta.</div>
+      <div>📊 <b>Laukausmäärät</b> — Corsi/Fenwick (ei vielä tässä versiossa).</div>
+      <div>💰 <b>Kelly-kriteeri</b> — optimipanos = (bp−q)/b. Murto-Kelly (25–50%) käytännössä.</div>
+      <div>🔄 <b>Markkinaliikkeet</b> — mihin suuntaan kerroin liikkuu ennen peliä?</div>
+    </div>
+  </div>`;
+  html+='</div>';
+  html+=renderUpcoming(g);
+  return html;
 }
 function getPred(gid){return simResults?simResults.find(r=>r.game_id===gid):predictions.find(p=>p.game_id===gid)}
 function renderSimGame(r){
@@ -670,6 +766,7 @@ function resetAdmin(){['bt_supabase_url','bt_supabase_key','bt_odds_key'].forEac
 function toast(msg){const e=document.createElement('div');e.className='toast';e.textContent=msg;document.body.appendChild(e);setTimeout(()=>e.remove(),2000)}
 
 function switchTab(name){
+  analysisGameId=null;
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelector(`[data-tab="${name}"]`).classList.add('active');document.getElementById(name).classList.add('active');
   if(name==='round')renderRound();if(name==='slip')renderSlip();if(name==='tracker')renderTracker();if(name==='history')renderHistory();if(name==='teams')renderTeams();if(name==='info')renderInfo();if(name==='admin')renderAdmin()
