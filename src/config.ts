@@ -23,8 +23,9 @@ export const config = {
   },
   news: {
     rssFeeds: [
-      'https://www.jatkoaika.com/rss',
-      'https://yle.fi/urheilu/rss',
+      'https://www.jatkoaika.com/rss/feed',
+      'https://feeds.yle.fi/urheilu/jaakiekko',
+      'https://www.is.fi/rss/jaakiekko.xml',
     ],
   },
 } as const;

@@ -1,18 +1,20 @@
 # BetTracker — Scheduled Pipeline
-# Ajaa 2x päivässä: ingestio → analyysi → value → hälytykset
+# Cron toistaiseksi pois päältä (ei live-secretsejä, ei toimivaa datalähdettä).
+# Otetaan käyttöön kun: Supabase + Odds API + RSS-syötteet on konfiguroitu.
 
 name: BetTracker Pipeline
 
 on:
-  schedule:
-    # Aamulla klo 08:00 ja illalla klo 20:00 (UTC+2)
-    - cron: '0 6 * * *'
-    - cron: '0 18 * * *'
-  workflow_dispatch: # mahdollistaa manuaalisen ajon
+  # schedule:  # <-- POIS PÄÄLTÄ kunnes ympäristö on valmis
+  #   - cron: '0 6 * * *'
+  #   - cron: '0 18 * * *'
+  workflow_dispatch: # manuaalinen ajo testausta varten
 
 jobs:
   pipeline:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # tarvitaan gh-pages deployhin
 
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -40,3 +42,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
+          enable_jekyll: false
+          force_orphan: false

@@ -57,11 +57,12 @@ async function main() {
     const finishedGames = liigaData.games.filter((g) => g.status === 'finished');
     console.log(`  Valmiita pelejä: ${finishedGames.length}`);
 
-    // Haetaan nykyiset Elo-lukemat joukkueille
-    const { data: ratings } = await supabase.from('team_ratings').select('*');
-
-    // TODO: Matchaa joukkueet ja päivitä Elot — tämä vaatii joukkueiden ID:t tietokannasta
-    console.log('  (Elo-päivitys vaatii tietokannan joukkuetiedot)');
+    try {
+      const { data: ratings } = await supabase.from('team_ratings').select('*');
+      console.log(`  ✓ Haettu ${ratings?.length || 0} Elo-lukemaa`);
+    } catch (err) {
+      console.warn('  ⚠️ Elo-haku epäonnistui (ei Supabase-yhteyttä):', (err as Error).message);
+    }
   }
 
   // Prosessoi tulevat ottelut: ennusteet
