@@ -19,9 +19,10 @@ import { config } from '../config.js';
 import { ingestFootballOdds, FootballOddsEvent } from '../ingest/odds-football.js';
 import { fetchStatsFor, LeagueStatsPair } from '../ingest/stats.js';
 import { strengthForTeam } from '../analyze/strength.js';
-import { predictPoisson, LeagueAverages } from '../analyze/poisson.js';
+import { predictPoisson, predictFromLambda, adjustLambda, LeagueAverages } from '../analyze/poisson.js';
+import { fetchAllFeeds, attachNews, MatchNews } from '../ingest/news-football.js';
 import { buildMatchCard, buildSnapshot, writeSnapshot } from './snapshot.js';
-import { MatchCard, MatchStats, TeamStats, TeamSeasonStats } from '../types-football.js';
+import { MatchCard, MatchStats, ModelAdjustment, TeamStats, TeamSeasonStats } from '../types-football.js';
 
 /** Kuinka pitkälle eteenpäin otteluita otetaan mukaan */
 const HORIZON_HOURS = Number(process.env.SNAPSHOT_HORIZON_HOURS || 72);
@@ -62,7 +63,28 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
     statsByLeague.set(sportKey, await fetchStatsFor(sportKey, now));
   }
 
-  const cards: MatchCard[] = events.map((e) => buildCard(e, statsByLeague.get(e.sportKey) ?? null, options));
+  // Uutiset haetaan kertaalleen kaikille otteluille. Jos haku pettää, ottelut
+  // jäävät ilman uutisia — se ei estä kertoimia eikä analyysiä.
+  let newsByMatch = new Map<string, MatchNews>();
+  try {
+    const articles = await fetchAllFeeds();
+    newsByMatch = await attachNews(
+      events.map((e) => ({
+        matchId: matchId(e),
+        home: e.home,
+        away: e.away,
+        league: e.league,
+      })),
+      articles,
+      now
+    );
+  } catch (err) {
+    console.warn(`[News] Uutishaku epäonnistui kokonaan — ottelut jäävät ilman uutisia: ${(err as Error).message}`);
+  }
+
+  const cards: MatchCard[] = events.map((e) =>
+    buildCard(e, statsByLeague.get(e.sportKey) ?? null, newsByMatch.get(matchId(e)) ?? null, options)
+  );
   cards.sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
 
   // Lähteet nimeltä snapshotiin: käyttäjän pitää voida jäljittää mistä luku tuli
@@ -70,19 +92,30 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
   for (const pair of statsByLeague.values()) {
     if (pair && !providers.includes(pair.current.source)) providers.push(pair.current.source);
   }
+  if ([...newsByMatch.values()].some((n) => n.news.length)) providers.push('RSS-uutissyötteet');
 
   return buildSnapshot(cards, 'live', now.toISOString(), providers);
 }
 
-function buildCard(e: FootballOddsEvent, stats: LeagueStatsPair | null, options: BuildLiveOptions): MatchCard {
+function matchId(e: FootballOddsEvent): string {
+  return `${e.sportKey}:${e.kickoff.slice(0, 10)}:${e.home.short}-${e.away.short}`;
+}
+
+function buildCard(
+  e: FootballOddsEvent,
+  stats: LeagueStatsPair | null,
+  news: MatchNews | null,
+  options: BuildLiveOptions
+): MatchCard {
   const base = {
-    id: `${e.sportKey}:${e.kickoff.slice(0, 10)}:${e.home.short}-${e.away.short}`,
+    id: matchId(e),
     league: e.league,
     kickoff: e.kickoff,
     home: e.home,
     away: e.away,
     odds: e.odds,
-    news: [],
+    news: news?.news ?? [],
+    newsWindow: news?.newsWindow ?? false,
     bankroll: options.bankroll ?? 100,
     blendWeight: config.model.blendWeight,
   };
@@ -100,17 +133,17 @@ function buildCard(e: FootballOddsEvent, stats: LeagueStatsPair | null, options:
   }
 
   const league: LeagueAverages = { homeGoals: stats.current.homeGoalsAvg, awayGoals: stats.current.awayGoalsAvg };
-  const poisson = predictPoisson(home.strength, away.strength, league, config.model.rho);
+  let poisson = predictPoisson(home.strength, away.strength, league, config.model.rho);
 
   const matchStats: MatchStats = {
     home: toTeamStats(home.stats, true),
     away: toTeamStats(away.stats, false),
-    h2h: [], // tiketti 29 lisää otteluhistorian
+    h2h: [], // otteluhistoria vaatii tulosdatan; ei vielä lähdettä Veikkausliigalle
   };
 
   // Mallin peruste näkyviin: käyttäjän pitää tietää nojaako luku tähän vai
   // viime kauteen, koska se muuttaa kuinka paljon siihen voi luottaa
-  const adjustments = [
+  const adjustments: ModelAdjustment[] = [
     {
       reason:
         `Voimat: ${basisLabel(home.basis)} (${e.home.short}, ${home.playedThisSeason} ottelua) / ` +
@@ -119,7 +152,31 @@ function buildCard(e: FootballOddsEvent, stats: LeagueStatsPair | null, options:
     },
   ];
 
+  // Uutisten λ-korjaukset: vain korkean varmuuden LLM-tapahtumat pääsevät tänne
+  // (ks. nlp-football.ts). Korjaus tehdään λ-arvoihin ja koko jakauma lasketaan
+  // uudelleen, jotta myös O/U ja BTTS heijastavat muutoksen.
+  const lambdaAdjustments = news?.lambdaAdjustments ?? [];
+  if (lambdaAdjustments.length) {
+    const homeDelta = sumDeltas(lambdaAdjustments, 'home');
+    const awayDelta = sumDeltas(lambdaAdjustments, 'away');
+    poisson = predictFromLambda(
+      adjustLambda(poisson.lambdaHome, homeDelta),
+      adjustLambda(poisson.lambdaAway, awayDelta),
+      config.model.rho
+    );
+    for (const adj of lambdaAdjustments) {
+      adjustments.push({
+        reason: `📰 ${adj.reason}`,
+        ...(adj.side === 'home' ? { delta_lambda_home: adj.delta } : { delta_lambda_away: adj.delta }),
+      });
+    }
+  }
+
   return buildMatchCard({ ...base, poisson, stats: matchStats, adjustments });
+}
+
+function sumDeltas(adjustments: Array<{ side: 'home' | 'away'; delta: number }>, side: 'home' | 'away'): number {
+  return adjustments.filter((a) => a.side === side).reduce((sum, a) => sum + a.delta, 0);
 }
 
 function basisLabel(basis: string): string {

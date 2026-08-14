@@ -199,6 +199,29 @@ export interface PoissonPrediction {
   topScores: ScoreProb[];
 }
 
+/**
+ * Ennuste suoraan λ-arvoista.
+ *
+ * Tarvitaan kun λ:aa on säädetty uutistiedon perusteella (tiketti 29):
+ * joukkuevoimista lasketaan λ, siihen tehdään loukkaantumiskorjaus, ja
+ * lopullinen jakauma lasketaan korjatuista arvoista.
+ */
+export function predictFromLambda(
+  lambdaHome: number,
+  lambdaAway: number,
+  rho: number = DEFAULT_RHO
+): PoissonPrediction {
+  const matrix = scoreMatrix(lambdaHome, lambdaAway, rho);
+  return {
+    lambdaHome,
+    lambdaAway,
+    probs: outcomeProbs(matrix),
+    over25: overProb(matrix, 2.5),
+    btts: bttsProb(matrix),
+    topScores: topScores(matrix, 5),
+  };
+}
+
 /** Koko Poisson-ennuste yhdellä kutsulla */
 export function predictPoisson(
   home: TeamStrength,

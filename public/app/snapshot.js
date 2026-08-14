@@ -74,6 +74,18 @@ export function timeUntil(iso, now = new Date()) {
   return `${Math.floor(hours / 24)} vrk`;
 }
 
+/** "2 h sitten" — uutisen tuoreus ratkaisee onko se vielä relevantti */
+export function relativeAge(iso, now = new Date()) {
+  const diffMin = Math.round((now.getTime() - Date.parse(iso)) / 60000);
+  if (!Number.isFinite(diffMin)) return '';
+  if (diffMin < 1) return 'juuri nyt';
+  if (diffMin < 60) return `${diffMin} min sitten`;
+  const hours = Math.floor(diffMin / 60);
+  if (hours < 24) return `${hours} h sitten`;
+  const days = Math.floor(hours / 24);
+  return `${days} vrk sitten`;
+}
+
 /** Snapshotin ikä minuutteina — vanha data on huono peruste vedolle */
 export function snapshotAgeMinutes(snapshot, now = new Date()) {
   const t = Date.parse(snapshot?.generated_at ?? '');

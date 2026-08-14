@@ -34,7 +34,12 @@ export interface ExtractedEvent {
 
 const MIN_CONFIDENCE = 0.5; // alle tämän eventtejä ei käytetä value-moottorissa
 
-export async function extractEvents(articleText: string): Promise<ExtractedEvent[]> {
+/**
+ * @param systemPrompt — vaihtoehtoinen prompt. Oletus on Liiga-jääkiekko;
+ * jalkapallo antaa oman promptinsa (ks. engine/nlp-football.ts). Näin API-kutsu
+ * ja JSON-validointi pysyvät yhdessä paikassa eikä niitä tarvitse monistaa.
+ */
+export async function extractEvents(articleText: string, systemPrompt: string = SYSTEM_PROMPT): Promise<ExtractedEvent[]> {
   if (!config.llm.apiKey) {
     console.warn('[LLM] No API key — skipping event extraction');
     return [];
@@ -50,7 +55,7 @@ export async function extractEvents(articleText: string): Promise<ExtractedEvent
     body: JSON.stringify({
       model: config.llm.model,
       messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: systemPrompt },
         { role: 'user', content: articleText },
       ],
       temperature: 0,
