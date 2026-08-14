@@ -11,6 +11,7 @@
 
 import { loadSnapshot, esc, SIDE_LABELS } from './snapshot.js';
 import { initCards, setSnapshot, renderAllCards, renderPlacedBets, toggleSection, findMatch, matchIndex, getSnapshot } from './football-cards.js';
+import * as tracker from './football-tracker.js';
 
 /** Vedonasetuksen ponnahdus — sama vuo kuin jääkiekkopuolella */
 function openBetPopup(matchId, side, odds, bookmaker) {
@@ -129,7 +130,9 @@ export async function start(containerId = 'round-games') {
   const el = document.getElementById(containerId);
   if (!el) return;
   initCards(el);
+  tracker.init();
   await reload();
+  tracker.render();
 }
 
 // Itsekäynnistys. Moduuli latautuu deferoituna eli inline-skriptin jälkeen,
