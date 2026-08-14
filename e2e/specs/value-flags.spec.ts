@@ -1,7 +1,14 @@
 // E2E: Kierros -näkymä (value-flagit osana pelikortteja)
 import { test, expect } from '@playwright/test';
+import { useHockey, resetState } from '../helpers.js';
 
 test.describe('Kierros -näkymä', () => {
+
+  test.beforeEach(async ({ page }) => {
+    // Tiketti #31: nama testit koskevat jaakiekkodemoa, joka on lipun takana
+    await useHockey(page);
+    await resetState(page);
+  });
 
   test('näyttää oletuksena Kierros-välilehden', async ({ page }) => {
     await page.goto('/demo.html');

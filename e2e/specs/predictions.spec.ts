@@ -1,7 +1,14 @@
 // E2E: Ennusteet ja simulaatio
 import { test, expect } from '@playwright/test';
+import { useHockey, resetState } from '../helpers.js';
 
 test.describe('Ennusteet ja simulaatio', () => {
+
+  test.beforeEach(async ({ page }) => {
+    // Tiketti #31: nama testit koskevat jaakiekkodemoa, joka on lipun takana
+    await useHockey(page);
+    await resetState(page);
+  });
 
   test('Kierros-näkymässä näkyy mallin 1X2-todennäköisyydet', async ({ page }) => {
     await page.goto('/demo.html');

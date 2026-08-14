@@ -1,7 +1,14 @@
 // E2E: Jalkapalloharjoituskortit Kierros-näkymässä (oikeat kertoimet, oma analyysi)
 import { test, expect } from '@playwright/test';
+import { useHockey, resetState } from '../helpers.js';
 
 test.describe('Harjoituskortit', () => {
+
+  test.beforeEach(async ({ page }) => {
+    // Tiketti #31: nama testit koskevat jaakiekkodemoa, joka on lipun takana
+    await useHockey(page);
+    await resetState(page);
+  });
 
   test('näyttää oikeat harjoituskohteet kertoimineen', async ({ page }) => {
     await page.goto('/demo.html');

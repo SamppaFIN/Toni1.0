@@ -1,9 +1,13 @@
 // E2E: Joukkueet -näkymä
 import { test, expect } from '@playwright/test';
+import { useHockey, resetState } from '../helpers.js';
 
 test.describe('Joukkueet -näkymä', () => {
 
   test.beforeEach(async ({ page }) => {
+    // Tiketti #31: nama testit koskevat jaakiekkodemoa
+    await useHockey(page);
+    await resetState(page);
     await page.goto('/demo.html');
     await page.click('.tab[data-tab="teams"]');
   });
