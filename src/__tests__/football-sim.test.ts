@@ -136,7 +136,17 @@ describe('Maalimäärät ovat jalkapallolle realistisia', () => {
 
   it('maalimäärä ei karkaa järjettömiin lukemiin', () => {
     const sims = runMany(match({ home: 0.44, draw: 0.27, away: 0.29 }, 1.5, 1.2), 2000);
-    expect(Math.max(...sims.map((s) => s.finalScore.home + s.finalScore.away))).toBeLessThan(13);
+    const totals = sims.map((s) => s.finalScore.home + s.finalScore.away).sort((a, b) => a - b);
+
+    // Kvantiili eikä maksimi: maksimi on 2000 arvonnan häntä, ja tiukka raja
+    // sille kaatuisi noin 2 % ajoista. Haurastuva testi porttina datan edessä
+    // olisi pahempi kuin ei testiä — se kaataisi cronin satunnaisesti.
+    const p99 = totals[Math.floor(totals.length * 0.99)];
+    expect(p99, `99. prosenttipiste ${p99}`).toBeLessThan(9);
+
+    // Väljä yläraja kiinni oikeista bugeista: jos λ tulkittaisiin vaikka
+    // maaleina minuutissa, tässä olisi satoja.
+    expect(Math.max(...totals)).toBeLessThan(20);
   });
 
   it('toimii myös ilman λ-arvoja (market-only-ottelu)', () => {
@@ -148,9 +158,10 @@ describe('Maalimäärät ovat jalkapallolle realistisia', () => {
     const avg = sims.reduce((sum, s) => sum + s.finalScore.home + s.finalScore.away, 0) / sims.length;
     expect(avg).toBeGreaterThan(1.5);
     expect(avg).toBeLessThan(4);
-    // Ja jakauma noudattaa silti mallia
+    // Ja jakauma noudattaa silti mallia. Toleranssi on 4 keskihajontaa
+    // (n=400 → se ≈ 0.025), jotta testi ei kaadu satunnaisesti.
     const home = sims.filter((s) => s.outcome === 'home').length / sims.length;
-    expect(Math.abs(home - 0.4)).toBeLessThan(0.08);
+    expect(Math.abs(home - 0.4)).toBeLessThan(0.1);
   });
 });
 
