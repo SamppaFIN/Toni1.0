@@ -16,7 +16,7 @@
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { config } from '../config.js';
-import { ingestFootballOdds, FootballOddsEvent } from '../ingest/odds-football.js';
+import { ingestFootballOdds, buildMatchId, FootballOddsEvent } from '../ingest/odds-football.js';
 import { fetchStatsFor, LeagueStatsPair } from '../ingest/stats.js';
 import { strengthForTeam } from '../analyze/strength.js';
 import { predictPoisson, predictFromLambda, adjustLambda, LeagueAverages } from '../analyze/poisson.js';
@@ -97,8 +97,9 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
   return buildSnapshot(cards, 'live', now.toISOString(), providers);
 }
 
+/** Sama tunniste kuin tuloshaussa — jaettu funktio, ks. odds-football.ts */
 function matchId(e: FootballOddsEvent): string {
-  return `${e.sportKey}:${e.kickoff.slice(0, 10)}:${e.home.short}-${e.away.short}`;
+  return buildMatchId(e.sportKey, e.kickoff, e.home.name, e.away.name);
 }
 
 function buildCard(

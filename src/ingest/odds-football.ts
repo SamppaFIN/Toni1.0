@@ -231,6 +231,16 @@ export function leagueLabel(sportKey: string): string {
   return labels[sportKey] || sportKey.replace(/^soccer_/, '').replace(/_/g, ' ');
 }
 
+/**
+ * Ottelun tunniste. Tämä on jaettu funktio tarkoituksella: snapshot,
+ * tuloshaku ja mittarit rakentavat saman tunnisteen samoista lähtötiedoista.
+ * Jos ne erkanisivat, tulokset eivät koskaan täsmäisi ennusteisiin.
+ */
+export function buildMatchId(sportKey: string, kickoffIso: string, homeName: string, awayName: string): string {
+  const day = new Date(kickoffIso).toISOString().slice(0, 10);
+  return `${sportKey}:${day}:${teamRef(homeName).short}-${teamRef(awayName).short}`;
+}
+
 export interface IngestOptions {
   /** Vain ottelut jotka alkavat tämän ajanhetken jälkeen */
   from?: Date;

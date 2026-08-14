@@ -163,6 +163,9 @@ body{
 <div id="tracker" class="view">
   <button class="btn btn-success btn-block" onclick="runSimulation()" id="sim-btn">▶️ Käynnistä pelipäivän simulaatio</button>
   <div id="tracker-list" style="margin-top:8px"></div>
+  <!-- Tiketti #33: mittarit. Vain jalkapallomoduuli kirjoittaa tähän, joten
+       jääkiekkotilassa kontti jää tyhjäksi. -->
+  <div id="metrics-content" style="margin-top:12px"></div>
 </div>
 <div id="slip" class="view"><div class="grid-2" id="slip-metrics"></div><div id="slip-list"></div><button class="btn btn-danger btn-block" style="margin-top:8px" onclick="clearSlip()">🗑️ Tyhjennä lappu</button></div>
 <div id="history" class="view"><div class="grid-2" id="history-metrics"></div><div id="history-list"></div></div>

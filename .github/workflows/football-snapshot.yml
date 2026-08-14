@@ -35,8 +35,10 @@ jobs:
       ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
       FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-      # Kvoottakatto: yksi pyyntö per sarja per ajo. 2 sarjaa × 2 ajoa = 4/vrk ≈ 120/kk,
-      # ilmaistason raja on 500/kk. Katto pysäyttää putken ennen kvootan loppumista.
+      # Kvoottakatto KERROINHAULLE (ingestFootballOdds lukee tämän).
+      # Kerroinhaku 1 krediitti per sarja → 2 sarjaa = 2 kr per ajo.
+      # Tuloshaku 2 krediittiä per sarja = 4 kr, mutta vain kerran vuorokaudessa.
+      # Yhteensä: 2 + 2 + 4 = 8 kr/vrk ≈ 240/kk. Ilmaistaso on 500/kk.
       ODDS_DAILY_CREDIT_BUDGET: '8'
       # CI:ssä ei ole edellisen ajon välimuistia, ja tuore data on tässä koko pointti
       CACHE_DISABLED: '1'
@@ -74,6 +76,21 @@ jobs:
 
       - name: Hae kertoimet ja laske analyysi
         run: npm run snapshot:live
+
+      # Tulokset ENNEN mittareita: mittarit lukevat results.json:n.
+      #
+      # Vain iltapäivän ajossa (ja käsin käynnistettynä). Tuloshaku kustantaa
+      # 2 krediittiä per sarja, ja päättyneen ottelun tulos ei muutu — sitä ei
+      # tarvitse hakea kahdesti vuorokaudessa. Näin kvootta pysyy 240/kk
+      # tuntumassa eikä 360/kk, ja ilmaistason 500:aan jää pelivaraa.
+      - name: Hae päättyneiden otteluiden tulokset
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 14 * * *'
+        run: npm run results
+        continue-on-error: true # tulosten puuttuminen ei saa kaataa snapshottia
+
+      - name: Laske mittarit
+        run: npm run metrics
+        continue-on-error: true
 
       - name: Yhteenveto ajosta
         run: |
