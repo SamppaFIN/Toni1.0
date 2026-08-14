@@ -1,0 +1,127 @@
+# Tiketti #34: Jalkapallosnapshotin ajastus
+#
+# Miksi tämä on olemassa: GitHub Pages on staattinen hosting, joten selain ei voi
+# hakea kertoimia itse (API-avain paljastuisi, CORS estäisi, kuukausikvootta paloisi
+# sivulatauksissa). Tämä workflow ajaa putken palvelinpuolella, committoi tuloksen
+# ja deployaa sen Pagesiin. Se on koko snapshot-arkkitehtuurin viimeinen palanen.
+#
+# Kaksi ajoa vuorokaudessa on tarkoituksellista:
+#   08:00 UTC — avauslinja
+#   14:00 UTC — lähellä iltapäivän aloituksia
+# Molemmat tallentuvat erikseen data/history/-kansioon, mikä antaa CLV-mittarille
+# (tiketti 33) avaus- ja sulkeutumiskertoimen vertailtavaksi.
+
+name: Jalkapallosnapshot
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+    - cron: '0 14 * * *'
+  workflow_dispatch: # manuaalinen ajo
+
+# Vain yksi ajo kerrallaan: kaksi rinnakkaista committia samaan haaraan
+# aiheuttaisi push-konfliktin ja toinen ajo hukkaisi datansa.
+concurrency:
+  group: football-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # datan commit mainiin + gh-pages-deploy
+
+    env:
+      ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+      FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+      API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+      # Kvoottakatto: yksi pyyntö per sarja per ajo. 2 sarjaa × 2 ajoa = 4/vrk ≈ 120/kk,
+      # ilmaistason raja on 500/kk. Katto pysäyttää putken ennen kvootan loppumista.
+      ODDS_DAILY_CREDIT_BUDGET: '8'
+      # CI:ssä ei ole edellisen ajon välimuistia, ja tuore data on tässä koko pointti
+      CACHE_DISABLED: '1'
+
+    steps:
+      # fetch-depth: 0 — commit-vaihe tekee `git pull --rebase`, joka tarvitsee
+      # historian. Oletuksen matala klooni (depth 1) kaataisi rebasen.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # --ignore-scripts ohittaa playwrightin selainlatauksen (~130 MB).
+      # Putki ei käytä selainta — kertoimet ja tilastot tulevat fetchillä.
+      - name: Asenna riippuvuudet
+        run: npm ci --ignore-scripts
+
+      - name: Tarkista että salaisuudet on asetettu
+        run: |
+          if [ -z "$ODDS_API_KEY" ]; then
+            echo "::error::ODDS_API_KEY puuttuu — aseta se Settings → Secrets and variables → Actions"
+            exit 1
+          fi
+          echo "ODDS_API_KEY asetettu (${#ODDS_API_KEY} merkkiä)"
+          [ -n "$FOOTBALL_DATA_TOKEN" ] && echo "FOOTBALL_DATA_TOKEN asetettu" || echo "::warning::FOOTBALL_DATA_TOKEN puuttuu — Valioliigan tunnusluvut jäävät hakematta"
+
+      # Yksikkötestit ennen dataa: rikkinäinen malli ei saa tuottaa snapshottia
+      # joka näyttää oikealta mutta laskee väärin.
+      - name: Aja testit
+        run: npm test
+
+      - name: Hae kertoimet ja laske analyysi
+        run: npm run snapshot:live
+
+      - name: Yhteenveto ajosta
+        run: |
+          if [ ! -f public/data/today.json ]; then
+            echo "::warning::today.json puuttuu — ei otteluita aikaikkunassa?"
+            exit 0
+          fi
+          node -e "
+            const s = require('./public/data/today.json');
+            const flagged = s.matches.filter(m => m.analysis.edges.some(e => e.flag !== 'none'));
+            const modes = {};
+            s.matches.forEach(m => modes[m.model.method] = (modes[m.model.method] || 0) + 1);
+            console.log('Otteluita:', s.matches.length, '| sarjat:', s.leagues.join(', '));
+            console.log('Lähteet:', s.providers.join(' + '));
+            console.log('Mallitilat:', JSON.stringify(modes));
+            console.log('Value-kohteita:', flagged.length);
+            for (const m of flagged) {
+              const best = m.analysis.edges.reduce((a, b) => b.edge > a.edge ? b : a);
+              console.log('  ' + (best.flag === 'strong' ? '[VAHVA]' : '[kandidaatti]'),
+                m.home.name, 'vs', m.away.name, '—', best.side,
+                '@', best.odds.toFixed(2), '(' + best.book + ')',
+                'edge', (best.edge * 100).toFixed(1) + '%');
+            }
+          "
+
+      - name: Committoi data
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/data
+          if git diff --cached --quiet; then
+            echo "Data ei muuttunut — ei committia"
+          else
+            STAMP=$(node -e "console.log(require('./public/data/today.json').generated_at)")
+            COUNT=$(node -e "console.log(require('./public/data/today.json').matches.length)")
+            git commit -m "Data: $COUNT ottelua, snapshot $STAMP [skip ci]"
+            # Rebase varmuuden vuoksi: main on voinut edetä ajon aikana
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+            echo "Data committoitu ja työnnetty"
+          fi
+
+      - name: Deployaa GitHub Pagesiin
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
+          enable_jekyll: false
+          force_orphan: false
+          commit_message: 'Deploy: jalkapallosnapshot'

@@ -379,6 +379,33 @@ describe('Validointi hylkää rikkinäisen datan', () => {
   });
 });
 
+describe('Historiatiedoston nimeäminen', () => {
+  // Suora yksikkötesti nimenmuodostuksesta ilman levylle kirjoittamista.
+  // Sama laskenta kuin writeSnapshot():ssa — jos tämä hajoaa, CLV-data katoaa.
+  const stampOf = (generatedAt: string) => `${generatedAt.slice(0, 16).replace(':', '')}Z`;
+
+  it('sisältää kellonajan, ei pelkkää päivämäärää', () => {
+    expect(stampOf('2026-08-14T15:58:27.727Z')).toBe('2026-08-14T1558Z');
+  });
+
+  it('saman päivän kaksi ajoa saavat eri nimen — avauslinja ei ylikirjoitu', () => {
+    const morning = stampOf('2026-08-14T08:00:00.000Z');
+    const afternoon = stampOf('2026-08-14T14:00:00.000Z');
+    expect(morning).not.toBe(afternoon);
+    expect(morning).toBe('2026-08-14T0800Z');
+    expect(afternoon).toBe('2026-08-14T1400Z');
+  });
+
+  it('nimet järjestyvät aakkosellisesti aikajärjestykseen', () => {
+    const stamps = ['2026-08-14T14:00:00.000Z', '2026-08-14T08:00:00.000Z', '2026-08-15T08:00:00.000Z'].map(stampOf);
+    expect([...stamps].sort()).toEqual(['2026-08-14T0800Z', '2026-08-14T1400Z', '2026-08-15T0800Z']);
+  });
+
+  it('nimi kelpaa tiedostonimeksi (ei kaksoispisteitä)', () => {
+    expect(stampOf('2026-08-14T15:58:27.727Z')).not.toContain(':');
+  });
+});
+
 describe('Esimerkkisnapshot (mock)', () => {
   const snap = buildMockSnapshot();
 

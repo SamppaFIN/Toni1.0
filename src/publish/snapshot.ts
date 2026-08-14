@@ -351,8 +351,17 @@ export function writeSnapshot(snapshot: Snapshot, publicDir: string): WriteResul
 
   const json = JSON.stringify(snapshot, null, 2);
   const todayPath = path.join(dataDir, 'today.json');
-  const day = snapshot.generated_at.slice(0, 10);
-  const historyPath = path.join(historyDir, `${day}.json`);
+
+  // Historiatiedoston nimessä on kellonaika, ei pelkkä päivämäärä.
+  //
+  // Cron ajaa putken kahdesti vuorokaudessa: aamun avauslinja ja iltapäivän
+  // sulkeutumislinja. Jos nimi olisi pelkkä päivämäärä, toinen ajo ylikirjoittaisi
+  // ensimmäisen ja avauskerroin katoaisi — juuri se luku jota CLV-mittari
+  // (tiketti 33) tarvitsee. Menetettyä linjaa ei voi hakea jälkikäteen.
+  //
+  // "2026-08-14T15:58:27.727Z" → "2026-08-14T1558Z"
+  const stamp = `${snapshot.generated_at.slice(0, 16).replace(':', '')}Z`;
+  const historyPath = path.join(historyDir, `${stamp}.json`);
 
   writeFileSync(todayPath, json, 'utf8');
   writeFileSync(historyPath, json, 'utf8');

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-14T15:58:27.727Z",
+  "generated_at": "2026-08-14T16:52:26.439Z",
   "sport": "football",
   "source": "live",
   "providers": [
@@ -34,7 +34,7 @@
           "draw": 4.6,
           "away": 1.45,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:31Z"
+          "fetched_at": "2026-08-14T16:52:00Z"
         },
         {
           "bookmaker": "1xBet",
@@ -44,17 +44,17 @@
           "draw": 4.8,
           "away": 1.44,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:49Z"
+          "fetched_at": "2026-08-14T16:52:19Z"
         },
         {
           "bookmaker": "Pinnacle",
           "key": "pinnacle",
           "market": "1X2",
-          "home": 5.88,
-          "draw": 4.95,
-          "away": 1.46,
+          "home": 6.01,
+          "draw": 5.03,
+          "away": 1.47,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:09Z"
+          "fetched_at": "2026-08-14T16:52:18Z"
         },
         {
           "bookmaker": "Marathon Bet",
@@ -64,7 +64,7 @@
           "draw": 4.8,
           "away": 1.43,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:09Z"
+          "fetched_at": "2026-08-14T16:51:59Z"
         },
         {
           "bookmaker": "Betsson",
@@ -74,7 +74,7 @@
           "draw": 4.3,
           "away": 1.48,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:52Z"
+          "fetched_at": "2026-08-14T16:52:19Z"
         },
         {
           "bookmaker": "Nordic Bet",
@@ -84,7 +84,7 @@
           "draw": 4.3,
           "away": 1.48,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:31Z"
+          "fetched_at": "2026-08-14T16:52:03Z"
         },
         {
           "bookmaker": "Coolbet",
@@ -94,7 +94,7 @@
           "draw": 4.9,
           "away": 1.5,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:10Z"
+          "fetched_at": "2026-08-14T16:51:38Z"
         },
         {
           "bookmaker": "William Hill",
@@ -104,7 +104,7 @@
           "draw": 4.5,
           "away": 1.44,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:50Z"
+          "fetched_at": "2026-08-14T16:52:22Z"
         },
         {
           "bookmaker": "Betfair",
@@ -114,31 +114,41 @@
           "draw": 5.1,
           "away": 1.49,
           "commission": 0.05,
-          "fetched_at": "2026-08-14T15:58:10Z"
+          "fetched_at": "2026-08-14T16:51:59Z"
+        },
+        {
+          "bookmaker": "Matchbook",
+          "key": "matchbook",
+          "market": "1X2",
+          "home": 5.9,
+          "draw": 5,
+          "away": 1.48,
+          "commission": 0.015,
+          "fetched_at": "2026-08-14T16:52:19Z"
         }
       ],
       "best": {
         "home": 6.05,
-        "draw": 4.95,
+        "draw": 5.03,
         "away": 1.5,
         "home_effective": 6.05,
-        "draw_effective": 4.95,
+        "draw_effective": 5.03,
         "away_effective": 1.5,
         "home_book": "1xBet",
         "draw_book": "Pinnacle",
         "away_book": "Coolbet"
       },
       "market": {
-        "margin": 0.034,
+        "margin": 0.0308,
         "implied": {
-          "home": 0.1582,
-          "draw": 0.1973,
-          "away": 0.6445
+          "home": 0.1586,
+          "draw": 0.1961,
+          "away": 0.6453
         },
         "sharp": {
-          "home": 0.1609,
-          "draw": 0.1911,
-          "away": 0.648
+          "home": 0.1592,
+          "draw": 0.1902,
+          "away": 0.6507
         },
         "sharp_source": "Pinnacle"
       },
@@ -147,9 +157,9 @@
         "lambda_home": 0.816,
         "lambda_away": 2.07,
         "probs": {
-          "home": 0.151,
-          "draw": 0.1969,
-          "away": 0.6521
+          "home": 0.1499,
+          "draw": 0.1963,
+          "away": 0.6538
         },
         "poisson_probs": {
           "home": 0.1327,
@@ -194,21 +204,21 @@
             "odds": 6.05,
             "odds_effective": 6.05,
             "book": "1xBet",
-            "model_prob": 0.151,
-            "implied_prob": 0.1582,
-            "edge": -0.0865,
+            "model_prob": 0.1499,
+            "implied_prob": 0.1586,
+            "edge": -0.0931,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
           },
           {
             "side": "draw",
-            "odds": 4.95,
-            "odds_effective": 4.95,
+            "odds": 5.03,
+            "odds_effective": 5.03,
             "book": "Pinnacle",
-            "model_prob": 0.1969,
-            "implied_prob": 0.1973,
-            "edge": -0.0253,
+            "model_prob": 0.1963,
+            "implied_prob": 0.1961,
+            "edge": -0.0126,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -218,9 +228,9 @@
             "odds": 1.5,
             "odds_effective": 1.5,
             "book": "Coolbet",
-            "model_prob": 0.6521,
-            "implied_prob": 0.6445,
-            "edge": -0.0218,
+            "model_prob": 0.6538,
+            "implied_prob": 0.6453,
+            "edge": -0.0193,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -281,7 +291,7 @@
           "draw": 5.1,
           "away": 7.5,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:31Z"
+          "fetched_at": "2026-08-14T16:52:00Z"
         },
         {
           "bookmaker": "1xBet",
@@ -291,7 +301,7 @@
           "draw": 5.4,
           "away": 8.4,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:49Z"
+          "fetched_at": "2026-08-14T16:52:19Z"
         },
         {
           "bookmaker": "Pinnacle",
@@ -301,7 +311,7 @@
           "draw": 5.72,
           "away": 8.4,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:09Z"
+          "fetched_at": "2026-08-14T16:52:18Z"
         },
         {
           "bookmaker": "Marathon Bet",
@@ -311,7 +321,7 @@
           "draw": 5.4,
           "away": 8.5,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:09Z"
+          "fetched_at": "2026-08-14T16:51:59Z"
         },
         {
           "bookmaker": "Nordic Bet",
@@ -321,7 +331,7 @@
           "draw": 4.8,
           "away": 9.3,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:31Z"
+          "fetched_at": "2026-08-14T16:52:03Z"
         },
         {
           "bookmaker": "Betsson",
@@ -331,7 +341,7 @@
           "draw": 4.8,
           "away": 9.3,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:52Z"
+          "fetched_at": "2026-08-14T16:52:19Z"
         },
         {
           "bookmaker": "Coolbet",
@@ -341,7 +351,7 @@
           "draw": 5.8,
           "away": 9,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:10Z"
+          "fetched_at": "2026-08-14T16:51:38Z"
         },
         {
           "bookmaker": "William Hill",
@@ -351,7 +361,7 @@
           "draw": 5,
           "away": 8,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:50Z"
+          "fetched_at": "2026-08-14T16:52:22Z"
         },
         {
           "bookmaker": "Betfair",
@@ -361,7 +371,7 @@
           "draw": 5.9,
           "away": 9.6,
           "commission": 0.05,
-          "fetched_at": "2026-08-14T15:58:10Z"
+          "fetched_at": "2026-08-14T16:51:59Z"
         }
       ],
       "best": {
@@ -528,7 +538,7 @@
           "draw": 3.35,
           "away": 2.16,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:31Z"
+          "fetched_at": "2026-08-14T16:52:00Z"
         },
         {
           "bookmaker": "1xBet",
@@ -538,7 +548,7 @@
           "draw": 3.24,
           "away": 2.28,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:49Z"
+          "fetched_at": "2026-08-14T16:52:19Z"
         },
         {
           "bookmaker": "Pinnacle",
@@ -548,7 +558,7 @@
           "draw": 3.28,
           "away": 2.33,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:09Z"
+          "fetched_at": "2026-08-14T16:52:18Z"
         },
         {
           "bookmaker": "Marathon Bet",
@@ -558,7 +568,7 @@
           "draw": 3.24,
           "away": 2.26,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:09Z"
+          "fetched_at": "2026-08-14T16:51:59Z"
         },
         {
           "bookmaker": "Coolbet",
@@ -568,7 +578,7 @@
           "draw": 3.3,
           "away": 2.25,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:10Z"
+          "fetched_at": "2026-08-14T16:51:38Z"
         },
         {
           "bookmaker": "William Hill",
@@ -578,7 +588,7 @@
           "draw": 3,
           "away": 2.25,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:50Z"
+          "fetched_at": "2026-08-14T16:52:22Z"
         },
         {
           "bookmaker": "Betfair",
@@ -588,7 +598,7 @@
           "draw": 3.35,
           "away": 2.32,
           "commission": 0.05,
-          "fetched_at": "2026-08-14T15:58:10Z"
+          "fetched_at": "2026-08-14T16:51:59Z"
         },
         {
           "bookmaker": "Nordic Bet",
@@ -598,7 +608,7 @@
           "draw": 3.2,
           "away": 2.25,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:31Z"
+          "fetched_at": "2026-08-14T16:52:03Z"
         },
         {
           "bookmaker": "Betsson",
@@ -608,7 +618,7 @@
           "draw": 3.2,
           "away": 2.25,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:52Z"
+          "fetched_at": "2026-08-14T16:52:19Z"
         }
       ],
       "best": {
@@ -775,7 +785,7 @@
           "draw": 3.35,
           "away": 2.55,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:31Z"
+          "fetched_at": "2026-08-14T16:52:00Z"
         },
         {
           "bookmaker": "1xBet",
@@ -785,7 +795,7 @@
           "draw": 3.38,
           "away": 2.6,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:49Z"
+          "fetched_at": "2026-08-14T16:52:19Z"
         },
         {
           "bookmaker": "Pinnacle",
@@ -795,7 +805,7 @@
           "draw": 3.54,
           "away": 2.64,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:09Z"
+          "fetched_at": "2026-08-14T16:52:18Z"
         },
         {
           "bookmaker": "Marathon Bet",
@@ -805,7 +815,7 @@
           "draw": 3.38,
           "away": 2.6,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:09Z"
+          "fetched_at": "2026-08-14T16:51:59Z"
         },
         {
           "bookmaker": "Coolbet",
@@ -815,7 +825,7 @@
           "draw": 3.4,
           "away": 2.7,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:10Z"
+          "fetched_at": "2026-08-14T16:51:38Z"
         },
         {
           "bookmaker": "William Hill",
@@ -825,7 +835,7 @@
           "draw": 3.25,
           "away": 2.5,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:50Z"
+          "fetched_at": "2026-08-14T16:52:22Z"
         },
         {
           "bookmaker": "Betfair",
@@ -835,7 +845,7 @@
           "draw": 3.5,
           "away": 2.72,
           "commission": 0.05,
-          "fetched_at": "2026-08-14T15:58:10Z"
+          "fetched_at": "2026-08-14T16:51:59Z"
         },
         {
           "bookmaker": "Betsson",
@@ -845,7 +855,7 @@
           "draw": 3.3,
           "away": 2.62,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:52Z"
+          "fetched_at": "2026-08-14T16:52:19Z"
         },
         {
           "bookmaker": "Nordic Bet",
@@ -855,7 +865,7 @@
           "draw": 3.3,
           "away": 2.62,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:31Z"
+          "fetched_at": "2026-08-14T16:52:03Z"
         }
       ],
       "best": {
@@ -1022,7 +1032,7 @@
           "draw": 3.63,
           "away": 2.73,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:09Z"
+          "fetched_at": "2026-08-14T16:52:18Z"
         },
         {
           "bookmaker": "1xBet",
@@ -1032,7 +1042,7 @@
           "draw": 3.52,
           "away": 2.7,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:49Z"
+          "fetched_at": "2026-08-14T16:52:19Z"
         },
         {
           "bookmaker": "Unibet (SE)",
@@ -1042,7 +1052,7 @@
           "draw": 3.55,
           "away": 2.75,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:31Z"
+          "fetched_at": "2026-08-14T16:52:00Z"
         },
         {
           "bookmaker": "Marathon Bet",
@@ -1052,7 +1062,7 @@
           "draw": 3.52,
           "away": 2.7,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:09Z"
+          "fetched_at": "2026-08-14T16:51:59Z"
         },
         {
           "bookmaker": "William Hill",
@@ -1062,7 +1072,7 @@
           "draw": 3.3,
           "away": 2.7,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:50Z"
+          "fetched_at": "2026-08-14T16:52:22Z"
         },
         {
           "bookmaker": "Betsson",
@@ -1072,7 +1082,7 @@
           "draw": 3.45,
           "away": 2.65,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:52Z"
+          "fetched_at": "2026-08-14T16:52:19Z"
         },
         {
           "bookmaker": "Nordic Bet",
@@ -1082,7 +1092,7 @@
           "draw": 3.45,
           "away": 2.65,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:57:31Z"
+          "fetched_at": "2026-08-14T16:52:03Z"
         },
         {
           "bookmaker": "Coolbet",
@@ -1092,17 +1102,17 @@
           "draw": 3.75,
           "away": 2.8,
           "commission": 0,
-          "fetched_at": "2026-08-14T15:58:10Z"
+          "fetched_at": "2026-08-14T16:51:38Z"
         },
         {
           "bookmaker": "Betfair",
           "key": "betfair_ex_eu",
           "market": "1X2",
           "home": 2.42,
-          "draw": 3.65,
+          "draw": 3.75,
           "away": 2.72,
           "commission": 0.05,
-          "fetched_at": "2026-08-14T15:58:10Z"
+          "fetched_at": "2026-08-14T16:51:59Z"
         }
       ],
       "best": {
