@@ -12,6 +12,7 @@
 import { loadSnapshot, esc, SIDE_LABELS } from './snapshot.js';
 import { initCards, setSnapshot, renderAllCards, renderPlacedBets, toggleSection, findMatch, matchIndex, getSnapshot } from './football-cards.js';
 import * as tracker from './football-tracker.js';
+import * as metrics from './football-metrics.js';
 
 /** Vedonasetuksen ponnahdus — sama vuo kuin jääkiekkopuolella */
 function openBetPopup(matchId, side, odds, bookmaker) {
@@ -133,6 +134,11 @@ export async function start(containerId = 'round-games') {
   tracker.init();
   await reload();
   tracker.render();
+
+  // Mittarit ovat oma tiedostonsa ja voivat puuttua (esim. ennen ensimmaista
+  // metrics-ajoa) — lataus ei saa estaa muun nakyman toimintaa
+  await metrics.load();
+  metrics.render();
 }
 
 // Itsekäynnistys. Moduuli latautuu deferoituna eli inline-skriptin jälkeen,

@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-14T19:46:09.259Z",
+  "sample": {
+    "predictions": 5,
+    "results": 1,
+    "matched": 0,
+    "sufficient": false,
+    "minimum": 20
+  },
+  "accuracy": {
+    "model": {
+      "total": 0,
+      "correct": 0,
+      "rate": 0
+    },
+    "market": {
+      "total": 0,
+      "correct": 0,
+      "rate": 0
+    }
+  },
+  "brier": {
+    "model": null,
+    "market": null,
+    "uniform": 0.6666666666666667
+  },
+  "logLoss": {
+    "model": null,
+    "market": null
+  },
+  "calibration": [
+    {
+      "from": 0,
+      "to": 0.2,
+      "predicted": 0,
+      "observed": 0,
+      "count": 0
+    },
+    {
+      "from": 0.2,
+      "to": 0.4,
+      "predicted": 0,
+      "observed": 0,
+      "count": 0
+    },
+    {
+      "from": 0.4,
+      "to": 0.6000000000000001,
+      "predicted": 0,
+      "observed": 0,
+      "count": 0
+    },
+    {
+      "from": 0.6000000000000001,
+      "to": 0.8,
+      "predicted": 0,
+      "observed": 0,
+      "count": 0
+    },
+    {
+      "from": 0.8,
+      "to": 1,
+      "predicted": 0,
+      "observed": 0,
+      "count": 0
+    }
+  ],
+  "clv": {
+    "summary": {
+      "count": 0,
+      "average": 0,
+      "beatRate": 0
+    },
+    "picks": []
+  },
+  "paperRoi": {
+    "bets": 0,
+    "staked": 0,
+    "returned": 0,
+    "profit": 0,
+    "roi": 0,
+    "wins": 0,
+    "hitRate": 0
+  },
+  "blendCalibration": {
+    "best": null,
+    "candidates": [],
+    "sufficientSample": false
+  },
+  "currentBlendWeight": 0.35
+}
