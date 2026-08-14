@@ -151,9 +151,9 @@ body{
 <div class="tabs" id="tab-bar">
   <button class="tab active" data-tab="round">📅 Kierros</button>
   <button class="tab" data-tab="slip">🎫 Vetolappu <span id="slip-count"></span></button>
-  <button class="tab" data-tab="tracker">🏒 Seuranta</button>
+  <button class="tab" data-tab="tracker" data-sport="hockey">🏒 Seuranta</button>
   <button class="tab" data-tab="history">📜 Historia</button>
-  <button class="tab" data-tab="teams">📊 Joukkueet</button>
+  <button class="tab" data-tab="teams" data-sport="hockey">📊 Joukkueet</button>
   <button class="tab" data-tab="info">ℹ️ Info</button>
   <button class="tab" data-tab="admin">⚙️ Admin</button>
 </div>
@@ -182,6 +182,10 @@ body{
 
 <script>
 const API='/rest/v1';
+// Tiketti #31: Lajilippu. Oletuksena jalkapallo; jääkiekkodemo on piilossa
+// mutta koskematta ja palautettavissa Admin-välilehdeltä.
+let SPORT=localStorage.getItem('bt_sport')||'football';
+function isHockey(){return SPORT==='hockey'}
 // Embedded fallback data for GitHub Pages (no backend server)
 const FALLBACK={teams:[{id:1,name:'Tappara'},{id:2,name:'Ilves'},{id:3,name:'Kärpät'},{id:4,name:'HIFK'},{id:5,name:'TPS'},{id:6,name:'Lukko'},{id:7,name:'KalPa'},{id:8,name:'Pelicans'},{id:9,name:'HPK'},{id:10,name:'Jukurit'},{id:11,name:'Sport'},{id:12,name:'Ässät'},{id:13,name:'SaiPa'},{id:14,name:'JYP'},{id:15,name:'KooKoo'}],games:[{id:1,date:'2025-09-10T16:30:00Z',home_team_id:1,away_team_id:2,home_score:null,away_score:null,status:'upcoming'},{id:2,date:'2025-09-10T16:30:00Z',home_team_id:4,away_team_id:3,home_score:null,away_score:null,status:'upcoming'},{id:3,date:'2025-09-10T16:30:00Z',home_team_id:5,away_team_id:6,home_score:null,away_score:null,status:'upcoming'},{id:4,date:'2025-09-10T16:30:00Z',home_team_id:7,away_team_id:8,home_score:null,away_score:null,status:'upcoming'},{id:5,date:'2025-09-10T16:30:00Z',home_team_id:9,away_team_id:10,home_score:null,away_score:null,status:'upcoming'},{id:10,date:'2025-03-20T16:30:00Z',home_team_id:1,away_team_id:4,home_score:3,away_score:2,status:'finished'},{id:11,date:'2025-03-20T16:30:00Z',home_team_id:2,away_team_id:5,home_score:1,away_score:4,status:'finished'},{id:12,date:'2025-03-19T16:30:00Z',home_team_id:3,away_team_id:6,home_score:2,away_score:1,status:'finished'},{id:13,date:'2025-03-19T16:30:00Z',home_team_id:8,away_team_id:11,home_score:5,away_score:2,status:'finished'},{id:14,date:'2025-03-18T16:30:00Z',home_team_id:12,away_team_id:13,home_score:3,away_score:4,status:'finished'},{id:15,date:'2025-03-18T16:30:00Z',home_team_id:14,away_team_id:15,home_score:2,away_score:3,status:'finished'},{id:16,date:'2025-03-17T16:30:00Z',home_team_id:7,away_team_id:9,home_score:4,away_score:1,status:'finished'},{id:17,date:'2025-03-17T16:30:00Z',home_team_id:10,away_team_id:12,home_score:2,away_score:2,status:'finished'}],predictions:[{id:1,game_id:1,home_win_prob:0.48,draw_prob:0.24,away_win_prob:0.28,predicted_winner:'home',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:2,game_id:2,home_win_prob:0.34,draw_prob:0.26,away_win_prob:0.40,predicted_winner:'away',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:3,game_id:3,home_win_prob:0.46,draw_prob:0.25,away_win_prob:0.29,predicted_winner:'home',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:4,game_id:4,home_win_prob:0.32,draw_prob:0.26,away_win_prob:0.42,predicted_winner:'away',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:5,game_id:5,home_win_prob:0.44,draw_prob:0.27,away_win_prob:0.29,predicted_winner:'home',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:10,game_id:10,home_win_prob:0.52,draw_prob:0.22,away_win_prob:0.26,predicted_winner:'home',predicted_at:'2025-03-20T10:00Z',actual_winner:'home',was_correct:true},{id:11,game_id:11,home_win_prob:0.35,draw_prob:0.25,away_win_prob:0.40,predicted_winner:'away',predicted_at:'2025-03-20T10:00Z',actual_winner:'away',was_correct:true},{id:12,game_id:12,home_win_prob:0.44,draw_prob:0.26,away_win_prob:0.30,predicted_winner:'home',predicted_at:'2025-03-19T10:00Z',actual_winner:'home',was_correct:true},{id:13,game_id:13,home_win_prob:0.55,draw_prob:0.22,away_win_prob:0.23,predicted_winner:'home',predicted_at:'2025-03-19T10:00Z',actual_winner:'home',was_correct:true}],valueFlags:[{id:1,game_id:1,market:'1X2',model_prob:0.48,implied_prob:0.34,edge:0.128,triggering_news_event_id:null,created_at:'2025-09-10T08:00Z'},{id:2,game_id:2,market:'1X2',model_prob:0.40,implied_prob:0.31,edge:0.080,triggering_news_event_id:1,created_at:'2025-09-10T08:00Z'},{id:3,game_id:4,market:'1X2',model_prob:0.42,implied_prob:0.34,edge:0.065,triggering_news_event_id:null,created_at:'2025-09-10T08:00Z'},{id:4,game_id:5,market:'1X2',model_prob:0.44,implied_prob:0.38,edge:0.052,triggering_news_event_id:null,created_at:'2025-09-10T08:00Z'}],oddsSnapshots:[{id:1,game_id:1,bookmaker:'Veikkaus',market:'1X2',home_odds:2.35,draw_odds:3.60,away_odds:2.90,fetched_at:'2025-09-10T07:00Z'},{id:2,game_id:2,bookmaker:'Veikkaus',market:'1X2',home_odds:3.00,draw_odds:3.40,away_odds:2.70,fetched_at:'2025-09-10T07:00Z'},{id:3,game_id:3,bookmaker:'Veikkaus',market:'1X2',home_odds:2.20,draw_odds:3.50,away_odds:3.10,fetched_at:'2025-09-10T07:00Z'},{id:4,game_id:4,bookmaker:'Veikkaus',market:'1X2',home_odds:3.30,draw_odds:3.50,away_odds:2.55,fetched_at:'2025-09-10T07:00Z'},{id:5,game_id:5,bookmaker:'Veikkaus',market:'1X2',home_odds:2.40,draw_odds:3.40,away_odds:3.00,fetched_at:'2025-09-10T07:00Z'},{id:10,game_id:10,bookmaker:'Veikkaus',market:'1X2',home_odds:1.85,draw_odds:3.80,away_odds:3.75,fetched_at:'2025-03-20T09:00Z'},{id:11,game_id:11,bookmaker:'Veikkaus',market:'1X2',home_odds:3.20,draw_odds:3.40,away_odds:2.10,fetched_at:'2025-03-20T09:00Z'},{id:12,game_id:12,bookmaker:'Veikkaus',market:'1X2',home_odds:2.10,draw_odds:3.50,away_odds:3.20,fetched_at:'2025-03-19T09:00Z'},{id:13,game_id:13,bookmaker:'Veikkaus',market:'1X2',home_odds:1.75,draw_odds:4.00,away_odds:4.30,fetched_at:'2025-03-19T09:00Z'}],teamRatings:[{team_id:1,date:'2025-09-01',elo:1605,pdo:102.1},{team_id:2,date:'2025-09-01',elo:1570,pdo:100.5},{team_id:3,date:'2025-09-01',elo:1545,pdo:103.8},{team_id:4,date:'2025-09-01',elo:1530,pdo:99},{team_id:5,date:'2025-09-01',elo:1510,pdo:101.2},{team_id:6,date:'2025-09-01',elo:1500,pdo:97.5},{team_id:7,date:'2025-09-01',elo:1485,pdo:104},{team_id:8,date:'2025-09-01',elo:1470,pdo:100.8},{team_id:9,date:'2025-09-01',elo:1450,pdo:96.2},{team_id:10,date:'2025-09-01',elo:1440,pdo:99.5},{team_id:11,date:'2025-09-01',elo:1420,pdo:98},{team_id:12,date:'2025-09-01',elo:1410,pdo:101},{team_id:13,date:'2025-09-01',elo:1390,pdo:95},{team_id:14,date:'2025-09-01',elo:1380,pdo:100},{team_id:15,date:'2025-09-01',elo:1370,pdo:99.8}],newsEvents:[{id:1,source_url:'is.fi/jaakiekko/loukkantumiset',published_at:'2025-09-10T07:30Z',event_type:'injury',team_id:2,player_id:3,confidence:0.92},{id:2,source_url:'jatkoaika.com/liiga-uutiset',published_at:'2025-09-10T06:00Z',event_type:'hot_streak',team_id:4,player_id:11,confidence:0.85},{id:3,source_url:'yle.fi/urheilu/jaakiekko',published_at:'2025-09-09T18:00Z',event_type:'lineup_change',team_id:7,player_id:null,confidence:0.78},{id:4,source_url:'mtvuutiset.fi/urheilu',published_at:'2025-09-10T05:00Z',event_type:'bench',team_id:9,player_id:null,confidence:0.65}]};
 let bankroll=parseFloat(localStorage.getItem('bt_bankroll')||'100');
@@ -311,6 +315,13 @@ function renderRoundReport(){
 }
 
 async function loadData(){
+  // Tiketti #31: jalkapallotilassa jääkiekkodataa ei haeta lainkaan.
+  // Olennaista: syncBookmakerOdds() jää ajamatta, joten genOddsForBookmaker()
+  // ei keksi kertoimia — keksityt ja oikeat kertoimet eivät voi sekoittua.
+  if(!isHockey()){
+    teams=[];games=[];predictions=[];valueFlags=[];oddsSnapshots=[];ratings=[];news=[];
+    return;
+  }
   try{
     const[g,t,p,v,o,r,n]=await Promise.all([fetch(API+'/games').then(r=>r.json()),fetch(API+'/teams').then(r=>r.json()),fetch(API+'/game_predictions').then(r=>r.json()),fetch(API+'/value_flags').then(r=>r.json()),fetch(API+'/odds_snapshots').then(r=>r.json()),fetch(API+'/team_ratings').then(r=>r.json()),fetch(API+'/news_events').then(r=>r.json())]);
     games=g;teams=t;predictions=p;valueFlags=v;oddsSnapshots=(o||[]).filter(x=>bookmakers.some(b=>b.name===x.bookmaker));ratings=r;news=n||[];
@@ -324,6 +335,8 @@ async function loadData(){
 }
 
 function renderRound(){
+  // Jalkapallotilassa kierrosnäkymä on public/app/-moduulien vastuulla
+  if(!isHockey()){if(window.BTF)window.BTF.renderAllCards();return}
   if(analysisGameId){
     const g=games.find(x=>x.id===analysisGameId);
     if(g)document.getElementById('round-games').innerHTML=buildAnalysis(g);
@@ -721,10 +734,13 @@ function resetSimulation(){
   if(simAdvanceTimer){clearTimeout(simAdvanceTimer);simAdvanceTimer=null}
   simResults=null;bets=[];betHistory=[];bankroll=100;pressureTeam='';
   ['bt_ratings','bt_round'].forEach(k=>localStorage.removeItem(k));
-  // Full reset: restore all FALLBACK data
-  const fb=FALLBACK;teams=fb.teams;games=fb.games;predictions=fb.predictions;valueFlags=fb.valueFlags;oddsSnapshots=[];ratings=fb.teamRatings;news=fb.newsEvents;
-  syncBookmakerOdds();
+  // Jalkapallotilassa FALLBACK-jääkiekkodataa ei palauteta eikä kertoimia keksitä
+  if(isHockey()){
+    const fb=FALLBACK;teams=fb.teams;games=fb.games;predictions=fb.predictions;valueFlags=fb.valueFlags;oddsSnapshots=[];ratings=fb.teamRatings;news=fb.newsEvents;
+    syncBookmakerOdds();
+  }
   save();renderAll();switchTab('round');
+  if(!isHockey()&&window.BTF)window.BTF.renderPlacedBets();
   toast('🔄 Kaikki nollattu — aloitetaan alusta');
 }
 function simulateGame(g){
@@ -780,6 +796,12 @@ function renderAdmin(){
 <div class="input-group"><label>Supabase Anon Key</label><input type="text" id="admin-supabase-key" value="${supabaseKey}" placeholder="eyJh..."></div>
 <div class="input-group"><label>Odds API Key</label><input type="text" id="admin-odds-key" value="${oddsKey}" placeholder="abc123..."></div>
 <div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-primary" style="flex:1" onclick="saveAdmin()">💾 Tallenna</button><button class="btn btn-danger" style="flex:1" onclick="resetAdmin()">🔄 Palauta</button></div></div>
+<div class="card"><h3>⚽ Laji</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Jalkapallo käyttää oikeita kertoimia <code>data/today.json</code>-snapshotista. Jääkiekkodemo on mock-datalla toimiva simulaatio — se on piilossa mutta koskematta.</p>
+<div style="display:flex;gap:6px">
+<button class="btn ${SPORT==='football'?'btn-primary':''}" style="flex:1;${SPORT!=='football'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setSport('football')">⚽ Jalkapallo${SPORT==='football'?' ✓':''}</button>
+<button class="btn ${SPORT==='hockey'?'btn-primary':''}" style="flex:1;${SPORT!=='hockey'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setSport('hockey')">🏒 Jääkiekko${SPORT==='hockey'?' ✓':''}</button>
+</div>
+${SPORT==='football'?'<button class="btn btn-block" style="margin-top:6px;background:oklch(1 1 0/0.1);color:var(--c-text);font-size:.7rem" onclick="if(window.BTF)window.BTF.reload().then(()=>toast(\'🔄 Kohteet päivitetty\'))">🔄 Lataa kohteet uudelleen</button>':''}</div>
 <div class="card"><h3>🏢 Vedonlyöntitoimistot</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Lisää haluamasi toimistot nimellä ja osoitteella. Kierroskortti näyttää jokaisen toimiston kertoimet (⭐ = paras).</p>
 <div class="input-group"><label>Nimi</label><input type="text" id="bk-name" placeholder="esim. NordicBet"></div>
 <div class="input-group"><label>Osoite (URL)</label><input type="text" id="bk-url" placeholder="https://www.nordicbet.com"></div>
@@ -924,10 +946,48 @@ function switchTab(name){
 }
 function renderAll(){renderRound();renderSlip();renderTracker();renderHistory();renderTeams();renderInfo();renderAdmin();updateBankroll();updateSlipBadge()}
 
+// ─── Tiketti #31: lajilipun mukainen näkyvyys ────────────────────────────
+// Jääkiekkovälilehdet piiloon jalkapallotilassa. Mitään ei poisteta —
+// Admin-välilehden toggle palauttaa ne.
+function applySportVisibility(){
+  document.querySelectorAll('.tab[data-sport="hockey"]').forEach(t=>{t.style.display=isHockey()?'':'none'});
+  document.querySelector('.glass-header h1').innerHTML=(isHockey()?'🏒':'⚽')+' BetTracker <span class="demo-badge">'+(isHockey()?'JÄÄKIEKKO':'DEMO')+'</span>';
+  // Jos aktiivinen välilehti piilotettiin, siirry Kierrokseen
+  const active=document.querySelector('.tab.active');
+  if(active&&active.style.display==='none')switchTab('round');
+}
+function setSport(sport){
+  SPORT=sport;localStorage.setItem('bt_sport',sport);
+  toast(sport==='hockey'?'🏒 Jääkiekkokierrokset näkyvissä':'⚽ Jalkapallo käytössä');
+  // Koko sivun uudelleenlataus on tässä oikea ratkaisu: lajinvaihto muuttaa
+  // sekä datalähteen että moduulien alustuksen, ja osittainen vaihto jättäisi
+  // vanhaa tilaa roikkumaan.
+  setTimeout(()=>location.reload(),400);
+}
+
+// ─── Silta jalkapallomoduuleille (public/app/*.js) ───────────────────────
+// Kapea, dokumentoitu rajapinta. Moduulit eivät koske jääkiekkokoodiin
+// eivätkä globaaleihin muuttujiin suoraan.
+window.BT={
+  getBankroll(){return bankroll},
+  getBets(){return bets},
+  addBet(bet){
+    bankroll-=bet.stake;bets.push(bet);
+    save();updateBankroll();renderSlip();updateSlipBadge();
+  },
+  toast,
+  save,
+  isHockey,
+};
+
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.getElementById('bankroll-modal').addEventListener('click',function(e){if(e.target===this)closeBankrollModal()});
 
+applySportVisibility();
 loadData().then(()=>{renderAll();updateBankroll();updateSlipBadge()});
 </script>
+<!-- Tiketti #30: jalkapallonäkymä ES-moduuleina. Ei build-vaihetta, ei frameworkia.
+     Moduuli käynnistää itsensä kun lajilippu on 'football'. -->
+<script type="module" src="app/football.js"></script>
 </body>
 </html>
