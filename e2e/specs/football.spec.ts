@@ -21,10 +21,12 @@ test.describe('Jalkapallonäkymä', () => {
     await expect(page.locator('.glass-header h1')).toContainText('⚽');
   });
 
-  test('jääkiekkovälilehdet on piilotettu', async ({ page }) => {
-    await expect(page.locator('.tab[data-tab="tracker"]')).toBeHidden();
+  test('Liiga-kohtainen välilehti on piilotettu, yhteiset näkyvät', async ({ page }) => {
+    // Joukkueet-näkymä on Liiga-spesifi (Elo, PDO) → piilossa
     await expect(page.locator('.tab[data-tab="teams"]')).toBeHidden();
-    // Yhteiset välilehdet näkyvät
+    // Seuranta on molemmilla lajeilla, mutta jalkapallon simulaationa (tiketti 32)
+    await expect(page.locator('.tab[data-tab="tracker"]')).toBeVisible();
+    await expect(page.locator('.tab[data-tab="tracker"]')).toContainText('🏟️');
     await expect(page.locator('.tab[data-tab="round"]')).toBeVisible();
     await expect(page.locator('.tab[data-tab="slip"]')).toBeVisible();
     await expect(page.locator('.tab[data-tab="admin"]')).toBeVisible();

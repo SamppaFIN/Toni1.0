@@ -151,7 +151,7 @@ body{
 <div class="tabs" id="tab-bar">
   <button class="tab active" data-tab="round">📅 Kierros</button>
   <button class="tab" data-tab="slip">🎫 Vetolappu <span id="slip-count"></span></button>
-  <button class="tab" data-tab="tracker" data-sport="hockey">🏒 Seuranta</button>
+  <button class="tab" data-tab="tracker">🏒 Seuranta</button>
   <button class="tab" data-tab="history">📜 Historia</button>
   <button class="tab" data-tab="teams" data-sport="hockey">📊 Joukkueet</button>
   <button class="tab" data-tab="info">ℹ️ Info</button>
@@ -347,6 +347,8 @@ function renderRound(){
   }
 }
 function renderTracker(){
+  // Jalkapallotilassa Seuranta on public/app/football-tracker.js:n vastuulla
+  if(!isHockey()){if(window.BTT)window.BTT.render();return}
   const b=document.getElementById('sim-btn');
   if(!simResults){
     b.textContent='▶️ Käynnistä pelipäivän simulaatio';b.className='btn btn-success btn-block';b.disabled=false;
@@ -584,6 +586,9 @@ function renderSlip(){
 function updateSlipBadge(){const e=document.getElementById('slip-count');e.textContent=bets.length?`(${bets.length})`:''}
 
 function runSimulation(){
+  // Jalkapallon simulaatio on oma moduulinsa; se ei vaadi vetoja, koska
+  // ottelutulokset ovat kiinnostavia myös ilman panosta
+  if(!isHockey()){if(window.BTT)window.BTT.run();return}
   if(!bets.length){toast('⚠️ Aseta ensin vetoja Kierros-välilehdellä');return}
   switchTab('tracker');
   const b=document.getElementById('sim-btn');
@@ -738,6 +743,10 @@ function resetSimulation(){
   if(isHockey()){
     const fb=FALLBACK;teams=fb.teams;games=fb.games;predictions=fb.predictions;valueFlags=fb.valueFlags;oddsSnapshots=[];ratings=fb.teamRatings;news=fb.newsEvents;
     syncBookmakerOdds();
+  }
+  if(!isHockey()){
+    localStorage.removeItem('bt_sim_results');
+    if(window.BTT)window.BTT.reset();
   }
   save();renderAll();switchTab('round');
   if(!isHockey()&&window.BTF)window.BTF.renderPlacedBets();
@@ -952,6 +961,9 @@ function renderAll(){renderRound();renderSlip();renderTracker();renderHistory();
 function applySportVisibility(){
   document.querySelectorAll('.tab[data-sport="hockey"]').forEach(t=>{t.style.display=isHockey()?'':'none'});
   document.querySelector('.glass-header h1').innerHTML=(isHockey()?'🏒':'⚽')+' BetTracker <span class="demo-badge">'+(isHockey()?'JÄÄKIEKKO':'DEMO')+'</span>';
+  // Seuranta on molemmilla lajeilla, mutta ikoni kertoo kummasta on kyse
+  const tr=document.querySelector('.tab[data-tab="tracker"]');
+  if(tr)tr.textContent=(isHockey()?'🏒':'🏟️')+' Seuranta';
   // Jos aktiivinen välilehti piilotettiin, siirry Kierrokseen
   const active=document.querySelector('.tab.active');
   if(active&&active.style.display==='none')switchTab('round');
@@ -974,6 +986,20 @@ window.BT={
   addBet(bet){
     bankroll-=bet.stake;bets.push(bet);
     save();updateBankroll();renderSlip();updateSlipBadge();
+  },
+  /**
+   * Ratkaise jalkapalloveto. simulated-lippu kulkee historiaan, jotta
+   * simuloitu ja oikea tuotto voidaan erottaa tiketissä 33 — sekoitettuna
+   * ROI-luku ei mittaisi mitään.
+   */
+  settleFootballBet(betId,won,resultLabel){
+    const b=bets.find(x=>x.id===betId);
+    if(!b)return;
+    const profit=won?b.stake*b.odds:0;
+    bankroll+=profit;
+    betHistory.push({...b,won,profit,resolved_at:new Date().toISOString(),game_result:resultLabel,simulated:true});
+    bets=bets.filter(x=>x.id!==betId);
+    save();updateBankroll();renderSlip();updateSlipBadge();renderHistory();
   },
   toast,
   save,
