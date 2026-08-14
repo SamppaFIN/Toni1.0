@@ -14,6 +14,7 @@ import {
   fairOdds,
   kickoffLabel,
   timeUntil,
+  relativeAge,
   esc,
   FLAG_META,
   SIDE_LABELS,
@@ -103,7 +104,7 @@ function statsSection(match) {
     ? `<div style="margin-top:8px;font-size:.68rem"><b>Aiemmat kohtaamiset</b><br>${match.stats.h2h
         .map((g) => `<span style="color:var(--c-text-muted)">${g.date}</span> ${esc(g.score)} <span style="font-size:.6rem;color:var(--c-text-muted)">(${g.venue === 'home' ? 'kotona' : 'vieraissa'})</span>`)
         .join('<br>')}</div>`
-    : `<div style="margin-top:8px;font-size:.65rem;color:var(--c-text-muted)">Aiempia kohtaamisia ei vielä haeta (tiketti 29).</div>`;
+    : `<div style="margin-top:8px;font-size:.65rem;color:var(--c-text-muted)">Aiempia kohtaamisia ei näytetä — sarjataulukko ei sisällä ottelukohtaisia tuloksia.</div>`;
 
   return `<div style="padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
     <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;font-size:.7rem;margin-bottom:4px;color:var(--c-text-muted)">
@@ -128,26 +129,48 @@ const EVENT_LABELS = {
 function newsSection(match) {
   if (!match.news?.length) {
     return `<div style="font-size:.7rem;color:var(--c-text-muted);padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
-      Otteluun liittyviä uutisia ei ole vielä haettu — uutisputki on tiketti 29.
-      <br><br>Kun se on käytössä, tähän tulevat otsikot lähteineen ja LLM:n erittelemät tapahtumat
-      (loukkaantuminen, kokoonpanomuutos) varmuusarvioineen. Yli 0.7 varmuuden tapahtuma säätää
-      mallin maaliodotusta, ja säätö näkyy 💎 Analyysi -osiossa.
+      Tähän otteluun ei löytynyt uutisia kuudesta seuratusta lähteestä
+      (BBC Sport, The Guardian, ESPN, Iltalehti, Ilta-Sanomat, Yle Urheilu).
+      <br><br>Se on tavallista pienemmissä sarjoissa. Uutinen liitetään vain kun
+      joukkue mainitaan selvästi jalkapallon yhteydessä — sinnepäin osuva uutinen
+      olisi huonompi kuin ei uutista.
     </div>`;
   }
 
   const items = match.news
     .map((n) => {
-      const type = EVENT_LABELS[n.event_type] ?? '📄';
-      const confidence = n.confidence !== null ? `<span class="badge ${n.confidence > 0.7 ? 'badge-green' : 'badge-muted'}" style="font-size:.5rem">varmuus ${(n.confidence * 100).toFixed(0)} %</span>` : '';
+      // Tapahtumatyyppi näytetään vain jos se on tunnistettu. Irrallinen
+      // yleisikoni ilman merkitystä on pelkkää visuaalista melua.
+      const meta = [
+        EVENT_LABELS[n.event_type] ?? null,
+        n.team ? esc(n.team) : null,
+        n.player ? esc(n.player) : null,
+        esc(n.source),
+        relativeAge(n.published_at),
+      ].filter(Boolean);
+
+      // Varmuus näkyy vain kun se ylittää mallivaikutuksen kynnyksen tai on
+      // muuten merkityksellinen — matala luku avainsanaosumasta ei kerro mitään
+      const confidence =
+        n.confidence !== null
+          ? `<span class="badge ${n.confidence > 0.7 ? 'badge-green' : 'badge-muted'}" style="font-size:.5rem;margin-left:4px" title="${n.confidence > 0.7 ? 'Vaikuttaa mallin maaliodotukseen' : 'Ei vaikuta malliin — alle 70 %:n kynnys'}">varmuus ${(n.confidence * 100).toFixed(0)} %</span>`
+          : '';
+
       return `<div style="padding:6px 0;border-bottom:1px dashed oklch(1 1 0/0.08)">
         <div style="font-size:.7rem;line-height:1.4"><a href="${esc(n.url)}" target="_blank" rel="noopener" style="color:var(--c-accent);text-decoration:none">${esc(n.title)}</a></div>
-        <div style="font-size:.6rem;color:var(--c-text-muted);margin-top:2px">${type}${n.team ? ` · ${esc(n.team)}` : ''}${n.player ? ` · ${esc(n.player)}` : ''} · ${esc(n.source)} ${confidence}</div>
+        <div style="font-size:.6rem;color:var(--c-text-muted);margin-top:2px">${meta.join(' · ')}${confidence}</div>
         ${n.impact ? `<div style="font-size:.62rem;color:var(--c-text-muted);margin-top:2px"><i>${esc(n.impact)}</i></div>` : ''}
       </div>`;
     })
     .join('');
 
-  return `<div style="padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">${items}</div>`;
+  const windowNote = match.analysis.news_window
+    ? `<div style="margin-top:6px;padding:6px;border-radius:6px;background:oklch(0.72 0.16 85 / 0.15);font-size:.62rem">
+        ⚡ <b>Uutisikkuna:</b> tuore korkean varmuuden tapahtuma. Markkina ei ole todennäköisesti vielä hinnoitellut sitä.
+      </div>`
+    : '';
+
+  return `<div style="padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">${items}${windowNote}</div>`;
 }
 
 // ─── Osio: Analyysi ───────────────────────────────────────────────────────
