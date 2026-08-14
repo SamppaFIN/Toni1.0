@@ -135,12 +135,14 @@
     { "id": 17, "epic": "demo", "nimi": "Demo UI — historia-sivu ja ROI-seuranta", "effort": "S", "riippuvuudet": [14, 15], "status": "done", "acceptance_criteria": ["Historia-välilehti näyttää kaikki ratkenneet vedot", "Voitetut/hävityt vedot merkattu ✅/❌", "ROI-% laskettu (tuotto/panokset × 100)", "Kokonaistulos euroina näkyvissä"], "valmius": 100 },
     { "id": 18, "epic": "demo", "nimi": "Demo UI — joukkueiden logot, nimet ja tunnusluvut", "effort": "S", "riippuvuudet": [11], "status": "done", "acceptance_criteria": ["Joukkueiden logot näkyvät värikoodattuina ympyröinä (CSS, ei kuvia)", "Joukkueiden nimet haetaan teams-taulusta (ei ID:t)", "Ennusteissa näkyy kertoimet ja mallin todennäköisyydet rinnakkain", "Tulevan kierroksen sivu näyttää kaikki pelit kertoimineen"], "valmius": 100 },
     { "id": 19, "epic": "demo", "nimi": "Info-sivu — käyttöohje uudelle käyttäjälle", "effort": "S", "riippuvuudet": [], "status": "done", "acceptance_criteria": ["Info-välilehti kertoo järjestelmän peruskäytön", "Selittää value-flagien merkityksen (edge > 3% / > 5 %)", "Selittää Elo/PDO/z-score -mittarit kansantajuisesti", "Ohjeet demo-simulaation käyttöön"], "valmius": 100 },
-    { "id": 20, "epic": "demo", "nimi": "Admin-sivu — API-konfiguraatio", "effort": "S", "riippuvuudet": [], "status": "done", "acceptance_criteria": ["Admin-välilehti näyttää nykyiset API-asetukset", "Mahdollisuus syöttää Supabase URL + anon key", "Mahdollisuus syöttää Odds API key", "Asetukset tallentuvat localStorageen (demo-tilassa)"], "valmius": 100 }
+    { "id": 20, "epic": "demo", "nimi": "Admin-sivu — API-konfiguraatio", "effort": "S", "riippuvuudet": [], "status": "done", "acceptance_criteria": ["Admin-välilehti näyttää nykyiset API-asetukset", "Mahdollisuus syöttää Supabase URL + anon key", "Mahdollisuus syöttää Odds API key", "Asetukset tallentuvat localStorageen (demo-tilassa)"], "valmius": 100 },
+    { "id": 21, "epic": "demo", "nimi": "Kerroinvertailu — dynaaminen toimistolista", "effort": "M", "riippuvuudet": [11], "status": "done", "acceptance_criteria": ["Admin-välilehdellä voi lisätä/poistaa toimistoja nimellä ja osoitteella (localStorage)", "Kierroskortti listaa jokaisen toimiston 1X2-kertoimet pystyriveinä", "Paras kerroin per kohde korostettu ⭐", "Backend: ODDS_BOOKMAKERS-allowlist + paras kerroin -apuohjelmat + unit-testit"], "valmius": 100 },
+    { "id": 22, "epic": "demo", "nimi": "Harjoitus-analyysi — oikeat kertoimet", "effort": "M", "riippuvuudet": [6, 8], "status": "done", "acceptance_criteria": ["Kierroskortilla näkyy oikeita Unibet-jalkapalloharjoituskohteita kertoimineen", "Marginaalin poisto ja implisiittiset todennäköisyydet laskettu kertoimista", "Oma arvio (tn %) → edge + value-flagit (3%/5% kynnykset)", "Harjoituskohteista voi asettaa vedon (vetolappu + kassa) ja ratkaista sen manuaalisesti ✅/❌", "Arviot säilyvät localStoragessa (bt_practice_models)"], "valmius": 100 }
   ],
-  "mvp_scope": "Tiketit 1–20. Yksi uutislähde, yksi odds-provider, yksi hälytyskanava. Staattinen mobiili-web UI GitHub Pagesissa. Malli ennustaa jokaisen ottelun ja träkkää osumatarkkuutta. Interaktiivinen demo pelipäiväsimulaatiolla ja vedonlyöntikassalla.",
+  "mvp_scope": "Tiketit 1–21. Yksi uutislähde, yksi odds-provider, yksi hälytyskanava. Staattinen mobiili-web UI GitHub Pagesissa. Malli ennustaa jokaisen ottelun ja träkkää osumatarkkuutta. Interaktiivinen demo pelipäiväsimulaatiolla ja vedonlyöntikassalla.",
   "out_of_scope_mvp": [
     "Kelly-panostuslogiikka (erillinen moduuli myöhemmin)",
-    "Useampi odds-provider",
+    "Suorat scraperit toimistojen sivuille (URL-listaus on demo-metadataa)",
     "Automaattinen panostus (oikealla rahalla)",
     "Live-vedonlyönti",
     "Kirjautuminen / multi-user"
@@ -590,6 +592,8 @@ Tämä sessio (Infinite + Kajo / DeepSeek V4 Pro / GitHub Copilot) vei BetTracke
 - **Live-simulaatio:** 20s pelipäivä jossa maalit, maalintekijät, jäähyt, laukaukset, ylivoima — kaikki generoidaan satunnaisesti mutta Elo-pohjaisilla todennäköisyyksillä
 - **Vedonlyönti:** 1X2-markkina, popup jossa pikapanokset (10€/25€/100€), kassa (alku 100€), talletus/nosto
 - **Pikaveto "seuraava maali":** 10€ automaattiveto ilman dialogia, ratkeaa heti maalin tullessa
+- **Kerroinvertailu:** kierroskortilla jokaisen toimiston 1X2-kertoimet pystylistana (⭐ = paras kerroin per kohde); toimistoja hallitaan dynaamisesti Admin-välilehdellä (nimi + URL, localStorage `bt_bookmakers`)
+- **🎯 Harjoituskortit (Kierros-näkymässä):** oikeita Unibet-kohteita (jalkapallo) — marginaalin poisto + implisiittiset todennäköisyydet automaattisesti, oma arvio → edge + value-flagit, vedonlyönti ja manuaalinen ratkaisu ✅/❌
 - **Paine-mekaniikka:** käyttäjä voi valita joukkueen joka "painaa päälle" (+80 Elo-pt), oranssi visuaalinen korostus
 - **Kierrosraportti:** simulaation jälkeen näyttää jokaisen vedon odotuksen, toteuman ja tuloksen (voitto → +€, häviö → 0€)
 - **📊 Analyysi-nappi:** jokaisella pelikortilla — avaa syväanalyysin jossa Elo-kaava, PDO-selitys, Edge-laskenta, loukkaantumiset, lähdeluettelo ja ammattilais-seurantakohteet
@@ -604,8 +608,8 @@ Tämä sessio (Infinite + Kajo / DeepSeek V4 Pro / GitHub Copilot) vei BetTracke
 - 15 joukkuetta, 17 peliä, realistiset Liiga-datat (kaudelta 2025)
 
 ### Testit
-- **41 unit-testiä** (vitest): elo, pdo, zscore, margin, predict, value — kaikki vihreänä
-- **20 E2E-testiä** (playwright): testaavat kierrosnäkymän, vedonlyönnin, simulaation, raportin, joukkuelistan, historian — kaikki vihreänä
+- **47 unit-testiä** (vitest): elo, pdo, zscore, margin, predict, value, odds — kaikki vihreänä
+- **23 E2E-testiä** (playwright): testaavat kierrosnäkymän, vedonlyönnin, simulaation, raportin, joukkuelistan, historian, harjoitusanalyysin ja harjoitusvedonlyönnin — kaikki vihreänä
 
 ### Infra
 - **GitHub Actions** (`.github/workflows/pipeline.yml`): cron-ajastus ingestio→analyysi→value→hälytykset
@@ -645,8 +649,8 @@ Tämä sessio (Infinite + Kajo / DeepSeek V4 Pro / GitHub Copilot) vei BetTracke
 - [ ] Päivitä GitHub Pages (CDN-viiveen jälkeen varmista että liveversio toimii)
 
 ### Seuraava kehitysvaihe
+- [x] **Kerroinvertailu:** jokaisen toimiston kertoimet pystylistana kierroskorteilla (⭐ = paras), dynaaminen toimistolista Adminissa (toteutettu 2026-08-13)
 - [ ] **Oikea dataputki:** Yhdistä Supabase, Liiga.fi-scraping, oikea Odds API
-- [ ] **Useampi odds-provider:** vertailu paljastaa arbitraasimahdollisuudet
 - [ ] **Telegram-botti:** vie hälytykset tuotantoon (koodi on valmiina `src/alert/telegram.ts`)
 - [ ] **Kelly-panostus:** `f* = (bp−q)/b`, murto-Kelly 25–50% — pidä erillisenä moduulina
 - [ ] **Pelaajakohtaiset z-scoret:** UI-näkymä "kuumille" ja "kylmille" pelaajille
@@ -668,7 +672,7 @@ Tämä sessio (Infinite + Kajo / DeepSeek V4 Pro / GitHub Copilot) vei BetTracke
 **Mitä tekisin toisin:**
 - **Liian aikainen optimointi** — alkuperäisessä suunnitelmassa oli 8 metatasoa, 4 epiciä, 20 tikettiä. Demo-MVP olisi voinut olla 10 tikettiä. Loput 10 syntyivät luonnostaan kun demoa testattiin.
 - **E2E-testien päivitys jäi jälkeen** — kun UI:n rakenne muuttui (tabit yhdistettiin), testit hajosivat. Korjattiin vasta lopussa. Automaattinen E2E-ajo olisi paljastanut tämän aiemmin.
-- **`localStorage`-avainten dokumentointi** — `bt_bankroll`, `bt_bets`, `bt_history`, `bt_simResults`, `bt_pressure`, `bt_ratings`, `bt_round`. Jos joku avain vaihtuu, kaikki data katoaa. Keskitetty `save()` auttaa, mutta avainten nimeäminen olisi pitänyt dokumentoida aiemmin.
+- **`localStorage`-avainten dokumentointi** — `bt_bankroll`, `bt_bets`, `bt_history`, `bt_simResults`, `bt_pressure`, `bt_ratings`, `bt_round`, `bt_bookmakers`, `bt_practice_models`. Jos joku avain vaihtuu, kaikki data katoaa. Keskitetty `save()` auttaa, mutta avainten nimeäminen olisi pitänyt dokumentoida aiemmin.
 - **Single-file SPA:n koko** — demo.html on nyt ~650 riviä. Toimii, mutta alkaa olla rajoilla. Seuraavassa vaiheessa kannattaa harkita moduuleihin pilkkomista (build-vaiheella).
 
 **Infinetelle:** 

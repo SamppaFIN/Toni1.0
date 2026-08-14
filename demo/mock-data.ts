@@ -147,10 +147,7 @@ export const mockNewsEvents = [
   { id: 4, source_url: 'mtvuutiset.fi/urheilu', published_at: '2025-09-10T05:00Z', event_type: 'bench', team_id: 9, player_id: null, confidence: 0.65, raw_text: 'HPK:n päävalmentaja tyytymätön harjoitusotteluiden esitykseen', extracted_json: { event_type: 'bench', team: 'HPK', confidence: 0.65 } },
 ];
 
-export const mockOddsSnapshots = [
-  { id: 1, game_id: 1, bookmaker: 'Veikkaus', market: '1X2', home_odds: 2.35, draw_odds: 3.60, away_odds: 2.90, fetched_at: '2025-09-10T07:00Z' },
-  { id: 2, game_id: 2, bookmaker: 'Veikkaus', market: '1X2', home_odds: 2.80, draw_odds: 3.30, away_odds: 2.45, fetched_at: '2026-08-03T11:00:00Z' },
-  { id: 3, game_id: 3, bookmaker: 'Veikkaus', market: '1X2', home_odds: 1.95, draw_odds: 3.60, away_odds: 3.50, fetched_at: '2026-08-02T09:00:00Z' },
-  { id: 4, game_id: 4, bookmaker: 'Veikkaus', market: '1X2', home_odds: 3.10, draw_odds: 3.40, away_odds: 2.20, fetched_at: '2026-08-02T09:00:00Z' },
-  { id: 5, game_id: 5, bookmaker: 'Veikkaus', market: '1X2', home_odds: 2.40, draw_odds: 3.20, away_odds: 2.90, fetched_at: '2026-07-31T09:00:00Z' },
-];
+// Kertoimet generoi demo-UI dynaamisesti Elo-pohjaisesti jokaiselle Adminissa
+// määritetylle vedonlyöntitoimistolle (katso demo.html: genOddsForBookmaker).
+// Mock-API palauttaa tyhjän listan, jotta UI:n generointi on ainoa lähde.
+export const mockOddsSnapshots = [];

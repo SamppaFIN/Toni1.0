@@ -2,10 +2,13 @@
 // Käynnistys: npm run demo → http://localhost:3333
 
 import express from 'express';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { mockValueFlags, mockPredictions, mockTeamRatings, mockGames, mockTeams, mockNewsEvents, mockOddsSnapshots } from './mock-data.js';
 
 const app = express();
 const PORT = 3333;
+const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../public');
 
 // CORS kaikille (demo-käyttö)
 app.use((_req, res, next) => {
@@ -14,7 +17,7 @@ app.use((_req, res, next) => {
 });
 
 // Staattiset tiedostot (web UI)
-app.use(express.static('public'));
+app.use(express.static(publicDir));
 
 // Mock API — matkii Supabase REST-rajapintaa
 app.get('/rest/v1/value_flags', (_req, res) => {

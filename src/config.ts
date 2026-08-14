@@ -12,6 +12,8 @@ export const config = {
   odds: {
     apiKey: process.env.ODDS_API_KEY || '',
     baseUrl: 'https://api.the-odds-api.com/v4',
+    // Sallittujen vedonlyöntitoimistojen lista (pilkulla eroteltuna). Tyhjä = kaikki API:n tarjoamat.
+    bookmakers: (process.env.ODDS_BOOKMAKERS || '').split(',').map((b) => b.trim()).filter(Boolean),
   },
   llm: {
     apiKey: process.env.LLM_API_KEY || '',

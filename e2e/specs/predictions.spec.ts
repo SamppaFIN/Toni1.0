@@ -30,7 +30,7 @@ test.describe('Ennusteet ja simulaatio', () => {
   test('vedon voi asettaa ja simulaatio käynnistyy', async ({ page }) => {
     await page.goto('/demo.html');
     // Aseta veto
-    await page.locator('#round-games .card .odds-btn').first().click();
+    await page.locator('#round-games .card .bk-odds').first().click();
     await page.click('button:has-text("✅ Veto")');
     // Käynnistä simulaatio
     await page.click('.tab[data-tab="tracker"]');
@@ -41,7 +41,7 @@ test.describe('Ennusteet ja simulaatio', () => {
 
   test('pikaveto-napit näkyvät live-simulaatiossa', async ({ page }) => {
     await page.goto('/demo.html');
-    await page.locator('#round-games .card .odds-btn').first().click();
+    await page.locator('#round-games .card .bk-odds').first().click();
     await page.click('button:has-text("✅ Veto")');
     await page.click('.tab[data-tab="tracker"]');
     await page.click('#sim-btn');
@@ -50,7 +50,7 @@ test.describe('Ennusteet ja simulaatio', () => {
 
   test('Kierrosraportti näkyy simulaation jälkeen', async ({ page }) => {
     await page.goto('/demo.html');
-    await page.locator('#round-games .card .odds-btn').first().click();
+    await page.locator('#round-games .card .bk-odds').first().click();
     await page.click('button:has-text("✅ Veto")');
     await page.click('.tab[data-tab="tracker"]');
     await page.click('#sim-btn');
@@ -64,7 +64,7 @@ test.describe('Ennusteet ja simulaatio', () => {
 
   test('Historia-välilehti näyttää vedonlyöntihistorian', async ({ page }) => {
     await page.goto('/demo.html');
-    await page.locator('#round-games .card .odds-btn').first().click();
+    await page.locator('#round-games .card .bk-odds').first().click();
     await page.click('button:has-text("✅ Veto")');
     await page.click('.tab[data-tab="tracker"]');
     await page.click('#sim-btn');

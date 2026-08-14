@@ -29,6 +29,52 @@ export interface ParsedOdds {
   fetched_at: string;
 }
 
+export interface BestOdds {
+  home_odds: number;
+  draw_odds: number;
+  away_odds: number;
+  home_best: string | null;
+  draw_best: string | null;
+  away_best: string | null;
+  bookmakerCount: number;
+}
+
+/** Suodattaa snapshotit allowlistan mukaan (tyhjä lista = kaikki) */
+export function filterBookmakers(snapshots: ParsedOdds[], allowlist: string[]): ParsedOdds[] {
+  if (!allowlist.length) return snapshots;
+  const set = new Set(allowlist.map((b) => b.toLowerCase()));
+  return snapshots.filter((s) => set.has(s.bookmaker.toLowerCase()));
+}
+
+/** Paras käytettävissä oleva kerroin jokaiselle 1X2-kohteelle kaikkien toimistojen yli */
+export function computeBestOdds(snapshots: ParsedOdds[]): BestOdds | null {
+  if (!snapshots.length) return null;
+  const best: BestOdds = {
+    home_odds: 0,
+    draw_odds: 0,
+    away_odds: 0,
+    home_best: null,
+    draw_best: null,
+    away_best: null,
+    bookmakerCount: snapshots.length,
+  };
+  for (const s of snapshots) {
+    if (s.home_odds > best.home_odds) {
+      best.home_odds = s.home_odds;
+      best.home_best = s.bookmaker;
+    }
+    if (s.draw_odds > best.draw_odds) {
+      best.draw_odds = s.draw_odds;
+      best.draw_best = s.bookmaker;
+    }
+    if (s.away_odds > best.away_odds) {
+      best.away_odds = s.away_odds;
+      best.away_best = s.bookmaker;
+    }
+  }
+  return best;
+}
+
 export function parseOddsResponse(games: OddsApiGame[]): ParsedOdds[] {
   const result: ParsedOdds[] = [];
 
@@ -61,8 +107,10 @@ export function parseOddsResponse(games: OddsApiGame[]): ParsedOdds[] {
 export async function ingestOdds(): Promise<ParsedOdds[]> {
   console.log('[Odds] Fetching...');
   const raw = await fetchOdds();
-  const parsed = parseOddsResponse(raw);
-  console.log(`[Odds] Parsed ${parsed.length} odds snapshots`);
+  const parsed = filterBookmakers(parseOddsResponse(raw), config.odds.bookmakers);
+  const counts = new Map<string, number>();
+  parsed.forEach((p) => counts.set(p.bookmaker, (counts.get(p.bookmaker) || 0) + 1));
+  console.log(`[Odds] Parsed ${parsed.length} snapshots — ${[...counts.entries()].map(([k, v]) => `${k} (${v})`).join(', ')}`);
   return parsed;
 }
 

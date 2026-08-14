@@ -12,7 +12,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npx tsx demo/server.ts',
+    command: 'npx tsx ../demo/server.ts',
     url: 'http://localhost:3333/demo.html',
     reuseExistingServer: !process.env.CI,
   },

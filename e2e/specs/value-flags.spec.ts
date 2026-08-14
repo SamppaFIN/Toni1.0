@@ -24,12 +24,14 @@ test.describe('Kierros -näkymä', () => {
     expect(text).toMatch(/\(\d{3,4}\)/);
   });
 
-  test('näyttää kertoimet 1X2-nappuloina', async ({ page }) => {
+  test('näyttää kertoimet useilta vedonlyöntitoimistoilta', async ({ page }) => {
     await page.goto('/demo.html');
     const firstCard = page.locator('#round-games .card').first();
     await expect(firstCard).toBeVisible({ timeout: 5000 });
-    const oddsBtns = firstCard.locator('.odds-btn');
-    expect(await oddsBtns.count()).toBe(3);
+    const bkNames = firstCard.locator('.bk-name');
+    expect(await bkNames.count()).toBeGreaterThanOrEqual(2);
+    const cells = firstCard.locator('.bk-odds');
+    expect(await cells.count()).toBeGreaterThanOrEqual(6);
   });
 
   test('value-flag (💎) näkyy kun edge > 3%', async ({ page }) => {
@@ -50,7 +52,7 @@ test.describe('Kierros -näkymä', () => {
 
   test('vetoa voi lyödä kertoimia klikkaamalla', async ({ page }) => {
     await page.goto('/demo.html');
-    const firstOdds = page.locator('#round-games .card .odds-btn').first();
+    const firstOdds = page.locator('#round-games .card .bk-odds').first();
     await firstOdds.click();
     await expect(page.locator('button:has-text("✅ Veto")')).toBeVisible();
     await page.click('button:has-text("✅ Veto")');
@@ -60,7 +62,7 @@ test.describe('Kierros -näkymä', () => {
 
   test('Vetolappu-välilehti näyttää asetetun vedon', async ({ page }) => {
     await page.goto('/demo.html');
-    await page.locator('#round-games .card .odds-btn').first().click();
+    await page.locator('#round-games .card .bk-odds').first().click();
     await page.click('button:has-text("✅ Veto")');
     await page.click('.tab[data-tab="slip"]');
     await expect(page.locator('#slip-list .card').first()).toBeVisible();
