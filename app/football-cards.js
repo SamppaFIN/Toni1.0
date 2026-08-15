@@ -20,35 +20,198 @@ import {
   SIDE_LABELS,
   METHOD_LABELS,
   bestEdge,
+  getDataSource,
+  getMockRound,
+  getMockRoundCount,
 } from './snapshot.js';
+import { isVisible } from './football-prefs.js';
 
 /** Joukkueen logo värillisenä ympyränä — sama tyyli kuin jääkiekkopuolella */
 function teamLogo(team, size = 26) {
   return `<span class="team-logo" style="background:${esc(team.color)};width:${size}px;height:${size}px;font-size:${Math.round(size * 0.34)}px" title="${esc(team.name)}">${esc(team.short)}</span>`;
 }
 
-/** Kertoimet toimisto per rivi, paras korostettuna */
+/**
+ * Kertoimet toimisto per rivi.
+ *
+ * Kaksi eri asiaa, kaksi eri merkintää — tämä ero on tarkoituksellinen:
+ *
+ *   ⭐ paras hinta   = pelkkä hintavertailun voittaja. Kertoo mistä veto
+ *                      kannattaa lyödä JOS sen lyö. Ei ota kantaa siihen
+ *                      onko veto järkevä.
+ *   🟡/🟢 väritäyttö = edge ylittää kynnyksen eli odotusarvo on positiivinen.
+ *
+ * Aiemmin paras hinta sai vihreän taustan, jolloin jokaisella ottelulla oli
+ * kolme vihreää ruutua vaikka yksikään ei olisi ollut pelaamisen arvoinen.
+ * Vihreä menetti merkityksensä. Nyt väri tarkoittaa aina ylikerrointa.
+ */
 function oddsTable(match, index) {
   if (!match.odds?.length) return '<div class="empty" style="font-size:.7rem">Ei kertoimia</div>';
 
   const head = `<div class="odds-row odds-head"><span>Toimisto</span><span>1</span><span>X</span><span>2</span></div>`;
+  const edgeBySide = new Map(match.analysis.edges.map((e) => [e.side, e]));
 
   const rows = match.odds
     .map((row) => {
       const cell = (side) => {
         const value = row[side];
         const isBest = match.best[`${side}_book`] === row.bookmaker && Math.abs(match.best[side] - value) < 1e-9;
+        // Edge on laskettu parhaasta hinnasta, joten value-merkintä kuuluu
+        // vain sille ruudulle jota luku koskee
+        const edge = isBest ? edgeBySide.get(side) : null;
+        const valueClass = edge && edge.flag !== 'none' ? ` value-${edge.flag === 'strong' ? 'strong' : 'candidate'}` : '';
         // Pörssin komissio näkyy vihjeessä: näytetty hinta ei ole se mitä veto maksaa
         const commissionNote = row.commission > 0 ? ` — pörssin komissio ${(row.commission * 100).toFixed(1)} %` : '';
-        return `<button class="bk-odds${isBest ? ' best' : ''}" onclick="event.stopPropagation();window.BTF.openBetPopup('${esc(match.id)}','${side}',${value},'${esc(row.bookmaker)}')" title="${esc(row.bookmaker)} — ${SIDE_LABELS[side]} ${value.toFixed(2)}${isBest ? ' (paras)' : ''}${commissionNote}">${value.toFixed(2)}${isBest ? ' ⭐' : ''}</button>`;
+        const valueNote = valueClass ? ` — ylikerroin, edge ${(edge.edge * 100).toFixed(1)} %` : '';
+        const icon = edge && edge.flag !== 'none' ? ` ${FLAG_META[edge.flag].icon}` : isBest ? ' ⭐' : '';
+        return `<button class="bk-odds${isBest ? ' best' : ''}${valueClass}" onclick="event.stopPropagation();window.BTF.openBetPopup('${esc(match.id)}','${side}',${value},'${esc(row.bookmaker)}')" title="${esc(row.bookmaker)} — ${SIDE_LABELS[side]} ${value.toFixed(2)}${isBest ? ' (paras hinta)' : ''}${commissionNote}${valueNote}">${value.toFixed(2)}${icon}</button>`;
       };
       return `<div class="odds-row"><span class="bk-name" title="${esc(row.bookmaker)}">${esc(row.bookmaker)}</span>${cell('home')}${cell('draw')}${cell('away')}</div>`;
     })
     .join('');
 
   return `<div class="odds-list">${head}${rows}</div>
-    <div style="font-size:.6rem;color:var(--c-text-muted);margin-top:4px">👆 Klikkaa kerrointa asettaaksesi vedon · ⭐ paras hinta komission jälkeen</div>
+    <div style="font-size:.6rem;color:var(--c-text-muted);margin-top:4px;line-height:1.5">
+      👆 Klikkaa kerrointa asettaaksesi vedon<br>
+      ⭐ paras hinta komission jälkeen — <i>ei</i> tarkoita että veto kannattaa<br>
+      🟡 edge yli 3 % · 💎 edge yli 5 % — vain nämä ovat ylikertoimia
+    </div>
     <div id="fbetpop-${index}" style="display:none;margin-top:4px"></div>`;
+}
+
+// ─── Elo (tiketti #39) ────────────────────────────────────────────────────
+
+export const ELO_HOME_ADVANTAGE = 55;
+
+/**
+ * Elo-eron odotusarvo. Sama kaava kuin analyze/season-elo.ts:n
+ * expectedScore + kotietu — pidetään yhdessä rivissä jotta poikkeama
+ * palvelinlaskennasta olisi ilmeinen jos joku muuttaa toista.
+ *
+ * Huom: tämä on kahden tuloksen odotusarvo (voitto = 1, tasapeli = 0.5),
+ * EI kotivoiton todennäköisyys. Tasapeli on mukana puolikkaana.
+ */
+export function eloExpected(homeElo, awayElo, homeAdvantage = ELO_HOME_ADVANTAGE) {
+  return 1 / (1 + 10 ** ((awayElo - homeElo - homeAdvantage) / 400));
+}
+
+function eloBadge(stats) {
+  if (stats?.elo == null) return '<span style="color:var(--c-text-muted)">—</span>';
+  const change = stats.elo_change;
+  const color = change > 0 ? 'var(--c-success)' : change < 0 ? 'var(--c-danger)' : 'var(--c-text-muted)';
+  const arrow = change > 0 ? '▲' : change < 0 ? '▼' : '·';
+  const rank = stats.elo_rank ? `<span style="color:var(--c-text-muted);font-size:.55rem"> #${stats.elo_rank}</span>` : '';
+  return `<b style="font-variant-numeric:tabular-nums">${stats.elo}</b>${rank} <span style="color:${color};font-size:.58rem">${arrow}${Math.abs(change ?? 0)}</span>`;
+}
+
+/** Elo suluissa joukkueen nimen perään — luku siinä missä se koskee joukkuetta */
+function eloParen(stats) {
+  if (!isVisible('elo') || stats?.elo == null) return '';
+  const change = stats.elo_change;
+  const color = change > 0 ? 'var(--c-success)' : change < 0 ? 'var(--c-danger)' : 'var(--c-text-muted)';
+  const arrow = change > 0 ? '▲' : change < 0 ? '▼' : '·';
+  return ` <span style="font-weight:500;font-size:.68rem;color:var(--c-text-muted);font-variant-numeric:tabular-nums" title="Kauden Elo (lähtötaso 1500)${stats.elo_rank ? `, sija #${stats.elo_rank}` : ''}${change != null ? `, muutos kauden alusta ${change > 0 ? '+' : ''}${change}` : ''}">(${stats.elo}<span style="color:${color};font-size:.56rem">${arrow}${Math.abs(change ?? 0)}</span>)</span>`;
+}
+
+// ─── Otsakkeen tekijäpillerit ─────────────────────────────────────────────
+//
+// Kortin otsake näytti aiemmin vain Elon ja mallin todennäköisyydet. Moni
+// asia joka VAIKUTTAA analyysiin — mistä kaudesta tunnusluvut on laskettu,
+// onko malli edes olemassa tälle sarjalle, kuinka moni uutinen liittyy
+// otteluun ja onko markkina ehtinyt hinnoitella tuoreen tiedon — jäi
+// nähtäväksi vain avaamalla Analyysi- tai Uutiset-osio. Pillerit tuovat
+// nämä näkyviin ilman avaamista.
+
+function pill(icon, text, tone = 'muted') {
+  return `<span class="factor-pill tone-${tone}">${icon} ${esc(text)}</span>`;
+}
+
+/** Mallin peruste: parsitaan adjustments-tekstistä, ei lasketa uudelleen */
+function basisPill(match) {
+  const reason = match.model.adjustments?.find((a) => a.reason?.startsWith('Voimat:'))?.reason;
+  if (!reason) return null;
+  const usesPrior = /viime kausi/.test(reason);
+  return usesPrior
+    ? pill('📐', 'osittain viime kaudelta', 'warning')
+    : pill('📐', 'tämän kauden data', 'muted');
+}
+
+function modelBasisPill(match) {
+  if (match.model.lambda_home === null) return pill('⚖️', 'ei tilastolähdettä — pelkkä markkina', 'warning');
+  const w = match.model.blend_weight;
+  if (w >= 1) return pill('⚖️', 'pelkkä oma malli — ei sharp-ankkuria', 'warning');
+  return pill('⚖️', `${Math.round(w * 100)} % oma malli / ${Math.round((1 - w) * 100)} % markkina`, 'muted');
+}
+
+function newsPill(match) {
+  const count = match.news?.length ?? 0;
+  const strong = (match.news ?? []).filter((n) => n.confidence !== null && n.confidence > 0.7).length;
+  if (!count) return pill('📰', 'ei uutisia', 'muted');
+  return pill('📰', `${count} uutis${count > 1 ? 'ta' : ''}${strong ? `, ${strong} vaikuttavaa` : ''}`, strong ? 'success' : 'muted');
+}
+
+/** Kaikki analyysiin vaikuttavat tekijät yhtenä pilleririvinä otsakkeessa */
+function factorPills(match) {
+  const items = [];
+  const h = match.stats?.home;
+  const a = match.stats?.away;
+
+  if (isVisible('elo') && h?.elo != null && a?.elo != null) {
+    const diff = h.elo - a.elo;
+    const exp = (eloExpected(h.elo, a.elo) * 100).toFixed(0);
+    items.push(pill('📈', `Elo-ero ${diff > 0 ? '+' : ''}${diff} · odotusarvo ${exp} %`, diff > 0 ? 'success' : diff < 0 ? 'danger' : 'muted'));
+  }
+
+  const basis = basisPill(match);
+  if (basis) items.push(basis);
+  items.push(modelBasisPill(match));
+  items.push(newsPill(match));
+  if (match.analysis.news_window) items.push(pill('⚡', 'uutisikkuna auki', 'warning'));
+
+  return items.length ? `<div class="factor-pills">${items.join('')}</div>` : '';
+}
+
+/**
+ * Value-tieto joka kortille.
+ *
+ * Aiemmin tämä oli vain otsikkorivin laskurina ("2 value-kohdetta") ja
+ * kortilla pelkkänä prosenttimerkkinä. Kortista ei nähnyt MIKÄ kohde on
+ * arvokas ilman että avasi analyysin — ja juuri se on se yksi asia jonka
+ * takia korttia katsotaan.
+ *
+ * Kun kohdetta ei ole, se sanotaan yhtä selvästi. "Ei value-kohdetta" on
+ * useimmilla otteluilla oikea vastaus, ja sen näkeminen estää lukemasta
+ * parasta hintaa vahingossa suositukseksi.
+ */
+function valueLine(match) {
+  const flagged = match.analysis.edges
+    .filter((e) => e.flag !== 'none')
+    .sort((a, b) => b.edge - a.edge);
+
+  const name = (side) => (side === 'home' ? match.home.name : side === 'away' ? match.away.name : 'Tasapeli');
+
+  if (!flagged.length) {
+    const best = [...match.analysis.edges].sort((a, b) => b.edge - a.edge)[0];
+    return `<div style="margin-top:6px;padding:6px 8px;border-radius:7px;background:oklch(1 1 0/0.05);font-size:.63rem;color:var(--c-text-muted);line-height:1.45">
+      ⚫ <b>Ei value-kohdetta.</b> Paras edge ${SIDE_LABELS[best.side]} ${esc(name(best.side))} @ ${num(best.odds)}
+      = <b>${best.edge > 0 ? '+' : ''}${(best.edge * 100).toFixed(1)} %</b> — jää alle 3 %:n kynnyksen, joten panossuositusta ei anneta.
+    </div>`;
+  }
+
+  const rows = flagged
+    .map((e) => {
+      const meta = FLAG_META[e.flag];
+      return `<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap">
+        <span>${meta.icon} <b>${SIDE_LABELS[e.side]} ${esc(name(e.side))}</b> @ <b>${num(e.odds)}</b> <span style="color:var(--c-text-muted)">${esc(e.book ?? '')}</span></span>
+        <span>edge <b style="color:${e.flag === 'strong' ? 'var(--c-success)' : 'var(--c-warning)'}">+${(e.edge * 100).toFixed(1)} %</b>${e.stake_suggestion > 0 ? ` · panos <b style="color:var(--c-success)">${num(e.stake_suggestion)} €</b>` : ''}</span>
+      </div>`;
+    })
+    .join('');
+
+  const strong = flagged.some((e) => e.flag === 'strong');
+  return `<div style="margin-top:6px;padding:6px 8px;border-radius:7px;font-size:.65rem;line-height:1.5;background:${strong ? 'oklch(0.62 0.20 145 / 0.14)' : 'oklch(0.72 0.16 85 / 0.14)'};border:1px solid ${strong ? 'oklch(0.62 0.20 145 / 0.4)' : 'oklch(0.72 0.16 85 / 0.4)'}">
+    ${rows}
+  </div>`;
 }
 
 /** Mallin todennäköisyydet palkkina */
@@ -90,6 +253,7 @@ function statsSection(match) {
   const a = match.stats.away;
   const rows = [
     statRow('sarjasija', h.rank ?? '—', a.rank ?? '—'),
+    statRow('kauden Elo', eloBadge(h), eloBadge(a)),
     statRow('pelatut', h.played, a.played),
     statRow('pisteet / peli', num(h.ppg), num(a.ppg)),
     statRow('maalit / peli', num(h.gf_pg), num(a.gf_pg)),
@@ -274,12 +438,250 @@ function analysisSection(match) {
   </div>`;
 }
 
+// ─── Osio: Laskennan vaiheet (tiketti #39) ────────────────────────────────
+//
+// Käyttäjä pyysi näkyviin kaikkien analyysilaskentojen tulokset. Tämä osio
+// näyttää jokaisen välivaiheen luvuilla täytettynä: mistä numerosta seuraava
+// numero syntyi. Tarkoitus on että laskun voi tarkistaa käsin — jos jokin
+// luku on väärä, se näkyy tässä eikä piiloudu lopputuloksen sisään.
+//
+// Kaikki mitä tässä lasketaan uudelleen selaimessa (devig, tehollinen kerroin,
+// edge, Kelly) on TARKISTUSLASKU, ei uusi totuus: lopputulosta verrataan
+// snapshotin lukuun ja ero näytetään, jos sitä on.
+
+/** Devig yhdelle riville: 1/kerroin, summa, normalisointi */
+export function devigRow(home, draw, away) {
+  const raw = { home: 1 / home, draw: 1 / draw, away: 1 / away };
+  const sum = raw.home + raw.draw + raw.away;
+  return {
+    raw,
+    sum,
+    margin: sum - 1,
+    probs: { home: raw.home / sum, draw: raw.draw / sum, away: raw.away / sum },
+  };
+}
+
+/** Kerroin komission jälkeen — sama kaava kuin publish/snapshot.ts */
+export function effectiveOdds(odds, commission = 0) {
+  if (!(odds > 1)) return odds;
+  return 1 + (odds - 1) * (1 - Math.min(Math.max(commission, 0), 1));
+}
+
+function step(number, title, body) {
+  return `<div style="margin-top:9px;padding-top:7px;border-top:1px dashed oklch(1 1 0/0.1)">
+    <div style="font-size:.66rem;font-weight:700;margin-bottom:3px"><span style="color:var(--c-accent)">${number}.</span> ${title}</div>
+    <div style="font-size:.62rem;line-height:1.65;font-variant-numeric:tabular-nums">${body}</div>
+  </div>`;
+}
+
+const mono = (s) => `<code style="font-size:.6rem;color:var(--c-accent)">${s}</code>`;
+
+function calcSection(match) {
+  const steps = [];
+  let n = 0;
+
+  // 1. Devig per toimisto — tämä on se vaihe jossa kate poistetaan
+  const devigRows = match.odds.map((r) => ({ row: r, d: devigRow(r.home, r.draw, r.away) }));
+  steps.push(
+    step(
+      ++n,
+      'Marginaalin poisto per toimisto',
+      `${mono('p = (1/kerroin) / Σ(1/kerroin)')}<br>
+      <div style="display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:3px;font-size:.58rem;margin-top:4px">
+        <span style="color:var(--c-text-muted)">toimisto</span><span style="color:var(--c-text-muted)">Σ1/k</span><span style="color:var(--c-text-muted)">1</span><span style="color:var(--c-text-muted)">X</span><span style="color:var(--c-text-muted)">2</span>
+        ${devigRows
+          .map(
+            ({ row, d }) =>
+              `<span title="${esc(row.bookmaker)}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(row.bookmaker)}</span>
+               <span title="kate ${(d.margin * 100).toFixed(2)} %">${d.sum.toFixed(4)}</span>
+               <span>${pct(d.probs.home, 1)}</span><span>${pct(d.probs.draw, 1)}</span><span>${pct(d.probs.away, 1)}</span>`
+          )
+          .join('')}
+      </div>
+      <div style="color:var(--c-text-muted);margin-top:3px">Σ1/k yli ykkösen on toimiston kate. Devig jakaa sen pois suhteessa.</div>`
+    )
+  );
+
+  // 2. Konsensus + sharp
+  steps.push(
+    step(
+      ++n,
+      'Konsensus ja sharp-ankkuri',
+      `Mediaani devigatuista: <b>1 ${pct(match.market.implied.home)} · X ${pct(match.market.implied.draw)} · 2 ${pct(match.market.implied.away)}</b><br>
+      ${match.market.sharp
+        ? `Ankkuri <b>${esc(match.market.sharp_source ?? '—')}</b>: 1 ${pct(match.market.sharp.home)} · X ${pct(match.market.sharp.draw)} · 2 ${pct(match.market.sharp.away)}`
+        : '<span style="color:var(--c-warning)">Ankkuria ei löytynyt — käytetään mediaania</span>'}
+      <div style="color:var(--c-text-muted);margin-top:3px">Devig tehdään ensin per toimisto ja vasta sitten otetaan mediaani. Toisin päin kate vuotaisi lukuun mukaan.</div>`
+    )
+  );
+
+  // 3. Elo (jos on)
+  const he = match.stats?.home?.elo;
+  const ae = match.stats?.away?.elo;
+  if (he != null && ae != null) {
+    const e = eloExpected(he, ae);
+    steps.push(
+      step(
+        ++n,
+        'Elo-odotusarvo',
+        `${mono(`E = 1 / (1 + 10^((${ae} − ${he} − ${ELO_HOME_ADVANTAGE}) / 400))`)}<br>
+        = <b>${(e * 100).toFixed(1)} %</b> kotijoukkueelle (voitto = 1, tasapeli = 0.5)
+        <div style="color:var(--c-text-muted);margin-top:3px">Lähtötaso 1500, K = 20, kotietu ${ELO_HOME_ADVANTAGE} pistettä, maaliero painotettuna. Elo ei ole osa 1X2-mallia — se on riippumaton vertailuluku.</div>`
+      )
+    );
+  }
+
+  // 4. Poisson
+  if (match.model.lambda_home !== null) {
+    steps.push(
+      step(
+        ++n,
+        'Poisson-malli',
+        `λ koti = <b>${num(match.model.lambda_home, 3)}</b> · λ vieras = <b>${num(match.model.lambda_away, 3)}</b><br>
+        ${mono('P(k maalia) = λ^k · e^(−λ) / k!')}<br>
+        Tulosmatriisi Dixon-Coles-korjauksella (ρ = −0.05) → 1 ${pct(match.model.poisson_probs.home)} · X ${pct(match.model.poisson_probs.draw)} · 2 ${pct(match.model.poisson_probs.away)}<br>
+        Yli 2.5 maalia <b>${pct(match.model.over25)}</b> · molemmat maalin <b>${pct(match.model.btts)}</b><br>
+        <span style="color:var(--c-text-muted)">Todennäköisimmät: ${match.model.top_scores.slice(0, 5).map((s) => `${esc(s.score)} ${pct(s.p, 1)}`).join(' · ')}</span>`
+      )
+    );
+
+    // 5. Blendi — vain kun molemmat osapuolet ovat olemassa
+    const w = match.model.blend_weight;
+    if (match.market.sharp && w > 0 && w < 1) {
+      const rows = ['home', 'draw', 'away']
+        .map(
+          (s) =>
+            `<div>${SIDE_LABELS[s]}: ${w.toFixed(2)} × ${pct(match.model.poisson_probs[s])} + ${(1 - w).toFixed(2)} × ${pct(match.market.sharp[s])} = <b>${pct(match.model.probs[s])}</b></div>`
+        )
+        .join('');
+      steps.push(
+        step(
+          ++n,
+          'Blendi: oma malli + markkina',
+          `${mono('p = w × Poisson + (1 − w) × sharp')}, w = <b>${w.toFixed(2)}</b><br>${rows}
+          <div style="color:var(--c-text-muted);margin-top:3px">Markkina painaa enemmän, koska se hinnoittelee myös sen mitä data ei kerro: kokoonpanot, motivaation, sään.</div>`
+        )
+      );
+    }
+  } else {
+    steps.push(
+      step(
+        ++n,
+        'Poisson-mallia ei laskettu',
+        `Sarjalle ei ollut tilastolähdettä, joten maaliodotusta ei voi laskea. Malli on <b>${esc(METHOD_LABELS[match.model.method]?.short ?? match.model.method)}</b> ja edge syntyy pelkästä hintavertailusta.`
+      )
+    );
+  }
+
+  // 6. Paras hinta + komissio
+  const bestRows = ['home', 'draw', 'away']
+    .map((s) => {
+      const odds = match.best[s];
+      const eff = match.best[`${s}_effective`];
+      const book = match.best[`${s}_book`];
+      const changed = Math.abs(odds - eff) > 0.005;
+      return `<div>${SIDE_LABELS[s]}: <b>${num(odds)}</b> ${esc(book ?? '—')}${changed ? ` → komission jälkeen <b>${num(eff)}</b>` : ''}</div>`;
+    })
+    .join('');
+  steps.push(
+    step(
+      ++n,
+      'Paras hinta komission jälkeen',
+      `${mono('tehollinen = 1 + (kerroin − 1) × (1 − komissio)')}<br>${bestRows}
+      <div style="color:var(--c-text-muted);margin-top:3px">Pörssissä komissio otetaan vain voitosta, joten panos palautuu kokonaan. Vertailu tehdään tällä luvulla — muuten pörssi voittaisi aina näennäisesti.</div>`
+    )
+  );
+
+  // 7. Edge — tarkistuslasku snapshotin lukua vasten
+  const edgeRows = match.analysis.edges
+    .map((e) => {
+      const recomputed = e.model_prob * e.odds_effective - 1;
+      const drift = Math.abs(recomputed - e.edge) > 0.001;
+      return `<div>${SIDE_LABELS[e.side]}: ${pct(e.model_prob)} × ${num(e.odds_effective)} − 1 = <b style="color:${e.edge > 0.05 ? 'var(--c-success)' : e.edge > 0.03 ? 'var(--c-warning)' : e.edge > 0 ? 'var(--c-text)' : 'var(--c-danger)'}">${e.edge > 0 ? '+' : ''}${(e.edge * 100).toFixed(2)} %</b>
+        ${drift ? `<span style="color:var(--c-danger)"> ⚠️ tarkistuslasku antaa ${(recomputed * 100).toFixed(2)} %</span>` : ''}</div>`;
+    })
+    .join('');
+  steps.push(
+    step(
+      ++n,
+      'Edge',
+      `${mono('edge = mallin todennäköisyys × tehollinen kerroin − 1')}<br>${edgeRows}
+      <div style="color:var(--c-text-muted);margin-top:3px">Kynnykset: 🟡 yli 3 % · 💎 yli 5 %. Alle 3 % on mallin virherajojen sisällä eikä siitä anneta panossuositusta.</div>`
+    )
+  );
+
+  // 8. Kelly
+  const kellyRows = match.analysis.edges
+    .map((e) => {
+      const b = e.odds_effective - 1;
+      const p = e.model_prob;
+      const full = b > 0 ? (b * p - (1 - p)) / b : 0;
+      if (e.stake_suggestion <= 0) {
+        return `<div style="color:var(--c-text-muted)">${SIDE_LABELS[e.side]}: ei panosta${full > 0 ? ` (täysi Kelly olisi ${(full * 100).toFixed(2)} %, mutta edge ${(e.edge * 100).toFixed(1)} % ei ylitä kynnystä)` : ''}</div>`;
+      }
+      return `<div>${SIDE_LABELS[e.side]}: b = ${num(b)}, ${mono(`f* = (${num(b)}×${p.toFixed(4)} − ${(1 - p).toFixed(4)}) / ${num(b)}`)} = <b>${(full * 100).toFixed(2)} %</b><br>
+        &nbsp;&nbsp;→ murto-Kelly 25 % → <b>${(e.kelly_fraction * 100).toFixed(2)} %</b> × ${num(match.analysis.bankroll_basis, 0)} € = <b style="color:var(--c-success)">${num(e.stake_suggestion)} €</b></div>`;
+    })
+    .join('');
+  steps.push(
+    step(
+      ++n,
+      'Kelly-panos',
+      `${kellyRows}
+      <div style="color:var(--c-text-muted);margin-top:3px">Täysi Kelly maksimoi kasvun mutta heiluu rajusti. Käytössä 25 % siitä, kovana kattona 2 % kassasta — mallin virhe ei saa tyhjentää kassaa.</div>`
+    )
+  );
+
+  // 9. Mallin korjaukset
+  if (match.model.adjustments?.length) {
+    steps.push(
+      step(
+        ++n,
+        'Mallin korjaukset',
+        match.model.adjustments
+          .map((a) => {
+            const delta = [
+              a.delta_lambda_home ? `λ koti ${a.delta_lambda_home > 0 ? '+' : ''}${num(a.delta_lambda_home, 3)}` : null,
+              a.delta_lambda_away ? `λ vieras ${a.delta_lambda_away > 0 ? '+' : ''}${num(a.delta_lambda_away, 3)}` : null,
+            ]
+              .filter(Boolean)
+              .join(', ');
+            return `<div>⚙️ ${esc(a.reason)}${delta ? ` <b>(${delta})</b>` : ''}</div>`;
+          })
+          .join('')
+      )
+    );
+  }
+
+  return `<div style="padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
+    <div style="font-size:.66rem;color:var(--c-text-muted);line-height:1.55">
+      Jokainen välitulos kaavoineen. Luvut ovat samat kuin muualla kortilla —
+      tämä ei laske mitään uudestaan vaan näyttää miten lopputulokseen päädyttiin.
+    </div>
+    ${steps.join('')}
+  </div>`;
+}
+
 // ─── Kortti ───────────────────────────────────────────────────────────────
+
+/**
+ * Kortin oma säiliö LLM-analyysille (tiketti #38, laajennus per ottelu).
+ *
+ * football-llm.js renderöi TÄHÄN säiliöön imperatiivisesti, samaan tapaan
+ * kuin round-wide-paneeli renderöi #llm-content:iin Vetolapulla. Tämä
+ * moduuli ei tuo football-llm.js:ää importilla — silta kulkee window.BTL:n
+ * kautta, sama kapea rajapinta kuin muuallakin (window.BT / window.BTF).
+ */
+export function llmContainerId(match) {
+  return `fllm-${match.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+}
 
 const SECTIONS = {
   stats: { icon: '📊', label: 'Tunnusluvut', render: statsSection },
   news: { icon: '📰', label: 'Uutiset', render: newsSection },
   analysis: { icon: '💎', label: 'Analyysi', render: analysisSection },
+  calc: { icon: '🔬', label: 'Laskenta', render: calcSection },
+  llm: { icon: '🤖', label: 'Kysy LLM:ltä', render: (match) => `<div id="${llmContainerId(match)}"></div>` },
 };
 
 /** Avoimet osiot pidetään muistissa, jotta uudelleenrenderöinti ei sulje niitä */
@@ -292,8 +694,14 @@ export function toggleSection(index, key) {
 }
 
 function sectionButtons(match, index) {
-  const open = openSections.get(index);
-  const buttons = Object.entries(SECTIONS)
+  const visible = Object.entries(SECTIONS).filter(([key]) => isVisible(key));
+  if (!visible.length) return '';
+
+  // Jos avoin osio piilotettiin asetuksista, se ei saa jäädä auki
+  let open = openSections.get(index);
+  if (open && !visible.some(([key]) => key === open)) open = null;
+
+  const buttons = visible
     .map(([key, s]) => {
       const count = key === 'news' ? match.news?.length ?? 0 : null;
       const active = open === key;
@@ -319,16 +727,21 @@ function matchCard(match, index) {
     </div>
 
     <div class="row" style="margin-top:5px">
-      <span class="matchup">${teamLogo(match.home)}<strong>${esc(match.home.name)}</strong><span class="vs">–</span><strong>${esc(match.away.name)}</strong>${teamLogo(match.away)}</span>
+      <span class="matchup">${teamLogo(match.home)}<strong>${esc(match.home.name)}${eloParen(match.stats?.home)}</strong><span class="vs">–</span><strong>${esc(match.away.name)}${eloParen(match.stats?.away)}</strong>${teamLogo(match.away)}</span>
       ${flagBadge}
     </div>
 
-    <div style="font-size:.65rem;margin-top:5px;color:var(--c-text-muted)">
-      Malli: <b style="color:var(--c-text)">${pct(match.model.probs.home, 0)}</b> / <b style="color:var(--c-text)">${pct(match.model.probs.draw, 0)}</b> / <b style="color:var(--c-text)">${pct(match.model.probs.away, 0)}</b>
-    </div>
-    ${probBar(match.model.probs)}
+    ${factorPills(match)}
+    ${valueLine(match)}
 
-    ${oddsTable(match, index)}
+    ${isVisible('probs')
+      ? `<div style="font-size:.65rem;margin-top:5px;color:var(--c-text-muted)">
+          Malli: <b style="color:var(--c-text)">${pct(match.model.probs.home, 0)}</b> / <b style="color:var(--c-text)">${pct(match.model.probs.draw, 0)}</b> / <b style="color:var(--c-text)">${pct(match.model.probs.away, 0)}</b>
+        </div>
+        ${probBar(match.model.probs)}`
+      : ''}
+
+    ${isVisible('odds') ? oddsTable(match, index) : `<div id="fbetpop-${index}" style="display:none"></div>`}
     ${sectionButtons(match, index)}
     <div id="fbets-${index}" style="margin-top:4px"></div>
   </div>`;
@@ -352,6 +765,42 @@ export function setSnapshot(snapshot, error) {
 
 export function getSnapshot() {
   return currentSnapshot;
+}
+
+/**
+ * Harjoitustilan kierrosnavigaatio (tiketti #37).
+ *
+ * Kierrosta ei voi vaihtaa vapaasti eteen ja taakse: harjoituksen idea on
+ * pelata kierros läpi, simuloida se ja siirtyä eteenpäin — aivan kuten
+ * oikeassa kaudessa. Siksi vain "seuraava kierros" ja "aloita alusta".
+ */
+function roundNav() {
+  if (getDataSource() !== 'mock') return '';
+  const index = getMockRound();
+  const total = getMockRoundCount() || 5;
+
+  const dots = Array.from({ length: total }, (_, i) => {
+    const state = i < index ? 'var(--c-success)' : i === index ? 'var(--c-accent)' : 'oklch(1 1 0/0.15)';
+    return `<span style="width:9px;height:9px;border-radius:50%;background:${state};display:inline-block"></span>`;
+  }).join('');
+
+  const atEnd = index >= total - 1;
+
+  return `<div class="card" style="border:1.5px solid var(--c-accent)">
+    <div class="row">
+      <strong style="font-size:.8rem">🎯 Harjoituskierros ${index + 1} / ${total}</strong>
+      <span style="display:flex;gap:5px;align-items:center">${dots}</span>
+    </div>
+    <div style="font-size:.63rem;color:var(--c-text-muted);margin-top:5px;line-height:1.5">
+      Kertoimet on johdettu kauden oikeista Elo-luvuista. Aseta vetoja, simuloi kierros
+      Seuranta-välilehdellä ja siirry eteenpäin — tappioketjua voi jahdata kierroksesta toiseen.
+    </div>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      ${atEnd
+        ? `<button class="btn btn-block" style="background:oklch(1 1 0/0.1);color:var(--c-text);font-size:.7rem" onclick="window.BTF.restartMockRounds()">🔄 Aloita kierrokset alusta</button>`
+        : `<button class="btn btn-primary btn-block" style="font-size:.72rem" onclick="window.BTF.nextMockRound()">Seuraava kierros →</button>`}
+    </div>
+  </div>`;
 }
 
 /** Snapshotin tila ja lähteet — käyttäjän pitää tietää mistä luvut tulevat */
@@ -415,8 +864,25 @@ export function renderAllCards() {
     ${currentSnapshot.matches.length} ottelua · ${flaggedCount ? `<b style="color:var(--c-success)">${flaggedCount} value-kohdetta</b>` : 'ei value-kohteita — markkina on tiukka'}
   </div>`;
 
-  container.innerHTML = sourceBanner(currentSnapshot) + summary + ordered.map(({ m, i }) => matchCard(m, i)).join('');
+  container.innerHTML = roundNav() + sourceBanner(currentSnapshot) + summary + ordered.map(({ m, i }) => matchCard(m, i)).join('');
   renderPlacedBets();
+  renderOpenLlmPanels();
+}
+
+/**
+ * Täytä auki olevat "Kysy LLM:ltä" -säiliöt.
+ *
+ * Placeholder-div syntyy vasta innerHTML-asetuksessa, joten renderForMatch
+ * voidaan kutsua vasta tämän jälkeen. Suljetuille kortin osioille säiliötä
+ * ei ole DOM:ssa — niitä ei yritetä täyttää.
+ */
+function renderOpenLlmPanels() {
+  if (!window.BTL || !currentSnapshot) return;
+  currentSnapshot.matches.forEach((match, index) => {
+    if (openSections.get(index) !== 'llm') return;
+    const bets = window.BT?.getBets?.()?.filter((b) => b.game_id === match.id) ?? [];
+    window.BTL.renderForMatch(llmContainerId(match), match, bets);
+  });
 }
 
 /** Näytä tälle ottelulle asetetut vedot kortin alaosassa */

@@ -1,41 +1,41 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-15T14:30:02.868Z",
+  "generated_at": "2026-08-15T19:26:04.710Z",
   "sample": {
     "predictions": 5,
-    "results": 1,
-    "matched": 0,
+    "results": 2,
+    "matched": 1,
     "sufficient": false,
     "minimum": 20
   },
   "accuracy": {
     "model": {
-      "total": 0,
+      "total": 1,
       "correct": 0,
       "rate": 0
     },
     "market": {
-      "total": 0,
+      "total": 1,
       "correct": 0,
       "rate": 0
     }
   },
   "brier": {
-    "model": null,
-    "market": null,
+    "model": 1.18865814,
+    "market": 1.1665311699999998,
     "uniform": 0.6666666666666667
   },
   "logLoss": {
-    "model": null,
-    "market": null
+    "model": 1.897786873873585,
+    "market": 1.8375940055718543
   },
   "calibration": [
     {
       "from": 0,
       "to": 0.2,
-      "predicted": 0,
-      "observed": 0,
-      "count": 0
+      "predicted": 0.1731,
+      "observed": 0.5,
+      "count": 2
     },
     {
       "from": 0.2,
@@ -54,9 +54,9 @@
     {
       "from": 0.6000000000000001,
       "to": 0.8,
-      "predicted": 0,
+      "predicted": 0.6538,
       "observed": 0,
-      "count": 0
+      "count": 1
     },
     {
       "from": 0.8,
@@ -84,8 +84,118 @@
     "hitRate": 0
   },
   "blendCalibration": {
-    "best": null,
-    "candidates": [],
+    "best": {
+      "weight": 0,
+      "brier": 1.1664660351283138,
+      "logLoss": 1.8376940005721876
+    },
+    "candidates": [
+      {
+        "weight": 0,
+        "brier": 1.1664660351283138,
+        "logLoss": 1.8376940005721876
+      },
+      {
+        "weight": 0.05,
+        "brier": 1.1696149940550389,
+        "logLoss": 1.8460516933118152
+      },
+      {
+        "weight": 0.1,
+        "brier": 1.1727693993924273,
+        "logLoss": 1.8544798262100555
+      },
+      {
+        "weight": 0.15,
+        "brier": 1.1759292511404793,
+        "logLoss": 1.8629795967315135
+      },
+      {
+        "weight": 0.2,
+        "brier": 1.1790945492991944,
+        "logLoss": 1.871552233137637
+      },
+      {
+        "weight": 0.25,
+        "brier": 1.1822652938685732,
+        "logLoss": 1.8801989955519116
+      },
+      {
+        "weight": 0.3,
+        "brier": 1.1854414848486154,
+        "logLoss": 1.8889211770715195
+      },
+      {
+        "weight": 0.35,
+        "brier": 1.1886231222393207,
+        "logLoss": 1.897720104927897
+      },
+      {
+        "weight": 0.4,
+        "brier": 1.1918102060406897,
+        "logLoss": 1.9065971416988114
+      },
+      {
+        "weight": 0.45,
+        "brier": 1.195002736252722,
+        "logLoss": 1.9155536865747194
+      },
+      {
+        "weight": 0.5,
+        "brier": 1.1982007128754177,
+        "logLoss": 1.9245911766823465
+      },
+      {
+        "weight": 0.55,
+        "brier": 1.2014041359087768,
+        "logLoss": 1.9337110884686297
+      },
+      {
+        "weight": 0.6,
+        "brier": 1.2046130053527992,
+        "logLoss": 1.942914939148344
+      },
+      {
+        "weight": 0.65,
+        "brier": 1.2078273212074853,
+        "logLoss": 1.952204288218974
+      },
+      {
+        "weight": 0.7,
+        "brier": 1.2110470834728346,
+        "logLoss": 1.9615807390466047
+      },
+      {
+        "weight": 0.75,
+        "brier": 1.2142722921488471,
+        "logLoss": 1.97104594052687
+      },
+      {
+        "weight": 0.8,
+        "brier": 1.2175029472355232,
+        "logLoss": 1.9806015888252655
+      },
+      {
+        "weight": 0.85,
+        "brier": 1.2207390487328629,
+        "logLoss": 1.9902494292014072
+      },
+      {
+        "weight": 0.9,
+        "brier": 1.2239805966408657,
+        "logLoss": 1.9999912579221601
+      },
+      {
+        "weight": 0.95,
+        "brier": 1.2272275909595323,
+        "logLoss": 2.0098289242688687
+      },
+      {
+        "weight": 1,
+        "brier": 1.2304800316888618,
+        "logLoss": 2.0197643326443084
+      }
+    ],
     "sufficientSample": false
   },
   "currentBlendWeight": 0.35
