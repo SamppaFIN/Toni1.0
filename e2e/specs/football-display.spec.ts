@@ -26,12 +26,18 @@ test.describe('Elo ja laskentaerittely', () => {
     await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
   });
 
-  test('kortilla näkyy molempien joukkueiden Elo-luku ja ero', async ({ page }) => {
+  test('Elo-luku näkyy suluissa joukkueen nimen perässä', async ({ page }) => {
+    const matchup = page.locator('#round-games .card').nth(2).locator('.matchup');
+    // Molemmille joukkueille oma luku sulkeissa, muutosnuoli mukana
+    await expect(matchup).toContainText(/\(1[3-6]\d\d[▲▼·]\d+\)/);
+    const parens = await matchup.locator('span[title*="Kauden Elo"]').count();
+    expect(parens).toBe(2);
+  });
+
+  test('Elo-ero ja odotusarvo näkyvät omalla rivillään', async ({ page }) => {
     const card = page.locator('#round-games .card').nth(2);
-    await expect(card).toContainText('Elo');
-    // Elo-luvut ovat neljä numeroa 1500:n molemmin puolin
-    await expect(card).toContainText(/1[3-6]\d\d/);
-    await expect(card).toContainText('ero');
+    await expect(card).toContainText('Elo-ero');
+    await expect(card).toContainText('odotusarvo');
   });
 
   test('Elo-luvut näkyvät myös tunnuslukuosiossa', async ({ page }) => {
@@ -113,6 +119,83 @@ test.describe('Kerroinvärit erottavat parhaan hinnan ylikertoimesta', () => {
 
   test('selite kertoo että tähti ei tarkoita kannattavaa vetoa', async ({ page }) => {
     await expect(page.locator('#round-games')).toContainText('ei tarkoita että veto kannattaa');
+  });
+});
+
+test.describe('Value-tieto joka kortilla', () => {
+  test.beforeEach(async ({ page }) => {
+    await useFootball(page);
+    await resetState(page);
+    await useFixtureSnapshot(page);
+    await page.goto('/demo.html');
+    await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
+  });
+
+  test('jokainen ottelukortti kertoo value-tilanteensa avaamatta analyysia', async ({ page }) => {
+    const cards = page.locator('#round-games .card');
+    const count = await cards.count();
+    for (let i = 1; i < count; i++) {
+      const text = await cards.nth(i).innerText();
+      // Joko nimetty value-kohde tai selvä "ei kohdetta" — ei hiljaista tyhjää
+      expect(text.includes('edge') || text.includes('Ei value-kohdetta')).toBe(true);
+    }
+  });
+
+  test('value-kortti nimeää kohteen, kertoimen, toimiston ja panoksen', async ({ page }) => {
+    // Fixtuurin vahva kohde: Inter Turku 1 @ 1.48 NordicBet
+    const card = page.locator('#round-games .card').filter({ hasText: 'Inter Turku' });
+    await expect(card).toContainText('Inter Turku');
+    await expect(card).toContainText('1.48');
+    await expect(card).toContainText('NordicBet');
+    await expect(card).toContainText('edge');
+    await expect(card).toContainText('panos');
+  });
+
+  test('ilman value-kohdetta kortti sanoo sen suoraan ja perustelee', async ({ page }) => {
+    const card = page.locator('#round-games .card').filter({ hasText: 'Arsenal' });
+    await expect(card).toContainText('Ei value-kohdetta');
+    await expect(card).toContainText('alle 3 %:n kynnyksen');
+    await expect(card).toContainText('panossuositusta ei anneta');
+    // Panossuositusta euroina ei tarjota — se on value-rivin muoto
+    await expect(card).not.toContainText('· panos');
+  });
+});
+
+test.describe('Välilehtipalkki', () => {
+  test.beforeEach(async ({ page }) => {
+    await useFootball(page);
+    await resetState(page);
+    await useFixtureSnapshot(page);
+  });
+
+  test('kaikki välilehdet ovat näkyvissä kapealla ruudulla', async ({ page }) => {
+    // Aiemmin palkki vieri vaakasuunnassa ja Admin jäi reunan taakse ilman
+    // vihjettä — asetukset olivat löytymättömissä puhelimella
+    await page.setViewportSize({ width: 360, height: 740 });
+    await page.goto('/demo.html');
+    await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
+
+    const bar = await page.locator('#tab-bar').boundingBox();
+    const tabs = page.locator('.tab:visible');
+    const count = await tabs.count();
+    expect(count).toBeGreaterThanOrEqual(7);
+
+    for (let i = 0; i < count; i++) {
+      const box = await tabs.nth(i).boundingBox();
+      const label = await tabs.nth(i).innerText();
+      expect(box, `välilehdellä ${label} ei ole mittoja`).not.toBeNull();
+      expect(box!.x, `${label} alkaa palkin vasemmalta puolelta`).toBeGreaterThanOrEqual(bar!.x - 1);
+      expect(box!.x + box!.width, `${label} jää palkin oikean reunan taakse`).toBeLessThanOrEqual(bar!.x + bar!.width + 1);
+    }
+  });
+
+  test('Admin-välilehti on klikattavissa suoraan ilman vieritystä', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 740 });
+    await page.goto('/demo.html');
+    await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
+
+    await page.locator('.tab[data-tab="admin"]').click({ timeout: 3000 });
+    await expect(page.locator('#admin-content')).toContainText('Teema');
   });
 });
 

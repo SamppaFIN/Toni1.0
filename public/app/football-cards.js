@@ -104,24 +104,69 @@ function eloBadge(stats) {
   return `<b style="font-variant-numeric:tabular-nums">${stats.elo}</b>${rank} <span style="color:${color};font-size:.58rem">${arrow}${Math.abs(change ?? 0)}</span>`;
 }
 
-/** Elo-rivi kortin yläosassa — käyttäjä pyysi luvut näkyviin ilman avaamista */
+/** Elo suluissa joukkueen nimen perään — luku siinä missä se koskee joukkuetta */
+function eloParen(stats) {
+  if (!isVisible('elo') || stats?.elo == null) return '';
+  const change = stats.elo_change;
+  const color = change > 0 ? 'var(--c-success)' : change < 0 ? 'var(--c-danger)' : 'var(--c-text-muted)';
+  const arrow = change > 0 ? '▲' : change < 0 ? '▼' : '·';
+  return ` <span style="font-weight:500;font-size:.68rem;color:var(--c-text-muted);font-variant-numeric:tabular-nums" title="Kauden Elo (lähtötaso 1500)${stats.elo_rank ? `, sija #${stats.elo_rank}` : ''}${change != null ? `, muutos kauden alusta ${change > 0 ? '+' : ''}${change}` : ''}">(${stats.elo}<span style="color:${color};font-size:.56rem">${arrow}${Math.abs(change ?? 0)}</span>)</span>`;
+}
+
+/** Elo-ero ja siitä johdettu odotusarvo — vertailuluku, ei osa 1X2-mallia */
 function eloLine(match) {
   if (!isVisible('elo')) return '';
   const h = match.stats?.home;
   const a = match.stats?.away;
-  if (h?.elo == null && a?.elo == null) return '';
+  if (h?.elo == null || a?.elo == null) return '';
 
-  const diff = h?.elo != null && a?.elo != null ? h.elo - a.elo : null;
-  const expected =
-    diff !== null
-      ? ` · kotietu mukaan lukien odotusarvo <b>${(eloExpected(h.elo, a.elo) * 100).toFixed(0)} %</b>`
-      : '';
+  const diff = h.elo - a.elo;
+  return `<div style="font-size:.6rem;color:var(--c-text-muted);margin-top:3px">
+    📈 Elo-ero <b style="color:${diff > 0 ? 'var(--c-success)' : diff < 0 ? 'var(--c-danger)' : 'var(--c-text)'}">${diff > 0 ? '+' : ''}${diff}</b>
+    · kotietu mukaan lukien odotusarvo <b>${(eloExpected(h.elo, a.elo) * 100).toFixed(0)} %</b> kotijoukkueelle
+  </div>`;
+}
 
-  return `<div style="font-size:.62rem;color:var(--c-text-muted);margin-top:4px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap">
-    <span title="Kauden Elo, lähtötaso 1500. Nuoli = muutos kauden alusta, # = sija Elo-järjestyksessä.">
-      📈 Elo ${eloBadge(h)} <span style="opacity:.5">vs</span> ${eloBadge(a)}
-    </span>
-    ${diff !== null ? `<span>ero <b style="color:${diff > 0 ? 'var(--c-success)' : diff < 0 ? 'var(--c-danger)' : 'var(--c-text)'}">${diff > 0 ? '+' : ''}${diff}</b>${expected}</span>` : ''}
+/**
+ * Value-tieto joka kortille.
+ *
+ * Aiemmin tämä oli vain otsikkorivin laskurina ("2 value-kohdetta") ja
+ * kortilla pelkkänä prosenttimerkkinä. Kortista ei nähnyt MIKÄ kohde on
+ * arvokas ilman että avasi analyysin — ja juuri se on se yksi asia jonka
+ * takia korttia katsotaan.
+ *
+ * Kun kohdetta ei ole, se sanotaan yhtä selvästi. "Ei value-kohdetta" on
+ * useimmilla otteluilla oikea vastaus, ja sen näkeminen estää lukemasta
+ * parasta hintaa vahingossa suositukseksi.
+ */
+function valueLine(match) {
+  const flagged = match.analysis.edges
+    .filter((e) => e.flag !== 'none')
+    .sort((a, b) => b.edge - a.edge);
+
+  const name = (side) => (side === 'home' ? match.home.name : side === 'away' ? match.away.name : 'Tasapeli');
+
+  if (!flagged.length) {
+    const best = [...match.analysis.edges].sort((a, b) => b.edge - a.edge)[0];
+    return `<div style="margin-top:6px;padding:6px 8px;border-radius:7px;background:oklch(1 1 0/0.05);font-size:.63rem;color:var(--c-text-muted);line-height:1.45">
+      ⚫ <b>Ei value-kohdetta.</b> Paras edge ${SIDE_LABELS[best.side]} ${esc(name(best.side))} @ ${num(best.odds)}
+      = <b>${best.edge > 0 ? '+' : ''}${(best.edge * 100).toFixed(1)} %</b> — jää alle 3 %:n kynnyksen, joten panossuositusta ei anneta.
+    </div>`;
+  }
+
+  const rows = flagged
+    .map((e) => {
+      const meta = FLAG_META[e.flag];
+      return `<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap">
+        <span>${meta.icon} <b>${SIDE_LABELS[e.side]} ${esc(name(e.side))}</b> @ <b>${num(e.odds)}</b> <span style="color:var(--c-text-muted)">${esc(e.book ?? '')}</span></span>
+        <span>edge <b style="color:${e.flag === 'strong' ? 'var(--c-success)' : 'var(--c-warning)'}">+${(e.edge * 100).toFixed(1)} %</b>${e.stake_suggestion > 0 ? ` · panos <b style="color:var(--c-success)">${num(e.stake_suggestion)} €</b>` : ''}</span>
+      </div>`;
+    })
+    .join('');
+
+  const strong = flagged.some((e) => e.flag === 'strong');
+  return `<div style="margin-top:6px;padding:6px 8px;border-radius:7px;font-size:.65rem;line-height:1.5;background:${strong ? 'oklch(0.62 0.20 145 / 0.14)' : 'oklch(0.72 0.16 85 / 0.14)'};border:1px solid ${strong ? 'oklch(0.62 0.20 145 / 0.4)' : 'oklch(0.72 0.16 85 / 0.4)'}">
+    ${rows}
   </div>`;
 }
 
@@ -625,11 +670,12 @@ function matchCard(match, index) {
     </div>
 
     <div class="row" style="margin-top:5px">
-      <span class="matchup">${teamLogo(match.home)}<strong>${esc(match.home.name)}</strong><span class="vs">–</span><strong>${esc(match.away.name)}</strong>${teamLogo(match.away)}</span>
+      <span class="matchup">${teamLogo(match.home)}<strong>${esc(match.home.name)}${eloParen(match.stats?.home)}</strong><span class="vs">–</span><strong>${esc(match.away.name)}${eloParen(match.stats?.away)}</strong>${teamLogo(match.away)}</span>
       ${flagBadge}
     </div>
 
     ${eloLine(match)}
+    ${valueLine(match)}
 
     ${isVisible('probs')
       ? `<div style="font-size:.65rem;margin-top:5px;color:var(--c-text-muted)">

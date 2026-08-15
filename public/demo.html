@@ -84,12 +84,15 @@ body{
 }
 .bankroll-amount{font-weight:800;font-size:clamp(1rem,2.5vw,1.2rem)}
 .bankroll-amount.positive{color:var(--c-success)}.bankroll-amount.negative{color:var(--c-danger)}
-/* Tabs — horizontal scroll */
-.tabs{display:flex;gap:4px;padding:clamp(6px,1.5vw,10px);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
+/* Tabs — rivittyvät, eivät vieri
+   Aiemmin palkki oli overflow-x:auto piilotetulla vierityspalkilla. Kapealla
+   ruudulla Admin jäi reunan taakse ilman mitään vihjettä siitä että sinne
+   pääsee — asetukset ja teemanvaihto olivat käytännössä löytymättömissä.
+   Rivitys näyttää kaikki välilehdet kerralla eikä vaadi arvaamaan. */
+.tabs{display:flex;flex-wrap:wrap;gap:4px;padding:clamp(6px,1.5vw,10px)}
 .tab{
-  flex-shrink:0;min-height:var(--touch-target);
-  padding:6px clamp(8px,2vw,14px);
+  flex:1 1 auto;min-height:var(--touch-target);
+  padding:6px clamp(6px,1.6vw,14px);
   background:var(--c-surface);border:none;color:var(--c-text-muted);
   border-radius:var(--radius-sm);cursor:pointer;
   font-size:clamp(0.65rem,1.2vw,0.75rem);font-weight:500;white-space:nowrap;
@@ -120,7 +123,9 @@ body{
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(6px,1.5vw,8px)}
 /* Team logo */
 .team-logo{width:clamp(24px,6vw,32px);height:clamp(24px,6vw,32px);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:clamp(0.55rem,1.5vw,0.7rem);color:#fff;flex-shrink:0}
-.matchup{display:flex;align-items:center;gap:6px;font-size:clamp(0.8rem,1.5vw,0.9rem)}
+/* Elo-luku suluissa kasvattaa nimeä — rivittyminen estää sen että
+   pitkä nimipari työntäisi value-merkin kortin reunan yli */
+.matchup{display:flex;align-items:center;gap:6px;font-size:clamp(0.8rem,1.5vw,0.9rem);flex-wrap:wrap}
 .matchup .vs{margin:0 2px;color:var(--c-text-muted);font-size:0.7em}
 /* Bookmaker odds list (kierroskortti) */
 .odds-list{display:flex;flex-direction:column;gap:3px;margin-top:6px}
