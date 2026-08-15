@@ -1,0 +1,915 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-08-14T09:00:00.000Z",
+  "sport": "football",
+  "source": "mock",
+  "providers": [
+    "esimerkkidata (ei oikeita kertoimia)"
+  ],
+  "leagues": [
+    "Valioliiga",
+    "Veikkausliiga"
+  ],
+  "matches": [
+    {
+      "id": "soccer_epl:2026-08-14:ARS-CHE",
+      "league": "Valioliiga",
+      "kickoff": "2026-08-14T18:30:00.000Z",
+      "home": {
+        "name": "Arsenal",
+        "short": "ARS",
+        "color": "#EF0107"
+      },
+      "away": {
+        "name": "Chelsea",
+        "short": "CHE",
+        "color": "#034694"
+      },
+      "odds": [
+        {
+          "bookmaker": "Pinnacle",
+          "key": "pinnacle",
+          "market": "1X2",
+          "home": 1.95,
+          "draw": 3.7,
+          "away": 4,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "Unibet",
+          "key": "unibet_eu",
+          "market": "1X2",
+          "home": 1.98,
+          "draw": 3.6,
+          "away": 3.95,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "Betsson",
+          "key": "betsson",
+          "market": "1X2",
+          "home": 1.92,
+          "draw": 3.75,
+          "away": 3.85,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "NordicBet",
+          "key": "nordicbet",
+          "market": "1X2",
+          "home": 1.94,
+          "draw": 3.65,
+          "away": 4.05,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "bet365",
+          "key": "bet365",
+          "market": "1X2",
+          "home": 1.96,
+          "draw": 3.6,
+          "away": 3.9,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        }
+      ],
+      "best": {
+        "home": 1.98,
+        "draw": 3.75,
+        "away": 4.05,
+        "home_effective": 1.98,
+        "draw_effective": 3.75,
+        "away_effective": 4.05,
+        "home_book": "Unibet",
+        "draw_book": "Betsson",
+        "away_book": "NordicBet"
+      },
+      "market": {
+        "margin": 0.0186,
+        "implied": {
+          "home": 0.4939,
+          "draw": 0.263,
+          "away": 0.2431
+        },
+        "sharp": {
+          "home": 0.4964,
+          "draw": 0.2616,
+          "away": 0.242
+        },
+        "sharp_source": "Pinnacle"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 1.801,
+        "lambda_away": 1.154,
+        "probs": {
+          "home": 0.5046,
+          "draw": 0.2548,
+          "away": 0.2406
+        },
+        "poisson_probs": {
+          "home": 0.5199,
+          "draw": 0.2422,
+          "away": 0.2379
+        },
+        "blend_weight": 0.35,
+        "over25": 0.5666,
+        "btts": 0.5769,
+        "top_scores": [
+          {
+            "score": "1-1",
+            "p": 0.1137
+          },
+          {
+            "score": "2-1",
+            "p": 0.0975
+          },
+          {
+            "score": "1-0",
+            "p": 0.0884
+          },
+          {
+            "score": "2-0",
+            "p": 0.0845
+          },
+          {
+            "score": "1-2",
+            "p": 0.0624
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Chelsea: Kärkihyökkääjä sivussa — vieraiden maaliodotus laskee",
+            "delta_lambda_away": -0.09
+          }
+        ]
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 1.98,
+            "odds_effective": 1.98,
+            "book": "Unibet",
+            "model_prob": 0.5046,
+            "implied_prob": 0.4939,
+            "edge": -0.0009,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 3.75,
+            "odds_effective": 3.75,
+            "book": "Betsson",
+            "model_prob": 0.2548,
+            "implied_prob": 0.263,
+            "edge": -0.0445,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 4.05,
+            "odds_effective": 4.05,
+            "book": "NordicBet",
+            "model_prob": 0.2406,
+            "implied_prob": 0.2431,
+            "edge": -0.0256,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 2,
+          "played": 3,
+          "form": "WWD",
+          "gf_pg": 2.2,
+          "ga_pg": 0.9,
+          "home_gf_pg": 2.5,
+          "away_gf_pg": 1.9,
+          "xg_pg": null,
+          "rest_days": 6,
+          "ppg": 2.33,
+          "elo": 1572,
+          "elo_change": 72,
+          "elo_rank": 2
+        },
+        "away": {
+          "rank": 6,
+          "played": 3,
+          "form": "WLD",
+          "gf_pg": 1.6,
+          "ga_pg": 1.3,
+          "home_gf_pg": 1.8,
+          "away_gf_pg": 1.4,
+          "xg_pg": null,
+          "rest_days": 4,
+          "ppg": 1.33,
+          "elo": 1518,
+          "elo_change": 18,
+          "elo_rank": 6
+        },
+        "h2h": [
+          {
+            "date": "2026-04-11",
+            "score": "1-2",
+            "venue": "home"
+          },
+          {
+            "date": "2025-11-23",
+            "score": "2-2",
+            "venue": "away"
+          },
+          {
+            "date": "2025-03-08",
+            "score": "3-1",
+            "venue": "home"
+          }
+        ]
+      },
+      "news": [
+        {
+          "title": "Chelsea ilman avainhyökkääjäänsä — reisivamma pitää sivussa arviolta kolme viikkoa",
+          "url": "https://www.bbc.com/sport/football/example-1",
+          "source": "BBC Sport",
+          "published_at": "2026-08-14T07:40:00.000Z",
+          "event_type": "injury",
+          "team": "Chelsea",
+          "player": "esimerkkipelaaja",
+          "confidence": 0.86,
+          "impact": "Kärkihyökkääjä sivussa — vieraiden maaliodotus laskee"
+        },
+        {
+          "title": "Arsenalin kokoonpano ennallaan, valmentaja vahvisti lehdistötilaisuudessa",
+          "url": "https://www.theguardian.com/football/example-2",
+          "source": "The Guardian",
+          "published_at": "2026-08-13T16:10:00.000Z",
+          "event_type": "lineup_change",
+          "team": "Arsenal",
+          "player": null,
+          "confidence": 0.74,
+          "impact": "Ei muutoksia — ei vaikutusta malliin"
+        }
+      ]
+    },
+    {
+      "id": "soccer_epl:2026-08-14:BHA-EVE",
+      "league": "Valioliiga",
+      "kickoff": "2026-08-14T16:00:00.000Z",
+      "home": {
+        "name": "Brighton",
+        "short": "BHA",
+        "color": "#0057B8"
+      },
+      "away": {
+        "name": "Everton",
+        "short": "EVE",
+        "color": "#003399"
+      },
+      "odds": [
+        {
+          "bookmaker": "Pinnacle",
+          "key": "pinnacle",
+          "market": "1X2",
+          "home": 2.05,
+          "draw": 3.45,
+          "away": 3.75,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "Unibet",
+          "key": "unibet_eu",
+          "market": "1X2",
+          "home": 2.1,
+          "draw": 3.4,
+          "away": 3.6,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "Betsson",
+          "key": "betsson",
+          "market": "1X2",
+          "home": 2.02,
+          "draw": 3.5,
+          "away": 3.7,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "NordicBet",
+          "key": "nordicbet",
+          "market": "1X2",
+          "home": 2.08,
+          "draw": 3.35,
+          "away": 3.8,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        }
+      ],
+      "best": {
+        "home": 2.1,
+        "draw": 3.5,
+        "away": 3.8,
+        "home_effective": 2.1,
+        "draw_effective": 3.5,
+        "away_effective": 3.8,
+        "home_book": "Unibet",
+        "draw_book": "Betsson",
+        "away_book": "NordicBet"
+      },
+      "market": {
+        "margin": 0.0251,
+        "implied": {
+          "home": 0.4644,
+          "draw": 0.2792,
+          "away": 0.2564
+        },
+        "sharp": {
+          "home": 0.4671,
+          "draw": 0.2776,
+          "away": 0.2553
+        },
+        "sharp_source": "Pinnacle"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 1.625,
+        "lambda_away": 1.19,
+        "probs": {
+          "home": 0.4678,
+          "draw": 0.2703,
+          "away": 0.2619
+        },
+        "poisson_probs": {
+          "home": 0.469,
+          "draw": 0.257,
+          "away": 0.274
+        },
+        "blend_weight": 0.35,
+        "over25": 0.5341,
+        "btts": 0.5646,
+        "top_scores": [
+          {
+            "score": "1-1",
+            "p": 0.1216
+          },
+          {
+            "score": "2-1",
+            "p": 0.0941
+          },
+          {
+            "score": "1-0",
+            "p": 0.0915
+          },
+          {
+            "score": "2-0",
+            "p": 0.0791
+          },
+          {
+            "score": "1-2",
+            "p": 0.069
+          }
+        ],
+        "adjustments": []
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.1,
+            "odds_effective": 2.1,
+            "book": "Unibet",
+            "model_prob": 0.4678,
+            "implied_prob": 0.4644,
+            "edge": -0.0176,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 3.5,
+            "odds_effective": 3.5,
+            "book": "Betsson",
+            "model_prob": 0.2703,
+            "implied_prob": 0.2792,
+            "edge": -0.054,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 3.8,
+            "odds_effective": 3.8,
+            "book": "NordicBet",
+            "model_prob": 0.2619,
+            "implied_prob": 0.2564,
+            "edge": -0.0048,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 9,
+          "played": 3,
+          "form": "DWL",
+          "gf_pg": 1.5,
+          "ga_pg": 1.4,
+          "home_gf_pg": 1.7,
+          "away_gf_pg": 1.3,
+          "xg_pg": null,
+          "rest_days": 7,
+          "ppg": 1.33,
+          "elo": 1504,
+          "elo_change": 4,
+          "elo_rank": 9
+        },
+        "away": {
+          "rank": 14,
+          "played": 3,
+          "form": "LDL",
+          "gf_pg": 1.2,
+          "ga_pg": 1.5,
+          "home_gf_pg": 1.4,
+          "away_gf_pg": 1,
+          "xg_pg": null,
+          "rest_days": 7,
+          "ppg": 0.67,
+          "elo": 1462,
+          "elo_change": -38,
+          "elo_rank": 14
+        },
+        "h2h": [
+          {
+            "date": "2026-02-14",
+            "score": "1-1",
+            "venue": "home"
+          },
+          {
+            "date": "2025-09-27",
+            "score": "0-2",
+            "venue": "away"
+          }
+        ]
+      },
+      "news": []
+    },
+    {
+      "id": "soccer_finland_veikkausliiga:2026-08-14:HJK-KUPS",
+      "league": "Veikkausliiga",
+      "kickoff": "2026-08-14T15:30:00.000Z",
+      "home": {
+        "name": "HJK",
+        "short": "HJK",
+        "color": "#0033A0"
+      },
+      "away": {
+        "name": "KuPS",
+        "short": "KUP",
+        "color": "#FFDD00"
+      },
+      "odds": [
+        {
+          "bookmaker": "Pinnacle",
+          "key": "pinnacle",
+          "market": "1X2",
+          "home": 2.25,
+          "draw": 3.3,
+          "away": 3.2,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "Unibet",
+          "key": "unibet_eu",
+          "market": "1X2",
+          "home": 2.35,
+          "draw": 3.25,
+          "away": 3.1,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "Veikkaus",
+          "key": "veikkaus",
+          "market": "1X2",
+          "home": 2.15,
+          "draw": 3.2,
+          "away": 3.05,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "NordicBet",
+          "key": "nordicbet",
+          "market": "1X2",
+          "home": 2.28,
+          "draw": 3.3,
+          "away": 3.15,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        }
+      ],
+      "best": {
+        "home": 2.35,
+        "draw": 3.3,
+        "away": 3.2,
+        "home_effective": 2.35,
+        "draw_effective": 3.3,
+        "away_effective": 3.2,
+        "home_book": "Unibet",
+        "draw_book": "Pinnacle",
+        "away_book": "Pinnacle"
+      },
+      "market": {
+        "margin": 0.0411,
+        "implied": {
+          "home": 0.4163,
+          "draw": 0.2858,
+          "away": 0.2979
+        },
+        "sharp": {
+          "home": 0.4193,
+          "draw": 0.2859,
+          "away": 0.2948
+        },
+        "sharp_source": "Pinnacle"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 1.69,
+        "lambda_away": 1.211,
+        "probs": {
+          "home": 0.4406,
+          "draw": 0.2738,
+          "away": 0.2856
+        },
+        "poisson_probs": {
+          "home": 0.4802,
+          "draw": 0.2512,
+          "away": 0.2686
+        },
+        "blend_weight": 0.35,
+        "over25": 0.5542,
+        "btts": 0.5782,
+        "top_scores": [
+          {
+            "score": "1-1",
+            "p": 0.1181
+          },
+          {
+            "score": "2-1",
+            "p": 0.0951
+          },
+          {
+            "score": "1-0",
+            "p": 0.0873
+          },
+          {
+            "score": "2-0",
+            "p": 0.0785
+          },
+          {
+            "score": "1-2",
+            "p": 0.0681
+          }
+        ],
+        "adjustments": []
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.35,
+            "odds_effective": 2.35,
+            "book": "Unibet",
+            "model_prob": 0.4406,
+            "implied_prob": 0.4163,
+            "edge": 0.0354,
+            "flag": "candidate",
+            "kelly_fraction": 0.0066,
+            "stake_suggestion": 0.66
+          },
+          {
+            "side": "draw",
+            "odds": 3.3,
+            "odds_effective": 3.3,
+            "book": "Pinnacle",
+            "model_prob": 0.2738,
+            "implied_prob": 0.2858,
+            "edge": -0.0965,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 3.2,
+            "odds_effective": 3.2,
+            "book": "Pinnacle",
+            "model_prob": 0.2856,
+            "implied_prob": 0.2979,
+            "edge": -0.0861,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 1,
+          "played": 18,
+          "form": "WWWDW",
+          "gf_pg": 1.85,
+          "ga_pg": 1.05,
+          "home_gf_pg": 2.1,
+          "away_gf_pg": 1.6,
+          "xg_pg": null,
+          "rest_days": 5,
+          "ppg": 2.11,
+          "elo": 1604,
+          "elo_change": 104,
+          "elo_rank": 1
+        },
+        "away": {
+          "rank": 3,
+          "played": 18,
+          "form": "WDWLW",
+          "gf_pg": 1.7,
+          "ga_pg": 1.1,
+          "home_gf_pg": 1.95,
+          "away_gf_pg": 1.45,
+          "xg_pg": null,
+          "rest_days": 4,
+          "ppg": 1.83,
+          "elo": 1562,
+          "elo_change": 62,
+          "elo_rank": 3
+        },
+        "h2h": [
+          {
+            "date": "2026-05-18",
+            "score": "2-1",
+            "venue": "home"
+          },
+          {
+            "date": "2025-08-30",
+            "score": "1-1",
+            "venue": "away"
+          },
+          {
+            "date": "2025-04-20",
+            "score": "0-1",
+            "venue": "home"
+          }
+        ]
+      },
+      "news": [
+        {
+          "title": "KuPS kiertää tiiviissä ottelutahdissa — kolme peliä kahdeksassa päivässä",
+          "url": "https://yle.fi/urheilu/example-3",
+          "source": "Yle Urheilu",
+          "published_at": "2026-08-13T11:00:00.000Z",
+          "event_type": "other",
+          "team": "KuPS",
+          "player": null,
+          "confidence": 0.68,
+          "impact": "Otteluruuhka — matala confidence, ei λ-korjausta"
+        }
+      ]
+    },
+    {
+      "id": "soccer_finland_veikkausliiga:2026-08-14:INT-ILV",
+      "league": "Veikkausliiga",
+      "kickoff": "2026-08-14T16:00:00.000Z",
+      "home": {
+        "name": "Inter Turku",
+        "short": "INT",
+        "color": "#004B93"
+      },
+      "away": {
+        "name": "Ilves",
+        "short": "ILV",
+        "color": "#00843D"
+      },
+      "odds": [
+        {
+          "bookmaker": "Pinnacle",
+          "key": "pinnacle",
+          "market": "1X2",
+          "home": 1.36,
+          "draw": 4.75,
+          "away": 7.9,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "Unibet",
+          "key": "unibet_eu",
+          "market": "1X2",
+          "home": 1.38,
+          "draw": 4.65,
+          "away": 7.6,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "Veikkaus",
+          "key": "veikkaus",
+          "market": "1X2",
+          "home": 1.33,
+          "draw": 4.5,
+          "away": 7.2,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        },
+        {
+          "bookmaker": "NordicBet",
+          "key": "nordicbet",
+          "market": "1X2",
+          "home": 1.48,
+          "draw": 4.4,
+          "away": 6.8,
+          "commission": 0,
+          "fetched_at": "2026-08-14T09:00:00.000Z"
+        }
+      ],
+      "best": {
+        "home": 1.48,
+        "draw": 4.75,
+        "away": 7.9,
+        "home_effective": 1.48,
+        "draw_effective": 4.75,
+        "away_effective": 7.9,
+        "home_book": "NordicBet",
+        "draw_book": "Pinnacle",
+        "away_book": "Pinnacle"
+      },
+      "market": {
+        "margin": 0.0128,
+        "implied": {
+          "home": 0.676,
+          "draw": 0.2002,
+          "away": 0.1238
+        },
+        "sharp": {
+          "home": 0.6857,
+          "draw": 0.1963,
+          "away": 0.118
+        },
+        "sharp_source": "Pinnacle"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 2.497,
+        "lambda_away": 0.729,
+        "probs": {
+          "home": 0.7102,
+          "draw": 0.1835,
+          "away": 0.1063
+        },
+        "poisson_probs": {
+          "home": 0.7558,
+          "draw": 0.1598,
+          "away": 0.0844
+        },
+        "blend_weight": 0.35,
+        "over25": 0.625,
+        "btts": 0.4784,
+        "top_scores": [
+          {
+            "score": "2-0",
+            "p": 0.124
+          },
+          {
+            "score": "3-0",
+            "p": 0.1032
+          },
+          {
+            "score": "1-0",
+            "p": 0.0957
+          },
+          {
+            "score": "2-1",
+            "p": 0.0904
+          },
+          {
+            "score": "1-1",
+            "p": 0.076
+          }
+        ],
+        "adjustments": []
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 1.48,
+            "odds_effective": 1.48,
+            "book": "NordicBet",
+            "model_prob": 0.7102,
+            "implied_prob": 0.676,
+            "edge": 0.0511,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          },
+          {
+            "side": "draw",
+            "odds": 4.75,
+            "odds_effective": 4.75,
+            "book": "Pinnacle",
+            "model_prob": 0.1835,
+            "implied_prob": 0.2002,
+            "edge": -0.1284,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 7.9,
+            "odds_effective": 7.9,
+            "book": "Pinnacle",
+            "model_prob": 0.1063,
+            "implied_prob": 0.1238,
+            "edge": -0.1602,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 2,
+          "played": 18,
+          "form": "WWDWW",
+          "gf_pg": 2.05,
+          "ga_pg": 0.85,
+          "home_gf_pg": 2.35,
+          "away_gf_pg": 1.75,
+          "xg_pg": null,
+          "rest_days": 6,
+          "ppg": 2.06,
+          "elo": 1588,
+          "elo_change": 88,
+          "elo_rank": 2
+        },
+        "away": {
+          "rank": 11,
+          "played": 18,
+          "form": "LLDLW",
+          "gf_pg": 1.05,
+          "ga_pg": 1.65,
+          "home_gf_pg": 1.25,
+          "away_gf_pg": 0.85,
+          "xg_pg": null,
+          "rest_days": 6,
+          "ppg": 0.89,
+          "elo": 1449,
+          "elo_change": -51,
+          "elo_rank": 11
+        },
+        "h2h": [
+          {
+            "date": "2026-06-02",
+            "score": "3-0",
+            "venue": "home"
+          },
+          {
+            "date": "2025-09-14",
+            "score": "1-1",
+            "venue": "away"
+          }
+        ]
+      },
+      "news": []
+    }
+  ]
+}

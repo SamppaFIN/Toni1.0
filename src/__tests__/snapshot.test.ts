@@ -15,8 +15,8 @@ const ROWS: BookmakerOdds[] = [
 ];
 
 const STATS: MatchStats = {
-  home: { rank: 1, played: 10, form: 'WWWDW', gf_pg: 2.0, ga_pg: 1.0, home_gf_pg: 2.2, away_gf_pg: 1.8, xg_pg: null, rest_days: 5, ppg: 2.2 },
-  away: { rank: 5, played: 10, form: 'WLDWL', gf_pg: 1.4, ga_pg: 1.3, home_gf_pg: 1.6, away_gf_pg: 1.2, xg_pg: null, rest_days: 4, ppg: 1.4 },
+  home: { rank: 1, played: 10, form: 'WWWDW', gf_pg: 2.0, ga_pg: 1.0, home_gf_pg: 2.2, away_gf_pg: 1.8, xg_pg: null, rest_days: 5, ppg: 2.2, elo: 1580, elo_change: 80, elo_rank: 1 },
+  away: { rank: 5, played: 10, form: 'WLDWL', gf_pg: 1.4, ga_pg: 1.3, home_gf_pg: 1.6, away_gf_pg: 1.2, xg_pg: null, rest_days: 4, ppg: 1.4, elo: 1512, elo_change: 12, elo_rank: 5 },
   h2h: [],
 };
 

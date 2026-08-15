@@ -22,7 +22,9 @@ import {
 import { initCards, setSnapshot, renderAllCards, renderPlacedBets, toggleSection, findMatch, matchIndex, getSnapshot } from './football-cards.js';
 import * as tracker from './football-tracker.js';
 import * as metrics from './football-metrics.js';
+import { DISPLAY_OPTIONS, getPrefs, togglePref, resetPrefs } from './football-prefs.js';
 import './football-chase.js'; // rekisteröi window.BTC — ei tarvitse suoraa viittausta täältä
+import './football-llm.js'; // rekisteröi window.BTL (tiketti #38)
 
 /** Vedonasetuksen ponnahdus — sama vuo kuin jääkiekkopuolella */
 function openBetPopup(matchId, side, odds, bookmaker) {
@@ -118,6 +120,8 @@ export async function reload() {
   const { snapshot, error } = await loadSnapshot();
   setSnapshot(snapshot, error);
   renderAllCards();
+  // LLM-paneelin nappi kertoo otteluiden määrän — se vanhenee jos snapshot vaihtuu
+  if (window.BTL) window.BTL.render();
   return { snapshot, error };
 }
 
@@ -148,6 +152,20 @@ async function restartMockRounds() {
   window.BT.toast('🔄 Harjoituskierrokset alusta');
 }
 
+/** Näyttöasetuksen vaihto (tiketti #39) — vaikuttaa vain renderöintiin */
+function toggleDisplay(key) {
+  togglePref(key);
+  renderAllCards();
+  if (typeof window.renderAdmin === 'function') window.renderAdmin();
+}
+
+function resetDisplay() {
+  resetPrefs();
+  renderAllCards();
+  if (typeof window.renderAdmin === 'function') window.renderAdmin();
+  window.BT.toast('🔄 Näyttöasetukset palautettu');
+}
+
 /** Vaihda datalähde oikean ja harjoitusdatan välillä */
 async function switchDataSource(source) {
   setDataSource(source);
@@ -175,6 +193,10 @@ window.BTF = {
   restartMockRounds,
   switchDataSource,
   getDataSource,
+  toggleDisplay,
+  resetDisplay,
+  getPrefs,
+  DISPLAY_OPTIONS,
 };
 
 // Demo.html kutsuu tätä kun jalkapallonäkymä on aktiivinen

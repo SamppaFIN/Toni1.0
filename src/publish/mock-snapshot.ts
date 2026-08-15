@@ -57,8 +57,8 @@ const MATCHES: MockMatch[] = [
       ['bet365', 'bet365', 1.96, 3.60, 3.90],
     ],
     stats: {
-      home: { rank: 2, played: 3, form: 'WWD', gf_pg: 2.20, ga_pg: 0.90, home_gf_pg: 2.50, away_gf_pg: 1.90, xg_pg: null, rest_days: 6, ppg: 2.33 },
-      away: { rank: 6, played: 3, form: 'WLD', gf_pg: 1.60, ga_pg: 1.30, home_gf_pg: 1.80, away_gf_pg: 1.40, xg_pg: null, rest_days: 4, ppg: 1.33 },
+      home: { rank: 2, played: 3, form: 'WWD', gf_pg: 2.20, ga_pg: 0.90, home_gf_pg: 2.50, away_gf_pg: 1.90, xg_pg: null, rest_days: 6, ppg: 2.33, elo: 1572, elo_change: 72, elo_rank: 2 },
+      away: { rank: 6, played: 3, form: 'WLD', gf_pg: 1.60, ga_pg: 1.30, home_gf_pg: 1.80, away_gf_pg: 1.40, xg_pg: null, rest_days: 4, ppg: 1.33, elo: 1518, elo_change: 18, elo_rank: 6 },
       h2h: [
         { date: '2026-04-11', score: '1-2', venue: 'home' },
         { date: '2025-11-23', score: '2-2', venue: 'away' },
@@ -106,8 +106,8 @@ const MATCHES: MockMatch[] = [
       ['NordicBet', 'nordicbet', 2.08, 3.35, 3.80],
     ],
     stats: {
-      home: { rank: 9, played: 3, form: 'DWL', gf_pg: 1.50, ga_pg: 1.40, home_gf_pg: 1.70, away_gf_pg: 1.30, xg_pg: null, rest_days: 7, ppg: 1.33 },
-      away: { rank: 14, played: 3, form: 'LDL', gf_pg: 1.20, ga_pg: 1.50, home_gf_pg: 1.40, away_gf_pg: 1.00, xg_pg: null, rest_days: 7, ppg: 0.67 },
+      home: { rank: 9, played: 3, form: 'DWL', gf_pg: 1.50, ga_pg: 1.40, home_gf_pg: 1.70, away_gf_pg: 1.30, xg_pg: null, rest_days: 7, ppg: 1.33, elo: 1504, elo_change: 4, elo_rank: 9 },
+      away: { rank: 14, played: 3, form: 'LDL', gf_pg: 1.20, ga_pg: 1.50, home_gf_pg: 1.40, away_gf_pg: 1.00, xg_pg: null, rest_days: 7, ppg: 0.67, elo: 1462, elo_change: -38, elo_rank: 14 },
       h2h: [
         { date: '2026-02-14', score: '1-1', venue: 'home' },
         { date: '2025-09-27', score: '0-2', venue: 'away' },
@@ -131,8 +131,8 @@ const MATCHES: MockMatch[] = [
       ['NordicBet', 'nordicbet', 2.28, 3.30, 3.15],
     ],
     stats: {
-      home: { rank: 1, played: 18, form: 'WWWDW', gf_pg: 1.85, ga_pg: 1.05, home_gf_pg: 2.10, away_gf_pg: 1.60, xg_pg: null, rest_days: 5, ppg: 2.11 },
-      away: { rank: 3, played: 18, form: 'WDWLW', gf_pg: 1.70, ga_pg: 1.10, home_gf_pg: 1.95, away_gf_pg: 1.45, xg_pg: null, rest_days: 4, ppg: 1.83 },
+      home: { rank: 1, played: 18, form: 'WWWDW', gf_pg: 1.85, ga_pg: 1.05, home_gf_pg: 2.10, away_gf_pg: 1.60, xg_pg: null, rest_days: 5, ppg: 2.11, elo: 1604, elo_change: 104, elo_rank: 1 },
+      away: { rank: 3, played: 18, form: 'WDWLW', gf_pg: 1.70, ga_pg: 1.10, home_gf_pg: 1.95, away_gf_pg: 1.45, xg_pg: null, rest_days: 4, ppg: 1.83, elo: 1562, elo_change: 62, elo_rank: 3 },
       h2h: [
         { date: '2026-05-18', score: '2-1', venue: 'home' },
         { date: '2025-08-30', score: '1-1', venue: 'away' },
@@ -173,8 +173,8 @@ const MATCHES: MockMatch[] = [
       ['NordicBet', 'nordicbet', 1.48, 4.40, 6.80],
     ],
     stats: {
-      home: { rank: 2, played: 18, form: 'WWDWW', gf_pg: 2.05, ga_pg: 0.85, home_gf_pg: 2.35, away_gf_pg: 1.75, xg_pg: null, rest_days: 6, ppg: 2.06 },
-      away: { rank: 11, played: 18, form: 'LLDLW', gf_pg: 1.05, ga_pg: 1.65, home_gf_pg: 1.25, away_gf_pg: 0.85, xg_pg: null, rest_days: 6, ppg: 0.89 },
+      home: { rank: 2, played: 18, form: 'WWDWW', gf_pg: 2.05, ga_pg: 0.85, home_gf_pg: 2.35, away_gf_pg: 1.75, xg_pg: null, rest_days: 6, ppg: 2.06, elo: 1588, elo_change: 88, elo_rank: 2 },
+      away: { rank: 11, played: 18, form: 'LLDLW', gf_pg: 1.05, ga_pg: 1.65, home_gf_pg: 1.25, away_gf_pg: 0.85, xg_pg: null, rest_days: 6, ppg: 0.89, elo: 1449, elo_change: -51, elo_rank: 11 },
       h2h: [
         { date: '2026-06-02', score: '3-0', venue: 'home' },
         { date: '2025-09-14', score: '1-1', venue: 'away' },

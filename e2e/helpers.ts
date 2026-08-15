@@ -11,6 +11,7 @@
 // kirjattu handoverissa kertaalleen.
 
 import { Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 
 /** Aja testi jääkiekkotilassa (mock-data, simulaatio, Liiga-joukkueet) */
 export async function useHockey(page: Page): Promise<void> {
@@ -37,4 +38,32 @@ export async function resetState(page: Page): Promise<void> {
       localStorage.removeItem(key);
     }
   });
+}
+
+/**
+ * Tarjoile kiinteä snapshot public/data/today.json:n sijaan.
+ *
+ * today.json on cronin tuottama tiedosto: sen ottelut, kertoimet ja
+ * value-liput vaihtuvat kahdesti vuorokaudessa. Testi joka väittää
+ * "kortilla näkyy ylikerroin" menisi vihreäksi tai punaiseksi sen mukaan
+ * mitä markkinalla sattuu sinä päivänä tapahtumaan — se ei mittaisi koodia
+ * vaan päivän kerroinasettelua.
+ *
+ * Fixtuuri on committoitu ja sisältää tarkoituksella kaikki tapaukset:
+ * Elo-luvut, yksi vahva value (💎), yksi kandidaatti (🟡) ja useita
+ * parhaita hintoja ilman valueta.
+ */
+export async function useFixtureSnapshot(page: Page): Promise<void> {
+  const fixture = JSON.parse(
+    readFileSync(new URL('./fixtures/snapshot-with-elo.json', import.meta.url), 'utf8')
+  );
+  // Aikaleima nyt-hetkeen, muuten kortti näyttäisi VANHENTUNUT-varoituksen
+  fixture.generated_at = new Date().toISOString();
+  for (const [i, m] of fixture.matches.entries()) {
+    m.kickoff = new Date(Date.now() + (i + 2) * 3600_000).toISOString();
+  }
+
+  await page.route('**/data/today.json', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) })
+  );
 }

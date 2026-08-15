@@ -130,7 +130,14 @@ body{
 .bk-name{font-size:.65rem;color:var(--c-text-muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bk-odds{min-height:34px;padding:4px;border-radius:var(--radius-sm);border:1.5px solid oklch(1 0 0 / 0.12);background:transparent;color:var(--c-text);cursor:pointer;font-size:.75rem;font-weight:700;font-variant-numeric:tabular-nums;text-align:center;transition:all .15s ease}
 .bk-odds:hover{border-color:var(--c-accent);color:var(--c-accent)}
-.bk-odds.best{background:oklch(0.62 0.20 145 / 0.18);border-color:oklch(0.62 0.20 145 / 0.6)}
+/* Paras hinta on pelkkä hintavertailun tulos, ei arvolöytö: se saa vain
+   vahvemman reunan ja tähden. Väritäyttö on varattu ylikertoimille, jotta
+   vihreä ruutu tarkoittaa aina positiivista odotusarvoa eikä koskaan
+   "halvin kolmesta huonosta". */
+.bk-odds.best{border-color:oklch(1 0 0 / 0.42);font-weight:800}
+/* Ylikertoimet: keltainen = kandidaatti (edge > 3 %), vihreä = vahva (> 5 %) */
+.bk-odds.value-candidate{background:oklch(0.72 0.16 85 / 0.20);border-color:oklch(0.72 0.16 85 / 0.65)}
+.bk-odds.value-strong{background:oklch(0.62 0.20 145 / 0.22);border-color:oklch(0.62 0.20 145 / 0.7)}
 .pk-odds{min-height:44px;padding:4px;border-radius:var(--radius-sm);border:1.5px solid oklch(1 0 0 / 0.12);background:oklch(0.62 0.20 145 / 0.12);color:var(--c-text);cursor:pointer;font-size:.75rem;font-weight:700;font-variant-numeric:tabular-nums;text-align:center;transition:all .15s ease}
 .pk-odds:hover{border-color:var(--c-accent);color:var(--c-accent)}
 /* Buttons */
@@ -202,7 +209,7 @@ body{
        jääkiekkotilassa kontti jää tyhjäksi. -->
   <div id="metrics-content" style="margin-top:12px"></div>
 </div>
-<div id="slip" class="view"><div class="grid-2" id="slip-metrics"></div><div id="slip-list"></div><button class="btn btn-danger btn-block" style="margin-top:8px" onclick="clearSlip()">🗑️ Tyhjennä lappu</button></div>
+<div id="slip" class="view"><div class="grid-2" id="slip-metrics"></div><div id="slip-list"></div><button class="btn btn-danger btn-block" style="margin-top:8px" onclick="clearSlip()">🗑️ Tyhjennä lappu</button><div id="llm-content" data-sport="football" style="margin-top:10px"></div></div>
 <div id="history" class="view"><div class="grid-2" id="history-metrics"></div><div id="history-list"></div></div>
 <!-- Tiketti #35: tappioketju. Jalkapallo-ominaisuus, piilossa jääkiekkotilassa
      (data-sport="football" tabissa, ks. applySportVisibility). -->
@@ -626,6 +633,10 @@ function clearSlip(){bets.forEach(b=>bankroll+=b.stake);bets=[];save();updateBan
 function removeBet(betId){const idx=bets.findIndex(b=>b.id===betId);if(idx===-1)return;bankroll+=bets[idx].stake;bets.splice(idx,1);save();updateBankroll();renderSlip();updateSlipBadge();renderRound();toast('🗑️ Veto poistettu')}
 function renderSlip(){
   const l=document.getElementById('slip-list'),m=document.getElementById('slip-metrics');
+  // Tiketti #38: LLM-paneeli renderöidään ennen aikaista paluuta — analyysin voi
+  // pyytää myös tyhjällä lapulla, koska se koskee koko kierrosta eikä vetoja
+  const llm=document.getElementById('llm-content');
+  if(llm){if(isHockey())llm.innerHTML='';else if(window.BTL)window.BTL.render()}
   if(!bets.length){l.innerHTML='<div class="empty">Ei vetoja — palaa Kierros-välilehdelle</div>';m.innerHTML='';return}
   const ts=bets.reduce((s,b)=>s+b.stake,0),pw=bets.reduce((s,b)=>s+b.stake*b.odds,0);
   m.innerHTML=`<div class="card"><div class="metric-label">Panokset</div><div class="metric">${ts.toFixed(2)}€</div></div><div class="card"><div class="metric-label">Mahd. voitto</div><div class="metric" style="color:var(--c-success)">${pw.toFixed(2)}€</div></div>`;
@@ -872,6 +883,28 @@ ${SPORT==='football'?(()=>{
 <button class="btn ${src==='live'?'btn-primary':''}" style="flex:1;font-size:.7rem;${style(src==='live')}" onclick="window.BTF.switchDataSource('live')">⚽ Oikeat${src==='live'?' ✓':''}</button>
 <button class="btn ${src==='mock'?'btn-primary':''}" style="flex:1;font-size:.7rem;${style(src==='mock')}" onclick="window.BTF.switchDataSource('mock')">🎯 Harjoitus${src==='mock'?' ✓':''}</button>
 </div></div>`;})():''}
+${SPORT==='football'&&window.BTF&&window.BTF.DISPLAY_OPTIONS?(()=>{
+  const prefs=window.BTF.getPrefs();
+  const rows=window.BTF.DISPLAY_OPTIONS.map(o=>{
+    const on=prefs[o.key]!==false;
+    return `<button class="btn" style="width:100%;text-align:left;font-size:.7rem;padding:7px 9px;min-height:36px;margin-bottom:4px;background:${on?'oklch(0.62 0.20 145 / 0.16)':'oklch(1 1 0/0.06)'};color:var(--c-text);border:1px solid ${on?'oklch(0.62 0.20 145 / 0.45)':'oklch(1 1 0/0.1)'}" onclick="window.BTF.toggleDisplay('${o.key}')">
+      <span style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <span><b>${esc(o.label)}</b><br><span style="font-size:.58rem;color:var(--muted)">${esc(o.hint)}</span></span>
+        <span style="font-size:.85rem">${on?'✅':'⬜'}</span>
+      </span></button>`;
+  }).join('');
+  return `<div class="card"><h3>👁️ Näytettävät analyysit</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Valitse mitä ottelukortilla näkyy. Asetukset vaikuttavat vain näyttöön — luvut lasketaan silti, ne ovat vain poissa näkyvistä.</p>
+${rows}
+<button class="btn btn-block" style="margin-top:4px;background:oklch(1 1 0/0.1);color:var(--c-text);font-size:.68rem" onclick="window.BTF.resetDisplay()">🔄 Palauta oletukset</button></div>`;})():''}
+${SPORT==='football'&&window.BTL?(()=>{
+  const key=window.BTL.getApiKey();const model=window.BTL.getModel();
+  const opts=window.BTL.SUGGESTED_MODELS.map(m=>`<option value="${esc(m.id)}"${m.id===model?' selected':''}>${esc(m.label)}</option>`).join('');
+  const custom=!window.BTL.SUGGESTED_MODELS.some(m=>m.id===model);
+  return `<div class="card"><h3>🤖 LLM-analyysi</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Vetolapun "Kysy LLM:ltä" -nappi lähettää kierroksen datan OpenRouterille. Avain tallentuu <b>tähän selaimeen</b> ja on luettavissa kenelle tahansa, joka pääsee koneelle tai kehitystyökaluihin — käytä vain avainta, jonka voit tarvittaessa mitätöidä.</p>
+<div class="input-group"><label>OpenRouter API Key</label><input type="password" id="admin-llm-key" value="${esc(key)}" placeholder="sk-or-v1-..." autocomplete="off"></div>
+<div class="input-group"><label>Malli</label><select id="admin-llm-model" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--c-text-muted);background:var(--c-bg);color:var(--c-text);font-size:.75rem" onchange="window.BTL.saveModel(this.value)">${opts}${custom?`<option value="${esc(model)}" selected>${esc(model)}</option>`:''}</select></div>
+<div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-primary" style="flex:1" onclick="window.BTL.saveKey(document.getElementById('admin-llm-key').value)">💾 Tallenna avain</button><button class="btn btn-danger" style="flex:1" onclick="window.BTL.saveKey('')">🗑️ Poista</button></div>
+<p style="font-size:.62rem;color:var(--muted);margin-top:8px">Avaimen saa osoitteesta <b>openrouter.ai/keys</b>. Kutsu maksaa mallista riippuen muutaman sentin murto-osan per analyysi.</p></div>`;})():''}
 <div class="card"><h3>🎨 Teema</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Sama sisältö, eri asu. Vaihtuu heti ilman sivun päivitystä.</p>
 <div style="display:flex;gap:6px">
 <button class="btn ${UI_THEME==='system'?'btn-primary':''}" style="flex:1;${UI_THEME!=='system'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setUiTheme('system')">🌙 Oletus${UI_THEME==='system'?' ✓':''}</button>

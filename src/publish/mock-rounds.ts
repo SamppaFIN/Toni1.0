@@ -21,7 +21,7 @@ import { fetchSeasonResults } from '../ingest/results-veikkausliiga.js';
 import { calculateSeasonElo, eloProbabilities, toEloMap, EloRating } from '../analyze/season-elo.js';
 import { buildMatchCard, buildSnapshot } from './snapshot.js';
 import { teamRef } from '../ingest/odds-football.js';
-import { BookmakerOdds, MatchCard, Snapshot, SideProbs } from '../types-football.js';
+import { BookmakerOdds, MatchCard, Snapshot, SideProbs, TeamStats } from '../types-football.js';
 
 export const ROUNDS = 5;
 
@@ -94,8 +94,46 @@ function buildFixtures(teams: string[], round: number): Array<[string, string]> 
   return fixtures;
 }
 
+/**
+ * Kauden oikeat tunnusluvut Elo-laskennan sivutuotteena.
+ *
+ * calculateSeasonElo laskee jo pelit, voitot ja maalit — nämä ovat oikeita
+ * lukuja kauden otteluista, eivät keksittyjä. Sarjasija johdetaan pisteistä
+ * (3-1-0), jolloin se vastaa oikeaa taulukkoa.
+ *
+ * form jää tyhjäksi: viiden viime ottelun järjestys vaatisi tulostason
+ * aikajanan, eikä arvattu kirjainjono näyttäisi arvatulta.
+ */
+function statsFrom(ratings: EloRating[]): Map<string, TeamStats> {
+  const points = (r: EloRating) => r.won * 3 + r.drawn;
+  const byPoints = [...ratings].sort((a, b) => points(b) - points(a) || b.goalsFor - b.goalsAgainst - (a.goalsFor - a.goalsAgainst));
+  const byElo = [...ratings].sort((a, b) => b.elo - a.elo);
+
+  const map = new Map<string, TeamStats>();
+  for (const r of ratings) {
+    const played = r.played || 1;
+    map.set(r.team, {
+      rank: byPoints.findIndex((x) => x.team === r.team) + 1,
+      played: r.played,
+      form: '',
+      gf_pg: Math.round((r.goalsFor / played) * 100) / 100,
+      ga_pg: Math.round((r.goalsAgainst / played) * 100) / 100,
+      home_gf_pg: null,
+      away_gf_pg: null,
+      xg_pg: null,
+      rest_days: null,
+      ppg: Math.round((points(r) / played) * 100) / 100,
+      elo: Math.round(r.elo),
+      elo_change: Math.round(r.change),
+      elo_rank: byElo.findIndex((x) => x.team === r.team) + 1,
+    });
+  }
+  return map;
+}
+
 export function buildMockRounds(ratings: EloRating[], baseDate = new Date('2026-08-16T00:00:00.000Z')): MockRoundsFile {
   const eloMap = toEloMap({ ratings, timeline: new Map(), matchesProcessed: 0 });
+  const statsMap = statsFrom(ratings);
   const teams = ratings.map((r) => r.team);
 
   const rounds: Snapshot[] = [];
@@ -123,7 +161,11 @@ export function buildMockRounds(ratings: EloRating[], baseDate = new Date('2026-
           // Poisson jätetään pois: harjoitusdatan malli on Elo-pohjainen, ja
           // sen esittäminen Poissonina väittäisi enemmän kuin data kestää
           poisson: null,
-          stats: null,
+          // Tunnusluvut ovat kauden oikeista otteluista — vain otteluparit
+          // ja kertoimet ovat harjoitusta varten rakennettuja
+          stats: statsMap.has(home) && statsMap.has(away)
+            ? { home: statsMap.get(home)!, away: statsMap.get(away)!, h2h: [] }
+            : null,
           bankroll: 100,
           adjustments: [
             {

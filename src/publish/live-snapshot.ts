@@ -21,20 +21,50 @@ import { fetchStatsFor, LeagueStatsPair } from '../ingest/stats.js';
 import { strengthForTeam } from '../analyze/strength.js';
 import { predictPoisson, predictFromLambda, adjustLambda, LeagueAverages } from '../analyze/poisson.js';
 import { fetchAllFeeds, attachNews, MatchNews } from '../ingest/news-football.js';
+import { fetchSeasonResults, normalizeTeam } from '../ingest/results-veikkausliiga.js';
+import { calculateSeasonElo } from '../analyze/season-elo.js';
 import { buildMatchCard, buildSnapshot, writeSnapshot } from './snapshot.js';
 import { MatchCard, MatchStats, ModelAdjustment, TeamStats, TeamSeasonStats } from '../types-football.js';
 
 /** Kuinka pitkälle eteenpäin otteluita otetaan mukaan */
 const HORIZON_HOURS = Number(process.env.SNAPSHOT_HORIZON_HOURS || 72);
 
+/** Ainoa sarja jolle on ottelutuloslähde eli jolle Elo voidaan laskea */
+const VEIKKAUSLIIGA_KEY = 'soccer_finland_veikkausliiga';
+
 export interface BuildLiveOptions {
   now?: Date;
   bankroll?: number;
 }
 
+/**
+ * Kauden Elo-luvut joukkuenimen mukaan.
+ *
+ * Vain Veikkausliigalle: Elo vaatii ottelutulokset kronologisessa
+ * järjestyksessä, ja veikkausliigapelit.fi on ainoa lähde joka ne antaa.
+ * Muille sarjoille luku jää nulliksi — sarjataulukon pisteistä johdettu
+ * "Elo" ei olisi Elo vaan eri suure samalla nimellä.
+ */
+export type EloLookup = Map<string, { elo: number; change: number; rank: number }>;
+
+export async function fetchSeasonEloMap(): Promise<EloLookup> {
+  const matches = await fetchSeasonResults();
+  const result = calculateSeasonElo(matches);
+  const sorted = [...result.ratings].sort((a, b) => b.elo - a.elo);
+  const map: EloLookup = new Map();
+  sorted.forEach((r, i) => {
+    map.set(normalizeTeam(r.team), { elo: Math.round(r.elo), change: Math.round(r.change), rank: i + 1 });
+  });
+  return map;
+}
+
 /** Kausitilastot → ottelukortin tunnuslukumuoto */
-function toTeamStats(s: TeamSeasonStats, isHome: boolean): TeamStats {
+function toTeamStats(s: TeamSeasonStats, isHome: boolean, elo: EloLookup | null): TeamStats {
   const perGame = (v: number | null, n: number | null) => (n && n > 0 && v !== null ? v / n : null);
+  // Elo täsmäytetään samalla normalisoinnilla kuin tuloslähteessä. Nimi voi olla
+  // taulukossa toisessa muodossa ("HJK Helsingfors" vs "HJK Helsinki"), ja
+  // epäonnistunut täsmäytys jättää luvun nulliksi eikä arvaa.
+  const rating = elo?.get(normalizeTeam(s.name)) ?? null;
   return {
     rank: s.rank,
     played: s.played,
@@ -46,6 +76,9 @@ function toTeamStats(s: TeamSeasonStats, isHome: boolean): TeamStats {
     xg_pg: null,
     rest_days: null,
     ppg: s.played ? round(s.points / s.played, 2) : null,
+    elo: rating?.elo ?? null,
+    elo_change: rating?.change ?? null,
+    elo_rank: rating?.rank ?? null,
     // isHome ei muuta lukuja, mutta pidetään parametri kutsupaikan luettavuuden vuoksi
     ...(isHome ? {} : {}),
   };
@@ -82,13 +115,34 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
     console.warn(`[News] Uutishaku epäonnistui kokonaan — ottelut jäävät ilman uutisia: ${(err as Error).message}`);
   }
 
+  // Kauden Elo haetaan vain jos mukana on Veikkausliigan otteluita. Haku on
+  // yhden sivun lataus eikä kuluta API-kvoottaa, mutta se on silti turha
+  // pyyntö jos kierroksella ei ole yhtään suomalaista ottelua.
+  let eloMap: EloLookup | null = null;
+  if (events.some((e) => e.sportKey === VEIKKAUSLIIGA_KEY)) {
+    try {
+      eloMap = await fetchSeasonEloMap();
+      console.log(`[Elo] Kauden Elo laskettu ${eloMap.size} joukkueelle`);
+    } catch (err) {
+      // Elo on lisätieto, ei ehto analyysille — putki jatkaa ilman sitä
+      console.warn(`[Elo] Elo-lukuja ei saatu: ${(err as Error).message}`);
+    }
+  }
+
   const cards: MatchCard[] = events.map((e) =>
-    buildCard(e, statsByLeague.get(e.sportKey) ?? null, newsByMatch.get(matchId(e)) ?? null, options)
+    buildCard(
+      e,
+      statsByLeague.get(e.sportKey) ?? null,
+      newsByMatch.get(matchId(e)) ?? null,
+      options,
+      e.sportKey === VEIKKAUSLIIGA_KEY ? eloMap : null
+    )
   );
   cards.sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
 
   // Lähteet nimeltä snapshotiin: käyttäjän pitää voida jäljittää mistä luku tuli
   const providers = ['The Odds API'];
+  if (eloMap?.size) providers.push('veikkausliigapelit.fi (Elo)');
   for (const pair of statsByLeague.values()) {
     if (pair && !providers.includes(pair.current.source)) providers.push(pair.current.source);
   }
@@ -106,7 +160,8 @@ function buildCard(
   e: FootballOddsEvent,
   stats: LeagueStatsPair | null,
   news: MatchNews | null,
-  options: BuildLiveOptions
+  options: BuildLiveOptions,
+  elo: EloLookup | null
 ): MatchCard {
   const base = {
     id: matchId(e),
@@ -137,8 +192,8 @@ function buildCard(
   let poisson = predictPoisson(home.strength, away.strength, league, config.model.rho);
 
   const matchStats: MatchStats = {
-    home: toTeamStats(home.stats, true),
-    away: toTeamStats(away.stats, false),
+    home: toTeamStats(home.stats, true, elo),
+    away: toTeamStats(away.stats, false, elo),
     h2h: [], // otteluhistoria vaatii tulosdatan; ei vielä lähdettä Veikkausliigalle
   };
 

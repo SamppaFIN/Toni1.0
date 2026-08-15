@@ -129,6 +129,18 @@ export interface TeamStats {
   xg_pg: number | null;
   rest_days: number | null;
   ppg: number | null;
+  /**
+   * Kauden Elo, laskettu nollasta lähtötasosta 1500 (analyze/season-elo.ts).
+   *
+   * null kun sarjalle ei ole ottelutuloslähdettä. Elo vaatii tulokset
+   * kronologisessa järjestyksessä — sarjataulukosta sitä ei voi johtaa,
+   * ja taulukon pisteistä laskettu "Elo" olisi eri luku eri nimellä.
+   */
+  elo: number | null;
+  /** Muutos kauden alusta (elo − 1500) */
+  elo_change: number | null;
+  /** Sija Elo-järjestyksessä sarjan sisällä */
+  elo_rank: number | null;
 }
 
 export interface H2HResult {
