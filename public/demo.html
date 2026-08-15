@@ -864,6 +864,14 @@ function renderAdmin(){
 <button class="btn ${SPORT==='hockey'?'btn-primary':''}" style="flex:1;${SPORT!=='hockey'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setSport('hockey')">🏒 Jääkiekko${SPORT==='hockey'?' ✓':''}</button>
 </div>
 ${SPORT==='football'?'<button class="btn btn-block" style="margin-top:6px;background:oklch(1 1 0/0.1);color:var(--c-text);font-size:.7rem" onclick="if(window.BTF)window.BTF.reload().then(()=>toast(\'🔄 Kohteet päivitetty\'))">🔄 Lataa kohteet uudelleen</button>':''}</div>
+${SPORT==='football'?(()=>{
+  const src=(window.BTF&&window.BTF.getDataSource)?window.BTF.getDataSource():'live';
+  const style=active=>active?'':'background:oklch(1 1 0/0.1);color:var(--c-text)';
+  return `<div class="card"><h3>🎯 Datalähde</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Harjoituskierrokset ovat viisi valmiiksi generoitua kierrosta, joiden kertoimet on johdettu kauden oikeista Elo-luvuista. Niillä voi testata vetolappuja ja tappioketjuja odottamatta oikeita otteluita.</p>
+<div style="display:flex;gap:6px">
+<button class="btn ${src==='live'?'btn-primary':''}" style="flex:1;font-size:.7rem;${style(src==='live')}" onclick="window.BTF.switchDataSource('live')">⚽ Oikeat${src==='live'?' ✓':''}</button>
+<button class="btn ${src==='mock'?'btn-primary':''}" style="flex:1;font-size:.7rem;${style(src==='mock')}" onclick="window.BTF.switchDataSource('mock')">🎯 Harjoitus${src==='mock'?' ✓':''}</button>
+</div></div>`;})():''}
 <div class="card"><h3>🎨 Teema</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Sama sisältö, eri asu. Vaihtuu heti ilman sivun päivitystä.</p>
 <div style="display:flex;gap:6px">
 <button class="btn ${UI_THEME==='system'?'btn-primary':''}" style="flex:1;${UI_THEME!=='system'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setUiTheme('system')">🌙 Oletus${UI_THEME==='system'?' ✓':''}</button>

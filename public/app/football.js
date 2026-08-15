@@ -9,7 +9,16 @@
 // Näin jääkiekkodemo ja sen 23 E2E-testiä toimivat ennallaan, ja jalkapallopuoli
 // on alusta asti moduuleissa eikä kasvata demo.html:ää.
 
-import { loadSnapshot, esc, SIDE_LABELS } from './snapshot.js';
+import {
+  loadSnapshot,
+  esc,
+  SIDE_LABELS,
+  getDataSource,
+  setDataSource,
+  getMockRound,
+  setMockRound,
+  getMockRoundCount,
+} from './snapshot.js';
 import { initCards, setSnapshot, renderAllCards, renderPlacedBets, toggleSection, findMatch, matchIndex, getSnapshot } from './football-cards.js';
 import * as tracker from './football-tracker.js';
 import * as metrics from './football-metrics.js';
@@ -112,6 +121,46 @@ export async function reload() {
   return { snapshot, error };
 }
 
+// ─── Harjoituskierrokset (tiketti #37) ───────────────────────────────────
+
+/**
+ * Siirry seuraavaan harjoituskierrokseen.
+ *
+ * Simulaatio nollataan, koska sen tulokset koskivat edellistä kierrosta.
+ * Vetoja EI nollata: avoin veto edelliseltä kierrokselta jää vetolappuun,
+ * ja tappioketju jatkuu kierroksen yli — se on koko harjoituksen pointti.
+ */
+async function nextMockRound() {
+  const next = getMockRound() + 1;
+  if (next >= getMockRoundCount()) return;
+  setMockRound(next);
+  if (window.BTT) window.BTT.reset();
+  await reload();
+  tracker.render();
+  window.BT.toast(`🎯 Kierros ${next + 1} / ${getMockRoundCount()}`);
+}
+
+async function restartMockRounds() {
+  setMockRound(0);
+  if (window.BTT) window.BTT.reset();
+  await reload();
+  tracker.render();
+  window.BT.toast('🔄 Harjoituskierrokset alusta');
+}
+
+/** Vaihda datalähde oikean ja harjoitusdatan välillä */
+async function switchDataSource(source) {
+  setDataSource(source);
+  if (window.BTT) window.BTT.reset();
+  await reload();
+  tracker.render();
+  if (window.BTC) window.BTC.render();
+  // Admin-paneeli näyttää valitun lähteen ✓-merkillä, joten se pitää
+  // renderöidä uudelleen — muuten nappi jää näyttämään vanhaa valintaa
+  if (typeof window.renderAdmin === 'function') window.renderAdmin();
+  window.BT.toast(source === 'mock' ? '🎯 Harjoituskierrokset käytössä' : '⚽ Oikeat kohteet käytössä');
+}
+
 // Julkinen rajapinta demo.html:lle ja onclick-käsittelijöille
 window.BTF = {
   reload,
@@ -122,6 +171,10 @@ window.BTF = {
   confirmBet,
   openBetPopup,
   getSnapshot,
+  nextMockRound,
+  restartMockRounds,
+  switchDataSource,
+  getDataSource,
 };
 
 // Demo.html kutsuu tätä kun jalkapallonäkymä on aktiivinen

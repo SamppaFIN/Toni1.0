@@ -20,6 +20,9 @@ import {
   SIDE_LABELS,
   METHOD_LABELS,
   bestEdge,
+  getDataSource,
+  getMockRound,
+  getMockRoundCount,
 } from './snapshot.js';
 
 /** Joukkueen logo värillisenä ympyränä — sama tyyli kuin jääkiekkopuolella */
@@ -354,6 +357,42 @@ export function getSnapshot() {
   return currentSnapshot;
 }
 
+/**
+ * Harjoitustilan kierrosnavigaatio (tiketti #37).
+ *
+ * Kierrosta ei voi vaihtaa vapaasti eteen ja taakse: harjoituksen idea on
+ * pelata kierros läpi, simuloida se ja siirtyä eteenpäin — aivan kuten
+ * oikeassa kaudessa. Siksi vain "seuraava kierros" ja "aloita alusta".
+ */
+function roundNav() {
+  if (getDataSource() !== 'mock') return '';
+  const index = getMockRound();
+  const total = getMockRoundCount() || 5;
+
+  const dots = Array.from({ length: total }, (_, i) => {
+    const state = i < index ? 'var(--c-success)' : i === index ? 'var(--c-accent)' : 'oklch(1 1 0/0.15)';
+    return `<span style="width:9px;height:9px;border-radius:50%;background:${state};display:inline-block"></span>`;
+  }).join('');
+
+  const atEnd = index >= total - 1;
+
+  return `<div class="card" style="border:1.5px solid var(--c-accent)">
+    <div class="row">
+      <strong style="font-size:.8rem">🎯 Harjoituskierros ${index + 1} / ${total}</strong>
+      <span style="display:flex;gap:5px;align-items:center">${dots}</span>
+    </div>
+    <div style="font-size:.63rem;color:var(--c-text-muted);margin-top:5px;line-height:1.5">
+      Kertoimet on johdettu kauden oikeista Elo-luvuista. Aseta vetoja, simuloi kierros
+      Seuranta-välilehdellä ja siirry eteenpäin — tappioketjua voi jahdata kierroksesta toiseen.
+    </div>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      ${atEnd
+        ? `<button class="btn btn-block" style="background:oklch(1 1 0/0.1);color:var(--c-text);font-size:.7rem" onclick="window.BTF.restartMockRounds()">🔄 Aloita kierrokset alusta</button>`
+        : `<button class="btn btn-primary btn-block" style="font-size:.72rem" onclick="window.BTF.nextMockRound()">Seuraava kierros →</button>`}
+    </div>
+  </div>`;
+}
+
 /** Snapshotin tila ja lähteet — käyttäjän pitää tietää mistä luvut tulevat */
 function sourceBanner(snapshot) {
   const isMock = snapshot.source === 'mock';
@@ -415,7 +454,7 @@ export function renderAllCards() {
     ${currentSnapshot.matches.length} ottelua · ${flaggedCount ? `<b style="color:var(--c-success)">${flaggedCount} value-kohdetta</b>` : 'ei value-kohteita — markkina on tiukka'}
   </div>`;
 
-  container.innerHTML = sourceBanner(currentSnapshot) + summary + ordered.map(({ m, i }) => matchCard(m, i)).join('');
+  container.innerHTML = roundNav() + sourceBanner(currentSnapshot) + summary + ordered.map(({ m, i }) => matchCard(m, i)).join('');
   renderPlacedBets();
 }
 

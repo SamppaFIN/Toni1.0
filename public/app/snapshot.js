@@ -10,9 +10,58 @@
 
 export const SCHEMA_VERSION = 1;
 
+// ─── Datalähde: oikea vai harjoituskierrokset ─────────────────────────────
+// Tiketti #37. Harjoitustila lataa viisi valmiiksi generoitua kierrosta
+// (data/mock-rounds.json) ja tarjoilee niistä yhtä kerrallaan. Kaikki muu —
+// kortit, vedot, tappioketjut, simulaatio — toimii muuttumattomana, koska ne
+// näkevät vain snapshotin eivätkä tiedä mistä se tuli.
+
+const SOURCE_KEY = 'bt_data_source';
+const ROUND_KEY = 'bt_mock_round';
+
+export function getDataSource() {
+  return localStorage.getItem(SOURCE_KEY) === 'mock' ? 'mock' : 'live';
+}
+
+export function setDataSource(source) {
+  localStorage.setItem(SOURCE_KEY, source);
+  if (source === 'mock') localStorage.setItem(ROUND_KEY, '0');
+}
+
+export function getMockRound() {
+  return Number(localStorage.getItem(ROUND_KEY) || '0');
+}
+
+export function setMockRound(index) {
+  localStorage.setItem(ROUND_KEY, String(index));
+}
+
+/** Montako kierrosta harjoitusdatassa on — täytetään latauksen yhteydessä */
+let mockRoundCount = 0;
+export function getMockRoundCount() {
+  return mockRoundCount;
+}
+
+async function loadMockRound() {
+  const res = await fetch('data/mock-rounds.json', { cache: 'no-store' });
+  if (!res.ok) {
+    return { snapshot: null, error: `Harjoitusdataa ei löytynyt (HTTP ${res.status}). Aja \`npm run mock:rounds\`.` };
+  }
+  const file = await res.json();
+  if (!Array.isArray(file.rounds) || !file.rounds.length) {
+    return { snapshot: null, error: 'Harjoitusdata on vioittunut: kierroksia ei löytynyt.' };
+  }
+
+  mockRoundCount = file.rounds.length;
+  const index = Math.min(Math.max(0, getMockRound()), file.rounds.length - 1);
+  return { snapshot: file.rounds[index], error: null };
+}
+
 /** Lataa snapshot. Palauttaa { snapshot, error } — ei koskaan heitä. */
 export async function loadSnapshot(url = 'data/today.json') {
   try {
+    if (getDataSource() === 'mock') return await loadMockRound();
+
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) {
       return { snapshot: null, error: `Tiedostoa ${url} ei löytynyt (HTTP ${res.status}).` };
