@@ -58,13 +58,38 @@ export async function fetchSeasonEloMap(): Promise<EloLookup> {
   return map;
 }
 
+/**
+ * Tilastolähde (Wikipedia/football-data.org) käyttää lyhyempiä nimiä kuin
+ * tuloslähde (veikkausliigapelit.fi): "HJK" vs "HJK Helsinki", "Inter Turku"
+ * vs "FC Inter Turku". Sama ongelma jota TEAM_NAME_MAP jo ratkaisee
+ * tuloslähteen SISÄLLÄ (Helsingfors/Helsinki) — tämä kartta menee
+ * tilastolähteen nimestä tuloslähteen (siis Elo-kartan) nimeen.
+ *
+ * Todettu käsin vertaamalla molempien lähteiden 12 joukkueen listaa
+ * (ks. tickets/... tai git-historia): 4/12 täsmäsi jo sellaisenaan, loput 8
+ * tässä. Ilman tätä 3/4 päivän ottelusta jäi ilman Elo-lukua huomaamatta.
+ */
+const STATS_TO_ELO_NAME: Record<string, string> = {
+  HJK: 'HJK Helsinki',
+  'Inter Turku': 'FC Inter Turku',
+  VPS: 'VPS Vaasa',
+  TPS: 'TPS Turku',
+  Ilves: 'Ilves Tampere',
+  SJK: 'SJK Seinäjoki',
+  KuPS: 'KuPS Kuopio',
+  'FF Jaro': 'Jaro',
+};
+
+/** Tilastolähteen nimi → Elo-kartan avain */
+export function eloKeyFor(statsName: string): string {
+  return normalizeTeam(STATS_TO_ELO_NAME[statsName] ?? statsName);
+}
+
 /** Kausitilastot → ottelukortin tunnuslukumuoto */
 function toTeamStats(s: TeamSeasonStats, isHome: boolean, elo: EloLookup | null): TeamStats {
   const perGame = (v: number | null, n: number | null) => (n && n > 0 && v !== null ? v / n : null);
-  // Elo täsmäytetään samalla normalisoinnilla kuin tuloslähteessä. Nimi voi olla
-  // taulukossa toisessa muodossa ("HJK Helsingfors" vs "HJK Helsinki"), ja
-  // epäonnistunut täsmäytys jättää luvun nulliksi eikä arvaa.
-  const rating = elo?.get(normalizeTeam(s.name)) ?? null;
+  // Epäonnistunut täsmäytys jättää luvun nulliksi eikä arvaa.
+  const rating = elo?.get(eloKeyFor(s.name)) ?? null;
   return {
     rank: s.rank,
     played: s.played,

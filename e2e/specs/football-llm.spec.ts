@@ -208,3 +208,98 @@ test.describe('Kysy LLM:ltä', () => {
     await expect(page.locator('#llm-content')).toBeEmpty();
   });
 });
+
+test.describe('Kysy LLM:ltä — per ottelu kortilla', () => {
+  test.beforeEach(async ({ page }) => {
+    await useFootball(page);
+    await resetState(page);
+    await useFixtureSnapshot(page);
+    await page.goto('/demo.html');
+    await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
+  });
+
+  test('jokaisella ottelukortilla on oma Kysy LLM:ltä -osio', async ({ page }) => {
+    const card = page.locator('#round-games .card').nth(2);
+    await expect(card.locator('button:has-text("Kysy LLM:ltä")')).toBeVisible();
+  });
+
+  test('ilman avainta kortin osio ohjaa Adminiin, ei näytä nappia', async ({ page }) => {
+    const card = page.locator('#round-games .card').nth(2);
+    await card.locator('button:has-text("Kysy LLM:ltä")').click();
+    await expect(card).toContainText('Lisää OpenRouter-avain');
+    await expect(card.locator('button:has-text("tästä ottelusta")')).toHaveCount(0);
+  });
+
+  test('kortin oma analyysi koskee vain sitä yhtä ottelua', async ({ page }) => {
+    let sent = '';
+    await page.route(API, async (route) => {
+      sent = route.request().postData() ?? '';
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ model: 'test', choices: [{ message: { content: 'Yhden ottelun analyysi' } }] }),
+      });
+    });
+
+    await setKey(page);
+    await page.click('.tab[data-tab="round"]');
+    const card = page.locator('#round-games .card').nth(2);
+
+    await card.locator('button:has-text("Kysy LLM:ltä")').click();
+    await card.locator('button:has-text("tästä ottelusta")').click();
+    await expect(card).toContainText('Yhden ottelun analyysi');
+
+    const prompt = JSON.parse(sent).messages[1].content;
+    // Vain yksi "## Ottelu" -otsikko — ei koko kierrosta
+    expect((prompt.match(/## Ottelu/g) ?? []).length).toBe(1);
+  });
+
+  test('kortin oma analyysi ei sotke round-wide-paneelin tilaa Vetolapulla', async ({ page }) => {
+    await page.route(API, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ model: 'test', choices: [{ message: { content: 'Korttikohtainen vastaus' } }] }),
+      })
+    );
+
+    await setKey(page);
+    await page.click('.tab[data-tab="round"]');
+    const card = page.locator('#round-games .card').nth(2);
+    await card.locator('button:has-text("Kysy LLM:ltä")').click();
+    await card.locator('button:has-text("tästä ottelusta")').click();
+    await expect(card).toContainText('Korttikohtainen vastaus');
+
+    await page.click('.tab[data-tab="slip"]');
+    await expect(page.locator('#llm-content')).not.toContainText('Korttikohtainen vastaus');
+    await expect(page.locator('#llm-content button:has-text("Kysy LLM:ltä analyysi")')).toBeVisible();
+  });
+
+  test('kortin analyysi säilyy sivun päivityksen yli', async ({ page }) => {
+    await page.route(API, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ model: 'test', choices: [{ message: { content: 'Säilyvä vastaus' } }] }),
+      })
+    );
+
+    await setKey(page);
+    await page.click('.tab[data-tab="round"]');
+    const card = page.locator('#round-games .card').nth(2);
+    await card.locator('button:has-text("Kysy LLM:ltä")').click();
+    await card.locator('button:has-text("tästä ottelusta")').click();
+    await expect(card).toContainText('Säilyvä vastaus');
+
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.locator('#round-games .card').nth(2).locator('button:has-text("Kysy LLM:ltä")').click();
+    await expect(page.locator('#round-games .card').nth(2)).toContainText('Säilyvä vastaus');
+  });
+
+  test('osion voi piilottaa asetuksista', async ({ page }) => {
+    await page.click('.tab[data-tab="admin"]');
+    await page.click('#admin-content button:has-text("Kysy LLM:ltä (per ottelu)")');
+    await page.click('.tab[data-tab="round"]');
+    await expect(page.locator('#round-games .card').nth(2).locator('button:has-text("Kysy LLM:ltä")')).toHaveCount(0);
+  });
+});

@@ -22,6 +22,7 @@ import { getSnapshot } from './football-cards.js';
 const KEY_STORAGE = 'bt_openrouter_key';
 const MODEL_STORAGE = 'bt_llm_model';
 const LAST_ANALYSIS = 'bt_llm_last';
+const MATCH_ANALYSIS_STORAGE = 'bt_llm_last_by_match';
 
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
@@ -307,10 +308,148 @@ export function render(containerId = 'llm-content') {
     ${result()}`;
 }
 
+// ─── Per-ottelu-analyysi (kortin oma "Kysy LLM:ltä" -osio) ─────────────────
+//
+// Sama toiminto kuin yllä, mutta yhdelle ottelulle kerrallaan. Kortin oma
+// nappi tarjoaa nopeamman ja halvemman kysymyksen kuin koko kierroksen
+// läpikäynti Vetolapulla — promptissa on vain se yksi ottelu.
+//
+// matchCache pitää muistissa mistä säiliöstä mikäkin ottelu renderöitiin,
+// jotta askMatch/cancelMatch löytävät oikean kontin ilman että kutsuja
+// tarvitsee välittää sitä joka kerta uudelleen.
+
+const perMatchState = new Map();
+const perMatchControllers = new Map();
+const matchCache = new Map(); // matchId -> { match, bets, containerId }
+
+function loadPersistedMatch(matchId) {
+  try {
+    const all = JSON.parse(localStorage.getItem(MATCH_ANALYSIS_STORAGE) || '{}');
+    return all[matchId] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function persistMatchState(matchId, matchState) {
+  try {
+    const all = JSON.parse(localStorage.getItem(MATCH_ANALYSIS_STORAGE) || '{}');
+    all[matchId] = matchState;
+    localStorage.setItem(MATCH_ANALYSIS_STORAGE, JSON.stringify(all));
+  } catch {
+    /* localStorage täynnä tms. — analyysi jää silti näkyviin tälle sivulataukselle */
+  }
+}
+
+function getMatchState(matchId) {
+  if (!perMatchState.has(matchId)) {
+    const persisted = loadPersistedMatch(matchId);
+    perMatchState.set(matchId, persisted ? { ...persisted, status: 'done' } : { status: 'idle', text: null, error: null, model: null, usage: null, at: null });
+  }
+  return perMatchState.get(matchId);
+}
+
+function matchUsageLine(matchState) {
+  if (!matchState.usage) return '';
+  const { prompt_tokens: p, completion_tokens: c, total_tokens: t } = matchState.usage;
+  if (!t && !p) return '';
+  return `<span style="color:var(--c-text-muted)"> · ${t ?? (p ?? 0) + (c ?? 0)} tokenia</span>`;
+}
+
+/** Renderöi yhden ottelun LLM-paneeli sen omaan säiliöön kortilla */
+export function renderForMatch(containerId, match, bets = []) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  matchCache.set(match.id, { match, bets, containerId });
+  const matchState = getMatchState(match.id);
+  const hasKey = !!getApiKey();
+
+  const button = () => {
+    if (matchState.status === 'loading') {
+      return `<button class="btn btn-block" style="background:oklch(1 1 0/0.1);color:var(--c-text);font-size:.68rem" onclick="window.BTL.cancelMatch('${esc(match.id)}')">⏳ Analysoidaan… (peruuta)</button>`;
+    }
+    if (!hasKey) {
+      return `<div style="font-size:.65rem;color:var(--c-text-muted);padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
+        Lisää OpenRouter-avain Admin-välilehdellä käyttääksesi tätä ottelukohtaisesti.
+      </div>`;
+    }
+    return `<button class="btn btn-primary btn-block" style="font-size:.7rem" onclick="window.BTL.askMatch('${esc(match.id)}')">🤖 Kysy LLM:ltä tästä ottelusta</button>`;
+  };
+
+  const result = () => {
+    if (matchState.status === 'error') {
+      return `<div style="margin-top:6px;padding:8px;border-radius:8px;background:oklch(0.52 0.22 25 / 0.12);border:1px solid var(--c-danger)">
+        <div style="font-weight:700;font-size:.7rem;color:var(--c-danger)">Analyysi epäonnistui</div>
+        <div style="font-size:.62rem;color:var(--c-text-muted);margin-top:4px">${esc(matchState.error)}</div>
+      </div>`;
+    }
+    if (matchState.status !== 'done' || !matchState.text) return '';
+    return `<div style="margin-top:6px;padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
+      <div class="row" style="font-size:.58rem;color:var(--c-text-muted);margin-bottom:5px">
+        <span>🤖 ${esc(matchState.model ?? '')}${matchUsageLine(matchState)}</span>
+        <span>${matchState.at ? new Date(matchState.at).toLocaleTimeString('fi') : ''}</span>
+      </div>
+      <div style="font-size:.7rem;line-height:1.6">${renderMarkdown(matchState.text)}</div>
+    </div>`;
+  };
+
+  el.innerHTML = `${button()}${result()}`;
+}
+
+async function askMatch(matchId) {
+  const cached = matchCache.get(matchId);
+  const snapshot = getSnapshot();
+  if (!cached || !snapshot) return;
+  const { match, bets, containerId } = cached;
+
+  const controller = new AbortController();
+  perMatchControllers.set(matchId, controller);
+  perMatchState.set(matchId, { status: 'loading', text: null, error: null, model: null, usage: null, at: null });
+  renderForMatch(containerId, match, bets);
+
+  try {
+    // Yhden ottelun snapshot — sama muoto kuin kierrossnapshot, jotta
+    // buildPrompt toimii muuttumattomana
+    const miniSnapshot = {
+      generated_at: snapshot.generated_at,
+      leagues: [match.league],
+      providers: snapshot.providers,
+      source: snapshot.source,
+      matches: [match],
+    };
+    const prompt = buildPrompt(miniSnapshot, bets);
+    const { text, model, usage } = await askLlm(prompt, { signal: controller.signal });
+
+    const doneState = { status: 'done', text, error: null, model, usage, at: new Date().toISOString() };
+    perMatchState.set(matchId, doneState);
+    persistMatchState(matchId, doneState);
+    window.BT.toast('🤖 Analyysi valmis');
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      perMatchState.set(matchId, { status: 'idle', text: null, error: null, model: null, usage: null, at: null });
+      window.BT.toast('Peruutettu');
+    } else {
+      perMatchState.set(matchId, { status: 'error', text: null, error: err.message, model: null, usage: null, at: null });
+    }
+  } finally {
+    perMatchControllers.delete(matchId);
+    renderForMatch(containerId, match, bets);
+  }
+}
+
+function cancelMatch(matchId) {
+  const controller = perMatchControllers.get(matchId);
+  if (controller) controller.abort();
+}
+
 // ─── Julkinen rajapinta ───────────────────────────────────────────────────
 
 const publicApi = {
   render,
+  renderForMatch,
+  askMatch,
+  cancelMatch,
   async ask() {
     const snapshot = getSnapshot();
     if (!snapshot?.matches.length) return window.BT.toast('⚠️ Ei otteluita');

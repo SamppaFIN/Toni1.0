@@ -113,18 +113,62 @@ function eloParen(stats) {
   return ` <span style="font-weight:500;font-size:.68rem;color:var(--c-text-muted);font-variant-numeric:tabular-nums" title="Kauden Elo (lähtötaso 1500)${stats.elo_rank ? `, sija #${stats.elo_rank}` : ''}${change != null ? `, muutos kauden alusta ${change > 0 ? '+' : ''}${change}` : ''}">(${stats.elo}<span style="color:${color};font-size:.56rem">${arrow}${Math.abs(change ?? 0)}</span>)</span>`;
 }
 
-/** Elo-ero ja siitä johdettu odotusarvo — vertailuluku, ei osa 1X2-mallia */
-function eloLine(match) {
-  if (!isVisible('elo')) return '';
+// ─── Otsakkeen tekijäpillerit ─────────────────────────────────────────────
+//
+// Kortin otsake näytti aiemmin vain Elon ja mallin todennäköisyydet. Moni
+// asia joka VAIKUTTAA analyysiin — mistä kaudesta tunnusluvut on laskettu,
+// onko malli edes olemassa tälle sarjalle, kuinka moni uutinen liittyy
+// otteluun ja onko markkina ehtinyt hinnoitella tuoreen tiedon — jäi
+// nähtäväksi vain avaamalla Analyysi- tai Uutiset-osio. Pillerit tuovat
+// nämä näkyviin ilman avaamista.
+
+function pill(icon, text, tone = 'muted') {
+  return `<span class="factor-pill tone-${tone}">${icon} ${esc(text)}</span>`;
+}
+
+/** Mallin peruste: parsitaan adjustments-tekstistä, ei lasketa uudelleen */
+function basisPill(match) {
+  const reason = match.model.adjustments?.find((a) => a.reason?.startsWith('Voimat:'))?.reason;
+  if (!reason) return null;
+  const usesPrior = /viime kausi/.test(reason);
+  return usesPrior
+    ? pill('📐', 'osittain viime kaudelta', 'warning')
+    : pill('📐', 'tämän kauden data', 'muted');
+}
+
+function modelBasisPill(match) {
+  if (match.model.lambda_home === null) return pill('⚖️', 'ei tilastolähdettä — pelkkä markkina', 'warning');
+  const w = match.model.blend_weight;
+  if (w >= 1) return pill('⚖️', 'pelkkä oma malli — ei sharp-ankkuria', 'warning');
+  return pill('⚖️', `${Math.round(w * 100)} % oma malli / ${Math.round((1 - w) * 100)} % markkina`, 'muted');
+}
+
+function newsPill(match) {
+  const count = match.news?.length ?? 0;
+  const strong = (match.news ?? []).filter((n) => n.confidence !== null && n.confidence > 0.7).length;
+  if (!count) return pill('📰', 'ei uutisia', 'muted');
+  return pill('📰', `${count} uutis${count > 1 ? 'ta' : ''}${strong ? `, ${strong} vaikuttavaa` : ''}`, strong ? 'success' : 'muted');
+}
+
+/** Kaikki analyysiin vaikuttavat tekijät yhtenä pilleririvinä otsakkeessa */
+function factorPills(match) {
+  const items = [];
   const h = match.stats?.home;
   const a = match.stats?.away;
-  if (h?.elo == null || a?.elo == null) return '';
 
-  const diff = h.elo - a.elo;
-  return `<div style="font-size:.6rem;color:var(--c-text-muted);margin-top:3px">
-    📈 Elo-ero <b style="color:${diff > 0 ? 'var(--c-success)' : diff < 0 ? 'var(--c-danger)' : 'var(--c-text)'}">${diff > 0 ? '+' : ''}${diff}</b>
-    · kotietu mukaan lukien odotusarvo <b>${(eloExpected(h.elo, a.elo) * 100).toFixed(0)} %</b> kotijoukkueelle
-  </div>`;
+  if (isVisible('elo') && h?.elo != null && a?.elo != null) {
+    const diff = h.elo - a.elo;
+    const exp = (eloExpected(h.elo, a.elo) * 100).toFixed(0);
+    items.push(pill('📈', `Elo-ero ${diff > 0 ? '+' : ''}${diff} · odotusarvo ${exp} %`, diff > 0 ? 'success' : diff < 0 ? 'danger' : 'muted'));
+  }
+
+  const basis = basisPill(match);
+  if (basis) items.push(basis);
+  items.push(modelBasisPill(match));
+  items.push(newsPill(match));
+  if (match.analysis.news_window) items.push(pill('⚡', 'uutisikkuna auki', 'warning'));
+
+  return items.length ? `<div class="factor-pills">${items.join('')}</div>` : '';
 }
 
 /**
@@ -620,11 +664,24 @@ function calcSection(match) {
 
 // ─── Kortti ───────────────────────────────────────────────────────────────
 
+/**
+ * Kortin oma säiliö LLM-analyysille (tiketti #38, laajennus per ottelu).
+ *
+ * football-llm.js renderöi TÄHÄN säiliöön imperatiivisesti, samaan tapaan
+ * kuin round-wide-paneeli renderöi #llm-content:iin Vetolapulla. Tämä
+ * moduuli ei tuo football-llm.js:ää importilla — silta kulkee window.BTL:n
+ * kautta, sama kapea rajapinta kuin muuallakin (window.BT / window.BTF).
+ */
+export function llmContainerId(match) {
+  return `fllm-${match.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
+}
+
 const SECTIONS = {
   stats: { icon: '📊', label: 'Tunnusluvut', render: statsSection },
   news: { icon: '📰', label: 'Uutiset', render: newsSection },
   analysis: { icon: '💎', label: 'Analyysi', render: analysisSection },
   calc: { icon: '🔬', label: 'Laskenta', render: calcSection },
+  llm: { icon: '🤖', label: 'Kysy LLM:ltä', render: (match) => `<div id="${llmContainerId(match)}"></div>` },
 };
 
 /** Avoimet osiot pidetään muistissa, jotta uudelleenrenderöinti ei sulje niitä */
@@ -674,7 +731,7 @@ function matchCard(match, index) {
       ${flagBadge}
     </div>
 
-    ${eloLine(match)}
+    ${factorPills(match)}
     ${valueLine(match)}
 
     ${isVisible('probs')
@@ -809,6 +866,23 @@ export function renderAllCards() {
 
   container.innerHTML = roundNav() + sourceBanner(currentSnapshot) + summary + ordered.map(({ m, i }) => matchCard(m, i)).join('');
   renderPlacedBets();
+  renderOpenLlmPanels();
+}
+
+/**
+ * Täytä auki olevat "Kysy LLM:ltä" -säiliöt.
+ *
+ * Placeholder-div syntyy vasta innerHTML-asetuksessa, joten renderForMatch
+ * voidaan kutsua vasta tämän jälkeen. Suljetuille kortin osioille säiliötä
+ * ei ole DOM:ssa — niitä ei yritetä täyttää.
+ */
+function renderOpenLlmPanels() {
+  if (!window.BTL || !currentSnapshot) return;
+  currentSnapshot.matches.forEach((match, index) => {
+    if (openSections.get(index) !== 'llm') return;
+    const bets = window.BT?.getBets?.()?.filter((b) => b.game_id === match.id) ?? [];
+    window.BTL.renderForMatch(llmContainerId(match), match, bets);
+  });
 }
 
 /** Näytä tälle ottelulle asetetut vedot kortin alaosassa */

@@ -24,6 +24,7 @@ export const DISPLAY_OPTIONS = [
   { key: 'news', label: 'Uutiset', hint: 'Otteluun liitetyt uutiset', default: true },
   { key: 'analysis', label: 'Analyysi', hint: 'Malli vs markkina, edge, Kelly-panos', default: true },
   { key: 'calc', label: 'Laskennan vaiheet', hint: 'Jokainen välitulos kaavoineen — pitkä', default: false },
+  { key: 'llm', label: 'Kysy LLM:ltä (per ottelu)', hint: 'Oma LLM-analyysinappi jokaiselle ottelukortille', default: true },
 ];
 
 const DEFAULTS = Object.fromEntries(DISPLAY_OPTIONS.map((o) => [o.key, o.default]));
