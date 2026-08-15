@@ -13,6 +13,7 @@ import { loadSnapshot, esc, SIDE_LABELS } from './snapshot.js';
 import { initCards, setSnapshot, renderAllCards, renderPlacedBets, toggleSection, findMatch, matchIndex, getSnapshot } from './football-cards.js';
 import * as tracker from './football-tracker.js';
 import * as metrics from './football-metrics.js';
+import './football-chase.js'; // rekisteröi window.BTC — ei tarvitse suoraa viittausta täältä
 
 /** Vedonasetuksen ponnahdus — sama vuo kuin jääkiekkopuolella */
 function openBetPopup(matchId, side, odds, bookmaker) {

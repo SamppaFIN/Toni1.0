@@ -21,12 +21,46 @@
   --shadow-card: 0 1px 3px rgba(0,0,0,.4);
   --shadow-elevated: 0 4px 16px rgba(0,0,0,.5);
   --touch-target: 44px;
+  --body-bg-image: none;
+}
+/* === Vaihtoehtoinen teema: "Kasino" ===
+   Sama token-rajapinta kuin oletusteemalla (system) — vain arvot vaihtuvat.
+   Yksikään komponentti ei tiedä kummasta teemasta on kyse; ne lukevat aina
+   samoja --c-*-muuttujia. Aihe: kasinopöydän huopa ja pelimerkin kulta,
+   ei geneerinen neon-mustalla-pohjalla-look.
+   Valinta tallentuu bt_ui_theme-avaimeen, oletus 'system' koskematta. */
+:root[data-ui-theme="casino"]{
+  --c-bg: oklch(0.16 0.045 155);
+  --c-surface: oklch(0.205 0.05 155);
+  --c-surface-hover: oklch(0.26 0.055 155);
+  --c-text: oklch(0.95 0.02 85);
+  --c-text-muted: oklch(0.66 0.03 100);
+  --c-accent: oklch(0.76 0.14 85);
+  --c-success: oklch(0.68 0.16 150);
+  --c-danger: oklch(0.58 0.20 25);
+  --c-warning: oklch(0.74 0.15 70);
+  --c-orange: oklch(0.63 0.18 45);
+  --shadow-card: 0 1px 3px rgba(0,0,0,.5);
+  --shadow-elevated: 0 4px 20px rgba(0,0,0,.55), 0 0 0 1px oklch(0.76 0.14 85 / 0.08);
+  --body-bg-image:
+    radial-gradient(1200px 800px at 15% -10%, oklch(0.30 0.06 155 / 0.55), transparent 60%),
+    radial-gradient(900px 700px at 110% 20%, oklch(0.76 0.14 85 / 0.05), transparent 55%),
+    repeating-linear-gradient(135deg, oklch(1 0 0 / 0.012) 0 2px, transparent 2px 34px);
+}
+:root[data-ui-theme="casino"] .glass-header{background:oklch(0.16 0.045 155 / 0.85)}
+:root[data-ui-theme="casino"] .card{border-color:oklch(0.76 0.14 85 / 0.10)}
+:root[data-ui-theme="casino"] .btn-primary{
+  background:linear-gradient(180deg, oklch(0.80 0.13 85), oklch(0.70 0.15 80));
+  color:oklch(0.18 0.03 85);box-shadow:0 0 0 1px oklch(0.80 0.13 85 / 0.4), var(--shadow-card);
+}
+:root[data-ui-theme="casino"] .tab.active{
+  background:linear-gradient(180deg, oklch(0.80 0.13 85), oklch(0.70 0.15 80));color:oklch(0.18 0.03 85);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:100%;-webkit-text-size-adjust:100%}
 body{
   font-family:system-ui,-apple-system,sans-serif;
-  background:var(--c-bg);color:var(--c-text);
+  background:var(--c-bg) var(--body-bg-image);background-attachment:fixed;color:var(--c-text);
   padding:0;max-width:500px;margin:0 auto;padding-bottom:80px;
   line-height:1.5;font-size:clamp(0.875rem, 1.5vw, 1rem);
 }
@@ -153,6 +187,7 @@ body{
   <button class="tab" data-tab="slip">🎫 Vetolappu <span id="slip-count"></span></button>
   <button class="tab" data-tab="tracker">🏒 Seuranta</button>
   <button class="tab" data-tab="history">📜 Historia</button>
+  <button class="tab" data-tab="chase" data-sport="football">🔥 Jahti</button>
   <button class="tab" data-tab="teams" data-sport="hockey">📊 Joukkueet</button>
   <button class="tab" data-tab="info">ℹ️ Info</button>
   <button class="tab" data-tab="admin">⚙️ Admin</button>
@@ -169,6 +204,9 @@ body{
 </div>
 <div id="slip" class="view"><div class="grid-2" id="slip-metrics"></div><div id="slip-list"></div><button class="btn btn-danger btn-block" style="margin-top:8px" onclick="clearSlip()">🗑️ Tyhjennä lappu</button></div>
 <div id="history" class="view"><div class="grid-2" id="history-metrics"></div><div id="history-list"></div></div>
+<!-- Tiketti #35: tappioketju. Jalkapallo-ominaisuus, piilossa jääkiekkotilassa
+     (data-sport="football" tabissa, ks. applySportVisibility). -->
+<div id="chase" class="view"><div id="chase-content"></div></div>
 <div id="teams" class="view"><div id="teams-list"></div></div>
 <div id="info" class="view"><div id="info-content"></div></div>
 <div id="admin" class="view"><div id="admin-content"></div></div>
@@ -189,6 +227,16 @@ const API='/rest/v1';
 // mutta koskematta ja palautettavissa Admin-välilehdeltä.
 let SPORT=localStorage.getItem('bt_sport')||'football';
 function isHockey(){return SPORT==='hockey'}
+
+// Käyttöliittymäteema. 'system' = alkuperäinen tumma OKLCH-teema, koskematta.
+// Sovelletaan heti skriptin alussa (ennen ensimmäistä renderöintiä) jotta
+// sivu ei välähdä väärällä teemalla.
+let UI_THEME=localStorage.getItem('bt_ui_theme')||'system';
+function applyUiTheme(){
+  if(UI_THEME==='system')document.documentElement.removeAttribute('data-ui-theme');
+  else document.documentElement.setAttribute('data-ui-theme',UI_THEME);
+}
+applyUiTheme();
 // Embedded fallback data for GitHub Pages (no backend server)
 const FALLBACK={teams:[{id:1,name:'Tappara'},{id:2,name:'Ilves'},{id:3,name:'Kärpät'},{id:4,name:'HIFK'},{id:5,name:'TPS'},{id:6,name:'Lukko'},{id:7,name:'KalPa'},{id:8,name:'Pelicans'},{id:9,name:'HPK'},{id:10,name:'Jukurit'},{id:11,name:'Sport'},{id:12,name:'Ässät'},{id:13,name:'SaiPa'},{id:14,name:'JYP'},{id:15,name:'KooKoo'}],games:[{id:1,date:'2025-09-10T16:30:00Z',home_team_id:1,away_team_id:2,home_score:null,away_score:null,status:'upcoming'},{id:2,date:'2025-09-10T16:30:00Z',home_team_id:4,away_team_id:3,home_score:null,away_score:null,status:'upcoming'},{id:3,date:'2025-09-10T16:30:00Z',home_team_id:5,away_team_id:6,home_score:null,away_score:null,status:'upcoming'},{id:4,date:'2025-09-10T16:30:00Z',home_team_id:7,away_team_id:8,home_score:null,away_score:null,status:'upcoming'},{id:5,date:'2025-09-10T16:30:00Z',home_team_id:9,away_team_id:10,home_score:null,away_score:null,status:'upcoming'},{id:10,date:'2025-03-20T16:30:00Z',home_team_id:1,away_team_id:4,home_score:3,away_score:2,status:'finished'},{id:11,date:'2025-03-20T16:30:00Z',home_team_id:2,away_team_id:5,home_score:1,away_score:4,status:'finished'},{id:12,date:'2025-03-19T16:30:00Z',home_team_id:3,away_team_id:6,home_score:2,away_score:1,status:'finished'},{id:13,date:'2025-03-19T16:30:00Z',home_team_id:8,away_team_id:11,home_score:5,away_score:2,status:'finished'},{id:14,date:'2025-03-18T16:30:00Z',home_team_id:12,away_team_id:13,home_score:3,away_score:4,status:'finished'},{id:15,date:'2025-03-18T16:30:00Z',home_team_id:14,away_team_id:15,home_score:2,away_score:3,status:'finished'},{id:16,date:'2025-03-17T16:30:00Z',home_team_id:7,away_team_id:9,home_score:4,away_score:1,status:'finished'},{id:17,date:'2025-03-17T16:30:00Z',home_team_id:10,away_team_id:12,home_score:2,away_score:2,status:'finished'}],predictions:[{id:1,game_id:1,home_win_prob:0.48,draw_prob:0.24,away_win_prob:0.28,predicted_winner:'home',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:2,game_id:2,home_win_prob:0.34,draw_prob:0.26,away_win_prob:0.40,predicted_winner:'away',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:3,game_id:3,home_win_prob:0.46,draw_prob:0.25,away_win_prob:0.29,predicted_winner:'home',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:4,game_id:4,home_win_prob:0.32,draw_prob:0.26,away_win_prob:0.42,predicted_winner:'away',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:5,game_id:5,home_win_prob:0.44,draw_prob:0.27,away_win_prob:0.29,predicted_winner:'home',predicted_at:'2025-09-10T08:00Z',actual_winner:null,was_correct:null},{id:10,game_id:10,home_win_prob:0.52,draw_prob:0.22,away_win_prob:0.26,predicted_winner:'home',predicted_at:'2025-03-20T10:00Z',actual_winner:'home',was_correct:true},{id:11,game_id:11,home_win_prob:0.35,draw_prob:0.25,away_win_prob:0.40,predicted_winner:'away',predicted_at:'2025-03-20T10:00Z',actual_winner:'away',was_correct:true},{id:12,game_id:12,home_win_prob:0.44,draw_prob:0.26,away_win_prob:0.30,predicted_winner:'home',predicted_at:'2025-03-19T10:00Z',actual_winner:'home',was_correct:true},{id:13,game_id:13,home_win_prob:0.55,draw_prob:0.22,away_win_prob:0.23,predicted_winner:'home',predicted_at:'2025-03-19T10:00Z',actual_winner:'home',was_correct:true}],valueFlags:[{id:1,game_id:1,market:'1X2',model_prob:0.48,implied_prob:0.34,edge:0.128,triggering_news_event_id:null,created_at:'2025-09-10T08:00Z'},{id:2,game_id:2,market:'1X2',model_prob:0.40,implied_prob:0.31,edge:0.080,triggering_news_event_id:1,created_at:'2025-09-10T08:00Z'},{id:3,game_id:4,market:'1X2',model_prob:0.42,implied_prob:0.34,edge:0.065,triggering_news_event_id:null,created_at:'2025-09-10T08:00Z'},{id:4,game_id:5,market:'1X2',model_prob:0.44,implied_prob:0.38,edge:0.052,triggering_news_event_id:null,created_at:'2025-09-10T08:00Z'}],oddsSnapshots:[{id:1,game_id:1,bookmaker:'Veikkaus',market:'1X2',home_odds:2.35,draw_odds:3.60,away_odds:2.90,fetched_at:'2025-09-10T07:00Z'},{id:2,game_id:2,bookmaker:'Veikkaus',market:'1X2',home_odds:3.00,draw_odds:3.40,away_odds:2.70,fetched_at:'2025-09-10T07:00Z'},{id:3,game_id:3,bookmaker:'Veikkaus',market:'1X2',home_odds:2.20,draw_odds:3.50,away_odds:3.10,fetched_at:'2025-09-10T07:00Z'},{id:4,game_id:4,bookmaker:'Veikkaus',market:'1X2',home_odds:3.30,draw_odds:3.50,away_odds:2.55,fetched_at:'2025-09-10T07:00Z'},{id:5,game_id:5,bookmaker:'Veikkaus',market:'1X2',home_odds:2.40,draw_odds:3.40,away_odds:3.00,fetched_at:'2025-09-10T07:00Z'},{id:10,game_id:10,bookmaker:'Veikkaus',market:'1X2',home_odds:1.85,draw_odds:3.80,away_odds:3.75,fetched_at:'2025-03-20T09:00Z'},{id:11,game_id:11,bookmaker:'Veikkaus',market:'1X2',home_odds:3.20,draw_odds:3.40,away_odds:2.10,fetched_at:'2025-03-20T09:00Z'},{id:12,game_id:12,bookmaker:'Veikkaus',market:'1X2',home_odds:2.10,draw_odds:3.50,away_odds:3.20,fetched_at:'2025-03-19T09:00Z'},{id:13,game_id:13,bookmaker:'Veikkaus',market:'1X2',home_odds:1.75,draw_odds:4.00,away_odds:4.30,fetched_at:'2025-03-19T09:00Z'}],teamRatings:[{team_id:1,date:'2025-09-01',elo:1605,pdo:102.1},{team_id:2,date:'2025-09-01',elo:1570,pdo:100.5},{team_id:3,date:'2025-09-01',elo:1545,pdo:103.8},{team_id:4,date:'2025-09-01',elo:1530,pdo:99},{team_id:5,date:'2025-09-01',elo:1510,pdo:101.2},{team_id:6,date:'2025-09-01',elo:1500,pdo:97.5},{team_id:7,date:'2025-09-01',elo:1485,pdo:104},{team_id:8,date:'2025-09-01',elo:1470,pdo:100.8},{team_id:9,date:'2025-09-01',elo:1450,pdo:96.2},{team_id:10,date:'2025-09-01',elo:1440,pdo:99.5},{team_id:11,date:'2025-09-01',elo:1420,pdo:98},{team_id:12,date:'2025-09-01',elo:1410,pdo:101},{team_id:13,date:'2025-09-01',elo:1390,pdo:95},{team_id:14,date:'2025-09-01',elo:1380,pdo:100},{team_id:15,date:'2025-09-01',elo:1370,pdo:99.8}],newsEvents:[{id:1,source_url:'is.fi/jaakiekko/loukkantumiset',published_at:'2025-09-10T07:30Z',event_type:'injury',team_id:2,player_id:3,confidence:0.92},{id:2,source_url:'jatkoaika.com/liiga-uutiset',published_at:'2025-09-10T06:00Z',event_type:'hot_streak',team_id:4,player_id:11,confidence:0.85},{id:3,source_url:'yle.fi/urheilu/jaakiekko',published_at:'2025-09-09T18:00Z',event_type:'lineup_change',team_id:7,player_id:null,confidence:0.78},{id:4,source_url:'mtvuutiset.fi/urheilu',published_at:'2025-09-10T05:00Z',event_type:'bench',team_id:9,player_id:null,confidence:0.65}]};
 let bankroll=parseFloat(localStorage.getItem('bt_bankroll')||'100');
@@ -749,7 +797,9 @@ function resetSimulation(){
   }
   if(!isHockey()){
     localStorage.removeItem('bt_sim_results');
+    localStorage.removeItem('bt_chase_chains');
     if(window.BTT)window.BTT.reset();
+    if(window.BTC)window.BTC.render();
   }
   save();renderAll();switchTab('round');
   if(!isHockey()&&window.BTF)window.BTF.renderPlacedBets();
@@ -814,6 +864,11 @@ function renderAdmin(){
 <button class="btn ${SPORT==='hockey'?'btn-primary':''}" style="flex:1;${SPORT!=='hockey'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setSport('hockey')">🏒 Jääkiekko${SPORT==='hockey'?' ✓':''}</button>
 </div>
 ${SPORT==='football'?'<button class="btn btn-block" style="margin-top:6px;background:oklch(1 1 0/0.1);color:var(--c-text);font-size:.7rem" onclick="if(window.BTF)window.BTF.reload().then(()=>toast(\'🔄 Kohteet päivitetty\'))">🔄 Lataa kohteet uudelleen</button>':''}</div>
+<div class="card"><h3>🎨 Teema</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Sama sisältö, eri asu. Vaihtuu heti ilman sivun päivitystä.</p>
+<div style="display:flex;gap:6px">
+<button class="btn ${UI_THEME==='system'?'btn-primary':''}" style="flex:1;${UI_THEME!=='system'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setUiTheme('system')">🌙 Oletus${UI_THEME==='system'?' ✓':''}</button>
+<button class="btn ${UI_THEME==='casino'?'btn-primary':''}" style="flex:1;${UI_THEME!=='casino'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setUiTheme('casino')">🎰 Kasino${UI_THEME==='casino'?' ✓':''}</button>
+</div></div>
 <div class="card"><h3>🏢 Vedonlyöntitoimistot</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Lisää haluamasi toimistot nimellä ja osoitteella. Kierroskortti näyttää jokaisen toimiston kertoimet (⭐ = paras).</p>
 <div class="input-group"><label>Nimi</label><input type="text" id="bk-name" placeholder="esim. NordicBet"></div>
 <div class="input-group"><label>Osoite (URL)</label><input type="text" id="bk-url" placeholder="https://www.nordicbet.com"></div>
@@ -955,6 +1010,7 @@ function switchTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelector(`[data-tab="${name}"]`).classList.add('active');document.getElementById(name).classList.add('active');
   if(name==='round')renderRound();if(name==='slip')renderSlip();if(name==='tracker')renderTracker();if(name==='history')renderHistory();if(name==='teams')renderTeams();if(name==='info')renderInfo();if(name==='admin')renderAdmin()
+  if(name==='chase'&&window.BTC)window.BTC.render();
 }
 function renderAll(){renderRound();renderSlip();renderTracker();renderHistory();renderTeams();renderInfo();renderAdmin();updateBankroll();updateSlipBadge()}
 
@@ -963,6 +1019,9 @@ function renderAll(){renderRound();renderSlip();renderTracker();renderHistory();
 // Admin-välilehden toggle palauttaa ne.
 function applySportVisibility(){
   document.querySelectorAll('.tab[data-sport="hockey"]').forEach(t=>{t.style.display=isHockey()?'':'none'});
+  // Tiketti #35: Jahti-välilehti on rakennettu jalkapallon kertoimien varaan
+  // (window.BTF.getSnapshot()) — piiloon jääkiekkotilassa, ei siirretty sinne.
+  document.querySelectorAll('.tab[data-sport="football"]').forEach(t=>{t.style.display=isHockey()?'none':''});
   document.querySelector('.glass-header h1').innerHTML=(isHockey()?'🏒':'⚽')+' BetTracker <span class="demo-badge">'+(isHockey()?'JÄÄKIEKKO':'DEMO')+'</span>';
   // Seuranta on molemmilla lajeilla, mutta ikoni kertoo kummasta on kyse
   const tr=document.querySelector('.tab[data-tab="tracker"]');
@@ -978,6 +1037,15 @@ function setSport(sport){
   // sekä datalähteen että moduulien alustuksen, ja osittainen vaihto jättäisi
   // vanhaa tilaa roikkumaan.
   setTimeout(()=>location.reload(),400);
+}
+
+// Teeman vaihto on pelkkää CSS-muuttujien uudelleenmäärittelyä — ei tarvitse
+// ladata sivua uudelleen tai hakea dataa uusiksi.
+function setUiTheme(theme){
+  UI_THEME=theme;localStorage.setItem('bt_ui_theme',theme);
+  applyUiTheme();
+  renderAdmin();
+  toast(theme==='casino'?'🎰 Kasino-teema käytössä':'🌙 Oletusteema käytössä');
 }
 
 // ─── Silta jalkapallomoduuleille (public/app/*.js) ───────────────────────
