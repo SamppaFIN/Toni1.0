@@ -14,6 +14,8 @@
     "results": "npx tsx src/ingest/results.ts",
     "metrics": "npx tsx src/publish/metrics.ts",
     "model:scoring": "npx tsx src/analyze/scoring.ts",
+    "elo:season": "npx tsx src/analyze/season-elo.ts",
+    "results:veikkausliiga": "npx tsx src/ingest/results-veikkausliiga.ts",
     "model:poisson": "npx tsx src/analyze/poisson.ts",
     "model:consensus": "npx tsx src/analyze/consensus.ts",
     "model:kelly": "npx tsx src/engine/kelly.ts",
