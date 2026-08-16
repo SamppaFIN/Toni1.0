@@ -57,6 +57,17 @@ export interface TeamRating {
   elo: number;
   pdo: number | null;
   notes: string | null;
+  elo_delta?: number;
+  pdo_delta?: number | null;
+  played?: number;
+  wins?: number;
+  ot_wins?: number;
+  ot_losses?: number;
+  losses?: number;
+  goals_for?: number;
+  goals_against?: number;
+  shots_for?: number | null;
+  shots_against?: number | null;
 }
 
 export interface PlayerForm {

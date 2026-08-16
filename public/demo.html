@@ -264,7 +264,7 @@ body{
   <div id="round-games" style="margin-top:2px"></div>
 </div>
 <div id="tracker" class="view">
-  <button class="btn btn-success btn-block" onclick="runSimulation()" id="sim-btn">▶️ Käynnistä pelipäivän simulaatio</button>
+  <button class="btn btn-success btn-block" onclick="runSimulation()" id="sim-btn">▶️ Simuloi kierros</button>
   <div id="tracker-list" style="margin-top:8px"></div>
   <!-- Tiketti #33: mittarit. Vain jalkapallomoduuli kirjoittaa tähän, joten
        jääkiekkotilassa kontti jää tyhjäksi. -->
@@ -316,6 +316,9 @@ let simInterval=null;
 let simAdvanceTimer=null;
 let analysisGameId=null;
 let teams=[],games=[],predictions=[],valueFlags=[],oddsSnapshots=[],ratings=[],news=[];
+let hockeyRounds=[];
+let hockeyRoundIndex=parseInt(localStorage.getItem('bt_hockey_round')||'0');
+let HOCKEY_ODDS_MODE=localStorage.getItem('bt_hockey_odds_mode')||'veikkaus';
 const DEFAULT_BOOKMAKERS=[{name:'bet365',url:'https://www.bet365.com'},{name:'Pinnacle',url:'https://www.pinnacle.com'},{name:'Unibet',url:'https://www.unibet.com'},{name:'Betsson',url:'https://www.betsson.com'},{name:'NordicBet',url:'https://www.nordicbet.com'},{name:'Veikkaus',url:'https://www.veikkaus.fi'}];
 let bookmakers=JSON.parse(localStorage.getItem('bt_bookmakers')||'null')||DEFAULT_BOOKMAKERS.map(b=>({...b}));
 
@@ -339,15 +342,47 @@ function getOdds(gid){
   return{home_odds,draw_odds,away_odds,home_best,draw_best,away_best,bookmakerCount:rows.length};
 }
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function gameDateLabel(iso){const d=new Date(iso);return Number.isNaN(d.getTime())?iso:d.toLocaleDateString('fi-FI',{weekday:'short',day:'numeric',month:'numeric'})}
 function persistBookmakers(){localStorage.setItem('bt_bookmakers',JSON.stringify(bookmakers))}
+function hockeyOddsMode(){return HOCKEY_ODDS_MODE==='soft'?'soft':'veikkaus'}
+function bookmakerProfile(name){
+  const key=String(name||'').toLowerCase();
+  const soft=hockeyOddsMode()==='soft';
+  if(soft){
+    if(key.includes('pinnacle'))return{margin:0.03,vol:0.004,favoriteTax:0.002,longshotTax:0.002,drawTax:0.001};
+    if(key.includes('veikkaus'))return{margin:0.058,vol:0.003,favoriteTax:0.008,longshotTax:0.007,drawTax:0.003};
+    if(key.includes('bet365'))return{margin:0.042,vol:0.005,favoriteTax:0.004,longshotTax:0.004,drawTax:0.0015};
+    if(key.includes('unibet'))return{margin:0.047,vol:0.0055,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    if(key.includes('betsson'))return{margin:0.05,vol:0.0055,favoriteTax:0.0055,longshotTax:0.0055,drawTax:0.002};
+    if(key.includes('nordic'))return{margin:0.049,vol:0.0055,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    return{margin:0.048,vol:0.0055,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+  }
+  if(key.includes('pinnacle'))return{margin:0.035,vol:0.002,favoriteTax:0.003,longshotTax:0.003,drawTax:0.001};
+  if(key.includes('veikkaus'))return{margin:0.082,vol:0.0015,favoriteTax:0.015,longshotTax:0.012,drawTax:0.005};
+  if(key.includes('bet365'))return{margin:0.05,vol:0.003,favoriteTax:0.006,longshotTax:0.006,drawTax:0.002};
+  if(key.includes('unibet'))return{margin:0.058,vol:0.0035,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  if(key.includes('betsson'))return{margin:0.06,vol:0.0035,favoriteTax:0.008,longshotTax:0.008,drawTax:0.003};
+  if(key.includes('nordic'))return{margin:0.059,vol:0.0035,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  return{margin:0.058,vol:0.0035,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+}
 function genOddsForBookmaker(g,bk){
   const hElo=getRating(g.home_team_id)?.elo||1500,aElo=getRating(g.away_team_id)?.elo||1500;
   const hp=1/(1+Math.pow(10,(aElo-(hElo+40))/400));
   const dp=Math.max(0.12,0.26-Math.abs(hElo+40-aElo)/1500);
-  const ap=1-hp-dp;
-  const margin=1.04+Math.random()*0.05;
-  const jitter=()=>1+(Math.random()-0.5)*0.06;
-  return{id:Date.now()+Math.floor(Math.random()*1e9),game_id:g.id,bookmaker:bk,market:'1X2',home_odds:+((margin/hp)*jitter()).toFixed(2),draw_odds:+((margin/dp)*jitter()).toFixed(2),away_odds:+((margin/ap)*jitter()).toFixed(2),fetched_at:new Date().toISOString()};
+  const ap=Math.max(0.08,1-hp-dp);
+  const profile=bookmakerProfile(bk);
+  const probs=[hp,dp,ap];
+  const favorite=probs.indexOf(Math.max(...probs));
+  const raw=probs.map((prob,index)=>{
+    const noise=(Math.random()-0.5)*2*profile.vol;
+    const favoriteTax=index===favorite?profile.favoriteTax:0;
+    const drawTax=index===1?profile.drawTax:0;
+    const longshotTax=prob<0.22?profile.longshotTax:0;
+    return prob*(1+noise+favoriteTax+drawTax+longshotTax);
+  });
+  const scale=(1+profile.margin)/raw.reduce((sum,value)=>sum+value,0);
+  const priced=raw.map(value=>value*scale);
+  return{id:Date.now()+Math.floor(Math.random()*1e9),game_id:g.id,bookmaker:bk,market:'1X2',home_odds:+(1/priced[0]).toFixed(2),draw_odds:+(1/priced[1]).toFixed(2),away_odds:+(1/priced[2]).toFixed(2),fetched_at:new Date().toISOString()};
 }
 function syncBookmakerOdds(){
   const upcoming=games.filter(g=>g.status==='upcoming');
@@ -357,15 +392,149 @@ function syncBookmakerOdds(){
 }
 function getRating(tid){return ratings.find(r=>r.team_id===tid)}
 function teamNameElo(id){const t=teams.find(x=>x.id===id);if(!t)return'Joukkue '+id;const r=getRating(id);return t.name+(r?' ('+r.elo.toFixed(0)+')':' ('+id+')')}
+function ensureRatingState(r,date){
+  if(!r)return null;
+  if(r.elo_delta===undefined)r.elo_delta=0;
+  if(r.pdo_delta===undefined)r.pdo_delta=0;
+  r.played=r.played||0;
+  r.wins=r.wins||0;
+  r.ot_wins=r.ot_wins||0;
+  r.ot_losses=r.ot_losses||0;
+  r.losses=r.losses||0;
+  r.goals_for=r.goals_for||0;
+  r.goals_against=r.goals_against||0;
+  if(r.shots_for===undefined)r.shots_for=null;
+  if(r.shots_against===undefined)r.shots_against=null;
+  if(date)r.date=date;
+  return r;
+}
+function computeRatingPdo(r){
+  if(r.shots_for&&r.shots_against&&r.shots_for>0&&r.shots_against>0){
+    const shPct=(r.goals_for/r.shots_for)*100;
+    const svPct=(1-r.goals_against/r.shots_against)*100;
+    return Math.max(94,Math.min(106,shPct+svPct));
+  }
+  const totalGoals=(r.goals_for||0)+(r.goals_against||0);
+  if(totalGoals<=0)return r.pdo??100;
+  return Math.max(94,Math.min(106,100+(((r.goals_for||0)/totalGoals)-0.5)*30));
+}
+function refreshRatingDerived(r,date){
+  ensureRatingState(r,date);
+  r.pdo=Math.round(computeRatingPdo(r)*10)/10;
+  const wins=(r.wins||0)+(r.ot_wins||0);
+  r.notes=`${r.played||0} ottelua · ${wins}-${r.ot_losses||0}-${r.losses||0} · maalit ${r.goals_for||0}-${r.goals_against||0}`;
+  return r;
+}
+function hasHockeyRounds(){return Array.isArray(hockeyRounds)&&hockeyRounds.length>0}
+function currentHockeyRound(){return hasHockeyRounds()?hockeyRounds[Math.min(Math.max(0,hockeyRoundIndex),hockeyRounds.length-1)]:null}
+function setHockeyRound(index){hockeyRoundIndex=index;localStorage.setItem('bt_hockey_round',String(index))}
+function setHockeyOddsMode(mode){
+  HOCKEY_ODDS_MODE=mode==='soft'?'soft':'veikkaus';
+  localStorage.setItem('bt_hockey_odds_mode',HOCKEY_ODDS_MODE);
+  if(isHockey()&&hasHockeyRounds()){
+    if(!ratings.length&&currentHockeyRound())ratings=currentHockeyRound().ratings.map(r=>refreshRatingDerived({...r},r.date));
+    applyHockeyRound(hockeyRoundIndex,!!ratings.length);
+    save();renderAll();switchTab('round');
+  }else renderAdmin();
+  toast(HOCKEY_ODDS_MODE==='soft'?'🎯 Pehmeä bookkeri käytössä':'🏦 Veikkaus-tyyli käytössä');
+}
+function buildDynamicRoundState(round){
+  const nextGames=round.games.map(g=>({...g}));
+  const nextOdds=[];
+  nextGames.forEach(g=>bookmakers.forEach(bk=>nextOdds.push(genOddsForBookmaker(g,bk.name))));
+
+  const nextPreds=[];
+  const nextFlags=[];
+  nextGames.forEach(g=>{
+    const hElo=getRating(g.home_team_id)?.elo||1500,aElo=getRating(g.away_team_id)?.elo||1500;
+    const hp=1/(1+Math.pow(10,(aElo-(hElo+40))/400));
+    const dp=Math.max(0.12,0.26-Math.abs(hElo+40-aElo)/1500);
+    const ap=1-hp-dp;
+    const pw=hp>ap&&hp>dp?'home':ap>dp?'away':'draw';
+    nextPreds.push({id:g.id,game_id:g.id,home_win_prob:+hp.toFixed(4),draw_prob:+dp.toFixed(4),away_win_prob:+ap.toFixed(4),predicted_winner:pw,predicted_at:new Date().toISOString(),actual_winner:null,was_correct:null});
+
+    const gRows=nextOdds.filter(x=>x.game_id===g.id);
+    const o=gRows.length?{home_odds:Math.max(...gRows.map(x=>x.home_odds)),draw_odds:Math.max(...gRows.map(x=>x.draw_odds)),away_odds:Math.max(...gRows.map(x=>x.away_odds))}:null;
+    if(!o)return;
+    ['home','draw','away'].forEach(side=>{
+      const oddsVal=side==='home'?o.home_odds:side==='draw'?o.draw_odds:o.away_odds;
+      const modelProb=side==='home'?hp:side==='draw'?dp:ap;
+      const ip=(1/oddsVal)/(1/o.home_odds+1/o.draw_odds+1/o.away_odds);
+      const edge=modelProb*oddsVal-1;
+      if(edge>0.03)nextFlags.push({id:Date.now()+g.id+Math.random(),game_id:g.id,market:'1X2',model_prob:+modelProb.toFixed(4),implied_prob:+ip.toFixed(4),edge:+edge.toFixed(4),triggering_news_event_id:null,created_at:new Date().toISOString()});
+    });
+  });
+
+  return { games: nextGames, predictions: nextPreds, oddsSnapshots: nextOdds, valueFlags: nextFlags };
+}
+function applyHockeyRound(index,preserveRatings){
+  if(!hasHockeyRounds()||!hockeyRounds[index])return false;
+  setHockeyRound(index);
+  const round=hockeyRounds[index];
+  if(preserveRatings){
+    const dynamic=buildDynamicRoundState(round);
+    games=dynamic.games;
+    predictions=dynamic.predictions;
+    valueFlags=dynamic.valueFlags;
+    oddsSnapshots=dynamic.oddsSnapshots;
+  }else{
+    games=round.games.map(g=>({...g}));
+    predictions=round.predictions.map(p=>({...p}));
+    valueFlags=round.valueFlags.map(v=>({...v}));
+    oddsSnapshots=round.oddsSnapshots.filter(x=>bookmakers.some(b=>b.name===x.bookmaker)).map(o=>({...o}));
+    ratings=round.ratings.map(r=>refreshRatingDerived({...r},r.date));
+  }
+  news=[];
+  simResults=null;
+  pressureTeam='';
+  return true;
+}
+function hockeyRoundNav(){
+  const round=currentHockeyRound();
+  if(!round)return'';
+  const atEnd=hockeyRoundIndex>=hockeyRounds.length-1;
+  const oddsModeLabel=hockeyOddsMode()==='soft'?'🎯 Pehmeä bookkeri':'🏦 Veikkaus-tyyli';
+  return `<div class="card" style="border:1.5px solid var(--c-accent)"><div class="row"><strong style="font-size:.82rem">🏒 Kausisimulaatio ${hockeyRoundIndex+1} / ${hockeyRounds.length}</strong><span style="display:flex;gap:6px;align-items:center"><span class="badge badge-muted">${esc(oddsModeLabel)}</span><span class="badge badge-yellow">${esc(round.label)}</span></span></div><div style="font-size:.66rem;color:var(--c-text-muted);margin-top:5px;line-height:1.5">Otteluohjelma tulee oikeasta Liiga-kaudesta. Kertoimet, ennusteet ja Elo-luvut elavat dynaamisesti simuloitujen kierrosten mukana.</div><div style="display:flex;gap:6px;margin-top:8px">${atEnd?`<button class="btn btn-block" style="background:oklch(1 1 0/0.1);color:var(--c-text);font-size:.7rem" onclick="resetSimulation()">🔄 Aloita kausi alusta</button>`:`<button class="btn btn-primary btn-block" style="font-size:.72rem" onclick="runSimulation()">▶️ Simuloi kierros</button>`}</div></div>`;
+}
 function updateEloAfterSim(){
   if(!simResults||!simResults.length)return;
   const K=32;
+  const prev = new Map();
   simResults.forEach(r=>{
     const hR=getRating(r.home_team_id);const aR=getRating(r.away_team_id);
     if(!hR||!aR)return;
+    ensureRatingState(hR,new Date().toISOString().slice(0,10));
+    ensureRatingState(aR,new Date().toISOString().slice(0,10));
+    if(!prev.has(hR.team_id))prev.set(hR.team_id,{elo:hR.elo,pdo:hR.pdo??100});
+    if(!prev.has(aR.team_id))prev.set(aR.team_id,{elo:aR.elo,pdo:aR.pdo??100});
     const E_h=1/(1+Math.pow(10,(aR.elo-(hR.elo+40))/400));
     let S_h=r.home_score>r.away_score?1:r.home_score<r.away_score?0:0.5;
     const d=K*(S_h-E_h);hR.elo+=d;aR.elo-=d;
+
+    hR.played+=1;aR.played+=1;
+    hR.goals_for+=r.home_score;hR.goals_against+=r.away_score;
+    aR.goals_for+=r.away_score;aR.goals_against+=r.home_score;
+    hR.shots_for=(hR.shots_for??0)+(r.shots_home||0);
+    hR.shots_against=(hR.shots_against??0)+(r.shots_away||0);
+    aR.shots_for=(aR.shots_for??0)+(r.shots_away||0);
+    aR.shots_against=(aR.shots_against??0)+(r.shots_home||0);
+
+    const homeWon=r.home_score>r.away_score;
+    const overtime=r.period>3;
+    if(!overtime){
+      if(homeWon){hR.wins+=1;aR.losses+=1;}
+      else if(r.away_score>r.home_score){aR.wins+=1;hR.losses+=1;}
+    }else{
+      if(homeWon){hR.ot_wins+=1;aR.ot_losses+=1;}
+      else if(r.away_score>r.home_score){aR.ot_wins+=1;hR.ot_losses+=1;}
+    }
+
+    refreshRatingDerived(hR,new Date().toISOString().slice(0,10));
+    refreshRatingDerived(aR,new Date().toISOString().slice(0,10));
+    hR.elo_delta=Math.round((hR.elo-prev.get(hR.team_id).elo)*10)/10;
+    aR.elo_delta=Math.round((aR.elo-prev.get(aR.team_id).elo)*10)/10;
+    hR.pdo_delta=Math.round(((hR.pdo??100)-prev.get(hR.team_id).pdo)*10)/10;
+    aR.pdo_delta=Math.round(((aR.pdo??100)-prev.get(aR.team_id).pdo)*10)/10;
   });
   localStorage.setItem('bt_ratings',JSON.stringify(ratings));
 }
@@ -381,6 +550,7 @@ function renderRoundReport(){
   const roundBets=betHistory.filter(b=>simResults.some(r=>r.game_id===b.game_id));
   const total=roundBets.length;const won=roundBets.filter(b=>b.won).length;
   const tp=roundBets.reduce((s,b)=>s+(b.won?b.stake*b.odds-b.stake:-b.stake),0);
+  const hasNextRound=hasHockeyRounds()&&hockeyRoundIndex<hockeyRounds.length-1;
   let html='<div class="card" style="border:2px solid var(--c-accent);margin-bottom:12px"><h3 style="font-size:.9rem;margin-bottom:8px">📋 Kierrosraportti</h3>';
   // Game results grid
   html+='<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:4px 8px;font-size:.75rem;align-items:center">';
@@ -411,7 +581,7 @@ function renderRoundReport(){
     }).join('');
     html+=`<div class="row" style="margin-top:8px;font-weight:700"><span>Yhteensä: ${won}/${total} osumaa (${total?(won/total*100).toFixed(0):0}%)</span><span style="color:${tp>=0?'var(--c-success)':'var(--c-danger)'}">${tp>=0?'+':''}${tp.toFixed(2)}€</span></div></div>`;
   }
-  html+='<div style="font-size:.65rem;color:var(--c-text-muted);margin-top:6px">📊 Elo-päivitykset tallennettu — siirrytään seuraavalle kierrokselle 8s kuluttua...</div></div>';
+  html+=hasHockeyRounds()?`<div style="font-size:.65rem;color:var(--c-text-muted);margin-top:6px">📊 Taman kierroksen simulaatio paivittaa Elo-luvut heti. Seuraavan ottelupaivan kertoimet ja ennusteet lasketaan naista paivittyneista Eloista.</div><div style="display:flex;gap:6px;margin-top:8px">${hasNextRound?`<button class="btn btn-primary btn-block" style="font-size:.72rem" onclick="advanceRound()">Seuraava ottelupäivä →</button>`:`<button class="btn btn-block" style="background:oklch(1 1 0/0.1);color:var(--c-text);font-size:.7rem" onclick="resetSimulation()">🔄 Aloita kausi alusta</button>`}</div></div>`:'</div>';
   // Render each game card with its bet result injected
   html+=simResults.map(r=>{
     let card=renderSimGame(r);
@@ -438,8 +608,28 @@ async function loadData(){
   // Olennaista: syncBookmakerOdds() jää ajamatta, joten genOddsForBookmaker()
   // ei keksi kertoimia — keksityt ja oikeat kertoimet eivät voi sekoittua.
   if(!isHockey()){
-    teams=[];games=[];predictions=[];valueFlags=[];oddsSnapshots=[];ratings=[];news=[];
+    teams=[];games=[];predictions=[];valueFlags=[];oddsSnapshots=[];ratings=[];news=[];hockeyRounds=[];
     return;
+  }
+  try{
+    const res=await fetch('data/liiga-rounds.json',{cache:'no-store'});
+    if(res.ok){
+      const file=await res.json();
+      if(Array.isArray(file.teams)&&Array.isArray(file.rounds)&&file.rounds.length){
+        teams=file.teams;
+        hockeyRounds=file.rounds;
+        const sr=localStorage.getItem('bt_ratings');
+        if(sr){
+          try{ratings=JSON.parse(sr).map(r=>refreshRatingDerived(r,r.date));}catch(e){ratings=[]}
+        }
+        const targetIndex=Math.min(Math.max(0,hockeyRoundIndex),hockeyRounds.length-1);
+        if(ratings.length){if(!applyHockeyRound(targetIndex,true))applyHockeyRound(0,false);}
+        else if(!applyHockeyRound(targetIndex,false))applyHockeyRound(0,false);
+        return;
+      }
+    }
+  }catch(e){
+    console.warn('Liiga-kierrosdataa ei saatu ladattua, kaytetaan fallbackia');
   }
   try{
     const[g,t,p,v,o,r,n]=await Promise.all([fetch(API+'/games').then(r=>r.json()),fetch(API+'/teams').then(r=>r.json()),fetch(API+'/game_predictions').then(r=>r.json()),fetch(API+'/value_flags').then(r=>r.json()),fetch(API+'/odds_snapshots').then(r=>r.json()),fetch(API+'/team_ratings').then(r=>r.json()),fetch(API+'/news_events').then(r=>r.json())]);
@@ -462,16 +652,16 @@ function renderRound(){
     else{analysisGameId=null;renderRound()}
   }else{
     const upcoming=games.filter(g=>g.status==='upcoming');
-    document.getElementById('round-games').innerHTML=upcoming.map(g=>renderUpcoming(g)).join('')+practiceCardsHtml();
+    document.getElementById('round-games').innerHTML=(hasHockeyRounds()?hockeyRoundNav():'')+upcoming.map(g=>renderUpcoming(g)).join('')+practiceCardsHtml();
   }
 }
 function renderTracker(){
   // Jalkapallotilassa Seuranta on public/app/football-tracker.js:n vastuulla
   if(!isHockey()){if(window.BTT)window.BTT.render();return}
   const b=document.getElementById('sim-btn');
+  b.style.display='none';
   if(!simResults){
-    b.textContent='▶️ Käynnistä pelipäivän simulaatio';b.className='btn btn-success btn-block';b.disabled=false;
-    let html='<div class="empty" style="margin-bottom:12px">Aseta vetoja Kierros-välilehdellä, sitten käynnistä simulaatio tästä</div>';
+    let html=isHockey()?'<div class="empty" style="margin-bottom:12px">Simuloi kierros nähdäksesi viime kauden oikeat tulokset ja raportin heti.</div>':'<div class="empty" style="margin-bottom:12px">Aseta vetoja Kierros-välilehdellä, sitten käynnistä simulaatio tästä</div>';
     if(bets.length){
       html+='<div class="card"><h3 style="font-size:.85rem;margin-bottom:6px">🎫 Avoimet vedot</h3>';
       const totalStake=bets.reduce((s,b)=>s+b.stake,0);
@@ -537,7 +727,7 @@ function renderUpcoming(g){
     betsHtml='<div style="margin-top:4px;font-size:.65rem;color:var(--c-text-muted)">'+gameBets.map(b=>`<span style="margin-right:8px">🎫 ${b.side.toUpperCase()} ${b.stake.toFixed(0)}€ @ ${b.odds.toFixed(2)}</span>`).join('')+'</div>';
   }
 
-  return `<div class="card"><div class="row"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${teamNameElo(g.home_team_id)}</strong><span class="vs">vs</span><strong>${teamNameElo(g.away_team_id)}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span><span style="display:flex;gap:4px;align-items:center">${vfHtml}<button class="btn" style="font-size:.7rem;padding:4px 12px;min-height:30px;border-radius:8px;background:var(--c-accent);color:#000;font-weight:700;white-space:nowrap" onclick="event.stopPropagation();showAnalysis(${g.id})">📊 Analyysi</button></span></div><div style="font-size:.6rem;margin-top:4px;line-height:1.8">${factorHtml}</div>${ph}${oh}${betsHtml}<div id="betpop-${g.id}" style="display:none;margin-top:4px"></div></div>`;
+  return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;font-size:.62rem;color:var(--c-text-muted)"><span>Liiga · ${gameDateLabel(g.date)}</span><span>${currentHockeyRound()?.label||''}</span></div><div class="row" style="margin-top:5px"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${teamNameElo(g.home_team_id)}</strong><span class="vs">–</span><strong>${teamNameElo(g.away_team_id)}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span><span style="display:flex;gap:4px;align-items:center">${vfHtml}<button class="btn" style="font-size:.68rem;padding:4px 10px;min-height:30px;border-radius:8px;background:var(--c-accent);color:#000;font-weight:700;white-space:nowrap" onclick="event.stopPropagation();showAnalysis(${g.id})">📊 Analyysi</button></span></div><div style="font-size:.6rem;margin-top:4px;line-height:1.8">${factorHtml}</div>${ph}${oh}${betsHtml}<div id="betpop-${g.id}" style="display:none;margin-top:4px"></div></div>`;
 }
 function showAnalysis(gid){analysisGameId=gid;renderRound();scrollTo(0,0)}
 function closeAnalysis(){analysisGameId=null;renderRound()}
@@ -546,6 +736,15 @@ function buildAnalysis(g){
   const hR=getRating(g.home_team_id),aR=getRating(g.away_team_id);
   const hElo=hR?.elo||1500,aElo=aR?.elo||1500;
   const hPdo=hR?.pdo||100,aPdo=aR?.pdo||100;
+  const hEloDelta=hR?.elo_delta||0,aEloDelta=aR?.elo_delta||0;
+  const hPdoDelta=hR?.pdo_delta||0,aPdoDelta=aR?.pdo_delta||0;
+  const hWins=(hR?.wins||0)+(hR?.ot_wins||0),aWins=(aR?.wins||0)+(aR?.ot_wins||0);
+  const hRecord=`${hWins}-${hR?.ot_losses||0}-${hR?.losses||0}`;
+  const aRecord=`${aWins}-${aR?.ot_losses||0}-${aR?.losses||0}`;
+  const hGoals=`${hR?.goals_for||0}-${hR?.goals_against||0}`;
+  const aGoals=`${aR?.goals_for||0}-${aR?.goals_against||0}`;
+  const hShots=hR?.shots_for!=null&&hR?.shots_against!=null?`${hR.shots_for}-${hR.shots_against}`:'—';
+  const aShots=aR?.shots_for!=null&&aR?.shots_against!=null?`${aR.shots_for}-${aR.shots_against}`:'—';
   const odds=getOdds(g.id);const pred=getPred(g.id)||{};
   const vf=valueFlags.find(f=>f.game_id===g.id);
   const eloDiff=hElo-aElo;const hAdv=40;const totalDiff=eloDiff+hAdv;
@@ -562,6 +761,7 @@ function buildAnalysis(g){
   const injuries=news.filter(e=>e.confidence>0.5&&(e.team_id===g.home_team_id||e.team_id===g.away_team_id));
   let html='';
   html+=`<div class="card" style="border:2px solid var(--c-accent);margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><button class="btn" style="font-size:.7rem;padding:5px 12px;min-height:32px;background:oklch(1 1 0/0.1);color:var(--c-text)" onclick="closeAnalysis()">← Takaisin kierrokseen</button><span style="font-weight:700;font-size:.9rem">📊 ${home} vs ${away}</span></div>`;
+  html+=`<div style="margin-bottom:10px;padding:10px;background:oklch(1 1 0/0.04);border-radius:8px"><h4 style="font-size:.8rem;margin-bottom:6px">📚 Dynaamiset kausitunnusluvut</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.72rem"><div style="padding:6px 8px;background:oklch(1 1 0/0.05);border-radius:8px"><div style="font-weight:700;margin-bottom:3px">${home}</div><div>Ottelut: <b>${hR?.played||0}</b></div><div>Saldo: <b>${hRecord}</b></div><div>Maalit: <b>${hGoals}</b></div><div>Laukaukset: <b>${hShots}</b></div><div>Elo Δ: <b style="color:${hEloDelta>=0?'var(--c-success)':'var(--c-danger)'}">${hEloDelta>=0?'+':''}${hEloDelta.toFixed(1)}</b></div><div>PDO Δ: <b style="color:${hPdoDelta>=0?'var(--c-success)':'var(--c-danger)'}">${hPdoDelta>=0?'+':''}${hPdoDelta.toFixed(1)}</b></div></div><div style="padding:6px 8px;background:oklch(1 1 0/0.05);border-radius:8px"><div style="font-weight:700;margin-bottom:3px">${away}</div><div>Ottelut: <b>${aR?.played||0}</b></div><div>Saldo: <b>${aRecord}</b></div><div>Maalit: <b>${aGoals}</b></div><div>Laukaukset: <b>${aShots}</b></div><div>Elo Δ: <b style="color:${aEloDelta>=0?'var(--c-success)':'var(--c-danger)'}">${aEloDelta>=0?'+':''}${aEloDelta.toFixed(1)}</b></div><div>PDO Δ: <b style="color:${aPdoDelta>=0?'var(--c-success)':'var(--c-danger)'}">${aPdoDelta>=0?'+':''}${aPdoDelta.toFixed(1)}</b></div></div></div><div style="font-size:.66rem;color:var(--c-text-muted);margin-top:6px">${esc(hR?.notes||'')} · ${esc(aR?.notes||'')}</div></div>`;
   // Section 1: Elo comparison + formula
   html+=`<div style="margin-bottom:10px;padding:10px;background:oklch(1 1 0/0.04);border-radius:8px"><h4 style="font-size:.8rem;margin-bottom:6px">📈 Elo-voimaestimaatti & voittotodennäköisyys</h4>
     <div class="row" style="font-size:.75rem;margin:4px 0"><span>${home}: <b>${hElo.toFixed(0)}</b></span><span>${away}: <b>${aElo.toFixed(0)}</b></span></div>
@@ -711,70 +911,35 @@ function updateSlipBadge(){const e=document.getElementById('slip-count');e.textC
 function runSimulation(){
   // Jalkapallon simulaatio on oma moduulinsa; se ei vaadi vetoja, koska
   // ottelutulokset ovat kiinnostavia myös ilman panosta
-  if(!isHockey()){if(window.BTT)window.BTT.run();return}
-  if(!bets.length){toast('⚠️ Aseta ensin vetoja Kierros-välilehdellä');return}
+  if(!isHockey()){const b=document.getElementById('sim-btn');if(b)b.style.display='block';if(window.BTT)window.BTT.run();return}
   switchTab('tracker');
   const b=document.getElementById('sim-btn');
-  b.textContent='🏒 Pelipäivä käynnissä...';b.className='btn btn-primary btn-block';b.disabled=true;
-
+  b.textContent='🏒 Simuloidaan...';b.className='btn btn-primary btn-block';b.disabled=true;
   const upcoming=games.filter(g=>g.status==='upcoming');
-  simResults=upcoming.map(g=>({
-    game_id:g.id,home_team_id:g.home_team_id,away_team_id:g.away_team_id,
-    home_score:0,away_score:0,winner:null,period:1,
-    scorers:[],penalties:[],shots_home:0,shots_away:0,
-    pp_chances_home:0,pp_chances_away:0,pp_goals_home:0,pp_goals_away:0
-  }));
+  simResults=upcoming.map(g=>{
+    const homeScore=g.actual_home_score??0,awayScore=g.actual_away_score??0;
+    const period=g.result_type&&g.result_type!=='RT'?4:3;
+    const winner=homeScore>awayScore?'home':awayScore>homeScore?'away':'draw';
+    const baseShotsHome=Math.max(20,homeScore*6+18+(g.home_team_id%5));
+    const baseShotsAway=Math.max(20,awayScore*6+17+(g.away_team_id%5));
+    const scorers=[];
+    const penalties=[];
+    const homePlayers=['Lehterä','Savinainen','Tanus','Keskinen','Puhakka','Räsänen','Mäenalanen','Kemiläinen'];
+    const awayPlayers=['Suomi','Ikonen','Turunen','Tyrväinen','Nurmi','Oksanen','Ruohomaa','Palve'];
+    for(let i=0;i<homeScore;i++)scorers.push({player:homePlayers[i%homePlayers.length],team:teamName(g.home_team_id),period:1+Math.min(2,i%3),time:`${1+Math.min(2,i%3)}.erä ${String(4+i*3).padStart(2,'0')}:${String((i*11)%60).padStart(2,'0')}`});
+    for(let i=0;i<awayScore;i++)scorers.push({player:awayPlayers[i%awayPlayers.length],team:teamName(g.away_team_id),period:1+Math.min(2,i%3),time:`${1+Math.min(2,i%3)}.erä ${String(6+i*3).padStart(2,'0')}:${String((i*13)%60).padStart(2,'0')}`});
+    const penaltyReasons=['Koukkaaminen','Kampitus','Kiinnipitäminen','Poikittainen maila'];
+    const penaltyCount=Math.max(1,Math.min(5,Math.abs(homeScore-awayScore)+2));
+    for(let i=0;i<penaltyCount;i++)penalties.push({team_short:(i%2===0?teamName(g.home_team_id):teamName(g.away_team_id)).substring(0,3).toUpperCase(),min:2,reason:penaltyReasons[i%penaltyReasons.length]});
+    const homePP=Math.max(0,Math.min(homeScore,Math.floor(homeScore/2)));
+    const awayPP=Math.max(0,Math.min(awayScore,Math.floor(awayScore/2)));
+    return{game_id:g.id,home_team_id:g.home_team_id,away_team_id:g.away_team_id,home_score:homeScore,away_score:awayScore,winner,period,scorers:scorers.sort((a,b)=>a.period-b.period),penalties,shots_home:baseShotsHome,shots_away:baseShotsAway,pp_chances_home:homePP+1,pp_chances_away:awayPP+1,pp_goals_home:homePP,pp_goals_away:awayPP};
+  });
   renderTrackerLive();
-  let elapsed=0;
-  const totalTime=20;
-  const goalsPerSec=0.7; // ~14 goals across 5 games in 20s (~2.8 per game)
-
-  simInterval=setInterval(()=>{
-    elapsed++;
-    if(Math.random()<goalsPerSec){
-      const gameIdx=Math.floor(Math.random()*simResults.length);
-      const g=simResults[gameIdx];
-      const isHome=Math.random()<(pressureTeam===String(g.home_team_id)?0.7:pressureTeam===String(g.away_team_id)?0.3:0.55);
-      if(isHome)g.home_score++;else g.away_score++;
-      const homePlayers=['Lehterä','Savinainen','Tanus','Keskinen','Puhakka','Räsänen','Mäenalanen','Kemiläinen'];
-      const awayPlayers=['Suomi','Ikonen','Turunen','Tyrväinen','Nurmi','Oksanen','Ruohomaa','Palve'];
-      const pname=isHome?homePlayers[Math.floor(Math.random()*homePlayers.length)]:awayPlayers[Math.floor(Math.random()*awayPlayers.length)];
-      g.scorers.push({player:pname,team:teamName(isHome?g.home_team_id:g.away_team_id),period:g.period,time:`${g.period}.erä ${String(20-Math.floor(elapsed/3)).padStart(2,'0')}:${String(Math.floor(Math.random()*60)).padStart(2,'0')}`});
-      g.shots_home+=Math.floor(Math.random()*4)+1;g.shots_away+=Math.floor(Math.random()*4)+1;
-      if(Math.random()<0.2){
-        const reasons=['Koukkaaminen','Kampitus','Kiinnipitäminen','Poikittainen maila'];
-        g.penalties.push({team_short:isHome?teamName(g.away_team_id).substring(0,3).toUpperCase():teamName(g.home_team_id).substring(0,3).toUpperCase(),min:2,reason:reasons[Math.floor(Math.random()*reasons.length)]});
-        if(isHome)g.pp_chances_home++;else g.pp_chances_away++;
-      }
-      // Resolve next_goal bets for this game
-      const ngBets=bets.filter(b=>b.game_id===g.game_id&&b.type==='next_goal');
-      ngBets.forEach(b=>{
-        const won=(b.side==='home'&&isHome)||(b.side==='away'&&!isHome);
-        const profit=won?b.stake*b.odds:0;
-        bankroll+=profit;
-        betHistory.push({...b,won,profit,resolved_at:new Date().toISOString(),game_result:'next_goal'});
-        bets=bets.filter(x=>x.id!==b.id);
-      });
-      if(ngBets.length){save();updateBankroll();updateSlipBadge();renderSlip();}
-      renderTrackerLive();
-    }
-    if(elapsed===6||elapsed===12){simResults.forEach(g=>g.period=elapsed===6?2:3)}
-    if(elapsed===17){simResults.forEach(g=>{if(g.home_score===g.away_score)g.period=4})}
-    b.textContent=`🏒 Pelipäivä käynnissä... ${totalTime-elapsed}s`;
-    if(elapsed>=totalTime){
-      clearInterval(simInterval);simInterval=null;b.disabled=false;
-      simResults.forEach(g=>{
-        g.winner=g.home_score>g.away_score?'home':g.away_score>g.home_score?'away':'draw';
-        g.shots_home=Math.max(g.shots_home,20+Math.floor(Math.random()*15));
-        g.shots_away=Math.max(g.shots_away,20+Math.floor(Math.random()*15));
-      });
-      resolveBets();updateEloAfterSim();save();
-      b.textContent='🔄 Käynnistä uudelleen';b.className='btn btn-primary btn-block';
-      renderRoundReport();
-      toast('🏒 Pelipäivä pelattu!');
-      simAdvanceTimer=setTimeout(()=>{advanceRound();},8000);
-    }
-  },1000);
+  resolveBets();updateEloAfterSim();save();
+  b.textContent='🔄 Simuloi uudelleen';b.className='btn btn-primary btn-block';b.disabled=false;
+  renderRoundReport();
+  toast('🏒 Kierros simuloitu viime kauden oikeilla tuloksilla');
 }
 
 function renderTrackerLive(){
@@ -806,6 +971,14 @@ function renderTrackerLive(){
 }
 
 function advanceRound(){
+  if(hasHockeyRounds()){
+    if(hockeyRoundIndex>=hockeyRounds.length-1){toast('🏁 Kausidataa ei ole enaa eteenpain');return}
+    bets=bets.filter(b=>b.practice);pressureTeam='';analysisGameId=null;
+    applyHockeyRound(hockeyRoundIndex+1,true);
+    save();renderAll();switchTab('round');
+    toast(`📅 Kierros ${hockeyRoundIndex+1} ladattu — Elo paivitetty edellisen kierroksen simulaatiosta`);
+    return;
+  }
   if(!simResults||!simResults.length)return;
   updateEloAfterSim();
   const nextRoundNum=(parseInt(localStorage.getItem('bt_round')||'1'))+1;
@@ -861,11 +1034,14 @@ function resetSimulation(){
   if(simInterval){clearInterval(simInterval);simInterval=null}
   if(simAdvanceTimer){clearTimeout(simAdvanceTimer);simAdvanceTimer=null}
   simResults=null;bets=[];betHistory=[];bankroll=100;pressureTeam='';
-  ['bt_ratings','bt_round'].forEach(k=>localStorage.removeItem(k));
+  ['bt_ratings','bt_round','bt_hockey_round'].forEach(k=>localStorage.removeItem(k));
   // Jalkapallotilassa FALLBACK-jääkiekkodataa ei palauteta eikä kertoimia keksitä
   if(isHockey()){
-    const fb=FALLBACK;teams=fb.teams;games=fb.games;predictions=fb.predictions;valueFlags=fb.valueFlags;oddsSnapshots=[];ratings=fb.teamRatings;news=fb.newsEvents;
-    syncBookmakerOdds();
+    hockeyRoundIndex=0;
+    if(!applyHockeyRound(0)){
+      const fb=FALLBACK;teams=fb.teams;games=fb.games;predictions=fb.predictions;valueFlags=fb.valueFlags;oddsSnapshots=[];ratings=fb.teamRatings;news=fb.newsEvents;
+      syncBookmakerOdds();
+    }
   }
   if(!isHockey()){
     localStorage.removeItem('bt_sim_results');
@@ -914,7 +1090,7 @@ function renderHistory(){
 }
 function renderTeams(){
   const l=document.getElementById('teams-list');if(!ratings.length){l.innerHTML='<div class="empty">Ei joukkuetietoja</div>';return}
-  l.innerHTML=[...ratings].sort((a,b)=>b.elo-a.elo).map((t,i)=>{const n=teamName(t.team_id);const pCls=t.pdo>102?'badge-green':t.pdo<98?'badge-red':'badge-muted';const pLbl=t.pdo>102?'Yli':t.pdo<98?'Ali':'Norm';return`<div class="card"><div class="row"><div class="matchup">${teamLogo(teams.find(x=>x.id===t.team_id),22)} <strong>#${i+1} ${n}</strong></div><span style="font-weight:700">Elo: ${t.elo.toFixed(0)}</span></div><div class="row" style="font-size:.7rem;color:var(--muted);margin-top:3px"><span>PDO: ${t.pdo?.toFixed(1)||'—'} <span class="badge ${pCls}">${pLbl}</span></span><span>${t.date}</span></div></div>`}).join('')}
+  l.innerHTML=[...ratings].sort((a,b)=>b.elo-a.elo).map((t,i)=>{const n=teamName(t.team_id);const pCls=t.pdo>102?'badge-green':t.pdo<98?'badge-red':'badge-muted';const pLbl=t.pdo>102?'Yli':t.pdo<98?'Ali':'Norm';const wins=(t.wins||0)+(t.ot_wins||0);const shots=(t.shots_for!=null&&t.shots_against!=null)?`${t.shots_for}-${t.shots_against}`:'—';return`<div class="card"><div class="row"><div class="matchup">${teamLogo(teams.find(x=>x.id===t.team_id),22)} <strong>#${i+1} ${n}</strong></div><span style="font-weight:700">Elo: ${t.elo.toFixed(0)}</span></div><div class="row" style="font-size:.7rem;color:var(--muted);margin-top:3px"><span>PDO: ${t.pdo?.toFixed(1)||'—'} <span class="badge ${pCls}">${pLbl}</span></span><span>${t.date}</span></div><div class="row" style="font-size:.68rem;color:var(--muted);margin-top:3px"><span>${t.played||0} ottelua · ${wins}-${t.ot_losses||0}-${t.losses||0}</span><span>maalit ${t.goals_for||0}-${t.goals_against||0}</span></div><div class="row" style="font-size:.66rem;color:var(--muted);margin-top:2px"><span>${esc(t.notes||'')}</span><span>laukaukset ${shots}</span></div></div>`}).join('')}
 function renderInfo(){
   document.getElementById('info-content').innerHTML=`<div class="card"><h3>ℹ️ Tervetuloa BetTrackeriin!</h3><p style="font-size:.8rem;line-height:1.5;color:var(--muted);margin-top:8px">BetTracker on Liiga-vedonlyönnin value-analyysijärjestelmä. Se auttaa tunnistamaan tilanteet, joissa vedonlyöntimarkkina on hinnoitellut kohteen väärin.</p></div>
 <div class="card"><h3>💎 Value-flagit</h3><p style="font-size:.75rem;line-height:1.5;color:var(--muted);margin-top:4px"><b>Edge > 3 %</b> = ylikerroinkandidaatti (keltainen)<br><b>Edge > 5 %</b> = vahva signaali (vihreä)<br>Edge = mallin todennäköisyys × kerroin − 1. Positiivinen edge tarkoittaa, että vedonlyöntikohde on aliarvostettu.</p></div>
@@ -924,6 +1100,7 @@ function renderInfo(){
 }
 function renderAdmin(){
   const supabaseUrl=localStorage.getItem('bt_supabase_url')||'';const supabaseKey=localStorage.getItem('bt_supabase_key')||'';const oddsKey=localStorage.getItem('bt_odds_key')||'';
+  const hockeyMode=hockeyOddsMode();
   const bkHtml=bookmakers.map((b,i)=>`<div class="row" style="font-size:.75rem;padding:6px 0;border-bottom:1px dashed oklch(1 1 0/0.12)"><span><b>${esc(b.name)}</b><br><span style="font-size:.6rem;color:var(--muted)">${esc(b.url)}</span></span><button class="btn btn-danger" style="font-size:.55rem;padding:2px 8px;min-height:26px" onclick="removeBookmaker(${i})">🗑️</button></div>`).join('')||'<div class="empty" style="font-size:.7rem">Ei toimistoja listalla</div>';
   document.getElementById('admin-content').innerHTML=`<div class="card"><h3>⚙️ API-asetukset</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Demo-tilassa asetukset tallentuvat selaimeen. Tuotannossa käytetään ympäristömuuttujia.</p>
 <div class="input-group"><label>Supabase URL</label><input type="text" id="admin-supabase-url" value="${supabaseUrl}" placeholder="https://xxx.supabase.co"></div>
@@ -936,6 +1113,7 @@ function renderAdmin(){
 <button class="btn ${SPORT==='hockey'?'btn-primary':''}" style="flex:1;${SPORT!=='hockey'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setSport('hockey')">🏒 Jääkiekko${SPORT==='hockey'?' ✓':''}</button>
 </div>
 ${SPORT==='football'?'<button class="btn btn-block" style="margin-top:6px;background:oklch(1 1 0/0.1);color:var(--c-text);font-size:.7rem" onclick="if(window.BTF)window.BTF.reload().then(()=>toast(\'🔄 Kohteet päivitetty\'))">🔄 Lataa kohteet uudelleen</button>':''}</div>
+${SPORT==='hockey'?`<div class="card"><h3>🎲 Kerrointila</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Veikkaus-tyyli on tiukka ja tuottaa vain harvoin ylikertoimia. Pehmeä bookkeri jättää harjoittelua varten enemmän hintavirhettä näkyviin.</p><div style="display:flex;gap:6px"><button class="btn ${hockeyMode==='veikkaus'?'btn-primary':''}" style="flex:1;font-size:.7rem;${hockeyMode!=='veikkaus'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setHockeyOddsMode('veikkaus')">🏦 Veikkaus-tyyli${hockeyMode==='veikkaus'?' ✓':''}</button><button class="btn ${hockeyMode==='soft'?'btn-primary':''}" style="flex:1;font-size:.7rem;${hockeyMode!=='soft'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setHockeyOddsMode('soft')">🎯 Pehmeä bookkeri${hockeyMode==='soft'?' ✓':''}</button></div></div>`:''}
 ${SPORT==='football'?(()=>{
   const src=(window.BTF&&window.BTF.getDataSource)?window.BTF.getDataSource():'live';
   const style=active=>active?'':'background:oklch(1 1 0/0.1);color:var(--c-text)';

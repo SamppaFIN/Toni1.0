@@ -1,29 +1,23 @@
-// Tiketti #37: Viiden kierroksen harjoitusdata
+// Tiketti #37: Kausisimulaation kierrosdata
 //
-// Tarkoitus: omien vetolappujen ja tappioketjujen testaaminen ilman että
-// tarvitsee odottaa oikeita otteluita. Viisi kierrosta peräkkäin, jokainen
-// simuloitavissa — ketjua voi jahdata kierroksesta toiseen.
+// Tarkoitus: harjoitella vedonlyontia kokonaisella kaudella niin, etta jokainen
+// kierros rakennetaan historiaan perustuen. Ennen jokaista kierrosta Elo-luvut
+// ja tunnusluvut lasketaan uudelleen siihen asti pelatuista otteluista.
 //
-// KERTOIMET EIVÄT OLE KEKSITTYJÄ ILMASTA: ne johdetaan kauden oikeista
-// Elo-luvuista (analyze/season-elo.ts, laskettu 115 pelatusta ottelusta).
-// Näin harjoituskierros tuntuu oikealta — KuPS on suosikki koska KuPS on
-// oikeasti kauden paras, ei koska arpa niin sanoi.
-//
-// DETERMINISTINEN: ei Math.randomia. Sama tiedosto joka ajolla, luettavat
-// diffit, ja harjoituskierros on toistettavissa.
+// Kertoimet johdetaan kierroskohtaisista Eloista ja niihin lisataan pieni,
+// deterministinen varianssi. Varianssi tuottaa seka hyvia etta huonoja
+// vetokohteita ilman satunnaisesti vaihtuvaa tiedostoa.
 //
 // Ajo: npm run mock:rounds
 
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { fetchSeasonResults } from '../ingest/results-veikkausliiga.js';
-import { calculateSeasonElo, eloProbabilities, toEloMap, EloRating } from '../analyze/season-elo.js';
+import { fetchSeasonResults, SeasonMatch } from '../ingest/results-veikkausliiga.js';
+import { STARTING_ELO, calculateSeasonElo, eloProbabilities, toEloMap } from '../analyze/season-elo.js';
 import { buildMatchCard, buildSnapshot } from './snapshot.js';
 import { teamRef } from '../ingest/odds-football.js';
 import { BookmakerOdds, MatchCard, Snapshot, SideProbs, TeamStats } from '../types-football.js';
-
-export const ROUNDS = 5;
 
 /** Toimistot joilta kertoimet "haetaan" — samat kuin oikeassa datassa */
 const BOOKMAKERS: Array<{ name: string; key: string; margin: number }> = [
@@ -39,6 +33,7 @@ export interface MockRoundsFile {
   schema_version: 1;
   generated_at: string;
   kind: 'mock-rounds';
+  season: string;
   rounds: Snapshot[];
 }
 
@@ -53,11 +48,17 @@ function jitter(seed: number, spread: number): number {
 
 /** Todennäköisyydet → kertoimet marginaalilla ja toimistokohtaisella hajonnalla */
 function oddsFor(probs: SideProbs, seed: number): BookmakerOdds[] {
+  const valueSide = seed % 3;
+  const trapSide = (seed + 1) % 3;
+
   return BOOKMAKERS.map((bk, i) => {
     const price = (p: number, side: number) => {
+      const sideIndex = side - 1;
+      const sideBoost = i === 1 && sideIndex === valueSide ? -0.11 : 0;
+      const sidePenalty = i === 2 && sideIndex === trapSide ? 0.05 : 0;
       // Marginaali jaetaan tasaisesti, jitter siirtää yksittäistä hintaa
       const inflated = p * (1 + bk.margin);
-      const withJitter = inflated * (1 + jitter(seed * 17 + i * 7 + side, 0.03));
+      const withJitter = inflated * (1 + jitter(seed * 17 + i * 7 + side, 0.025) + sideBoost + sidePenalty);
       return Math.max(1.02, Math.round((1 / withJitter) * 100) / 100);
     };
     return {
@@ -75,23 +76,30 @@ function oddsFor(probs: SideProbs, seed: number): BookmakerOdds[] {
 }
 
 /**
- * Kierrosten ottelupariutus.
+ * Ryhmittele kauden ottelut kierroksiksi.
  *
- * Yksinkertainen rotaatio (round-robin): joukkue 0 pysyy paikallaan ja muut
- * kiertävät. Näin viisi kierrosta tuottaa 30 eri ottelua ilman toistoja,
- * ja jokainen joukkue pelaa joka kierros.
+ * Kierros vaihtuu kun joku joukkue esiintyisi toista kertaa samassa ryhmässä.
+ * Tämä toimii Veikkausliigan rytmillä, jossa yksi joukkue pelaa kierroksella
+ * yleensä vain kerran.
  */
-function buildFixtures(teams: string[], round: number): Array<[string, string]> {
-  const n = teams.length;
-  const rotated = [teams[0], ...teams.slice(1).map((_, i) => teams[1 + ((i + round) % (n - 1))])];
-  const fixtures: Array<[string, string]> = [];
-  for (let i = 0; i < n / 2; i++) {
-    const home = rotated[i];
-    const away = rotated[n - 1 - i];
-    // Vuorottele kotietu kierroksittain jotta sama joukkue ei ole aina kotona
-    fixtures.push(round % 2 === 0 ? [home, away] : [away, home]);
+function splitToRounds(matches: SeasonMatch[]): SeasonMatch[][] {
+  const rounds: SeasonMatch[][] = [];
+  let current: SeasonMatch[] = [];
+  let seen = new Set<string>();
+
+  for (const m of matches) {
+    if (seen.has(m.home) || seen.has(m.away)) {
+      if (current.length) rounds.push(current);
+      current = [];
+      seen = new Set<string>();
+    }
+    current.push(m);
+    seen.add(m.home);
+    seen.add(m.away);
   }
-  return fixtures;
+
+  if (current.length) rounds.push(current);
+  return rounds;
 }
 
 /**
@@ -104,16 +112,39 @@ function buildFixtures(teams: string[], round: number): Array<[string, string]> 
  * form jää tyhjäksi: viiden viime ottelun järjestys vaatisi tulostason
  * aikajanan, eikä arvattu kirjainjono näyttäisi arvatulta.
  */
-function statsFrom(ratings: EloRating[]): Map<string, TeamStats> {
-  const points = (r: EloRating) => r.won * 3 + r.drawn;
+function statsFromRound(allTeams: string[], matchesSoFar: SeasonMatch[]): Map<string, TeamStats> {
+  const ratings = calculateSeasonElo(matchesSoFar, { startingElo: STARTING_ELO }).ratings;
+  const points = (r: { won: number; drawn: number }) => r.won * 3 + r.drawn;
   const byPoints = [...ratings].sort((a, b) => points(b) - points(a) || b.goalsFor - b.goalsAgainst - (a.goalsFor - a.goalsAgainst));
   const byElo = [...ratings].sort((a, b) => b.elo - a.elo);
 
+  const byTeam = new Map(ratings.map((r) => [r.team, r]));
+
   const map = new Map<string, TeamStats>();
-  for (const r of ratings) {
+  for (const team of allTeams) {
+    const r = byTeam.get(team);
+    if (!r) {
+      map.set(team, {
+        rank: null,
+        played: 0,
+        form: '',
+        gf_pg: 0,
+        ga_pg: 0,
+        home_gf_pg: null,
+        away_gf_pg: null,
+        xg_pg: null,
+        rest_days: null,
+        ppg: null,
+        elo: STARTING_ELO,
+        elo_change: 0,
+        elo_rank: null,
+      });
+      continue;
+    }
+
     const played = r.played || 1;
-    map.set(r.team, {
-      rank: byPoints.findIndex((x) => x.team === r.team) + 1,
+    map.set(team, {
+      rank: byPoints.findIndex((x) => x.team === team) + 1,
       played: r.played,
       form: '',
       gf_pg: Math.round((r.goalsFor / played) * 100) / 100,
@@ -125,24 +156,36 @@ function statsFrom(ratings: EloRating[]): Map<string, TeamStats> {
       ppg: Math.round((points(r) / played) * 100) / 100,
       elo: Math.round(r.elo),
       elo_change: Math.round(r.change),
-      elo_rank: byElo.findIndex((x) => x.team === r.team) + 1,
+      elo_rank: byElo.findIndex((x) => x.team === team) + 1,
     });
   }
   return map;
 }
 
-export function buildMockRounds(ratings: EloRating[], baseDate = new Date('2026-08-16T00:00:00.000Z')): MockRoundsFile {
-  const eloMap = toEloMap({ ratings, timeline: new Map(), matchesProcessed: 0 });
-  const statsMap = statsFrom(ratings);
-  const teams = ratings.map((r) => r.team);
+function seasonLabel(matches: SeasonMatch[]): string {
+  const years = [...new Set(matches.map((m) => m.date.slice(0, 4)))];
+  return years.length === 1 ? years[0] : `${years[0]}-${years[years.length - 1]}`;
+}
+
+export function buildMockRounds(matches: SeasonMatch[], baseDate = new Date('2026-08-16T00:00:00.000Z')): MockRoundsFile {
+  const ordered = [...matches].sort((a, b) => a.date.localeCompare(b.date));
+  const roundsFromSeason = splitToRounds(ordered);
+  const allTeams = [...new Set(ordered.flatMap((m) => [m.home, m.away]))].sort();
 
   const rounds: Snapshot[] = [];
+  let processed: SeasonMatch[] = [];
 
-  for (let round = 0; round < ROUNDS; round++) {
+  for (let round = 0; round < roundsFromSeason.length; round++) {
     const kickoffDay = new Date(baseDate.getTime() + round * 7 * 86400_000);
     const cards: MatchCard[] = [];
+    const seasonRound = roundsFromSeason[round];
+    const preRoundRatings = calculateSeasonElo(processed, { startingElo: STARTING_ELO }).ratings;
+    const eloMap = toEloMap({ ratings: preRoundRatings, timeline: new Map(), matchesProcessed: processed.length });
+    const statsMap = statsFromRound(allTeams, processed);
 
-    buildFixtures(teams, round).forEach(([home, away], matchIndex) => {
+    seasonRound.forEach((resultMatch, matchIndex) => {
+      const home = resultMatch.home;
+      const away = resultMatch.away;
       const homeElo = eloMap.get(home) ?? 1500;
       const awayElo = eloMap.get(away) ?? 1500;
       const probs = eloProbabilities(homeElo, awayElo);
@@ -153,7 +196,7 @@ export function buildMockRounds(ratings: EloRating[], baseDate = new Date('2026-
       cards.push(
         buildMatchCard({
           id: `mock:r${round + 1}:${teamRef(home).short}-${teamRef(away).short}`,
-          league: `Harjoituskierros ${round + 1}/${ROUNDS}`,
+          league: `Kausisimulaatio ${round + 1}/${roundsFromSeason.length}`,
           kickoff: kickoff.toISOString(),
           home: teamRef(home),
           away: teamRef(away),
@@ -169,7 +212,10 @@ export function buildMockRounds(ratings: EloRating[], baseDate = new Date('2026-
           bankroll: 100,
           adjustments: [
             {
-              reason: `Kertoimet johdettu kauden Elo-luvuista: ${home} ${homeElo.toFixed(0)} vs ${away} ${awayElo.toFixed(0)}`,
+              reason: `Kierroksen alku-Elo: ${home} ${homeElo.toFixed(0)} vs ${away} ${awayElo.toFixed(0)}`,
+            },
+            {
+              reason: `Historiatulos (vertailu): ${resultMatch.homeScore}-${resultMatch.awayScore} (${resultMatch.date})`,
             },
           ],
         })
@@ -178,15 +224,19 @@ export function buildMockRounds(ratings: EloRating[], baseDate = new Date('2026-
 
     rounds.push(
       buildSnapshot(cards, 'mock', kickoffDay.toISOString(), [
-        'Harjoitusdata — kertoimet johdettu kauden Elo-luvuista',
+        'Kausisimulaatio — kertoimet johdettu kierroskohtaisista Elo-luvuista',
+        `Historiadata: ${seasonLabel(ordered)} Veikkausliiga`,
       ])
     );
+
+    processed = processed.concat(seasonRound);
   }
 
   return {
     schema_version: 1,
     generated_at: baseDate.toISOString(),
     kind: 'mock-rounds',
+    season: seasonLabel(ordered),
     rounds,
   };
 }
@@ -203,13 +253,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../public');
 
   const matches = await fetchSeasonResults();
-  const elo = calculateSeasonElo(matches);
-  const file = buildMockRounds(elo.ratings);
+  const file = buildMockRounds(matches);
   const target = writeMockRounds(publicDir, file);
 
-  console.log(`✓ ${ROUNDS} harjoituskierrosta kirjoitettu (${file.rounds.reduce((s, r) => s + r.matches.length, 0)} ottelua)`);
+  console.log(`✓ ${file.rounds.length} kausisimulaatiokierrosta kirjoitettu (${file.rounds.reduce((s, r) => s + r.matches.length, 0)} ottelua)`);
   console.log(`  ${target}`);
-  console.log(`  Kertoimet johdettu ${elo.matchesProcessed} pelatun ottelun Elo-luvuista\n`);
+  console.log(`  Historiakausi: ${file.season} (${matches.length} tulosta)\n`);
 
   for (const [i, round] of file.rounds.entries()) {
     console.log(`Kierros ${i + 1} — ${round.generated_at.slice(0, 10)}`);
