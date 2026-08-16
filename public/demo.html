@@ -291,9 +291,9 @@ body{
 
 <script>
 const API='/rest/v1';
-// Tiketti #31: Lajilippu. Oletuksena jalkapallo; jääkiekkodemo on piilossa
-// mutta koskematta ja palautettavissa Admin-välilehdeltä.
-let SPORT=localStorage.getItem('bt_sport')||'football';
+// Tiketti #31: Lajilippu. Oletuksena jääkiekko; jalkapallo on edelleen
+// palautettavissa Admin-välilehdeltä.
+let SPORT=localStorage.getItem('bt_sport')||'hockey';
 function isHockey(){return SPORT==='hockey'}
 
 // Käyttöliittymäteema. 'system' = alkuperäinen tumma OKLCH-teema, koskematta.
@@ -681,6 +681,7 @@ function renderUpcoming(g){
   const home=teamName(g.home_team_id),away=teamName(g.away_team_id);
   const odds=getOdds(g.id);const pred=getPred(g.id)||{};
   const vf=valueFlags.find(f=>f.game_id===g.id);
+  const relatedNews=news.filter(e=>e.team_id===g.home_team_id||e.team_id===g.away_team_id);
 
   // Value flag badge
   let vfHtml='';
@@ -727,7 +728,14 @@ function renderUpcoming(g){
     betsHtml='<div style="margin-top:4px;font-size:.65rem;color:var(--c-text-muted)">'+gameBets.map(b=>`<span style="margin-right:8px">🎫 ${b.side.toUpperCase()} ${b.stake.toFixed(0)}€ @ ${b.odds.toFixed(2)}</span>`).join('')+'</div>';
   }
 
-  return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;font-size:.62rem;color:var(--c-text-muted)"><span>Liiga · ${gameDateLabel(g.date)}</span><span>${currentHockeyRound()?.label||''}</span></div><div class="row" style="margin-top:5px"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${teamNameElo(g.home_team_id)}</strong><span class="vs">–</span><strong>${teamNameElo(g.away_team_id)}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span><span style="display:flex;gap:4px;align-items:center">${vfHtml}<button class="btn" style="font-size:.68rem;padding:4px 10px;min-height:30px;border-radius:8px;background:var(--c-accent);color:#000;font-weight:700;white-space:nowrap" onclick="event.stopPropagation();showAnalysis(${g.id})">📊 Analyysi</button></span></div><div style="font-size:.6rem;margin-top:4px;line-height:1.8">${factorHtml}</div>${ph}${oh}${betsHtml}<div id="betpop-${g.id}" style="display:none;margin-top:4px"></div></div>`;
+  const hintHtml=`<div style="margin-top:6px;font-size:.62rem;color:var(--c-text-muted);line-height:1.55">
+    👆 Klikkaa kerrointa asettaaksesi vedon<br>
+    🏦 ${hockeyOddsMode()==='soft'?'Pehmeä bookkeri':'Veikkaus-tyyli'} — ${hockeyOddsMode()==='soft'?'harjoitteluun jätetty enemmän hajontaa':'tiukempi ja konservatiivisempi hinnoittelu'}<br>
+    ${vf?`💎 edge yli 3 %${vf.edge>0.05?' · vahva signaali':''}`:'⚫ paras edge alle 3 % — ei ylikerrointa'}
+  </div>`;
+  const footerButtons=`<div style="display:flex;gap:4px;margin-top:8px"><button class="btn" style="flex:1;font-size:.62rem;padding:5px 4px;min-height:32px;border-radius:6px;background:oklch(1 1 0/0.08);color:var(--c-text)" onclick="event.stopPropagation();showAnalysis(${g.id})">📊 Tunnusluvut</button><button class="btn" style="flex:1;font-size:.62rem;padding:5px 4px;min-height:32px;border-radius:6px;background:${relatedNews.length?'oklch(1 1 0/0.08)':'oklch(1 1 0/0.04)'};color:var(--c-text)" onclick="event.stopPropagation();showAnalysis(${g.id})">📰 Uutiset${relatedNews.length?` (${relatedNews.length})`:''}</button><button class="btn" style="flex:1;font-size:.62rem;padding:5px 4px;min-height:32px;border-radius:6px;background:var(--c-accent);color:#000;font-weight:700" onclick="event.stopPropagation();showAnalysis(${g.id})">💎 Analyysi</button></div>`;
+
+  return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;font-size:.62rem;color:var(--c-text-muted)"><span>Liiga · ${gameDateLabel(g.date)}</span><span>${currentHockeyRound()?.label||''}</span></div><div class="row" style="margin-top:5px"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${teamNameElo(g.home_team_id)}</strong><span class="vs">–</span><strong>${teamNameElo(g.away_team_id)}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span><span style="display:flex;gap:4px;align-items:center">${vfHtml}<button class="btn" style="font-size:.68rem;padding:4px 10px;min-height:30px;border-radius:8px;background:var(--c-accent);color:#000;font-weight:700;white-space:nowrap" onclick="event.stopPropagation();showAnalysis(${g.id})">📊 Analyysi</button></span></div><div style="font-size:.6rem;margin-top:4px;line-height:1.8">${factorHtml}</div>${ph}${oh}${betsHtml}${hintHtml}${footerButtons}<div id="betpop-${g.id}" style="display:none;margin-top:4px"></div></div>`;
 }
 function showAnalysis(gid){analysisGameId=gid;renderRound();scrollTo(0,0)}
 function closeAnalysis(){analysisGameId=null;renderRound()}
