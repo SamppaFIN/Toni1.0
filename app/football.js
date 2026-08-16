@@ -220,6 +220,12 @@ export async function start(containerId = 'round-games') {
 // Itsekäynnistys. Moduuli latautuu deferoituna eli inline-skriptin jälkeen,
 // joten kontti on jo DOM:ssa. Lajilippu luetaan suoraan localStoragesta,
 // jolloin moduuli ei riipu inline-skriptin latausjärjestyksestä.
+//
+// Oletus on 'hockey' — sama päätös kuin demo.html:n SPORT-lipussa, ei
+// tarkoituksellisesti eriävä. Football-moduuli ei siis itsekäynnisty
+// oletuksena, mutta pysyy täysin toimivana: Admin-välilehden setSport()
+// lataa koko sivun uudelleen lajia vaihdettaessa, jolloin tämä ehto
+// arvioidaan uudestaan tuoreella bt_sport-arvolla.
 if ((localStorage.getItem('bt_sport') || 'hockey') !== 'hockey') {
   start();
 }

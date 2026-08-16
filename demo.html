@@ -235,7 +235,6 @@ body{
 }
 .pressure-toggle:hover{border-color:var(--c-orange);color:var(--c-text)}
 .pressure-toggle.active{background:var(--c-orange);color:#fff;border-color:var(--c-orange);font-weight:700;box-shadow:0 0 12px oklch(0.58 0.18 50 / 0.3)}
-.factor-badge{display:inline-block;padding:1px 6px;border-radius:8px;background:oklch(1 1 0 / 0.06);margin:1px 2px;cursor:help;font-weight:500}
 /* Modal */
 .modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:oklch(0 0 0 / 0.7);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;animation:fadeIn .2s ease}
 /* a11y */
@@ -255,7 +254,7 @@ body{
   <button class="tab" data-tab="slip">🎫 Vetolappu <span id="slip-count"></span></button>
   <button class="tab" data-tab="tracker">🏒 Seuranta</button>
   <button class="tab" data-tab="history">📜 Historia</button>
-  <button class="tab" data-tab="chase" data-sport="football">🔥 Jahti</button>
+  <button class="tab" data-tab="chase">🔥 Jahti</button>
   <button class="tab" data-tab="teams" data-sport="hockey">📊 Joukkueet</button>
   <button class="tab" data-tab="info">ℹ️ Info</button>
   <button class="tab" data-tab="admin">⚙️ Admin</button>
@@ -272,8 +271,9 @@ body{
 </div>
 <div id="slip" class="view"><div class="grid-2" id="slip-metrics"></div><div id="slip-list"></div><button class="btn btn-danger btn-block" style="margin-top:8px" onclick="clearSlip()">🗑️ Tyhjennä lappu</button><div id="llm-content" data-sport="football" style="margin-top:10px"></div></div>
 <div id="history" class="view"><div class="grid-2" id="history-metrics"></div><div id="history-list"></div></div>
-<!-- Tiketti #35: tappioketju. Jalkapallo-ominaisuus, piilossa jääkiekkotilassa
-     (data-sport="football" tabissa, ks. applySportVisibility). -->
+<!-- Tiketti #35: tappioketju. Toimii molemmilla lajeilla — football-chase.js
+     lukee kohteet ja kertoimet window.BT.getChaseMatches()-sillan kautta,
+     joka valitsee oikean lähteen SPORT-lipun mukaan (ks. window.BT alempana). -->
 <div id="chase" class="view"><div id="chase-content"></div></div>
 <div id="teams" class="view"><div id="teams-list"></div></div>
 <div id="info" class="view"><div id="info-content"></div></div>
@@ -291,8 +291,11 @@ body{
 
 <script>
 const API='/rest/v1';
-// Tiketti #31: Lajilippu. Oletuksena jääkiekko; jalkapallo on edelleen
-// palautettavissa Admin-välilehdeltä.
+// Tiketti #31 loi lajilipun jalkapallo-oletuksella. Päätös on sittemmin
+// vaihtunut: jääkiekon kausisimulaatio (oikea Liiga-otteluohjelma, dynaamiset
+// kertoimet, eriytetyt lähtö-Elot) on nyt pääasiallinen kehityskohde, joten
+// oletus on jääkiekko. Jalkapallo pysyy täysin toimivana ja tavoitettavissa
+// Admin-välilehdeltä.
 let SPORT=localStorage.getItem('bt_sport')||'hockey';
 function isHockey(){return SPORT==='hockey'}
 
@@ -354,25 +357,35 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
 function gameDateLabel(iso){const d=new Date(iso);return Number.isNaN(d.getTime())?iso:d.toLocaleDateString('fi-FI',{weekday:'short',day:'numeric',month:'numeric'})}
 function persistBookmakers(){localStorage.setItem('bt_bookmakers',JSON.stringify(bookmakers))}
 function hockeyOddsMode(){return HOCKEY_ODDS_MODE==='soft'?'soft':'veikkaus'}
+// KORJAUS: vol (kertoimen satunnaisvaihtelu per toimisto) oli 6-10x liian
+// pieni suhteessa margin-eroihin toimistojen välillä. Seurauksena Pinnaclen
+// matala margin voitti AINA joka kohteessa joka kierroksella (todennettu
+// Monte Carlo -ajolla: 100 % kierroksista Pinnacle paras kaikilla kolmella
+// kohteella) — "paras hinta" -tähti oli täysin ennustettava eikä siis
+// kertonut mitään. Vol-arvot 6x, jolloin Pinnacle on yhä keskimäärin
+// terävin (se ON mallinnettu sharp-kirjaksi, sama rooli kuin oikean datan
+// puolella src/analyze/consensus.ts:n sharpAnchor()), mutta ei enää
+// deterministisesti — sama Monte Carlo -ajo antaa nyt ~59 % kierroksista
+// Pinnacle-puhtaan kolmikon, loput jakautuvat muille toimistoille.
 function bookmakerProfile(name){
   const key=String(name||'').toLowerCase();
   const soft=hockeyOddsMode()==='soft';
   if(soft){
-    if(key.includes('pinnacle'))return{margin:0.03,vol:0.004,favoriteTax:0.002,longshotTax:0.002,drawTax:0.001};
-    if(key.includes('veikkaus'))return{margin:0.058,vol:0.003,favoriteTax:0.008,longshotTax:0.007,drawTax:0.003};
-    if(key.includes('bet365'))return{margin:0.042,vol:0.005,favoriteTax:0.004,longshotTax:0.004,drawTax:0.0015};
-    if(key.includes('unibet'))return{margin:0.047,vol:0.0055,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
-    if(key.includes('betsson'))return{margin:0.05,vol:0.0055,favoriteTax:0.0055,longshotTax:0.0055,drawTax:0.002};
-    if(key.includes('nordic'))return{margin:0.049,vol:0.0055,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
-    return{margin:0.048,vol:0.0055,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    if(key.includes('pinnacle'))return{margin:0.03,vol:0.024,favoriteTax:0.002,longshotTax:0.002,drawTax:0.001};
+    if(key.includes('veikkaus'))return{margin:0.058,vol:0.018,favoriteTax:0.008,longshotTax:0.007,drawTax:0.003};
+    if(key.includes('bet365'))return{margin:0.042,vol:0.03,favoriteTax:0.004,longshotTax:0.004,drawTax:0.0015};
+    if(key.includes('unibet'))return{margin:0.047,vol:0.033,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    if(key.includes('betsson'))return{margin:0.05,vol:0.033,favoriteTax:0.0055,longshotTax:0.0055,drawTax:0.002};
+    if(key.includes('nordic'))return{margin:0.049,vol:0.033,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    return{margin:0.048,vol:0.033,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
   }
-  if(key.includes('pinnacle'))return{margin:0.035,vol:0.002,favoriteTax:0.003,longshotTax:0.003,drawTax:0.001};
-  if(key.includes('veikkaus'))return{margin:0.082,vol:0.0015,favoriteTax:0.015,longshotTax:0.012,drawTax:0.005};
-  if(key.includes('bet365'))return{margin:0.05,vol:0.003,favoriteTax:0.006,longshotTax:0.006,drawTax:0.002};
-  if(key.includes('unibet'))return{margin:0.058,vol:0.0035,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
-  if(key.includes('betsson'))return{margin:0.06,vol:0.0035,favoriteTax:0.008,longshotTax:0.008,drawTax:0.003};
-  if(key.includes('nordic'))return{margin:0.059,vol:0.0035,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
-  return{margin:0.058,vol:0.0035,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  if(key.includes('pinnacle'))return{margin:0.035,vol:0.012,favoriteTax:0.003,longshotTax:0.003,drawTax:0.001};
+  if(key.includes('veikkaus'))return{margin:0.082,vol:0.009,favoriteTax:0.015,longshotTax:0.012,drawTax:0.005};
+  if(key.includes('bet365'))return{margin:0.05,vol:0.018,favoriteTax:0.006,longshotTax:0.006,drawTax:0.002};
+  if(key.includes('unibet'))return{margin:0.058,vol:0.021,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  if(key.includes('betsson'))return{margin:0.06,vol:0.021,favoriteTax:0.008,longshotTax:0.008,drawTax:0.003};
+  if(key.includes('nordic'))return{margin:0.059,vol:0.021,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  return{margin:0.058,vol:0.021,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
 }
 function genOddsForBookmaker(g,bk){
   const hElo=getRating(g.home_team_id)?.elo||1500,aElo=getRating(g.away_team_id)?.elo||1500;
@@ -711,21 +724,27 @@ function renderUpcoming(g){
   const homePressed=pressureTeam===String(g.home_team_id);
   const awayPressed=pressureTeam===String(g.away_team_id);
 
-  // Factor badges
-  let factorHtml='';
+  // Tekijäpillerit — sama .factor-pill-tyyli ja aina-näkyvä periaate kuin
+  // jalkapallon football-cards.js:n factorPills()issa (tiketti #39-jatko).
+  // Vanha versio oli ehdollinen (esim. Elo-ero näkyi vain >60pt erolla), mikä
+  // jätti rivin lähes aina tyhjäksi kun joukkueet käynnistyivät tasan
+  // Elo 1500:sta. Nyt rivi kertoo tilanteen aina, myös kun ero on pieni.
   const hElo=getRating(g.home_team_id)?.elo||1500,aElo=getRating(g.away_team_id)?.elo||1500;
   const hPdo=getRating(g.home_team_id)?.pdo||100,aPdo=getRating(g.away_team_id)?.pdo||100;
-  const factors=[];
-  factors.push({l:'🏠 Kotietu',c:'var(--c-accent)',t:'Kotijoukkueella ~55% voittotodennäköisyys Liigassa'});
-  const eloDiff=Math.abs(hElo-aElo);
-  if(eloDiff>60)factors.push({l:`⚡ Elo-ero ${eloDiff.toFixed(0)}pt`,c:'var(--c-warning)',t:`Elo-ero ${(hElo>aElo?home:away)} eduksi`});
-  if(hPdo>102)factors.push({l:`📈 ${home} ylisuorittaa`,c:'var(--c-orange)',t:`PDO ${hPdo.toFixed(1)} — regressoituu kohti 100`});
-  if(aPdo>102)factors.push({l:`📈 ${away} ylisuorittaa`,c:'var(--c-orange)',t:`PDO ${aPdo.toFixed(1)} — regressoituu kohti 100`});
-  if(hPdo<98)factors.push({l:`📉 ${home} alisuorittaa`,c:'oklch(0.52 0.22 25)',t:`PDO ${hPdo.toFixed(1)} — todennäköinen nousu tulossa`});
-  if(aPdo<98)factors.push({l:`📉 ${away} alisuorittaa`,c:'oklch(0.52 0.22 25)',t:`PDO ${aPdo.toFixed(1)} — todennäköinen nousu tulossa`});
-  const injuryCount=news.filter(e=>e.confidence>0.7&&(e.team_id===g.home_team_id||e.team_id===g.away_team_id)).length;
-  if(injuryCount>0)factors.push({l:`🤕 Loukkaantuminen`,c:'var(--c-danger)',t:'Korkean confidencen loukkaantumisuutinen'});
-  factorHtml=factors.map(f=>`<span class="factor-badge" style="color:${f.c}" title="${f.t}">${f.l}</span>`).join(' ');
+  const HOCKEY_HOME_ADVANTAGE=40; // sama vakio kuin genOddsForBookmaker/buildDynamicRoundState
+  const eloDiff=hElo-aElo;
+  const expectedHome=1/(1+Math.pow(10,(aElo-(hElo+HOCKEY_HOME_ADVANTAGE))/400));
+  const pdoLabel=(name,pdo)=>`${name} ${pdo.toFixed(1)}${pdo>102?' yli':pdo<98?' ali':''}`;
+  const pdoTone=(hPdo>102||aPdo>102||hPdo<98||aPdo<98)?'warning':'muted';
+  const strongNews=relatedNews.filter(e=>e.confidence>0.7).length;
+  const hockeyPill=(icon,text,tone)=>`<span class="factor-pill tone-${tone}">${icon} ${esc(text)}</span>`;
+  const factorHtml=`<div class="factor-pills">${[
+    hockeyPill('📈',`Elo-ero ${eloDiff>0?'+':''}${eloDiff.toFixed(0)} · odotusarvo ${(expectedHome*100).toFixed(0)} %`,eloDiff>0?'success':eloDiff<0?'danger':'muted'),
+    hockeyPill('📊',`PDO ${pdoLabel(home,hPdo)} · ${pdoLabel(away,aPdo)}`,pdoTone),
+    relatedNews.length
+      ?hockeyPill('📰',`${relatedNews.length} uutis${relatedNews.length>1?'ta':''}${strongNews?`, ${strongNews} vaikuttavaa`:''}`,strongNews?'success':'muted')
+      :hockeyPill('📰','ei uutisia','muted'),
+  ].join('')}</div>`;
 
   let oh='';let ph='';
   if(pred.home_win_prob){const h=(pred.home_win_prob*100).toFixed(0),d=(pred.draw_prob*100).toFixed(0),a=(pred.away_win_prob*100).toFixed(0);
@@ -762,9 +781,11 @@ function renderUpcoming(g){
     🏦 ${hockeyOddsMode()==='soft'?'Pehmeä bookkeri':'Veikkaus-tyyli'} — ${hockeyOddsMode()==='soft'?'harjoitteluun jätetty enemmän hajontaa':'tiukempi ja konservatiivisempi hinnoittelu'}<br>
     ${vf?`💎 edge yli 3 %${vf.edge>0.05?' · vahva signaali':''}`:'⚫ paras edge alle 3 % — ei ylikerrointa'}
   </div>`;
-  const footerButtons=`<div style="display:flex;gap:4px;margin-top:8px"><button class="btn" style="flex:1;font-size:.62rem;padding:5px 4px;min-height:32px;border-radius:6px;background:oklch(1 1 0/0.08);color:var(--c-text)" onclick="event.stopPropagation();showAnalysis(${g.id})">📊 Tunnusluvut</button><button class="btn" style="flex:1;font-size:.62rem;padding:5px 4px;min-height:32px;border-radius:6px;background:${relatedNews.length?'oklch(1 1 0/0.08)':'oklch(1 1 0/0.04)'};color:var(--c-text)" onclick="event.stopPropagation();showAnalysis(${g.id})">📰 Uutiset${relatedNews.length?` (${relatedNews.length})`:''}</button><button class="btn" style="flex:1;font-size:.62rem;padding:5px 4px;min-height:32px;border-radius:6px;background:var(--c-accent);color:#000;font-weight:700" onclick="event.stopPropagation();showAnalysis(${g.id})">💎 Analyysi</button></div>`;
-
-  return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;font-size:.62rem;color:var(--c-text-muted)"><span>Liiga · ${gameDateLabel(g.date)}</span><span>${currentHockeyRound()?.label||''}</span></div><div class="row" style="margin-top:5px"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${teamNameElo(g.home_team_id)}</strong><span class="vs">–</span><strong>${teamNameElo(g.away_team_id)}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span><span style="display:flex;gap:4px;align-items:center">${vfHtml}<button class="btn" style="font-size:.68rem;padding:4px 10px;min-height:30px;border-radius:8px;background:var(--c-accent);color:#000;font-weight:700;white-space:nowrap" onclick="event.stopPropagation();showAnalysis(${g.id})">📊 Analyysi</button></span></div><div style="font-size:.6rem;margin-top:4px;line-height:1.8">${factorHtml}</div>${ph}${oh}${betsHtml}${estimateHtml}${hintHtml}${footerButtons}<div id="betpop-${g.id}" style="display:none;margin-top:4px"></div></div>`;
+  // Ei erillistä footer-nappiriviä: kortin yläreunan 📊 Analyysi-nappi avaa
+  // saman buildAnalysis()-syväsukelluksen (tunnusluvut+uutiset+analyysi
+  // yhdessä) jota kolme footer-nappia kaikki kutsuivat identtisesti — puhdas
+  // duplikaatti joka poistettiin.
+  return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;font-size:.62rem;color:var(--c-text-muted)"><span>Liiga · ${gameDateLabel(g.date)}</span><span>${currentHockeyRound()?.label||''}</span></div><div class="row" style="margin-top:5px"><span class="matchup">${teamLogo(teams.find(t=>t.id===g.home_team_id))}<strong>${teamNameElo(g.home_team_id)}</strong><span class="vs">–</span><strong>${teamNameElo(g.away_team_id)}</strong>${teamLogo(teams.find(t=>t.id===g.away_team_id))}</span><span style="display:flex;gap:4px;align-items:center">${vfHtml}<button class="btn" style="font-size:.68rem;padding:4px 10px;min-height:30px;border-radius:8px;background:var(--c-accent);color:#000;font-weight:700;white-space:nowrap" onclick="event.stopPropagation();showAnalysis(${g.id})">📊 Analyysi</button></span></div>${factorHtml}${ph}${oh}${betsHtml}${estimateHtml}${hintHtml}<div id="betpop-${g.id}" style="display:none;margin-top:4px"></div></div>`;
 }
 function showAnalysis(gid){analysisGameId=gid;renderRound();scrollTo(0,0)}
 function closeAnalysis(){analysisGameId=null;renderRound()}
@@ -1407,6 +1428,28 @@ window.BT={
   toast,
   save,
   isHockey,
+  /**
+   * Kohteet ja kertoimet tappioketjulle (public/app/football-chase.js),
+   * lajista riippumatta. Jalkapallolla Kysytään suoraan window.BTF:ltä
+   * (sama snapshot jota kortit käyttävät). Jääkiekolla rakennetaan sama
+   * muoto kierroksen `games`+`getOdds()`-datasta — chase.js ei tarvitse
+   * tietää kummasta lajista on kyse, se saa aina saman muodon.
+   */
+  getChaseMatches(){
+    if(!isHockey()){
+      return (window.BTF&&window.BTF.getSnapshot&&window.BTF.getSnapshot()?.matches||[]).map(m=>({
+        id:m.id,home:m.home.name,away:m.away.name,
+        sides:{home:{odds:m.best.home,book:m.best.home_book},draw:{odds:m.best.draw,book:m.best.draw_book},away:{odds:m.best.away,book:m.best.away_book}},
+      }));
+    }
+    return games.filter(g=>g.status==='upcoming').map(g=>{
+      const o=getOdds(g.id);
+      return{
+        id:g.id,home:teamName(g.home_team_id),away:teamName(g.away_team_id),
+        sides:o?{home:{odds:o.home_odds,book:o.home_best},draw:{odds:o.draw_odds,book:o.draw_best},away:{odds:o.away_odds,book:o.away_best}}:null,
+      };
+    }).filter(m=>m.sides);
+  },
 };
 
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
