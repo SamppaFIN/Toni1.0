@@ -254,7 +254,7 @@ body{
   <button class="tab" data-tab="slip">🎫 Vetolappu <span id="slip-count"></span></button>
   <button class="tab" data-tab="tracker">🏒 Seuranta</button>
   <button class="tab" data-tab="history">📜 Historia</button>
-  <button class="tab" data-tab="chase" data-sport="football">🔥 Jahti</button>
+  <button class="tab" data-tab="chase">🔥 Jahti</button>
   <button class="tab" data-tab="teams" data-sport="hockey">📊 Joukkueet</button>
   <button class="tab" data-tab="info">ℹ️ Info</button>
   <button class="tab" data-tab="admin">⚙️ Admin</button>
@@ -271,8 +271,9 @@ body{
 </div>
 <div id="slip" class="view"><div class="grid-2" id="slip-metrics"></div><div id="slip-list"></div><button class="btn btn-danger btn-block" style="margin-top:8px" onclick="clearSlip()">🗑️ Tyhjennä lappu</button><div id="llm-content" data-sport="football" style="margin-top:10px"></div></div>
 <div id="history" class="view"><div class="grid-2" id="history-metrics"></div><div id="history-list"></div></div>
-<!-- Tiketti #35: tappioketju. Jalkapallo-ominaisuus, piilossa jääkiekkotilassa
-     (data-sport="football" tabissa, ks. applySportVisibility). -->
+<!-- Tiketti #35: tappioketju. Toimii molemmilla lajeilla — football-chase.js
+     lukee kohteet ja kertoimet window.BT.getChaseMatches()-sillan kautta,
+     joka valitsee oikean lähteen SPORT-lipun mukaan (ks. window.BT alempana). -->
 <div id="chase" class="view"><div id="chase-content"></div></div>
 <div id="teams" class="view"><div id="teams-list"></div></div>
 <div id="info" class="view"><div id="info-content"></div></div>
@@ -290,14 +291,12 @@ body{
 
 <script>
 const API='/rest/v1';
-// Tiketti #31: Lajilippu. Oletuksena jalkapallo; jääkiekkodemo on piilossa
-// mutta koskematta ja palautettavissa Admin-välilehdeltä.
-//
-// KORJAUS: oletus oli hetken 'hockey', mikä piilotti Jahti-tabin
-// (data-sport="football") ja tyhjensi LLM-paneelin (renderSlip() ehdollistaa
-// sen isHockey()-lipulla) jokaiselta tuoreelta selaimelta. Tiketti 31:n
-// hyväksymiskriteeri on nimenomaan "oletuksena vain jalkapallo näkyvissä".
-let SPORT=localStorage.getItem('bt_sport')||'football';
+// Tiketti #31 loi lajilipun jalkapallo-oletuksella. Päätös on sittemmin
+// vaihtunut: jääkiekon kausisimulaatio (oikea Liiga-otteluohjelma, dynaamiset
+// kertoimet, eriytetyt lähtö-Elot) on nyt pääasiallinen kehityskohde, joten
+// oletus on jääkiekko. Jalkapallo pysyy täysin toimivana ja tavoitettavissa
+// Admin-välilehdeltä.
+let SPORT=localStorage.getItem('bt_sport')||'hockey';
 function isHockey(){return SPORT==='hockey'}
 
 // Käyttöliittymäteema. 'system' = alkuperäinen tumma OKLCH-teema, koskematta.
@@ -358,25 +357,35 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
 function gameDateLabel(iso){const d=new Date(iso);return Number.isNaN(d.getTime())?iso:d.toLocaleDateString('fi-FI',{weekday:'short',day:'numeric',month:'numeric'})}
 function persistBookmakers(){localStorage.setItem('bt_bookmakers',JSON.stringify(bookmakers))}
 function hockeyOddsMode(){return HOCKEY_ODDS_MODE==='soft'?'soft':'veikkaus'}
+// KORJAUS: vol (kertoimen satunnaisvaihtelu per toimisto) oli 6-10x liian
+// pieni suhteessa margin-eroihin toimistojen välillä. Seurauksena Pinnaclen
+// matala margin voitti AINA joka kohteessa joka kierroksella (todennettu
+// Monte Carlo -ajolla: 100 % kierroksista Pinnacle paras kaikilla kolmella
+// kohteella) — "paras hinta" -tähti oli täysin ennustettava eikä siis
+// kertonut mitään. Vol-arvot 6x, jolloin Pinnacle on yhä keskimäärin
+// terävin (se ON mallinnettu sharp-kirjaksi, sama rooli kuin oikean datan
+// puolella src/analyze/consensus.ts:n sharpAnchor()), mutta ei enää
+// deterministisesti — sama Monte Carlo -ajo antaa nyt ~59 % kierroksista
+// Pinnacle-puhtaan kolmikon, loput jakautuvat muille toimistoille.
 function bookmakerProfile(name){
   const key=String(name||'').toLowerCase();
   const soft=hockeyOddsMode()==='soft';
   if(soft){
-    if(key.includes('pinnacle'))return{margin:0.03,vol:0.004,favoriteTax:0.002,longshotTax:0.002,drawTax:0.001};
-    if(key.includes('veikkaus'))return{margin:0.058,vol:0.003,favoriteTax:0.008,longshotTax:0.007,drawTax:0.003};
-    if(key.includes('bet365'))return{margin:0.042,vol:0.005,favoriteTax:0.004,longshotTax:0.004,drawTax:0.0015};
-    if(key.includes('unibet'))return{margin:0.047,vol:0.0055,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
-    if(key.includes('betsson'))return{margin:0.05,vol:0.0055,favoriteTax:0.0055,longshotTax:0.0055,drawTax:0.002};
-    if(key.includes('nordic'))return{margin:0.049,vol:0.0055,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
-    return{margin:0.048,vol:0.0055,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    if(key.includes('pinnacle'))return{margin:0.03,vol:0.024,favoriteTax:0.002,longshotTax:0.002,drawTax:0.001};
+    if(key.includes('veikkaus'))return{margin:0.058,vol:0.018,favoriteTax:0.008,longshotTax:0.007,drawTax:0.003};
+    if(key.includes('bet365'))return{margin:0.042,vol:0.03,favoriteTax:0.004,longshotTax:0.004,drawTax:0.0015};
+    if(key.includes('unibet'))return{margin:0.047,vol:0.033,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    if(key.includes('betsson'))return{margin:0.05,vol:0.033,favoriteTax:0.0055,longshotTax:0.0055,drawTax:0.002};
+    if(key.includes('nordic'))return{margin:0.049,vol:0.033,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    return{margin:0.048,vol:0.033,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
   }
-  if(key.includes('pinnacle'))return{margin:0.035,vol:0.002,favoriteTax:0.003,longshotTax:0.003,drawTax:0.001};
-  if(key.includes('veikkaus'))return{margin:0.082,vol:0.0015,favoriteTax:0.015,longshotTax:0.012,drawTax:0.005};
-  if(key.includes('bet365'))return{margin:0.05,vol:0.003,favoriteTax:0.006,longshotTax:0.006,drawTax:0.002};
-  if(key.includes('unibet'))return{margin:0.058,vol:0.0035,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
-  if(key.includes('betsson'))return{margin:0.06,vol:0.0035,favoriteTax:0.008,longshotTax:0.008,drawTax:0.003};
-  if(key.includes('nordic'))return{margin:0.059,vol:0.0035,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
-  return{margin:0.058,vol:0.0035,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  if(key.includes('pinnacle'))return{margin:0.035,vol:0.012,favoriteTax:0.003,longshotTax:0.003,drawTax:0.001};
+  if(key.includes('veikkaus'))return{margin:0.082,vol:0.009,favoriteTax:0.015,longshotTax:0.012,drawTax:0.005};
+  if(key.includes('bet365'))return{margin:0.05,vol:0.018,favoriteTax:0.006,longshotTax:0.006,drawTax:0.002};
+  if(key.includes('unibet'))return{margin:0.058,vol:0.021,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  if(key.includes('betsson'))return{margin:0.06,vol:0.021,favoriteTax:0.008,longshotTax:0.008,drawTax:0.003};
+  if(key.includes('nordic'))return{margin:0.059,vol:0.021,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  return{margin:0.058,vol:0.021,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
 }
 function genOddsForBookmaker(g,bk){
   const hElo=getRating(g.home_team_id)?.elo||1500,aElo=getRating(g.away_team_id)?.elo||1500;
@@ -1419,6 +1428,28 @@ window.BT={
   toast,
   save,
   isHockey,
+  /**
+   * Kohteet ja kertoimet tappioketjulle (public/app/football-chase.js),
+   * lajista riippumatta. Jalkapallolla Kysytään suoraan window.BTF:ltä
+   * (sama snapshot jota kortit käyttävät). Jääkiekolla rakennetaan sama
+   * muoto kierroksen `games`+`getOdds()`-datasta — chase.js ei tarvitse
+   * tietää kummasta lajista on kyse, se saa aina saman muodon.
+   */
+  getChaseMatches(){
+    if(!isHockey()){
+      return (window.BTF&&window.BTF.getSnapshot&&window.BTF.getSnapshot()?.matches||[]).map(m=>({
+        id:m.id,home:m.home.name,away:m.away.name,
+        sides:{home:{odds:m.best.home,book:m.best.home_book},draw:{odds:m.best.draw,book:m.best.draw_book},away:{odds:m.best.away,book:m.best.away_book}},
+      }));
+    }
+    return games.filter(g=>g.status==='upcoming').map(g=>{
+      const o=getOdds(g.id);
+      return{
+        id:g.id,home:teamName(g.home_team_id),away:teamName(g.away_team_id),
+        sides:o?{home:{odds:o.home_odds,book:o.home_best},draw:{odds:o.draw_odds,book:o.draw_best},away:{odds:o.away_odds,book:o.away_best}}:null,
+      };
+    }).filter(m=>m.sides);
+  },
 };
 
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));

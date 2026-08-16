@@ -12,12 +12,20 @@
 //
 // ARKKITEHTUURI: ketjun jokainen veto on TAVALLINEN veto joka kulkee
 // window.BT.addBet() / settleFootballBet() -kautta — sama historia, sama
-// kassa, sama ROI-seuranta kuin muillakin jalkapallovedoilla. Ketju on vain
-// kevyt metadata (bt_chase_chains) joka linkittää vedot toisiinsa. Ei
-// kahta totuutta samasta rahasta.
+// kassa, sama ROI-seuranta kuin muilla vedoilla. Ketju on vain kevyt
+// metadata (bt_chase_chains) joka linkittää vedot toisiinsa. Ei kahta
+// totuutta samasta rahasta.
+//
+// LAJIRIIPPUMATTOMUUS (jälkikäteen lisätty): Jahti toimi alun perin vain
+// jalkapallolla, koska se luki kohteet suoraan football-cards.js:n
+// snapshotista. Käyttäjä halusi sen toimivan myös jääkiekossa. Ratkaisu on
+// window.BT.getChaseMatches() — demo.html palauttaa aina saman muodon
+// `{id, home, away, sides:{home,draw,away}}` riippumatta siitä kumpi laji on
+// aktiivinen. Tämä tiedosto ei siis tiedä eikä sen tarvitse tietää lajista;
+// se tietää vain kumpaa "football"-lippua käyttää simulaation
+// suodatuksessa, mikä ratkeaa window.BT.isHockey():lla.
 
 import { esc, num } from './snapshot.js';
-import { getSnapshot } from './football-cards.js';
 
 const CHAINS_KEY = 'bt_chase_chains';
 
@@ -98,6 +106,7 @@ export function nextStepRequirement(chain) {
 
 function pushStep(chain, { matchId, home, away, side, stake, odds, bookmaker }) {
   const betId = Date.now() + Math.floor(Math.random() * 1000);
+  const isHockeyMode = typeof window.BT?.isHockey === 'function' && window.BT.isHockey();
   window.BT.addBet({
     id: betId,
     game_id: matchId,
@@ -106,7 +115,10 @@ function pushStep(chain, { matchId, home, away, side, stake, odds, bookmaker }) 
     stake,
     bookmaker: bookmaker ?? null,
     practice: true,
-    football: true,
+    // football-tracker.js suodattaa jalkapallon simuloidun kierroksen vedot
+    // tällä lipulla — jääkiekon vedoilla se ei saa olla päällä, muuten ne
+    // sekoittuisivat jos käyttäjä myöhemmin vaihtaa lajia.
+    football: !isHockeyMode,
     home,
     away,
     chase_id: chain.id,
@@ -272,12 +284,11 @@ function stopLossBar(chain, req) {
 }
 
 function startForm(mode) {
-  const snapshot = getSnapshot();
-  const matches = snapshot?.matches ?? [];
+  const matches = window.BT.getChaseMatches();
   if (!matches.length) return `<div class="empty">Ei otteluita — hae kohteet Kierros-välilehdeltä ensin.</div>`;
 
   const options = matches
-    .map((m) => `<option value="${esc(m.id)}">${esc(m.home.name)} – ${esc(m.away.name)}</option>`)
+    .map((m) => `<option value="${esc(String(m.id))}">${esc(m.home)} – ${esc(m.away)}</option>`)
     .join('');
 
   return `<div class="card" style="border:1.5px dashed var(--c-accent)">
@@ -347,9 +358,8 @@ function activeChainCard(chain) {
 }
 
 function continueForm(chain, req) {
-  const snapshot = getSnapshot();
-  const matches = snapshot?.matches ?? [];
-  const options = matches.map((m) => `<option value="${esc(m.id)}">${esc(m.home.name)} – ${esc(m.away.name)}</option>`).join('');
+  const matches = window.BT.getChaseMatches();
+  const options = matches.map((m) => `<option value="${esc(String(m.id))}">${esc(m.home)} – ${esc(m.away)}</option>`).join('');
 
   return `<div style="margin-top:10px;padding-top:10px;border-top:1px dashed oklch(1 1 0/0.12)">
     <div style="font-size:.72rem;font-weight:700;margin-bottom:6px">🔥 Jatka tappiolla</div>
@@ -429,29 +439,29 @@ const publicApi = {
     });
   },
   confirmStart() {
-    const snapshot = getSnapshot();
     const matchId = document.getElementById('chase-match')?.value;
     const stake = parseFloat(document.getElementById('chase-stake')?.value || '0');
-    const match = snapshot?.matches.find((m) => m.id === matchId);
+    // <select>-arvo on aina merkkijono — jääkiekon numeeriset id:t on
+    // vertailtava merkkijonona, ei arvattava tyyppiä ottelulistan mukaan
+    const match = window.BT.getChaseMatches().find((m) => String(m.id) === matchId);
     if (!match) return window.BT.toast('⚠️ Ottelua ei löytynyt');
 
-    const edge = match.analysis.edges.find((e) => e.side === startSide);
-    const odds = edge?.odds;
-    if (!odds) return window.BT.toast('⚠️ Kerrointa ei löytynyt tälle kohteelle');
+    const side = match.sides[startSide];
+    if (!side?.odds) return window.BT.toast('⚠️ Kerrointa ei löytynyt tälle kohteelle');
     if (!(stake > 0) || stake > window.BT.getBankroll()) return window.BT.toast('⚠️ Virheellinen panos');
 
     try {
       startChain({
         matchId,
-        home: match.home.name,
-        away: match.away.name,
+        home: match.home,
+        away: match.away,
         side: startSide,
         stake,
-        odds,
-        bookmaker: edge.book,
+        odds: side.odds,
+        bookmaker: side.book,
         mode: startMode,
       });
-      window.BT.toast(`🔥 Ketju aloitettu: ${stake.toFixed(2)} € @ ${odds.toFixed(2)}`);
+      window.BT.toast(`🔥 Ketju aloitettu: ${stake.toFixed(2)} € @ ${side.odds.toFixed(2)}`);
       render();
     } catch (err) {
       window.BT.toast(`⚠️ ${err.message}`);
@@ -474,13 +484,12 @@ const publicApi = {
     });
   },
   confirmContinue(chainId) {
-    const snapshot = getSnapshot();
     const matchId = document.getElementById('chase-cont-match')?.value;
     const oddsInput = parseFloat(document.getElementById('chase-cont-odds')?.value || '0');
     const stakeInput = parseFloat(document.getElementById('chase-cont-stake')?.value || '0');
     const sideBtn = document.querySelector('[data-chase-cont-side][data-selected="true"]');
     const side = sideBtn?.dataset.chaseContSide;
-    const match = snapshot?.matches.find((m) => m.id === matchId);
+    const match = window.BT.getChaseMatches().find((m) => String(m.id) === matchId);
 
     if (!match || !side) return window.BT.toast('⚠️ Valitse ottelu ja kohde');
     if (!(oddsInput > 1)) return window.BT.toast('⚠️ Anna kerroin');
@@ -489,8 +498,8 @@ const publicApi = {
     try {
       continueChain(chainId, {
         matchId,
-        home: match.home.name,
-        away: match.away.name,
+        home: match.home,
+        away: match.away,
         side,
         stake: stakeInput,
         odds: oddsInput,
