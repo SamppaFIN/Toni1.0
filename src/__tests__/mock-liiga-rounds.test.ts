@@ -19,12 +19,29 @@ describe('Liiga-kausisimulaation raakadataparsinta', () => {
     });
   });
 
-  it('rakentaa kierrokset, joissa ensimmaisen paivan Elo on 1500', () => {
+  it('rakentaa kierrokset, joissa ensimmaisen paivan Elo tulee kauden 2024-25 sijoituksesta', () => {
+    // Ei enaa litteaa 1500:aa kaikille — lahto-Elo siemennetaan edellisen
+    // kauden runkosarjan lopputaulukosta (Wikipedia, "2024-25 Liiga season").
+    // Lukko oli runkosarjan voittaja (112 pistetta), Jukurit viimeinen (49
+    // pistetta) — kasin laskettu vertailuarvo molemmille.
     const file = buildLiigaRoundsFile(RAW);
     expect(file.rounds.length).toBeGreaterThan(20);
     expect(file.teams).toHaveLength(16);
     expect(file.rounds[0].games).toHaveLength(6);
-    expect(file.rounds[0].ratings.every((rating) => rating.elo === 1500)).toBe(true);
+
+    const eloByTeamId = new Map(file.rounds[0].ratings.map((r) => [r.team_id, r.elo]));
+    const lukko = file.teams.find((t) => t.name === 'Lukko')!;
+    const jukurit = file.teams.find((t) => t.name === 'Jukurit')!;
+    const tappara = file.teams.find((t) => t.name === 'Tappara')!;
+
+    expect(eloByTeamId.get(lukko.id)).toBe(1632);
+    expect(eloByTeamId.get(jukurit.id)).toBe(1254);
+    // Tapparan pistemaara (90) on tasan taulukon keskiarvo — lahtee siis
+    // 1500:sta, ei sattumalta vaan kaavan takia
+    expect(eloByTeamId.get(tappara.id)).toBe(1500);
+
+    // Ei enaa kaikki samat — juuri tama oli ongelma jota korjattiin
+    expect(new Set(file.rounds[0].ratings.map((r) => r.elo)).size).toBeGreaterThan(1);
   });
 
   it('toisen kierroksen Eloissa nakyy oikeiden otteluiden vaikutus', () => {

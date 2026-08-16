@@ -28,6 +28,50 @@ const TEAMS: Team[] = [
   { id: 16, name: 'K-Espoo', ext_id: null },
 ];
 
+/**
+ * Kauden 2024–25 runkosarjan lopputaulukko (Wikipedia, "2024–25 Liiga season"),
+ * pisteinä. Käytetään lähtö-Elon siemenenä — ilman tätä kaikki 16 joukkuetta
+ * käynnistyisivät identtisestä 1500:sta, jolloin esim. Elo-ero-tekijäpilleri
+ * ei koskaan näyttäisi mitään ensimmäisillä kierroksilla.
+ *
+ * "Kiekko-Espoo" Wikipedian nimellä = "K-Espoo" tässä koodissa (ks. TEAMS).
+ */
+const PREVIOUS_SEASON_POINTS: Record<string, number> = {
+  Lukko: 112,
+  Ilves: 111,
+  KalPa: 107,
+  HIFK: 107,
+  SaiPa: 106,
+  KooKoo: 99,
+  Ässät: 95,
+  'K-Espoo': 91,
+  Tappara: 90,
+  HPK: 83,
+  Sport: 83,
+  TPS: 79,
+  Kärpät: 77,
+  JYP: 76,
+  Pelicans: 75,
+  Jukurit: 49,
+};
+const PREVIOUS_SEASON_MEAN_POINTS = 90.0;
+/**
+ * Pistettä → Elo-pistettä. Kerroin 6 valittu niin että jänneväli (Lukko 1632,
+ * Jukurit 1254 — ero 378) on samaa suuruusluokkaa kuin oikeasta datasta
+ * laskettu Veikkausliigan Elo-jänneväli (1349–1604, ks. analyze/season-elo.ts).
+ * Yhden kauden sijoitus ei saa antaa liikaa itsevarmuutta, muttei myöskään
+ * litteä 1500 kaikille — sama periaate kuin analyze/strength.ts:n
+ * kauden alun prioriblendaus.
+ */
+const PREVIOUS_SEASON_ELO_SCALE = 6;
+
+/** Joukkueen lähtö-Elo edellisen kauden sijoituksesta. Tuntematon nimi → 1500. */
+function startingEloFor(teamName: string): number {
+  const points = PREVIOUS_SEASON_POINTS[teamName];
+  if (points === undefined) return STARTING_ELO;
+  return Math.round(STARTING_ELO + (points - PREVIOUS_SEASON_MEAN_POINTS) * PREVIOUS_SEASON_ELO_SCALE);
+}
+
 const TEAM_BY_NAME = new Map(TEAMS.map((team) => [team.name, team]));
 const TEAM_PATTERN = [...TEAMS.map((team) => team.name)]
   .sort((a, b) => b.length - a.length)
@@ -163,7 +207,7 @@ function outcomeScore(game: HistoricalGame): number {
 
 function makeEmptyAccumulators(): Map<number, TeamAccumulator> {
   return new Map(
-    TEAMS.map((team) => [team.id, { team_id: team.id, elo: STARTING_ELO, played: 0, wins: 0, otWins: 0, otLosses: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 }])
+    TEAMS.map((team) => [team.id, { team_id: team.id, elo: startingEloFor(team.name), played: 0, wins: 0, otWins: 0, otLosses: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 }])
   );
 }
 

@@ -220,6 +220,10 @@ export async function start(containerId = 'round-games') {
 // Itsekäynnistys. Moduuli latautuu deferoituna eli inline-skriptin jälkeen,
 // joten kontti on jo DOM:ssa. Lajilippu luetaan suoraan localStoragesta,
 // jolloin moduuli ei riipu inline-skriptin latausjärjestyksestä.
-if ((localStorage.getItem('bt_sport') || 'hockey') !== 'hockey') {
+//
+// KORJAUS: oletus oli hetken 'hockey' — samaa mieltä demo.html:n SPORT-lipun
+// kanssa mutta väärä molemmissa. Ilman tätä koko jalkapallomoduuli (myös
+// per-ottelu LLM-nappi) jäi alustumatta tuoreella selaimella.
+if ((localStorage.getItem('bt_sport') || 'football') !== 'hockey') {
   start();
 }
