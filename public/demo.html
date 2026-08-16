@@ -320,6 +320,7 @@ let hockeyRounds=[];
 let hockeyRoundIndex=parseInt(localStorage.getItem('bt_hockey_round')||'0');
 let HOCKEY_ODDS_MODE=localStorage.getItem('bt_hockey_odds_mode')||'veikkaus';
 let hockeyModels=JSON.parse(localStorage.getItem('bt_hockey_models')||'{}');
+const HOCKEY_DATA_VERSION_KEY='bt_hockey_data_version';
 const DEFAULT_BOOKMAKERS=[{name:'bet365',url:'https://www.bet365.com'},{name:'Pinnacle',url:'https://www.pinnacle.com'},{name:'Unibet',url:'https://www.unibet.com'},{name:'Betsson',url:'https://www.betsson.com'},{name:'NordicBet',url:'https://www.nordicbet.com'},{name:'Veikkaus',url:'https://www.veikkaus.fi'}];
 let bookmakers=JSON.parse(localStorage.getItem('bt_bookmakers')||'null')||DEFAULT_BOOKMAKERS.map(b=>({...b}));
 
@@ -436,6 +437,16 @@ function refreshRatingDerived(r,date){
 function hasHockeyRounds(){return Array.isArray(hockeyRounds)&&hockeyRounds.length>0}
 function currentHockeyRound(){return hasHockeyRounds()?hockeyRounds[Math.min(Math.max(0,hockeyRoundIndex),hockeyRounds.length-1)]:null}
 function setHockeyRound(index){hockeyRoundIndex=index;localStorage.setItem('bt_hockey_round',String(index))}
+function resetStaleHockeyState(version){
+  const current=localStorage.getItem(HOCKEY_DATA_VERSION_KEY);
+  if(current===version)return;
+  ['bt_ratings','bt_hockey_round','bt_hockey_models','bt_simResults'].forEach(k=>localStorage.removeItem(k));
+  localStorage.setItem(HOCKEY_DATA_VERSION_KEY,version);
+  hockeyRoundIndex=0;
+  ratings=[];
+  hockeyModels={};
+  simResults=null;
+}
 function setHockeyOddsMode(mode){
   HOCKEY_ODDS_MODE=mode==='soft'?'soft':'veikkaus';
   localStorage.setItem('bt_hockey_odds_mode',HOCKEY_ODDS_MODE);
@@ -624,6 +635,7 @@ async function loadData(){
     if(res.ok){
       const file=await res.json();
       if(Array.isArray(file.teams)&&Array.isArray(file.rounds)&&file.rounds.length){
+        resetStaleHockeyState(file.generated_at||'unknown');
         teams=file.teams;
         hockeyRounds=file.rounds;
         const sr=localStorage.getItem('bt_ratings');
@@ -660,7 +672,7 @@ function renderRound(){
     else{analysisGameId=null;renderRound()}
   }else{
     const upcoming=games.filter(g=>g.status==='upcoming');
-    document.getElementById('round-games').innerHTML=(hasHockeyRounds()?hockeyRoundNav():'')+upcoming.map(g=>renderUpcoming(g)).join('')+practiceCardsHtml();
+    document.getElementById('round-games').innerHTML=(hasHockeyRounds()?hockeyRoundNav():'')+upcoming.map(g=>renderUpcoming(g)).join('');
   }
 }
 function renderTracker(){

@@ -220,6 +220,6 @@ export async function start(containerId = 'round-games') {
 // Itsekäynnistys. Moduuli latautuu deferoituna eli inline-skriptin jälkeen,
 // joten kontti on jo DOM:ssa. Lajilippu luetaan suoraan localStoragesta,
 // jolloin moduuli ei riipu inline-skriptin latausjärjestyksestä.
-if ((localStorage.getItem('bt_sport') || 'football') !== 'hockey') {
+if ((localStorage.getItem('bt_sport') || 'hockey') !== 'hockey') {
   start();
 }
