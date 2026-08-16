@@ -588,7 +588,7 @@ function renderRoundReport(){
       const home=teamName(g.home_team_id),away=teamName(g.away_team_id);
       const sideLabel=b.side==='home'?home:b.side==='away'?away:'Tasapeli';
       const actual=`${home} ${r.home_score} - ${r.away_score} ${away}`;
-      const winnerLabel=r.home_score>r.away_score?`${home} voitti`:r.away_score>r.home_score?`${away} voitti`:'Tasapeli';
+      const winnerLabel=r.winner==='home'?`${home} voitti`:r.winner==='away'?`${away} voitti`:'Tasapeli varsinaisella peliajalla';
       const net=b.won?b.stake*b.odds-b.stake:0;
       const returnAmt=b.won?b.stake*b.odds:0;
       const resIcon=b.won?'✅':'❌';
@@ -959,7 +959,7 @@ function runSimulation(){
   simResults=upcoming.map(g=>{
     const homeScore=g.actual_home_score??0,awayScore=g.actual_away_score??0;
     const period=g.result_type&&g.result_type!=='RT'?4:3;
-    const winner=homeScore>awayScore?'home':awayScore>homeScore?'away':'draw';
+    const winner=period>3?'draw':homeScore>awayScore?'home':awayScore>homeScore?'away':'draw';
     const baseShotsHome=Math.max(20,homeScore*6+18+(g.home_team_id%5));
     const baseShotsAway=Math.max(20,awayScore*6+17+(g.away_team_id%5));
     const scorers=[];
