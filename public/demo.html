@@ -196,9 +196,19 @@ body{
    vihreä ruutu tarkoittaa aina positiivista odotusarvoa eikä koskaan
    "halvin kolmesta huonosta". */
 .bk-odds.best{border-color:oklch(1 0 0 / 0.42);font-weight:800}
-/* Ylikertoimet: keltainen = kandidaatti (edge > 3 %), vihreä = vahva (> 5 %) */
+/* Kerroinruudun taustaväri = vetosuositus, neljä tasoa. Musta (ei luokkaa) on
+   oletus: ei suositusta. Keltainen kandidaatti (>3 %), vihreä vahva (>5 %),
+   kultainen poikkeuksellinen (>12 %). Kultainen on tarkoituksella
+   metallisempi kuin keltainen — hehku ja kirkkaampi reuna erottavat ne
+   toisistaan myös nopeasti silmäiltynä. */
 .bk-odds.value-candidate{background:oklch(0.72 0.16 85 / 0.20);border-color:oklch(0.72 0.16 85 / 0.65)}
 .bk-odds.value-strong{background:oklch(0.62 0.20 145 / 0.22);border-color:oklch(0.62 0.20 145 / 0.7)}
+.bk-odds.value-elite{
+  background:linear-gradient(160deg,oklch(0.84 0.14 92 / 0.34),oklch(0.68 0.13 78 / 0.26));
+  border-color:oklch(0.86 0.13 90 / 0.85);
+  box-shadow:0 0 0 1px oklch(0.86 0.13 90 / 0.35), 0 0 12px oklch(0.82 0.14 88 / 0.3), inset 0 1px 0 oklch(1 0.03 90 / 0.35);
+  font-weight:800;
+}
 /* Odotusarvo kertoimen alla, hyvin pienellä. Neljä tasoa:
    punainen = negatiivinen odotusarvo, harmaa = nolla-alue (0-3 %, mallin
    virherajojen sisällä), keltainen = kandidaatti (>3 %), vihreä = vahva
@@ -1441,9 +1451,42 @@ function simulateGame(g){
   const hn=teamName(g.home_team_id).substring(0,3);const pph=penalties.filter(p=>!p.team_short.startsWith(hn)).length,ppa=penalties.filter(p=>p.team_short.startsWith(hn)).length;
   return{game_id:g.id,home_team_id:g.home_team_id,away_team_id:g.away_team_id,home_score:hs,away_score:as,winner:w,period:3,scorers:scorers.sort((a,b)=>a.period-b.period),penalties,pp_chances_home:pph,pp_chances_away:ppa,pp_goals_home:Math.min(pph,Math.floor(Math.random()*(pph+1))),pp_goals_away:Math.min(ppa,Math.floor(Math.random()*(ppa+1))),shots_home:20+Math.floor(Math.random()*20),shots_away:20+Math.floor(Math.random()*20)}
 }
+/**
+ * Ratkaise tämän kierroksen vedot simulaation tuloksia vasten.
+ *
+ * KORJAUS (rahankäsittelybugi): funktio ratkaisi JOKAISEN vedon jonka ottelu
+ * löytyi simResultsista, mutta poisti lopuksi vain ne joilla EI ollut
+ * practice-lippua (`bets=bets.filter(b=>b.practice)`). Practice-veto siis
+ * maksettiin kassaan JA jäi silti avoimeksi — ja koska "🔄 Simuloi uudelleen"
+ * kutsuu tätä uudelleen, sama veto maksettiin joka painalluksella vaikka
+ * panos oli veloitettu vain kertaalleen. Todennettu: sama 10 € veto kertoimella
+ * 2.14 kasvatti kassaa +21,40 € joka kutsulla (90 → 111,40 → 132,80 → 154,20).
+ *
+ * Lippu oli alun perin tarkoitettu suojaamaan JALKAPALLON harjoitusvetoja
+ * jääkiekkosimulaatiolta, mutta ylempi forEach ei koskaan noudattanut sitä.
+ * Kun Jahti-ketju alkoi toimia myös jääkiekossa (sen askeleet ovat
+ * practice:true), bugi tuli näkyviin oikeana rahana.
+ *
+ * Nyt sääntö on yksi ja sama: ratkaistu veto poistetaan, ratkaisematon jää
+ * auki. Ei erillistä lippupohjaista poikkeusta, joka voi eriytyä ylemmästä
+ * ehdosta.
+ */
 function resolveBets(){
-  bets.forEach(b=>{const r=simResults.find(r=>r.game_id===b.game_id);if(!r)return;const won=(b.side==='home'&&r.winner==='home')||(b.side==='away'&&r.winner==='away')||(b.side==='draw'&&r.winner==='draw');const profit=won?b.stake*b.odds:0;bankroll+=profit;betHistory.push({...b,won,profit,resolved_at:new Date().toISOString(),game_result:`${r.home_score}-${r.away_score}`})});
-  bets=bets.filter(b=>b.practice)
+  const settled=new Set();
+  bets.forEach(b=>{
+    // Jalkapallovedot kulkevat football-tracker.js:n kautta — jääkiekkosim ei
+    // koske niihin. (Niiden game_id on merkkijono eikä osuisi muutenkaan,
+    // mutta ehto on tässä eksplisiittisesti eikä sattuman varassa.)
+    if(b.football)return;
+    const r=simResults.find(r=>r.game_id===b.game_id);
+    if(!r)return; // ei tämän kierroksen ottelu → veto jää avoimeksi
+    const won=(b.side==='home'&&r.winner==='home')||(b.side==='away'&&r.winner==='away')||(b.side==='draw'&&r.winner==='draw');
+    const profit=won?b.stake*b.odds:0;
+    bankroll+=profit;
+    betHistory.push({...b,won,profit,resolved_at:new Date().toISOString(),game_result:`${r.home_score}-${r.away_score}`});
+    settled.add(b.id);
+  });
+  bets=bets.filter(b=>!settled.has(b.id));
 }
 
 function showBankrollModal(){document.getElementById('bankroll-modal').style.display='flex'}
