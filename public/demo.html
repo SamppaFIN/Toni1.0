@@ -1572,10 +1572,32 @@ function renderTrackerLive(){
   document.getElementById('tracker-list').innerHTML=html;
 }
 
+/**
+ * Kierrosta vaihdettaessa jäljellä olevat vedot.
+ *
+ * resolveBets() on jo ratkaissut kaiken mikä oli simuloidussa kierroksessa,
+ * joten tänne jää vain veto jota EI ratkaistu (esim. ottelu ei ollut mukana
+ * simulaatiossa). Aiemmin sellainen pudotettiin hiljaa `filter(b=>b.practice)`
+ * -rivillä ja panos katosi ilman historiamerkintää — sama ansa kuin
+ * resolveBets():n bugissa, vain toisessa paikassa ja toiseen suuntaan.
+ *
+ * Jääkiekkovedolla ei ole manuaalista ratkaisupolkua (vetolapun ✅/❌ näkyy
+ * vain practice-vedoille), joten auki jäävä veto olisi ikuisesti
+ * ratkaisematon. Siksi panos PALAUTETAAN. Jahti-ketjun askeleet
+ * (practice:true) jäävät auki tarkoituksella — ketju jatkuu kierroksen yli ja
+ * niillä on oma ratkaisukäyttöliittymä.
+ */
+function refundUnsettledOnRoundChange(){
+  let refunded=0;
+  bets.forEach(b=>{if(!b.practice){bankroll+=b.stake;refunded+=b.stake}});
+  bets=bets.filter(b=>b.practice);
+  if(refunded>0){updateBankroll();toast(`↩️ Ratkaisematon veto palautettu: ${refunded.toFixed(2)} €`)}
+}
+
 function advanceRound(){
   if(hasHockeyRounds()){
     if(hockeyRoundIndex>=hockeyRounds.length-1){toast('🏁 Kausidataa ei ole enaa eteenpain');return}
-    bets=bets.filter(b=>b.practice);pressureTeam='';analysisGameId=null;
+    refundUnsettledOnRoundChange();pressureTeam='';analysisGameId=null;
     applyHockeyRound(hockeyRoundIndex+1,true);
     save();renderAll();switchTab('round');
     toast(`📅 Kierros ${hockeyRoundIndex+1} ladattu — Elo paivitetty edellisen kierroksen simulaatiosta`);
@@ -1624,7 +1646,7 @@ function advanceRound(){
   oddsSnapshots=[...oddsSnapshots.filter(o=>!newGames.some(ng=>ng.id===o.game_id)),...newOdds];
   predictions=[...predictions.filter(p=>!newGames.find(ng=>ng.id===p.game_id)),...newPreds];
   valueFlags=[...valueFlags.filter(v=>!newGames.find(ng=>ng.id===v.game_id)),...newFlags];
-  simResults=null;bets=bets.filter(b=>b.practice);pressureTeam='';
+  simResults=null;refundUnsettledOnRoundChange();pressureTeam='';
   save();renderAll();switchTab('round');
   toast('📅 Kierros '+nextRoundNum+' ladattu! Uudet kertoimet jaettu, Elot päivitetty.');
 }
