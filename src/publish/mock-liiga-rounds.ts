@@ -298,23 +298,31 @@ function jitter(seed: number, spread: number): number {
   return ((x - Math.floor(x)) - 0.5) * 2 * spread;
 }
 
-// KORJAUS: tämä on toinen kopio samasta funktiosta joka on myös
-// public/demo.html:ssä (selaimen dynaaminen kierrospäivitys). Tämä
-// Node-puolen versio tuottaa public/data/liiga-rounds.json:n — eli juuri
-// sen datan jota käyttäjä oikeasti näkee jokaisella tuoreella kierroksella,
-// koska ne ladataan suoraan tästä tiedostosta eikä lasketa selaimessa
-// uudelleen. Alkuperäinen vol oli 6-10x liian pieni suhteessa margin-eroihin
-// — Pinnacle voitti täysin deterministisesti joka kierroksen joka kohteen
-// (sama bugi, sama korjaus kuin demo.html:ssä, vain toisessa tiedostossa).
+// KORJAUS #2: edellinen vol-korjaus (6x) ratkaisi vain "Pinnacle voittaa
+// aina" -ongelman, muttei riittänyt tuottamaan YHTÄÄN value-flagia koko
+// kaudelle. Syy on rakenteellinen: jokaisen toimiston oma marginaali
+// NEUTRALOITUU lähes kokonaan skaalauksessa (scale=(1+margin)/Σadjusted),
+// koska favoriteTax/drawTax/longshotTax nostavat nimittäjää suunnilleen
+// saman verran kuin margin nostaa osoittajaa. Jäljelle jäävä rako on vain
+// muutaman prosentin luokkaa, ja sen voi ylittää VAIN toimistojen välinen
+// kohina (best-of-6-hintavertailu) — ei margin itsessään.
+//
+// Todennettu Monte Carlo -ajolla koko kauden yli (825 tarkistusta =
+// 275 ottelua × 3 kohdetta):
+//   vol×1 (alkuperäinen): paras edge koskaan −2,9 % — ei ikinä positiivinen
+//   vol×6 (ensimmäinen korjaus): paras edge koskaan −1,6 % — yhä ei ikinä
+//   vol×20 (tämä korjaus): ~6,4 % otteluista ylittää 3 %:n kynnyksen,
+//     ~0,3 % ylittää 5 %:n vahvan signaalin kynnyksen — realistinen määrä,
+//     ei liikaa (markkina on useimmiten oikeassa) muttei myöskään koskaan.
 function bookmakerProfile(name: string) {
   const key = name.toLowerCase();
-  if (key.includes('pinnacle')) return { margin: 0.035, vol: 0.012, favoriteTax: 0.003, longshotTax: 0.003, drawTax: 0.001 };
-  if (key.includes('veikkaus')) return { margin: 0.082, vol: 0.009, favoriteTax: 0.015, longshotTax: 0.012, drawTax: 0.005 };
-  if (key.includes('bet365')) return { margin: 0.05, vol: 0.018, favoriteTax: 0.006, longshotTax: 0.006, drawTax: 0.002 };
-  if (key.includes('unibet')) return { margin: 0.058, vol: 0.021, favoriteTax: 0.007, longshotTax: 0.007, drawTax: 0.003 };
-  if (key.includes('betsson')) return { margin: 0.06, vol: 0.021, favoriteTax: 0.008, longshotTax: 0.008, drawTax: 0.003 };
-  if (key.includes('nordic')) return { margin: 0.059, vol: 0.021, favoriteTax: 0.007, longshotTax: 0.007, drawTax: 0.003 };
-  return { margin: 0.058, vol: 0.021, favoriteTax: 0.007, longshotTax: 0.007, drawTax: 0.003 };
+  if (key.includes('pinnacle')) return { margin: 0.035, vol: 0.04, favoriteTax: 0.003, longshotTax: 0.003, drawTax: 0.001 };
+  if (key.includes('veikkaus')) return { margin: 0.082, vol: 0.03, favoriteTax: 0.015, longshotTax: 0.012, drawTax: 0.005 };
+  if (key.includes('bet365')) return { margin: 0.05, vol: 0.06, favoriteTax: 0.006, longshotTax: 0.006, drawTax: 0.002 };
+  if (key.includes('unibet')) return { margin: 0.058, vol: 0.07, favoriteTax: 0.007, longshotTax: 0.007, drawTax: 0.003 };
+  if (key.includes('betsson')) return { margin: 0.06, vol: 0.07, favoriteTax: 0.008, longshotTax: 0.008, drawTax: 0.003 };
+  if (key.includes('nordic')) return { margin: 0.059, vol: 0.07, favoriteTax: 0.007, longshotTax: 0.007, drawTax: 0.003 };
+  return { margin: 0.058, vol: 0.07, favoriteTax: 0.007, longshotTax: 0.007, drawTax: 0.003 };
 }
 
 function oddsFor(roundIndex: number, gameIndex: number, probs: { home: number; draw: number; away: number }): OddsSnapshot[] {

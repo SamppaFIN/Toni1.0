@@ -357,35 +357,47 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
 function gameDateLabel(iso){const d=new Date(iso);return Number.isNaN(d.getTime())?iso:d.toLocaleDateString('fi-FI',{weekday:'short',day:'numeric',month:'numeric'})}
 function persistBookmakers(){localStorage.setItem('bt_bookmakers',JSON.stringify(bookmakers))}
 function hockeyOddsMode(){return HOCKEY_ODDS_MODE==='soft'?'soft':'veikkaus'}
-// KORJAUS: vol (kertoimen satunnaisvaihtelu per toimisto) oli 6-10x liian
-// pieni suhteessa margin-eroihin toimistojen välillä. Seurauksena Pinnaclen
-// matala margin voitti AINA joka kohteessa joka kierroksella (todennettu
-// Monte Carlo -ajolla: 100 % kierroksista Pinnacle paras kaikilla kolmella
-// kohteella) — "paras hinta" -tähti oli täysin ennustettava eikä siis
-// kertonut mitään. Vol-arvot 6x, jolloin Pinnacle on yhä keskimäärin
-// terävin (se ON mallinnettu sharp-kirjaksi, sama rooli kuin oikean datan
-// puolella src/analyze/consensus.ts:n sharpAnchor()), mutta ei enää
-// deterministisesti — sama Monte Carlo -ajo antaa nyt ~59 % kierroksista
-// Pinnacle-puhtaan kolmikon, loput jakautuvat muille toimistoille.
+// KORJAUS #1 (vol×6): Pinnaclen matala margin voitti AINA joka kohteessa
+// joka kierroksella — "paras hinta" -tähti oli täysin ennustettava.
+//
+// KORJAUS #2 (vol×20, tämä): korjaus #1 ratkaisi vain sen ETTÄ paras hinta
+// vaihtelee toimistoittain, muttei riittänyt tuottamaan YHTÄÄN value-flagia
+// koko kaudelle — käyttäjä huomasi ettei vihreää/keltaista indikaattoria
+// tullut ikinä vaikka kerroin näytti silmämääräisesti ylihintaiselta.
+//
+// Syy on rakenteellinen: jokaisen toimiston oma marginaali NEUTRALOITUU
+// lähes kokonaan skaalauksessa (scale=(1+margin)/Σadjusted), koska
+// favoriteTax/drawTax/longshotTax nostavat nimittäjää suunnilleen saman
+// verran kuin margin nostaa osoittajaa. Jäljelle jäävä rako ylittyy VAIN
+// toimistojen välisellä kohinalla (best-of-6-hintavertailu), ei marginilla
+// itsellään — siksi vol piti nostaa paljon pidemmälle kuin margin-erojen
+// korjaus vaati.
+//
+// Todennettu Monte Carlo -ajolla koko kauden yli (825 tarkistusta =
+// 275 ottelua × 3 kohdetta, ks. src/publish/mock-liiga-rounds.ts):
+//   vol×1 (alkuperäinen): paras edge koskaan −2,9 % — ei ikinä positiivinen
+//   vol×6 (korjaus #1):   paras edge koskaan −1,6 % — yhä ei ikinä
+//   vol×20 (korjaus #2):  ~6,4 % otteluista ylittää 3 %:n kynnyksen,
+//     ~0,3 % ylittää 5 %:n vahvan signaalin kynnyksen.
 function bookmakerProfile(name){
   const key=String(name||'').toLowerCase();
   const soft=hockeyOddsMode()==='soft';
   if(soft){
-    if(key.includes('pinnacle'))return{margin:0.03,vol:0.024,favoriteTax:0.002,longshotTax:0.002,drawTax:0.001};
-    if(key.includes('veikkaus'))return{margin:0.058,vol:0.018,favoriteTax:0.008,longshotTax:0.007,drawTax:0.003};
-    if(key.includes('bet365'))return{margin:0.042,vol:0.03,favoriteTax:0.004,longshotTax:0.004,drawTax:0.0015};
-    if(key.includes('unibet'))return{margin:0.047,vol:0.033,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
-    if(key.includes('betsson'))return{margin:0.05,vol:0.033,favoriteTax:0.0055,longshotTax:0.0055,drawTax:0.002};
-    if(key.includes('nordic'))return{margin:0.049,vol:0.033,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
-    return{margin:0.048,vol:0.033,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    if(key.includes('pinnacle'))return{margin:0.03,vol:0.08,favoriteTax:0.002,longshotTax:0.002,drawTax:0.001};
+    if(key.includes('veikkaus'))return{margin:0.058,vol:0.06,favoriteTax:0.008,longshotTax:0.007,drawTax:0.003};
+    if(key.includes('bet365'))return{margin:0.042,vol:0.1,favoriteTax:0.004,longshotTax:0.004,drawTax:0.0015};
+    if(key.includes('unibet'))return{margin:0.047,vol:0.11,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    if(key.includes('betsson'))return{margin:0.05,vol:0.11,favoriteTax:0.0055,longshotTax:0.0055,drawTax:0.002};
+    if(key.includes('nordic'))return{margin:0.049,vol:0.11,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    return{margin:0.048,vol:0.11,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
   }
-  if(key.includes('pinnacle'))return{margin:0.035,vol:0.012,favoriteTax:0.003,longshotTax:0.003,drawTax:0.001};
-  if(key.includes('veikkaus'))return{margin:0.082,vol:0.009,favoriteTax:0.015,longshotTax:0.012,drawTax:0.005};
-  if(key.includes('bet365'))return{margin:0.05,vol:0.018,favoriteTax:0.006,longshotTax:0.006,drawTax:0.002};
-  if(key.includes('unibet'))return{margin:0.058,vol:0.021,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
-  if(key.includes('betsson'))return{margin:0.06,vol:0.021,favoriteTax:0.008,longshotTax:0.008,drawTax:0.003};
-  if(key.includes('nordic'))return{margin:0.059,vol:0.021,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
-  return{margin:0.058,vol:0.021,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  if(key.includes('pinnacle'))return{margin:0.035,vol:0.04,favoriteTax:0.003,longshotTax:0.003,drawTax:0.001};
+  if(key.includes('veikkaus'))return{margin:0.082,vol:0.03,favoriteTax:0.015,longshotTax:0.012,drawTax:0.005};
+  if(key.includes('bet365'))return{margin:0.05,vol:0.06,favoriteTax:0.006,longshotTax:0.006,drawTax:0.002};
+  if(key.includes('unibet'))return{margin:0.058,vol:0.07,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  if(key.includes('betsson'))return{margin:0.06,vol:0.07,favoriteTax:0.008,longshotTax:0.008,drawTax:0.003};
+  if(key.includes('nordic'))return{margin:0.059,vol:0.07,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  return{margin:0.058,vol:0.07,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
 }
 function genOddsForBookmaker(g,bk){
   const hElo=getRating(g.home_team_id)?.elo||1500,aElo=getRating(g.away_team_id)?.elo||1500;
