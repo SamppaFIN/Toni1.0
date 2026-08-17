@@ -196,13 +196,23 @@ body{
    vihreä ruutu tarkoittaa aina positiivista odotusarvoa eikä koskaan
    "halvin kolmesta huonosta". */
 .bk-odds.best{border-color:oklch(1 0 0 / 0.42);font-weight:800}
-/* Ylikertoimet: keltainen = kandidaatti (edge > 3 %), vihreä = vahva (> 5 %) */
+/* Kerroinruudun taustaväri = vetosuositus, neljä tasoa. Musta (ei luokkaa) on
+   oletus: ei suositusta. Keltainen kandidaatti (>3 %), vihreä vahva (>5 %),
+   kultainen poikkeuksellinen (>8 %). Kultainen on tarkoituksella
+   metallisempi kuin keltainen — hehku ja kirkkaampi reuna erottavat ne
+   toisistaan myös nopeasti silmäiltynä. */
 .bk-odds.value-candidate{background:oklch(0.72 0.16 85 / 0.20);border-color:oklch(0.72 0.16 85 / 0.65)}
 .bk-odds.value-strong{background:oklch(0.62 0.20 145 / 0.22);border-color:oklch(0.62 0.20 145 / 0.7)}
+.bk-odds.value-elite{
+  background:linear-gradient(160deg,oklch(0.84 0.14 92 / 0.34),oklch(0.68 0.13 78 / 0.26));
+  border-color:oklch(0.86 0.13 90 / 0.85);
+  box-shadow:0 0 0 1px oklch(0.86 0.13 90 / 0.35), 0 0 12px oklch(0.82 0.14 88 / 0.3), inset 0 1px 0 oklch(1 0.03 90 / 0.35);
+  font-weight:800;
+}
 /* Odotusarvo kertoimen alla, hyvin pienellä. Neljä tasoa:
    punainen = negatiivinen odotusarvo, harmaa = nolla-alue (0-3 %, mallin
    virherajojen sisällä), keltainen = kandidaatti (>3 %), vihreä = vahva
-   (>5 %), sateenkaari = poikkeuksellinen (>12 %) jota kannattaa epäillä
+   (>5 %), sateenkaari = poikkeuksellinen (>8 %) jota kannattaa epäillä
    ennen kuin siihen luottaa. */
 .bk-odds{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1.1}
 .ev{font-size:.5rem;font-weight:600;font-variant-numeric:tabular-nums;opacity:.95}
@@ -420,21 +430,21 @@ function bookmakerProfile(name){
   const key=String(name||'').toLowerCase();
   const soft=hockeyOddsMode()==='soft';
   if(soft){
-    if(key.includes('pinnacle'))return{margin:0.03,vol:0.08,favoriteTax:0.002,longshotTax:0.002,drawTax:0.001};
-    if(key.includes('veikkaus'))return{margin:0.058,vol:0.06,favoriteTax:0.008,longshotTax:0.007,drawTax:0.003};
-    if(key.includes('bet365'))return{margin:0.042,vol:0.1,favoriteTax:0.004,longshotTax:0.004,drawTax:0.0015};
-    if(key.includes('unibet'))return{margin:0.047,vol:0.11,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
-    if(key.includes('betsson'))return{margin:0.05,vol:0.11,favoriteTax:0.0055,longshotTax:0.0055,drawTax:0.002};
-    if(key.includes('nordic'))return{margin:0.049,vol:0.11,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
-    return{margin:0.048,vol:0.11,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    if(key.includes('pinnacle'))return{margin:0.03,vol:0.112,favoriteTax:0.002,longshotTax:0.002,drawTax:0.001};
+    if(key.includes('veikkaus'))return{margin:0.058,vol:0.084,favoriteTax:0.008,longshotTax:0.007,drawTax:0.003};
+    if(key.includes('bet365'))return{margin:0.042,vol:0.14,favoriteTax:0.004,longshotTax:0.004,drawTax:0.0015};
+    if(key.includes('unibet'))return{margin:0.047,vol:0.154,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    if(key.includes('betsson'))return{margin:0.05,vol:0.154,favoriteTax:0.0055,longshotTax:0.0055,drawTax:0.002};
+    if(key.includes('nordic'))return{margin:0.049,vol:0.154,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
+    return{margin:0.048,vol:0.154,favoriteTax:0.005,longshotTax:0.005,drawTax:0.002};
   }
-  if(key.includes('pinnacle'))return{margin:0.035,vol:0.04,favoriteTax:0.003,longshotTax:0.003,drawTax:0.001};
-  if(key.includes('veikkaus'))return{margin:0.082,vol:0.03,favoriteTax:0.015,longshotTax:0.012,drawTax:0.005};
-  if(key.includes('bet365'))return{margin:0.05,vol:0.06,favoriteTax:0.006,longshotTax:0.006,drawTax:0.002};
-  if(key.includes('unibet'))return{margin:0.058,vol:0.07,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
-  if(key.includes('betsson'))return{margin:0.06,vol:0.07,favoriteTax:0.008,longshotTax:0.008,drawTax:0.003};
-  if(key.includes('nordic'))return{margin:0.059,vol:0.07,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
-  return{margin:0.058,vol:0.07,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  if(key.includes('pinnacle'))return{margin:0.035,vol:0.056,favoriteTax:0.003,longshotTax:0.003,drawTax:0.001};
+  if(key.includes('veikkaus'))return{margin:0.082,vol:0.042,favoriteTax:0.015,longshotTax:0.012,drawTax:0.005};
+  if(key.includes('bet365'))return{margin:0.05,vol:0.084,favoriteTax:0.006,longshotTax:0.006,drawTax:0.002};
+  if(key.includes('unibet'))return{margin:0.058,vol:0.098,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  if(key.includes('betsson'))return{margin:0.06,vol:0.098,favoriteTax:0.008,longshotTax:0.008,drawTax:0.003};
+  if(key.includes('nordic'))return{margin:0.059,vol:0.098,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
+  return{margin:0.058,vol:0.098,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
 }
 // KORJAUS: kolme eri kohtaa (genOddsForBookmaker, buildDynamicRoundState,
 // advanceRound) laskivat hp/dp/ap:n toisistaan riippumatta, ja kaksi niistä
@@ -462,7 +472,7 @@ function hockeyProbs(hElo,aElo){
 // 12 %:n "huikea" -taso on tarkoituksellisesti epäluuloinen: sellainen edge
 // on demossa mahdollinen, mutta oikeassa maailmassa se tarkoittaa lähes
 // aina että malli on väärässä, ei että markkina on.
-const EV_WOW=0.12;
+const EV_WOW=0.08;
 function evClass(ev){
   if(ev>EV_WOW)return'ev-wow';
   if(ev>0.05)return'ev-good';
@@ -477,6 +487,57 @@ function evLabel(ev){
   if(ev<0)return'🔴 negatiivinen odotusarvo';
   return'⚪ nolla-alue (alle 3 % on mallin virherajojen sisällä)';
 }
+/** Kerroinruudun TAUSTAVÄRI-luokka: '' = musta (ei suositusta) */
+function evBgClass(ev){
+  if(ev==null)return'';
+  if(ev>EV_WOW)return'value-elite';   // kultainen
+  if(ev>0.05)return'value-strong';    // vihreä
+  if(ev>0.03)return'value-candidate'; // keltainen
+  return'';                           // musta
+}
+
+/**
+ * Kerroinruudun odotusarvo. Käyttää hockeyEstimate()a, joten se seuraa
+ * KÄYTTÄJÄN omaa arviota jos hän on syöttänyt sellaisen — muuten mallin
+ * arviota (joka sisältää Kerroinlaskurin tekijät). Näin kortin suositusvärit,
+ * "Oma arvio" -laatikon edge ja Kerroinlaskurin taulukko lukevat kaikki
+ * samaa lukua eivätkä voi olla eri mieltä.
+ */
+function evForOdds(gameId,side,oddsValue){
+  const{value:pct}=hockeyEstimate(gameId,side);
+  if(pct==null||isNaN(pct)||!(oddsValue>1))return null;
+  return pct/100*oddsValue-1;
+}
+
+/** Yhden kerroinruudun sisältö — sama sekä ensirenderöinnissä että live-päivityksessä */
+function oddsCellInner(oddsValue,isBest,ev){
+  const evHtml=ev==null?'':`<span class="ev ${evClass(ev)}">${ev>0?'+':''}${(ev*100).toFixed(1)}%</span>`;
+  return`<span>${oddsValue.toFixed(2)}${isBest?' ⭐':''}</span>${evHtml}`;
+}
+
+/**
+ * Päivitä kortin kerroinruudut kun käyttäjä muuttaa omaa arviotaan.
+ * Kohdennettu DOM-päivitys eikä renderRound(), koska uudelleenrenderöinti
+ * menettäisi kirjoituskohdistuksen kesken numeron kirjoittamista.
+ */
+function refreshOddsCells(gameId){
+  const rows=getBookmakerRows(gameId);
+  const best=getOdds(gameId);
+  if(!best)return;
+  rows.forEach((r,ri)=>{
+    ['home','draw','away'].forEach(side=>{
+      const el=document.getElementById(`bko-${gameId}-${side}-${ri}`);
+      if(!el)return;
+      const val=side==='home'?r.home_odds:side==='draw'?r.draw_odds:r.away_odds;
+      const isBest=val===best[side+'_odds'];
+      const ev=evForOdds(gameId,side,val);
+      el.className='bk-odds'+(isBest?' best':'')+(evBgClass(ev)?' '+evBgClass(ev):'');
+      el.innerHTML=oddsCellInner(val,isBest,ev);
+      el.title=`${r.bookmaker} — ${SIDE_LABEL_FI[side]} ${val.toFixed(2)}${isBest?' (paras hinta)':''}`+(ev==null?'':`\nOdotusarvo ${(ev*100).toFixed(1)} % · ${evLabel(ev)}`);
+    });
+  });
+}
+const SIDE_LABEL_FI={home:'1',draw:'X',away:'2'};
 
 // ─── Kerroinlaskuri: manuaaliset tekijät (esim. loukkaantunut avainpelaaja) ──
 //
@@ -589,8 +650,78 @@ function ensureRatingState(r,date){
   r.goals_against=r.goals_against||0;
   if(r.shots_for===undefined)r.shots_for=null;
   if(r.shots_against===undefined)r.shots_against=null;
+  // Putki: positiivinen = voittoputki, negatiivinen = häviöputki, 0 = ei putkea.
+  // form on viimeisten otteluiden kirjainjono uusin ensin ('V'=voitto,
+  // 'J'=jatkoaika/voitto lisäajalla, 'H'=häviö) — todellisista tuloksista,
+  // ei arvattu.
+  if(r.streak===undefined)r.streak=0;
+  if(!Array.isArray(r.form))r.form=[];
   if(date)r.date=date;
   return r;
+}
+/** Putken kuvaus tekstinä, tai null jos putkea ei ole */
+function streakLabel(r){
+  const s=r?.streak||0;
+  if(Math.abs(s)<2)return null; // yksi ottelu ei ole putki
+  return s>0?`${s} voittoputki`:`${Math.abs(s)} häviöputki`;
+}
+
+// ─── Maaliodottama ────────────────────────────────────────────────────────
+// SM-liigan keskiarvo on noin 5,5 maalia/ottelu. Odottama lasketaan
+// joukkueiden OIKEISTA kausiluvuista (hyökkäysvoima vs. vastustajan
+// puolustus) samalla tekniikalla kuin jalkapallon Poisson-mallissa
+// (src/analyze/poisson.ts) — ei arvattua vakiota.
+//
+// Kun ottelut on pelattu nolla (kauden alku), palautetaan sarjan keskiarvo
+// puoliksi eikä keksitä joukkuekohtaista lukua tyhjästä.
+const LIIGA_GOALS_PER_GAME=5.5;
+const LIIGA_HOME_GOAL_EDGE=1.06; // kotijoukkue tekee ~6 % enemmän
+function hockeyExpectedGoals(g){
+  const hR=getRating(g.home_team_id),aR=getRating(g.away_team_id);
+  const half=LIIGA_GOALS_PER_GAME/2;
+  const perGame=(r,key)=>(r&&r.played>0)?r[key]/r.played:half;
+  const hAtk=perGame(hR,'goals_for'),hDef=perGame(hR,'goals_against');
+  const aAtk=perGame(aR,'goals_for'),aDef=perGame(aR,'goals_against');
+  // Hyökkäys ja vastustajan puolustus keskiarvoistetaan — kumpikin puoli
+  // kertoo saman asian eri suunnasta, ja keskiarvo vaimentaa pienen otoksen
+  // kohinaa
+  const home=(hAtk+aDef)/2*LIIGA_HOME_GOAL_EDGE;
+  const away=(aAtk+hDef)/2/LIIGA_HOME_GOAL_EDGE;
+  const played=Math.min(hR?.played||0,aR?.played||0);
+  return{home,away,total:home+away,played};
+}
+
+// ─── PDF-tutkimuksen Elo-tekijät (SM-liiga Elo-malli, 2026) ──────────────
+// Käyttäjän toimittama tutkimus. Lukuarvot pohjautuvat NHL:n vakiintuneisiin
+// Elo-malleihin (FiveThirtyEight, Hockey Alchemy) — PDF:n oma huomautus on
+// että ne EIVÄT ole SM-liigalle validoituja ja pitäisi kalibroida omalla
+// datalla. Se varoitus näytetään käyttäjälle Kerroinlaskurissa.
+//
+// Kotietu ja maaliero/xG-ero on jätetty pois listalta: kotietu on jo mallin
+// vakiona (+40) ja maaliero ajaa Elo-lukua itseään, joten niiden lisääminen
+// käsin laskisi saman asian kahdesti.
+const ELO_FACTOR_PRESETS=[
+  {label:'Ykkösvahdin vaihto kakkoseen',      delta:-30, range:'−20…−40', note:'Suurin yksittäisen pelaajan vaikutus'},
+  {label:'Avainpelaajan poissaolo',           delta:-25, range:'−15…−35', note:'Riippuu pelaajan tuotanto-osuudesta'},
+  {label:'Peräkkäiset ottelut / väsymys',     delta:-22, range:'−15…−30', note:'Matkarasitus, lepopäivien puute'},
+  {label:'PDO yli 100 → regressio alas',      delta:-20, range:'−15…−30', note:'Regressiovaroitus, ei suora siirto'},
+  {label:'PDO alle 100 → regressio ylös',     delta: 20, range:'+15…+30', note:'Regressiovaroitus, ei suora siirto'},
+  {label:'Erikoistilanne-% heikentynyt',      delta:-12, range:'−10…−15', note:'PP%/PK% 5 %-yks. muutos'},
+  {label:'Erikoistilanne-% parantunut',       delta: 12, range:'+10…+15', note:'PP%/PK% 5 %-yks. muutos'},
+  {label:'Valmentajanvaihto',                 delta: 15, range:'+10…+20', note:'Lyhytaikainen, 5–10 ottelua'},
+  {label:'Kuuma ketju, xG tukee',             delta: 15, range:'+10…+20', note:'Aidompi signaali'},
+  {label:'Voittoputki (lisämomentum)',        delta: 10, range:'+5…+15',  note:'Suurin osa jo Elo-luvussa itsessään'},
+  {label:'Kuuma ketju, ei xG-tukea',          delta:  7, range:'+5…+10',  note:'Usein PDO-kohinaa, yleisö yliarvioi'},
+  {label:'Uusi hankinta / legioonalainen',    delta:  5, range:'−10…+20', note:'Iso epävarmuus, pieni otos'},
+];
+/** Esivalinnan täyttö lomakkeeseen — arvot jäävät muokattaviksi */
+function applyFactorPreset(gameId,index){
+  const p=ELO_FACTOR_PRESETS[index];
+  if(!p)return;
+  const l=document.getElementById(`factor-label-${gameId}`);
+  const d=document.getElementById(`factor-delta-${gameId}`);
+  if(l)l.value=p.label;
+  if(d)d.value=p.delta;
 }
 function computeRatingPdo(r){
   if(r.shots_for&&r.shots_against&&r.shots_for>0&&r.shots_against>0){
@@ -727,6 +858,20 @@ function updateEloAfterSim(){
       if(homeWon){hR.ot_wins+=1;aR.ot_losses+=1;}
       else if(r.away_score>r.home_score){aR.ot_wins+=1;hR.ot_losses+=1;}
     }
+
+    // Putki ja muotorivi todellisista tuloksista. Jatkoaikavoitto katkaisee
+    // häviöputken mutta ei kasvata voittoputkea samalla painolla — se on
+    // merkitty omalla kirjaimellaan ('J') jotta ero näkyy.
+    const bump=(rr,outcome)=>{
+      if(outcome==='V')rr.streak=rr.streak>0?rr.streak+1:1;
+      else if(outcome==='H')rr.streak=rr.streak<0?rr.streak-1:-1;
+      else rr.streak=0; // jatkoaikatulos nollaa putken kumpaankin suuntaan
+      rr.form=[outcome,...(rr.form||[])].slice(0,8);
+    };
+    const homeOutcome=overtime?'J':homeWon?'V':'H';
+    const awayOutcome=overtime?'J':homeWon?'H':'V';
+    bump(hR,homeOutcome);
+    bump(aR,awayOutcome);
 
     refreshRatingDerived(hR,new Date().toISOString().slice(0,10));
     refreshRatingDerived(aR,new Date().toISOString().slice(0,10));
@@ -900,22 +1045,49 @@ function renderUpcoming(g){
   // Vanha versio oli ehdollinen (esim. Elo-ero näkyi vain >60pt erolla), mikä
   // jätti rivin lähes aina tyhjäksi kun joukkueet käynnistyivät tasan
   // Elo 1500:sta. Nyt rivi kertoo tilanteen aina, myös kun ero on pieni.
-  const hElo=getRating(g.home_team_id)?.elo||1500,aElo=getRating(g.away_team_id)?.elo||1500;
+  // KORJAUS: kortti näytti SÄÄTÄMÄTTÖMÄN Elo-eron vaikka mallin
+  // todennäköisyydet ja kerroinruutujen odotusarvot oli jo säädetty
+  // Kerroinlaskurin tekijöillä — sama luku kahdessa eri merkityksessä.
+  // hockeyGameProbs() palauttaa säädetyt hElo/aElo, joten kortti, laskuri ja
+  // odotusarvot lukevat nyt kaikki samaa.
+  const gp=hockeyGameProbs(g);
+  const hElo=gp.hElo,aElo=gp.aElo;
   const hPdo=getRating(g.home_team_id)?.pdo||100,aPdo=getRating(g.away_team_id)?.pdo||100;
   const HOCKEY_HOME_ADVANTAGE=40; // sama vakio kuin genOddsForBookmaker/buildDynamicRoundState
   const eloDiff=hElo-aElo;
   const expectedHome=1/(1+Math.pow(10,(aElo-(hElo+HOCKEY_HOME_ADVANTAGE))/400));
+  const hFd=factorDelta(g.id,'home'),aFd=factorDelta(g.id,'away');
+  const gameFactors=hockeyFactors[g.id]||[];
   const pdoLabel=(name,pdo)=>`${name} ${pdo.toFixed(1)}${pdo>102?' yli':pdo<98?' ali':''}`;
   const pdoTone=(hPdo>102||aPdo>102||hPdo<98||aPdo<98)?'warning':'muted';
   const strongNews=relatedNews.filter(e=>e.confidence>0.7).length;
   const hockeyPill=(icon,text,tone)=>`<span class="factor-pill tone-${tone}">${icon} ${esc(text)}</span>`;
+  // Voittoputket ja maaliodottama otsakkeeseen. Putki näytetään vain kun se on
+  // oikeasti putki (>=2 ottelua) — yksi voitto ei ole putki, ja sen esittäminen
+  // sellaisena olisi kohinaa. Maaliodottama tulee joukkueiden oikeista
+  // kausiluvuista; kauden alussa (0 pelattua) se kertoo nojaavansa sarjan
+  // keskiarvoon eikä esitä joukkuekohtaista lukua varmana.
+  const hRat=getRating(g.home_team_id),aRat=getRating(g.away_team_id);
+  const hStreak=streakLabel(hRat),aStreak=streakLabel(aRat);
+  const xg=hockeyExpectedGoals(g);
   const factorHtml=`<div class="factor-pills">${[
-    hockeyPill('📈',`Elo-ero ${eloDiff>0?'+':''}${eloDiff.toFixed(0)} · odotusarvo ${(expectedHome*100).toFixed(0)} %`,eloDiff>0?'success':eloDiff<0?'danger':'muted'),
+    // Elo-ero näyttää säädön erikseen, jottei näytä siltä että kausi-Elo olisi
+    // muuttunut — se ei ole, säätö koskee vain tätä ottelua
+    hockeyPill('📈',`Elo-ero ${eloDiff>0?'+':''}${eloDiff.toFixed(0)}${(hFd||aFd)?' (säädetty)':''} · odotusarvo ${(expectedHome*100).toFixed(0)} %`,eloDiff>0?'success':eloDiff<0?'danger':'muted'),
+    hockeyPill('🥅',xg.played>0
+      ? `Maaliodottama ${xg.home.toFixed(1)} – ${xg.away.toFixed(1)} (yht. ${xg.total.toFixed(1)})`
+      : `Maaliodottama ${xg.total.toFixed(1)} — sarjan ka., ei vielä otteluita`,
+      xg.played>0?'muted':'warning'),
+    hStreak?hockeyPill(hRat.streak>0?'🔥':'❄️',`${home}: ${hStreak}`,hRat.streak>0?'success':'danger'):null,
+    aStreak?hockeyPill(aRat.streak>0?'🔥':'❄️',`${away}: ${aStreak}`,aRat.streak>0?'success':'danger'):null,
     hockeyPill('📊',`PDO ${pdoLabel(home,hPdo)} · ${pdoLabel(away,aPdo)}`,pdoTone),
     relatedNews.length
       ?hockeyPill('📰',`${relatedNews.length} uutis${relatedNews.length>1?'ta':''}${strongNews?`, ${strongNews} vaikuttavaa`:''}`,strongNews?'success':'muted')
       :hockeyPill('📰','ei uutisia','muted'),
-  ].join('')}</div>`;
+    // Omat Kerroinlaskurissa valitut vaikutukset, jokainen omana pillerinään.
+    // Klikkaus avaa laskurin siihen otteluun, jotta niitä voi säätää heti.
+    ...gameFactors.map(f=>`<span class="factor-pill tone-warning" style="cursor:pointer" title="Oma tekijä Kerroinlaskurista — klikkaa avataksesi" onclick="event.stopPropagation();showCalculator(${g.id})">⚙️ ${f.team==='home'?'🏠':'✈️'} ${esc(f.label)} ${f.delta>0?'+':''}${f.delta}</span>`),
+  ].filter(Boolean).join('')}</div>`;
 
   let oh='';let ph='';
   if(pred.home_win_prob){const h=(pred.home_win_prob*100).toFixed(0),d=(pred.draw_prob*100).toFixed(0),a=(pred.away_win_prob*100).toFixed(0);
@@ -924,18 +1096,18 @@ function renderUpcoming(g){
   if(bkRows.length&&odds){
     const best=odds;
     const head=`<div class="odds-row odds-head"><span>Toimisto</span><span>1</span><span>X</span><span>2</span></div>`;
-    // Odotusarvo per kerroin: EI vain parhaalle hinnalle vaan JOKAISELLE
-    // toimistolle, koska juuri niiden vertailu on koko taulukon pointti.
-    // Malli on ottelukohtainen (hockeyGameProbs → sisältää Kerroinlaskurin
-    // manuaaliset tekijät), joten sama luku päivittyy heti kun käyttäjä
-    // lisää esim. loukkaantumisen.
-    const modelProbs=hockeyGameProbs(g);
+    // Odotusarvo JOKAISELLE toimistolle, ei vain parhaalle hinnalle — niiden
+    // vertailu on koko taulukon pointti. Taustaväri kertoo suosituksen
+    // (musta/keltainen/vihreä/kultainen) ja päivittyy heti kun käyttäjä muuttaa
+    // omaa arviotaan tai lisää tekijän Kerroinlaskuriin, koska evForOdds()
+    // lukee saman hockeyEstimate()n kuin kaikki muukin.
     const rowsHtml=bkRows.map((r,ri)=>{
       const cell=(side,val,label)=>{
-        const ev=modelProbs[side]*val-1;
-        const cls=evClass(ev);
         const isBest=val===best[side+'_odds'];
-        return `<button class="bk-odds${isBest?' best':''}" onclick="event.stopPropagation();showBetPopup(${g.id},'${side}',${val},${ri})" title="${esc(r.bookmaker)} — ${label} ${val.toFixed(2)}${isBest?' (paras hinta)':''}\nOdotusarvo ${(ev*100).toFixed(1)} % · ${evLabel(ev)}\nKlikkaa pitkään tai avaa 🧮 Kerroinlaskuri nähdäksesi koko kaavan"><span>${val.toFixed(2)}${isBest?' ⭐':''}</span><span class="ev ${cls}">${ev>0?'+':''}${(ev*100).toFixed(1)}%</span></button>`;
+        const ev=evForOdds(g.id,side,val);
+        const bg=evBgClass(ev);
+        const tip=`${esc(r.bookmaker)} — ${label} ${val.toFixed(2)}${isBest?' (paras hinta)':''}`+(ev==null?'':`\nOdotusarvo ${(ev*100).toFixed(1)} % · ${evLabel(ev)}`);
+        return `<button id="bko-${g.id}-${side}-${ri}" class="bk-odds${isBest?' best':''}${bg?' '+bg:''}" onclick="event.stopPropagation();showBetPopup(${g.id},'${side}',${val},${ri})" title="${tip}">${oddsCellInner(val,isBest,ev)}</button>`;
       };
       return`<div class="odds-row"><span class="bk-name" title="${esc(r.bookmaker)}">${esc(r.bookmaker)}</span>${cell('home',r.home_odds,'1')}${cell('draw',r.draw_odds,'X')}${cell('away',r.away_odds,'2')}</div>`;
     }).join('');
@@ -1035,7 +1207,11 @@ function buildCalculator(g){
     html+=`<div style="font-size:.65rem;color:var(--c-text-muted);padding:6px 0">Ei omia tekijöitä. Malli käyttää pelkkiä kausi-Elo-lukuja.</div>`;
   }
   html+=`<div style="margin-top:8px;padding:8px;border:1.5px dashed var(--c-accent);border-radius:8px">
-    <div style="font-size:.65rem;color:var(--c-text-muted);margin-bottom:6px">Lisää tieto jota mallilla ei ole — esim. loukkaantuminen, väsymys, valmentajanvaihto:</div>
+    <div style="font-size:.65rem;color:var(--c-text-muted);margin-bottom:6px">Lisää tieto jota mallilla ei ole. Valitse tutkimuksen valmis tekijä tai kirjoita oma:</div>
+    <select onchange="applyFactorPreset(${g.id},this.value);this.selectedIndex=0" style="width:100%;min-height:38px;border-radius:6px;border:1px solid oklch(1 1 0/0.15);background:var(--c-bg);color:var(--c-text);padding:6px;font-size:.7rem;margin-bottom:6px">
+      <option value="">📋 Valitse tutkimuksesta…</option>
+      ${ELO_FACTOR_PRESETS.map((p,i)=>`<option value="${i}">${p.delta>0?'+':''}${p.delta} · ${esc(p.label)} (${esc(p.range)})</option>`).join('')}
+    </select>
     <input type="text" id="factor-label-${g.id}" placeholder="esim. Ykkösmaalivahti loukkaantunut" style="width:100%;min-height:38px;padding:7px 10px;border-radius:6px;border:1px solid oklch(1 1 0/0.15);background:var(--c-bg);color:var(--c-text);font-size:.72rem;margin-bottom:6px">
     <div style="display:flex;gap:6px">
       <select id="factor-team-${g.id}" style="flex:1;min-height:38px;border-radius:6px;border:1px solid oklch(1 1 0/0.15);background:var(--c-bg);color:var(--c-text);padding:6px;font-size:.7rem">
@@ -1045,8 +1221,40 @@ function buildCalculator(g){
       <input type="number" id="factor-delta-${g.id}" placeholder="Elo ±" step="5" style="width:90px;min-height:38px;padding:6px;border-radius:6px;border:1px solid oklch(1 1 0/0.15);background:var(--c-bg);color:var(--c-text);font-size:.72rem;text-align:center">
       <button class="btn btn-primary" style="font-size:.68rem;padding:6px 12px;min-height:38px" onclick="addHockeyFactor(${g.id})">➕ Lisää</button>
     </div>
-    <div style="font-size:.58rem;color:var(--c-text-muted);margin-top:6px;line-height:1.5">Nyrkkisääntö: ykkösmaalivahti ≈ 40–70 Elo · avainhyökkääjä ≈ 15–30 Elo · takaisin kokoonpanoon = positiivinen luku.</div>
-  </div></div></div>`;
+    <div style="font-size:.58rem;color:var(--c-text-muted);margin-top:6px;line-height:1.5">Esivalinnan luku on vaihteluvälin keskikohta — muuta se vapaasti. Takaisin kokoonpanoon = positiivinen luku.</div>
+  </div>`;
+
+  // Tutkimuksen taulukko referenssiksi + sen oma varoitus
+  html+=`<details style="margin-top:8px">
+    <summary style="font-size:.66rem;color:var(--c-accent);cursor:pointer;padding:4px 0">📚 Tutkimuksen Elo-vaikutustaulukko (SM-liiga Elo-malli)</summary>
+    <div class="scroller" style="overflow-x:auto;margin-top:6px">
+      <table style="width:100%;border-collapse:collapse;font-size:.62rem">
+        <tr style="color:var(--c-text-muted);text-align:left"><th style="padding:3px 6px">Tekijä</th><th style="padding:3px 6px;text-align:right">Vaikutus</th><th style="padding:3px 6px">Huomio</th></tr>
+        <tr><td style="padding:3px 6px">Kotietu <span style="color:var(--c-text-muted)">(mallissa jo)</span></td><td style="padding:3px 6px;text-align:right;font-variant-numeric:tabular-nums">+35…+50</td><td style="padding:3px 6px;color:var(--c-text-muted)">Vakio joka kotiottelussa — malli käyttää +${HADV}</td></tr>
+        <tr><td style="padding:3px 6px">Maaliero / xG-ero <span style="color:var(--c-text-muted)">(mallissa jo)</span></td><td style="padding:3px 6px;text-align:right">perusajuri</td><td style="padding:3px 6px;color:var(--c-text-muted)">Ohjaa Elo-lukua itseään</td></tr>
+        ${ELO_FACTOR_PRESETS.map(p=>`<tr style="border-top:1px solid oklch(1 1 0/0.06)"><td style="padding:3px 6px">${esc(p.label)}</td><td style="padding:3px 6px;text-align:right;font-variant-numeric:tabular-nums;color:${p.delta>0?'var(--c-success)':'var(--c-danger)'}">${esc(p.range)}</td><td style="padding:3px 6px;color:var(--c-text-muted)">${esc(p.note)}</td></tr>`).join('')}
+      </table>
+    </div>
+    <div style="font-size:.6rem;color:var(--c-warning);margin-top:6px;line-height:1.6">
+      ⚠️ Tutkimuksen oma varoitus: lukuarvot pohjautuvat NHL:n Elo-malleihin
+      (FiveThirtyEight, Hockey Alchemy) eivätkä ole SM-liigalle validoituja.
+      Ne ovat lähtöarvoja, jotka pitäisi kalibroida omalla otoksella
+      (Elo-ero + tapahtumat + toteutunut lopputulos).
+    </div>
+  </details></div>`;
+
+  // Maaliodottama omana vaiheena
+  const xgc=hockeyExpectedGoals(g);
+  html+=`<div style="margin-top:8px;padding:10px;background:oklch(1 1 0/0.04);border-radius:8px">
+    <h4 style="font-size:.78rem;margin-bottom:6px">🥅 Maaliodottama</h4>
+    <div style="font-size:.68rem;color:var(--c-text-muted);line-height:1.85">
+      ${xgc.played>0
+        ? `Hyökkäysvoima ja vastustajan puolustus keskiarvoistettuna, kotietu ×${LIIGA_HOME_GOAL_EDGE}:<br>
+           <b>${esc(home)} ${xgc.home.toFixed(2)}</b> – <b>${xgc.away.toFixed(2)} ${esc(away)}</b> · yhteensä <b>${xgc.total.toFixed(2)}</b><br>
+           <span style="color:var(--c-text-muted)">Sarjan keskiarvo ${LIIGA_GOALS_PER_GAME} maalia/ottelu. Luvut joukkueiden oikeista kausituloksista (${xgc.played} ottelua vähemmän pelanneella).</span>`
+        : `<span style="color:var(--c-warning)">Kautta ei ole vielä pelattu — odottama on sarjan keskiarvo ${LIIGA_GOALS_PER_GAME} jaettuna, ei joukkuekohtainen arvio.</span>`}
+    </div>
+  </div></div>`;
 
   // ─ Vaihe 2: kaava
   html+=`<div style="margin-top:8px;padding:10px;background:oklch(1 1 0/0.04);border-radius:8px">
@@ -1075,23 +1283,25 @@ function buildCalculator(g){
   if(bkRows.length&&odds){
     html+=`<div style="margin-top:8px;padding:10px;background:oklch(1 1 0/0.04);border-radius:8px">
       <h4 style="font-size:.78rem;margin-bottom:4px">3️⃣ Odotusarvo per kerroin</h4>
-      <div style="font-size:.65rem;color:var(--c-text-muted);margin-bottom:8px">Odotusarvo = P(malli) × kerroin − 1. Kertoimet <b>eivät</b> muutu tekijöistä — markkina ei tiedä niistä, ja juuri siitä erosta arvo syntyy.</div>
+      <div style="font-size:.65rem;color:var(--c-text-muted);margin-bottom:8px">Odotusarvo = P(arvio) × kerroin − 1. Kertoimet <b>eivät</b> muutu tekijöistä — markkina ei tiedä niistä, ja juuri siitä erosta arvo syntyy.${['home','draw','away'].some(s=>hockeyEstimate(g.id,s).isOwn)?' <b style="color:var(--c-warning)">Käytössä on oma arviosi, ei mallin.</b>':''}</div>
       <div class="odds-list">
         <div class="odds-row odds-head"><span>Toimisto</span><span>1</span><span>X</span><span>2</span></div>
         ${bkRows.map(r=>{
           const cell=(side,val)=>{
-            const ev=adj[side]*val-1;
-            return `<span style="text-align:center;font-variant-numeric:tabular-nums"><span style="font-size:.72rem;font-weight:700">${val.toFixed(2)}</span><br><span class="ev ${evClass(ev)}">${ev>0?'+':''}${(ev*100).toFixed(1)}%</span></span>`;
+            // Sama evForOdds() kuin kortilla — ei toista laskentaa, ei toista totuutta
+            const ev=evForOdds(g.id,side,val);
+            const bg=evBgClass(ev);
+            return `<span class="bk-odds${bg?' '+bg:''}" style="cursor:default">${oddsCellInner(val,false,ev)}</span>`;
           };
           return `<div class="odds-row"><span class="bk-name">${esc(r.bookmaker)}</span>${cell('home',r.home_odds)}${cell('draw',r.draw_odds)}${cell('away',r.away_odds)}</div>`;
         }).join('')}
       </div>
-      <div style="font-size:.62rem;color:var(--c-text-muted);margin-top:8px;line-height:1.7">
-        <span class="ev ev-bad">−x %</span> negatiivinen — markkina yliarvioi kohteen<br>
-        <span class="ev ev-flat">0–3 %</span> nolla-alue — mallin virherajojen sisällä, ei suositusta<br>
-        <span class="ev ev-ok">&gt;3 %</span> kandidaatti 🟡<br>
-        <span class="ev ev-good">&gt;5 %</span> vahva signaali 🟢<br>
-        <span class="ev ev-wow">&gt;12 %</span> poikkeuksellinen 🌈 — epäile ensin mallia, ei markkinaa
+      <div style="font-size:.62rem;color:var(--c-text-muted);margin-top:8px;line-height:2">
+        Ruudun tausta = vetosuositus, teksti = odotusarvon tarkka luku.<br>
+        <span class="bk-odds" style="display:inline-flex;padding:1px 7px;min-height:0;font-size:.6rem">musta</span> ei suositusta (alle 3 %, mallin virherajojen sisällä tai negatiivinen)<br>
+        <span class="bk-odds value-candidate" style="display:inline-flex;padding:1px 7px;min-height:0;font-size:.6rem">keltainen</span> kandidaatti, yli 3 %<br>
+        <span class="bk-odds value-strong" style="display:inline-flex;padding:1px 7px;min-height:0;font-size:.6rem">vihreä</span> vahva signaali, yli 5 %<br>
+        <span class="bk-odds value-elite" style="display:inline-flex;padding:1px 7px;min-height:0;font-size:.6rem">kultainen</span> poikkeuksellinen, yli 8 % — epäile ensin mallia, ei markkinaa
       </div>
     </div>`;
   }
@@ -1102,7 +1312,10 @@ function buildCalculator(g){
 function buildAnalysis(g){
   const home=teamName(g.home_team_id),away=teamName(g.away_team_id);
   const hR=getRating(g.home_team_id),aR=getRating(g.away_team_id);
-  const hElo=hR?.elo||1500,aElo=aR?.elo||1500;
+  // Säädetyt Elot samasta lähteestä kuin kortti ja Kerroinlaskuri —
+  // muuten tämä näkymä kertoisi eri kaavan kuin se jota oikeasti käytetään
+  const gpA=hockeyGameProbs(g);
+  const hElo=gpA.hElo,aElo=gpA.aElo;
   const hPdo=hR?.pdo||100,aPdo=aR?.pdo||100;
   const hEloDelta=hR?.elo_delta||0,aEloDelta=aR?.elo_delta||0;
   const hPdoDelta=hR?.pdo_delta||0,aPdoDelta=aR?.pdo_delta||0;
@@ -1205,7 +1418,25 @@ function renderSimGame(r){
   let pe='';if(r.penalties&&r.penalties.length)pe='<div class="penalty-row">🚨 '+r.penalties.map(p=>`${p.team_short} ${p.min}min (${p.reason})`).join(' | ')+'</div>';
   let pp='';if(r.pp_goals_home!=null)pp=`<div style="font-size:.65rem;color:var(--muted);margin-top:3px">YV: ${h} ${r.pp_goals_home}/${r.pp_chances_home} — ${a} ${r.pp_goals_away}/${r.pp_chances_away}</div>`;
   const w=r.home_score>r.away_score?'fill-home':r.away_score>r.home_score?'fill-away':'fill-draw';
-  return `<div class="card">${periodHtml}<div class="row"><span class="matchup">${teamLogo(teams.find(t=>t.id===r.home_team_id),22)} ${teamNameElo(r.home_team_id)}</span><span style="font-size:1.2rem;font-weight:800">${r.home_score} - ${r.away_score}${ot}</span><span class="matchup">${teamNameElo(r.away_team_id)} ${teamLogo(teams.find(t=>t.id===r.away_team_id),22)}</span></div><div class="progress-bar" style="margin-top:6px;height:6px"><span class="progress-fill ${w}" style="width:${r.home_score/(r.home_score+r.away_score||1)*100}%"></span></div>${sc}${pe}${pp}<div style="font-size:.65rem;color:var(--muted);margin-top:3px">🏟️ Laukaukset: ${teamNameElo(r.home_team_id)} ${r.shots_home||0} - ${r.shots_away||0} ${teamNameElo(r.away_team_id)}</div></div>`;
+
+  // Otsakepillerit myös simulaatiokortille: putket ja maaliodottama.
+  // Odottama on tässä erityisen kiinnostava, koska sen VIERESSÄ on toteuma —
+  // näkee heti menikö ottelu yli vai alle odotuksen.
+  const simGame=games.find(x=>x.id===r.game_id)||{home_team_id:r.home_team_id,away_team_id:r.away_team_id,id:r.game_id};
+  const sxg=hockeyExpectedGoals(simGame);
+  const actual=(r.home_score||0)+(r.away_score||0);
+  const settled=r.winner!==null;
+  const overUnder=settled?(actual>sxg.total+0.5?'yli':actual<sxg.total-0.5?'alle':'osui'):null;
+  const sPill=(icon,text,tone)=>`<span class="factor-pill tone-${tone}">${icon} ${esc(text)}</span>`;
+  const hSt=streakLabel(getRating(r.home_team_id)),aSt=streakLabel(getRating(r.away_team_id));
+  const simPills=`<div class="factor-pills" style="margin-top:5px">${[
+    sPill('🥅',`Odottama ${sxg.home.toFixed(1)} – ${sxg.away.toFixed(1)} (yht. ${sxg.total.toFixed(1)})`+(settled?` · toteuma ${actual} ${overUnder}`:''),
+      overUnder==='osui'?'success':overUnder?'warning':'muted'),
+    hSt?sPill(getRating(r.home_team_id).streak>0?'🔥':'❄️',`${h}: ${hSt}`,getRating(r.home_team_id).streak>0?'success':'danger'):null,
+    aSt?sPill(getRating(r.away_team_id).streak>0?'🔥':'❄️',`${a}: ${aSt}`,getRating(r.away_team_id).streak>0?'success':'danger'):null,
+  ].filter(Boolean).join('')}</div>`;
+
+  return `<div class="card">${periodHtml}<div class="row"><span class="matchup">${teamLogo(teams.find(t=>t.id===r.home_team_id),22)} ${teamNameElo(r.home_team_id)}</span><span style="font-size:1.2rem;font-weight:800">${r.home_score} - ${r.away_score}${ot}</span><span class="matchup">${teamNameElo(r.away_team_id)} ${teamLogo(teams.find(t=>t.id===r.away_team_id),22)}</span></div>${simPills}<div class="progress-bar" style="margin-top:6px;height:6px"><span class="progress-fill ${w}" style="width:${r.home_score/(r.home_score+r.away_score||1)*100}%"></span></div>${sc}${pe}${pp}<div style="font-size:.65rem;color:var(--muted);margin-top:3px">🏟️ Laukaukset: ${teamNameElo(r.home_team_id)} ${r.shots_home||0} - ${r.shots_away||0} ${teamNameElo(r.away_team_id)}</div></div>`;
 }
 
 function togglePressure(id){pressureTeam=pressureTeam===String(id)?'':String(id);save();renderTracker();toast(pressureTeam?'🔥 '+teamName(id)+' painaa päälle!':'🔥 Paine poistettu')}
@@ -1441,9 +1672,42 @@ function simulateGame(g){
   const hn=teamName(g.home_team_id).substring(0,3);const pph=penalties.filter(p=>!p.team_short.startsWith(hn)).length,ppa=penalties.filter(p=>p.team_short.startsWith(hn)).length;
   return{game_id:g.id,home_team_id:g.home_team_id,away_team_id:g.away_team_id,home_score:hs,away_score:as,winner:w,period:3,scorers:scorers.sort((a,b)=>a.period-b.period),penalties,pp_chances_home:pph,pp_chances_away:ppa,pp_goals_home:Math.min(pph,Math.floor(Math.random()*(pph+1))),pp_goals_away:Math.min(ppa,Math.floor(Math.random()*(ppa+1))),shots_home:20+Math.floor(Math.random()*20),shots_away:20+Math.floor(Math.random()*20)}
 }
+/**
+ * Ratkaise tämän kierroksen vedot simulaation tuloksia vasten.
+ *
+ * KORJAUS (rahankäsittelybugi): funktio ratkaisi JOKAISEN vedon jonka ottelu
+ * löytyi simResultsista, mutta poisti lopuksi vain ne joilla EI ollut
+ * practice-lippua (`bets=bets.filter(b=>b.practice)`). Practice-veto siis
+ * maksettiin kassaan JA jäi silti avoimeksi — ja koska "🔄 Simuloi uudelleen"
+ * kutsuu tätä uudelleen, sama veto maksettiin joka painalluksella vaikka
+ * panos oli veloitettu vain kertaalleen. Todennettu: sama 10 € veto kertoimella
+ * 2.14 kasvatti kassaa +21,40 € joka kutsulla (90 → 111,40 → 132,80 → 154,20).
+ *
+ * Lippu oli alun perin tarkoitettu suojaamaan JALKAPALLON harjoitusvetoja
+ * jääkiekkosimulaatiolta, mutta ylempi forEach ei koskaan noudattanut sitä.
+ * Kun Jahti-ketju alkoi toimia myös jääkiekossa (sen askeleet ovat
+ * practice:true), bugi tuli näkyviin oikeana rahana.
+ *
+ * Nyt sääntö on yksi ja sama: ratkaistu veto poistetaan, ratkaisematon jää
+ * auki. Ei erillistä lippupohjaista poikkeusta, joka voi eriytyä ylemmästä
+ * ehdosta.
+ */
 function resolveBets(){
-  bets.forEach(b=>{const r=simResults.find(r=>r.game_id===b.game_id);if(!r)return;const won=(b.side==='home'&&r.winner==='home')||(b.side==='away'&&r.winner==='away')||(b.side==='draw'&&r.winner==='draw');const profit=won?b.stake*b.odds:0;bankroll+=profit;betHistory.push({...b,won,profit,resolved_at:new Date().toISOString(),game_result:`${r.home_score}-${r.away_score}`})});
-  bets=bets.filter(b=>b.practice)
+  const settled=new Set();
+  bets.forEach(b=>{
+    // Jalkapallovedot kulkevat football-tracker.js:n kautta — jääkiekkosim ei
+    // koske niihin. (Niiden game_id on merkkijono eikä osuisi muutenkaan,
+    // mutta ehto on tässä eksplisiittisesti eikä sattuman varassa.)
+    if(b.football)return;
+    const r=simResults.find(r=>r.game_id===b.game_id);
+    if(!r)return; // ei tämän kierroksen ottelu → veto jää avoimeksi
+    const won=(b.side==='home'&&r.winner==='home')||(b.side==='away'&&r.winner==='away')||(b.side==='draw'&&r.winner==='draw');
+    const profit=won?b.stake*b.odds:0;
+    bankroll+=profit;
+    betHistory.push({...b,won,profit,resolved_at:new Date().toISOString(),game_result:`${r.home_score}-${r.away_score}`});
+    settled.add(b.id);
+  });
+  bets=bets.filter(b=>!settled.has(b.id));
 }
 
 function showBankrollModal(){document.getElementById('bankroll-modal').style.display='flex'}
@@ -1614,6 +1878,9 @@ function updateHockeyModel(id,side,val){
   // Kertoo kummasta luvusta edge on laskettu — tyhjennys palauttaa mallin
   const originEl=document.getElementById(`ho-${id}-${side}`);
   if(originEl)originEl.textContent=hockeyEstimate(id,side).isOwn?'✍️ oma':'🤖 malli';
+  // Kerroinruutujen suositusvärit seuraavat omaa arviota — kohdennettu
+  // päivitys, koska renderRound() menettäisi kirjoituskohdistuksen
+  refreshOddsCells(id);
   const edge=hockeyEdge(id,side);
   const el=document.getElementById(`he-${id}-${side}`);
   if(!el)return;
