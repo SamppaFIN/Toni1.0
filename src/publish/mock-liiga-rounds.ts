@@ -329,13 +329,13 @@ function jitter(seed: number, spread: number): number {
 //     ei liikaa (markkina on useimmiten oikeassa) muttei myöskään koskaan.
 function bookmakerProfile(name: string) {
   const key = name.toLowerCase();
-  if (key.includes('pinnacle')) return { margin: 0.035, vol: 0.04, favoriteTax: 0.003, longshotTax: 0.003, drawTax: 0.001 };
-  if (key.includes('veikkaus')) return { margin: 0.082, vol: 0.03, favoriteTax: 0.015, longshotTax: 0.012, drawTax: 0.005 };
-  if (key.includes('bet365')) return { margin: 0.05, vol: 0.06, favoriteTax: 0.006, longshotTax: 0.006, drawTax: 0.002 };
-  if (key.includes('unibet')) return { margin: 0.058, vol: 0.07, favoriteTax: 0.007, longshotTax: 0.007, drawTax: 0.003 };
-  if (key.includes('betsson')) return { margin: 0.06, vol: 0.07, favoriteTax: 0.008, longshotTax: 0.008, drawTax: 0.003 };
-  if (key.includes('nordic')) return { margin: 0.059, vol: 0.07, favoriteTax: 0.007, longshotTax: 0.007, drawTax: 0.003 };
-  return { margin: 0.058, vol: 0.07, favoriteTax: 0.007, longshotTax: 0.007, drawTax: 0.003 };
+  if (key.includes('pinnacle')) return { margin: 0.035, vol: 0.056, favoriteTax: 0.003, longshotTax: 0.003, drawTax: 0.001 };
+  if (key.includes('veikkaus')) return { margin: 0.082, vol: 0.042, favoriteTax: 0.015, longshotTax: 0.012, drawTax: 0.005 };
+  if (key.includes('bet365')) return { margin: 0.05, vol: 0.084, favoriteTax: 0.006, longshotTax: 0.006, drawTax: 0.002 };
+  if (key.includes('unibet')) return { margin: 0.058, vol: 0.098, favoriteTax: 0.007, longshotTax: 0.007, drawTax: 0.003 };
+  if (key.includes('betsson')) return { margin: 0.06, vol: 0.098, favoriteTax: 0.008, longshotTax: 0.008, drawTax: 0.003 };
+  if (key.includes('nordic')) return { margin: 0.059, vol: 0.098, favoriteTax: 0.007, longshotTax: 0.007, drawTax: 0.003 };
+  return { margin: 0.058, vol: 0.098, favoriteTax: 0.007, longshotTax: 0.007, drawTax: 0.003 };
 }
 
 function oddsFor(roundIndex: number, gameIndex: number, probs: { home: number; draw: number; away: number }): OddsSnapshot[] {
