@@ -280,16 +280,29 @@ function buildRatings(games: HistoricalGame[]): TeamRating[] {
   });
 }
 
+/**
+ * KORJAUS: tasapelin kaava oli `0.22 - |d|/1800`, kun selaimen kolme muuta
+ * toteutusta (demo.html: hockeyProbs, buildAnalysis, kerroinruutujen
+ * odotusarvo) käyttivät `0.26 - |d|/1500`. Sama "mallin arvio" antoi siis eri
+ * luvun sen mukaan kummalta polulta se tuli — kortti näytti 48/18/33 mutta
+ * selaimessa laskettu sama malli 46/22/32, ja kierroksen 1 value-flagit
+ * (tästä tiedostosta) sekä kerroinruutujen odotusarvot (selaimesta) eivät
+ * voineet olla samaa mieltä.
+ *
+ * Yhtenäistetty selaimen kaavaan, koska sitä käyttää kolme paikkaa yhden
+ * sijaan — ja koska dynaamisten kierrosten HINNOITTELU tehdään sillä, joten
+ * kertoimet ja edge lasketaan nyt taatusti samasta jakaumasta.
+ *
+ * Huom: home+draw+away = (1-d) + d = 1 aina, joten /total on no-op —
+ * jätetty pois selkeyden vuoksi.
+ */
 function probabilityTriple(homeElo: number, awayElo: number) {
   const homeWinRaw = expectedScore(homeElo + HOME_ADVANTAGE, awayElo);
-  const draw = Math.max(0.12, 0.22 - Math.abs(homeElo + HOME_ADVANTAGE - awayElo) / 1800);
-  const home = homeWinRaw * (1 - draw);
-  const away = (1 - homeWinRaw) * (1 - draw);
-  const total = home + draw + away;
+  const draw = Math.max(0.12, 0.26 - Math.abs(homeElo + HOME_ADVANTAGE - awayElo) / 1500);
   return {
-    home: home / total,
-    draw: draw / total,
-    away: away / total,
+    home: homeWinRaw * (1 - draw),
+    draw,
+    away: (1 - homeWinRaw) * (1 - draw),
   };
 }
 
