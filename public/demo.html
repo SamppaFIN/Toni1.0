@@ -399,11 +399,28 @@ function bookmakerProfile(name){
   if(key.includes('nordic'))return{margin:0.059,vol:0.07,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
   return{margin:0.058,vol:0.07,favoriteTax:0.007,longshotTax:0.007,drawTax:0.003};
 }
+// KORJAUS: kolme eri kohtaa (genOddsForBookmaker, buildDynamicRoundState,
+// advanceRound) laskivat hp/dp/ap:n toisistaan riippumatta, ja kaksi niistä
+// (buildDynamicRoundState, advanceRound) käyttivät kaavaa `ap=1-hp-dp` ILMAN
+// alarajaa. Suurella Elo-erolla (esim. Lukko 1632 vs Jukurit 1254, ero 378)
+// tämä antoi ap:lle NEGATIIVISEN arvon, jolloin altavastaajan edge oli aina
+// mahdoton havaita — juuri se puoli jolla ylikertoimet oikeasti näkyvät.
+// genOddsForBookmakerissa oli väliaikainen `Math.max(0.08,...)`-paikkaus joka
+// ei ollut sama kuin muualla käytetty kaava, joten hinnoittelu ja
+// edge-tarkistus vertasivat eri lukuja toisiinsa.
+//
+// Yksi yhteinen funktio, sama tekniikka kuin src/publish/mock-liiga-rounds.ts:n
+// probabilityTriple(): kotivoitto kerrotaan (1-tasapeli):llä, jolloin summa on
+// AINA tasan 1 eikä yksikään termi voi mennä negatiiviseksi — ei tarvita
+// erillistä alarajaa.
+function hockeyProbs(hElo,aElo){
+  const homeWinRaw=1/(1+Math.pow(10,(aElo-(hElo+40))/400));
+  const draw=Math.max(0.12,0.26-Math.abs(hElo+40-aElo)/1500);
+  return{home:homeWinRaw*(1-draw),draw,away:(1-homeWinRaw)*(1-draw)};
+}
 function genOddsForBookmaker(g,bk){
   const hElo=getRating(g.home_team_id)?.elo||1500,aElo=getRating(g.away_team_id)?.elo||1500;
-  const hp=1/(1+Math.pow(10,(aElo-(hElo+40))/400));
-  const dp=Math.max(0.12,0.26-Math.abs(hElo+40-aElo)/1500);
-  const ap=Math.max(0.08,1-hp-dp);
+  const{home:hp,draw:dp,away:ap}=hockeyProbs(hElo,aElo);
   const profile=bookmakerProfile(bk);
   const probs=[hp,dp,ap];
   const favorite=probs.indexOf(Math.max(...probs));
@@ -491,9 +508,7 @@ function buildDynamicRoundState(round){
   const nextFlags=[];
   nextGames.forEach(g=>{
     const hElo=getRating(g.home_team_id)?.elo||1500,aElo=getRating(g.away_team_id)?.elo||1500;
-    const hp=1/(1+Math.pow(10,(aElo-(hElo+40))/400));
-    const dp=Math.max(0.12,0.26-Math.abs(hElo+40-aElo)/1500);
-    const ap=1-hp-dp;
+    const{home:hp,draw:dp,away:ap}=hockeyProbs(hElo,aElo);
     const pw=hp>ap&&hp>dp?'home':ap>dp?'away':'draw';
     nextPreds.push({id:g.id,game_id:g.id,home_win_prob:+hp.toFixed(4),draw_prob:+dp.toFixed(4),away_win_prob:+ap.toFixed(4),predicted_winner:pw,predicted_at:new Date().toISOString(),actual_winner:null,was_correct:null});
 
@@ -1072,9 +1087,7 @@ function advanceRound(){
   const newPreds=[];
   newGames.forEach(g=>{
     const hElo=getRating(g.home_team_id)?.elo||1500,aElo=getRating(g.away_team_id)?.elo||1500;
-    const hp=1/(1+Math.pow(10,(aElo-(hElo+40))/400));
-    const dp=Math.max(0.12,0.26-Math.abs(hElo+40-aElo)/1500);
-    const ap=1-hp-dp;
+    const{home:hp,draw:dp,away:ap}=hockeyProbs(hElo,aElo);
     const pw=hp>ap?'home':ap>hp?'draw':'draw';
     newPreds.push({id:Date.now()+g.id+100,game_id:g.id,home_win_prob:+hp.toFixed(4),draw_prob:+dp.toFixed(4),away_win_prob:+ap.toFixed(4),predicted_winner:pw,predicted_at:new Date().toISOString(),actual_winner:null,was_correct:null});
   });
