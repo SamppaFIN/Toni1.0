@@ -286,6 +286,7 @@ body{
   <button class="tab" data-tab="history">📜 Historia</button>
   <button class="tab" data-tab="chase">🔥 Jahti</button>
   <button class="tab" data-tab="teams" data-sport="hockey">📊 Joukkueet</button>
+  <button class="tab" data-tab="teams-fb" data-sport="football">📊 Joukkueet</button>
   <button class="tab" data-tab="info">ℹ️ Info</button>
   <button class="tab" data-tab="admin">⚙️ Admin</button>
 </div>
@@ -306,6 +307,9 @@ body{
      joka valitsee oikean lähteen SPORT-lipun mukaan (ks. window.BT alempana). -->
 <div id="chase" class="view"><div id="chase-content"></div></div>
 <div id="teams" class="view"><div id="teams-list"></div></div>
+<!-- Tiketti #45: Valioliigan joukkuetaulukko. Jalkapallo-ominaisuus, piilossa
+     jääkiekkotilassa (data-sport="football" tabissa, ks. applySportVisibility). -->
+<div id="teams-fb" class="view"><div id="teams-fb-list"></div></div>
 <div id="info" class="view"><div id="info-content"></div></div>
 <div id="admin" class="view"><div id="admin-content"></div></div>
 
@@ -1966,6 +1970,7 @@ function switchTab(name){
   document.querySelector(`[data-tab="${name}"]`).classList.add('active');document.getElementById(name).classList.add('active');
   if(name==='round')renderRound();if(name==='slip')renderSlip();if(name==='tracker')renderTracker();if(name==='history')renderHistory();if(name==='teams')renderTeams();if(name==='info')renderInfo();if(name==='admin')renderAdmin()
   if(name==='chase'&&window.BTC)window.BTC.render();
+  if(name==='teams-fb'&&window.BTS)window.BTS.render();
 }
 function renderAll(){renderRound();renderSlip();renderTracker();renderHistory();renderTeams();renderInfo();renderAdmin();updateBankroll();updateSlipBadge()}
 

@@ -366,6 +366,21 @@ function edgeCard(edge, match) {
   </div>`;
 }
 
+/**
+ * Tiketti #45: sama voimaluku jota λ-laskenta käytti (src/analyze/strength.ts),
+ * rinnakkain molemmille joukkueille — vertailukelpoinen Joukkueet-tabin
+ * taulukon kanssa. Puolustuksessa pienempi luku on parempi.
+ */
+function teamStrengthRow(match) {
+  const h = match.model.home_strength;
+  const a = match.model.away_strength;
+  if (!h || !a) return '';
+  return `<div style="font-size:.62rem;color:var(--c-text-muted);margin-top:4px">
+    Voimaluku (1.00 = sarjan keskitaso): hyökkäys <b>${esc(match.home.short)} ${num(h.attack)}</b> − <b>${esc(match.away.short)} ${num(a.attack)}</b>
+    · puolustus <b>${esc(match.home.short)} ${num(h.defense)}</b> − <b>${esc(match.away.short)} ${num(a.defense)}</b>
+  </div>`;
+}
+
 function analysisSection(match) {
   const method = METHOD_LABELS[match.model.method] ?? { short: match.model.method, long: '' };
   const hasPoisson = match.model.poisson_probs !== null;
@@ -399,6 +414,7 @@ function analysisSection(match) {
           .slice(0, 5)
           .map((s) => `<b>${esc(s.score)}</b> ${pct(s.p, 0)}`)
           .join(' · ')}</div>
+        ${teamStrengthRow(match)}
       </div>`
     : '';
 
