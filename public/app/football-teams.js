@@ -1,0 +1,80 @@
+// Tiketti #45: Valioliigan joukkuetaulukko
+//
+// Sama idea kuin jääkiekon "Joukkueet"-välilehdellä (renderTeams() demo.html:ssä):
+// koko sarjan joukkueet listattuna voimaluvun mukaan. Ero on että jalkapallolla
+// ei ole Elo:a — voimaluku on sama hyökkäys-/puolustuskerroin jota Poisson-malli
+// käyttää ottelukorteilla (src/analyze/strength.ts), joten taulukko ja
+// ottelukortin analyysi kertovat aina samaa tarinaa.
+
+import { esc } from './snapshot.js';
+
+let teams = null;
+let loadError = null;
+
+export async function load(url = 'data/football-teams.json') {
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) {
+      loadError = `Joukkuetaulukkoa ei löytynyt (HTTP ${res.status}). Aja \`npm run teams:football\`.`;
+      teams = null;
+      return null;
+    }
+    const file = await res.json();
+    teams = file;
+    loadError = null;
+    return file;
+  } catch (err) {
+    loadError = `Joukkuetaulukon lataus epäonnistui: ${err.message}`;
+    teams = null;
+    return null;
+  }
+}
+
+function formBadges(form) {
+  if (!form) return '<span style="color:var(--c-text-muted)">—</span>';
+  const colors = { W: 'var(--c-success)', D: 'var(--c-warning)', L: 'var(--c-danger)' };
+  return form
+    .split('')
+    .map((r) => `<span style="display:inline-block;width:14px;height:14px;line-height:14px;text-align:center;border-radius:3px;background:${colors[r] || 'var(--c-text-muted)'};color:#000;font-size:.55rem;font-weight:700;margin-right:2px">${r}</span>`)
+    .join('');
+}
+
+/** Voimaluku badge — sama kynnyslogiikka kuin hockeyn PDO-badgella (renderTeams()) */
+function strengthBadge(value, betterWhenHigh) {
+  const good = betterWhenHigh ? value > 1.1 : value < 0.9;
+  const bad = betterWhenHigh ? value < 0.9 : value > 1.1;
+  const cls = good ? 'badge-green' : bad ? 'badge-red' : 'badge-muted';
+  return `<span class="badge ${cls}">${value.toFixed(2)}</span>`;
+}
+
+export function render(containerId = 'teams-fb-list') {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  if (loadError || !teams) {
+    el.innerHTML = `<div class="empty">${esc(loadError ?? 'Joukkuetaulukkoa ei ole vielä ladattu.')}</div>`;
+    return;
+  }
+
+  const rows = teams.teams
+    .map(
+      (t) => `<div class="card"><div class="row">
+        <div class="matchup"><span class="team-logo" style="background:${esc(t.team.color)};width:22px;height:22px;font-size:8px" title="${esc(t.team.name)}">${esc(t.team.short)}</span> <strong>#${t.rank ?? '—'} ${esc(t.team.name)}</strong></div>
+        <span style="font-weight:700">${t.points} p</span>
+      </div>
+      <div class="row" style="font-size:.7rem;color:var(--muted);margin-top:3px">
+        <span>${t.played} O · ${t.won}-${t.draw}-${t.lost} · ${t.gf}-${t.ga}</span>
+        ${formBadges(t.form)}
+      </div>
+      <div class="row" style="font-size:.65rem;color:var(--muted);margin-top:3px">
+        <span>Hyökkäys ${strengthBadge(t.attack, true)}</span>
+        <span>Puolustus ${strengthBadge(t.defense, false)}</span>
+      </div></div>`
+    )
+    .join('');
+
+  el.innerHTML = `<div style="font-size:.65rem;color:var(--muted);margin-bottom:6px">${esc(teams.league)} ${esc(teams.season)} · voimaluku 1.00 = sarjan keskitaso, puolustuksessa pienempi on parempi</div>${rows}`;
+}
+
+// BTL on jo varattu football-llm.js:lle (tiketti #38) — joukkuetaulukolle BTS (Sarjataulukko)
+window.BTS = { load, render };

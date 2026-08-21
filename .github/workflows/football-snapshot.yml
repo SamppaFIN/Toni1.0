@@ -77,6 +77,12 @@ jobs:
       - name: Hae kertoimet ja laske analyysi
         run: npm run snapshot:live
 
+      # Tiketti #45: Valioliigan joukkuetaulukko. Vaatii FOOTBALL_DATA_TOKENin;
+      # ei saa kaataa koko ajoa jos sitä ei ole tai football-data.org on hidas.
+      - name: Hae Valioliigan joukkuetaulukko
+        run: npm run teams:football
+        continue-on-error: true
+
       # Tulokset ENNEN mittareita: mittarit lukevat results.json:n.
       #
       # Vain iltapäivän ajossa (ja käsin käynnistettynä). Tuloshaku kustantaa

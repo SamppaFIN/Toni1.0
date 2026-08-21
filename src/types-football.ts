@@ -80,6 +80,12 @@ export interface ScoreProb {
  */
 export type ModelMethod = 'poisson+sharp-blend' | 'poisson' | 'market-only';
 
+/** 1.0 = sarjan keskitaso. Puolustuksessa pienempi luku on parempi (ks. poisson.ts:teamStrength). */
+export interface TeamStrengthView {
+  attack: number;
+  defense: number;
+}
+
 export interface ModelView {
   method: ModelMethod;
   /** null kun tilastolähdettä ei ole → Poissonia ei voi laskea */
@@ -94,6 +100,9 @@ export interface ModelView {
   btts: number | null;
   top_scores: ScoreProb[];
   adjustments: ModelAdjustment[];
+  /** Tiketti #45: sama voimaluku jota λ-laskenta käytti — näkyvissä joukkuetaulukon kanssa vertailukelpoisena */
+  home_strength: TeamStrengthView | null;
+  away_strength: TeamStrengthView | null;
 }
 
 export interface EdgeRow {

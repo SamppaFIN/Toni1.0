@@ -23,6 +23,7 @@ import { initCards, setSnapshot, renderAllCards, renderPlacedBets, toggleSection
 import * as tracker from './football-tracker.js';
 import * as metrics from './football-metrics.js';
 import { DISPLAY_OPTIONS, getPrefs, togglePref, resetPrefs } from './football-prefs.js';
+import * as teamsTable from './football-teams.js';
 import './football-chase.js'; // rekisteröi window.BTC — ei tarvitse suoraa viittausta täältä
 import './football-llm.js'; // rekisteröi window.BTL (tiketti #38)
 
@@ -215,6 +216,10 @@ export async function start(containerId = 'round-games') {
   // metrics-ajoa) — lataus ei saa estaa muun nakyman toimintaa
   await metrics.load();
   metrics.render();
+
+  // Tiketti #45: joukkuetaulukko on myös oma tiedostonsa, samasta syystä
+  await teamsTable.load();
+  teamsTable.render();
 }
 
 // Itsekäynnistys. Moduuli latautuu deferoituna eli inline-skriptin jälkeen,

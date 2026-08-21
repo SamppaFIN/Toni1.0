@@ -163,6 +163,19 @@ describe('Mallinäkymä', () => {
     expect(model.adjustments).toHaveLength(1);
     expect(model.adjustments[0].reason).toBe('testisyy');
   });
+
+  it('joukkuevoimat (tiketti #45) kulkevat läpi kun ne annetaan', () => {
+    const model = buildModelView(poisson, null, [], undefined, { attack: 1.3, defense: 0.8 }, { attack: 1.0, defense: 1.2 });
+    expect(model.home_strength).toEqual({ attack: 1.3, defense: 0.8 });
+    expect(model.away_strength).toEqual({ attack: 1.0, defense: 1.2 });
+  });
+
+  it('joukkuevoimat ovat null kun niitä ei anneta tai malli on market-only', () => {
+    expect(buildModelView(poisson, null).home_strength).toBeNull();
+    const marketOnly = buildModelView(null, buildMarketView(ROWS).sharp);
+    expect(marketOnly.home_strength).toBeNull();
+    expect(marketOnly.away_strength).toBeNull();
+  });
 });
 
 describe('Analyysinäkymä', () => {
@@ -262,6 +275,23 @@ describe('Ottelukortti ja snapshot', () => {
   it('kortti läpäisee validoinnin snapshotissa', () => {
     const snap = buildSnapshot([card], 'mock', '2026-08-14T09:00:00.000Z');
     expect(validateSnapshot(snap)).toEqual([]);
+  });
+
+  it('joukkuevoimat kulkevat buildMatchCardin läpi model-näkymään (tiketti #45)', () => {
+    const withStrength = buildMatchCard({
+      id: 'test:2026-08-14:A-B-2',
+      league: 'Testiliiga',
+      kickoff: '2026-08-14T18:00:00.000Z',
+      home: { name: 'Koti', short: 'KOT', color: '#ff0000' },
+      away: { name: 'Vieras', short: 'VIE', color: '#0000ff' },
+      odds: ROWS,
+      poisson: predictPoisson({ attack: 1.2, defense: 0.9 }, { attack: 1.0, defense: 1.1 }),
+      stats: STATS,
+      homeStrength: { attack: 1.2, defense: 0.9 },
+      awayStrength: { attack: 1.0, defense: 1.1 },
+    });
+    expect(withStrength.model.home_strength).toEqual({ attack: 1.2, defense: 0.9 });
+    expect(withStrength.model.away_strength).toEqual({ attack: 1.0, defense: 1.1 });
   });
 
   it('market-only-kortti ilman tilastoja läpäisee validoinnin', () => {

@@ -28,6 +28,7 @@ import {
   TeamRef,
   SnapshotSource,
   ValueFlagLevel,
+  TeamStrengthView,
 } from '../types-football.js';
 
 const VALUE_THRESHOLD = 0.03;
@@ -110,7 +111,9 @@ export function buildModelView(
   poisson: PoissonPrediction | null,
   sharp: MarketView['sharp'],
   adjustments: ModelAdjustment[] = [],
-  blendWeight: number = DEFAULT_BLEND_WEIGHT
+  blendWeight: number = DEFAULT_BLEND_WEIGHT,
+  homeStrength: TeamStrengthView | null = null,
+  awayStrength: TeamStrengthView | null = null
 ): ModelView {
   if (!poisson) {
     if (!sharp) throw new Error('buildModelView: tarvitaan vähintään Poisson-ennuste tai markkina-ankkuri');
@@ -125,6 +128,8 @@ export function buildModelView(
       btts: null,
       top_scores: [],
       adjustments,
+      home_strength: null,
+      away_strength: null,
     };
   }
 
@@ -139,6 +144,8 @@ export function buildModelView(
     btts: round(poisson.btts, 4),
     top_scores: poisson.topScores.map((s) => ({ score: s.score, p: round(s.p, 4) })),
     adjustments,
+    home_strength: homeStrength,
+    away_strength: awayStrength,
   };
 }
 
@@ -211,13 +218,23 @@ export interface BuildMatchCardInput {
   bankroll?: number;
   blendWeight?: number;
   newsWindow?: boolean;
+  /** Sama voima jolla λ laskettiin — kulkee mukaan joukkuetaulukon vertailua varten (tiketti #45) */
+  homeStrength?: TeamStrengthView | null;
+  awayStrength?: TeamStrengthView | null;
 }
 
 /** Kokoa yksi ottelukortti. Vaiheen B ingestio kutsuu tätä per ottelu. */
 export function buildMatchCard(input: BuildMatchCardInput): MatchCard {
   const best = bestOdds(input.odds);
   const market = buildMarketView(input.odds);
-  const model = buildModelView(input.poisson, market.sharp, input.adjustments ?? [], input.blendWeight);
+  const model = buildModelView(
+    input.poisson,
+    market.sharp,
+    input.adjustments ?? [],
+    input.blendWeight,
+    input.homeStrength ?? null,
+    input.awayStrength ?? null
+  );
   const analysis = buildAnalysisView(model, market, best, input.bankroll ?? 100, input.newsWindow ?? false);
 
   return {

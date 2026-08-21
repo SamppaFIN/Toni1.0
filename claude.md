@@ -2,6 +2,8 @@
 
 ## Identiteetti
 
+> Tässä projektissa on käytetty useampaa mallia. Kukin identiteetti alla vastaa sitä mallia joka on kulloinkin ajossa — käytä sitä joka vastaa istunnon `malli`-arvoa Response Protocolin otsikossa.
+
 ```json
 {
   "kutsumanimi": "Kajo",
@@ -25,6 +27,60 @@
     "ei reaaliaikaista tietoa (ilman hakua)",
     "voi erehtyä",
     "ei muista sinua ensi kerralla (ellei muistitiedostoja)"
+  ]
+}
+```
+
+```json
+{
+  "kutsumanimi": "Kipinä",
+  "ikoni": "✨",
+  "malli": "Claude Sonnet 5",
+  "alusta": "Claude Code (VS Code -laajennus)",
+  "kehittäjä": "Anthropic",
+  "projektin_omistaja": "Infinite",
+  "kieli": ["suomi", "englanti", "...ja ~100 muuta"],
+  "vahvuudet": [
+    "nopea iterointi",
+    "koodaaminen",
+    "refaktorointi",
+    "testaus",
+    "arkipäivän kehitystyö"
+  ],
+  "tietopohja_asti": "2026-01",
+  "muisti": "ei säily keskustelujen välillä (paitsi /memories/)",
+  "luonne": ["suorapuheinen", "täsmällinen", "rehellinen"],
+  "rajoitukset": [
+    "ei reaaliaikaista tietoa (ilman hakua)",
+    "voi erehtyä",
+    "ei muista sinua ensi kerralla (ellei muistitiedostoja)"
+  ]
+}
+```
+
+```json
+{
+  "kutsumanimi": "Syvyys",
+  "ikoni": "🌌",
+  "malli": "Claude Opus 5",
+  "alusta": "Claude Code (VS Code -laajennus)",
+  "kehittäjä": "Anthropic",
+  "projektin_omistaja": "Infinite",
+  "kieli": ["suomi", "englanti", "...ja ~100 muuta"],
+  "vahvuudet": [
+    "syvä analyysi",
+    "monimutkainen arkkitehtuurisuunnittelu",
+    "laajat refaktoroinnit",
+    "vaikeat bugit"
+  ],
+  "tietopohja_asti": "2026-01",
+  "muisti": "ei säily keskustelujen välillä (paitsi /memories/)",
+  "luonne": ["harkitseva", "perusteellinen", "rehellinen"],
+  "rajoitukset": [
+    "ei reaaliaikaista tietoa (ilman hakua)",
+    "voi erehtyä",
+    "ei muista sinua ensi kerralla (ellei muistitiedostoja)",
+    "hitaampi ja kalliimpi kuin Sonnet — käytä kun syvyys todella tarvitaan"
   ]
 }
 ```
@@ -118,7 +174,7 @@
       "id": "jalkapallo",
       "nimi": "⚽ Football Real Data — Jalkapallo oikealla datalla",
       "kuvaus": "Jalkapallo pääkohteeksi: oikeat kertoimet vedonlyöntitoimistoilta, joukkueiden tunnusluvut, otteluun liittyvät uutiset ja vedonlyöntianalytiikka jokaiselle ottelukortille. Jääkiekko piiloon lipun taakse.",
-      "tiketit": [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34],
+      "tiketit": [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 45],
       "user_story": "Vedonlyöjänä haluan nähdä päivän jalkapallo-ottelut oikeilla kertoimilla usealta toimistolta, ja jokaiselle ottelulle liittyvät uutiset, joukkueiden tunnusluvut ja valmiin vedonlyöntianalyysin panossuosituksineen, jotta voin tehdä päätöksen näkemällä perustelut enkä pelkkää lopputulosta.",
       "valmius": 100
     },
@@ -171,7 +227,8 @@
     { "id": 37, "epic": "tyokalut", "nimi": "Viiden kierroksen harjoitusdata", "effort": "M", "riippuvuudet": [36], "status": "done", "acceptance_criteria": ["Viisi kierrosta, 6 ottelua kussakin, 30 uniikkia paria (round-robin-rotaatio)", "Kertoimet johdettu kauden OIKEISTA Elo-luvuista — suosikki on suosikki syysta", "Tunnusluvut kauden oikeista otteluista (pelit, maalit, pisteet, sija)", "Deterministinen: ei Math.randomia, sama tiedosto joka ajolla", "Admin-toggle oikean ja harjoitusdatan valilla, kierros sailyy sivun paivityksen yli", "Avoin veto sailyy kierroksen vaihtuessa — ketjua voi jahdata eteenpain", "11 E2E-testia"], "valmius": 100 },
     { "id": 38, "epic": "tyokalut", "nimi": "Kysy LLM:lta — kierroksen analyysi kielimallilla", "effort": "M", "riippuvuudet": [30], "status": "done", "acceptance_criteria": ["Vetolapun nappi lahettaa koko kierroksen datan OpenRouterille ja nayttaa analyysin", "PROMPTIN JARJESTYS: tunnusluvut ja uutiset ENNEN kertoimia — muuten malli toistaa markkinan takaisin ja analyysi on kehapaatelma", "Jarjestelmaviesti ohjaa skeptisyyteen: markkina on useimmiten oikeassa, ei loydoksia on hyvaksyttava vastaus", "Omat avoimet vedot mukana arvioitavaksi", "Malli valittavissa (OpenRouter), avain localStoragessa Admin-valilehdella", "Avaimen nakyvyys sanotaan kayttajalle suoraan, ei piiloteta", "Vastaus escapetaan — mallin teksti ei voi injektoida HTML:aa", "401/402/429 kerrotaan ymmarrettavasti; tyhja vastaus tunnistetaan virheeksi", "16 yksikkotestia + 14 E2E-testia (verkkokutsu katkaistu page.routella)"], "valmius": 100 },
     { "id": 39, "epic": "tyokalut", "nimi": "Elo kortilla, laskennan vaiheet ja nayttoasetukset", "effort": "M", "riippuvuudet": [36], "status": "done", "acceptance_criteria": ["Elo-luvut, muutos kauden alusta ja Elo-sija nakyvat ottelukortilla ja tunnusluvuissa", "Elo vain sarjoille joilla on ottelutuloslahde — taulukon pisteista johdettu luku ei olisi Elo", "Laskenta-osio nayttaa jokaisen valivaiheen kaavoineen: devig per toimisto, konsensus, Elo, Poisson, blendi, tehollinen kerroin, edge, Kelly", "Selaimen tarkistuslasku vertautuu snapshotin lukuun ja poikkeama nakyy varoituksena", "Admin-togglet: 7 nayttovalintaa, vaikuttavat VAIN renderointiin eivat laskentaan (todennettu E2E:lla)", "KORJAUS: paras kerroin sai vihrean taustan vaikka odotusarvo oli negatiivinen. Nyt tahti = paras hinta, vari = ylikerroin (keltainen > 3 %, vihrea > 5 %)", "12 yksikkotestia (selaimen laskenta vs palvelin) + 16 E2E-testia"], "valmius": 100 },
-    { "id": 40, "epic": "tyokalut", "nimi": "Kasino-teeman uudistus, tekijapillerit ja per-ottelu LLM-nappi", "effort": "M", "riippuvuudet": [38, 39], "status": "done", "acceptance_criteria": ["KORJAUS: tilastolahteen lyhyet nimet (HJK, Inter Turku) eivat tasmanneet tuloslahteen nimiin — 3/4 paivan ottelusta jai ilman Elo-lukua huomaamatta. eloKeyFor()-kartta korjaa, 14 yksikkotestia lukitsee kaikki 12 joukkuetta", "KORJAUS: push mainiin ei deployaa GitHub Pagesia — vain cron/workflow_dispatch tekee sen. Tuotannon data ja UI olivat jaljessa useita committeja", "Tekijapillerit kortin otsakkeeseen: Elo-ero+odotusarvo, mallin peruste (tama/viime kausi), oma malli vs markkina -paino, uutismaara ja -vaikuttavuus, uutisikkuna — kaikki mika vaikuttaa analyysiin nakyy ilman osion avaamista", "Kasino-teema uudistettu pelkasta taustavarista oikeaksi identiteetiksi: Cinzel-otsikkofontti (vain otsikot, numerot pysyvat jarjestelmafontissa), kortin nurkkaan ♠-vesileima, messinkireunat, kulta-liuska paanapissa ja aktiivisessa valilehdessa, kohokuvioidut painikkeet", "Per-ottelu Kysy LLM:lta -osio jokaisella kortilla oman avaamattoman napin takana — analysoi VAIN sen yhden ottelun, ei koko kierrosta; vastaus sailyy per ottelu omalla localStorage-avaimellaan", "Valilehtipalkki rivittyy — Admin ei jaa enaa nakymattomiin kapealla ruudulla", "471 yksikkotestia + 115 E2E-testia vihreana"], "valmius": 100 }
+    { "id": 40, "epic": "tyokalut", "nimi": "Kasino-teeman uudistus, tekijapillerit ja per-ottelu LLM-nappi", "effort": "M", "riippuvuudet": [38, 39], "status": "done", "acceptance_criteria": ["KORJAUS: tilastolahteen lyhyet nimet (HJK, Inter Turku) eivat tasmanneet tuloslahteen nimiin — 3/4 paivan ottelusta jai ilman Elo-lukua huomaamatta. eloKeyFor()-kartta korjaa, 14 yksikkotestia lukitsee kaikki 12 joukkuetta", "KORJAUS: push mainiin ei deployaa GitHub Pagesia — vain cron/workflow_dispatch tekee sen. Tuotannon data ja UI olivat jaljessa useita committeja", "Tekijapillerit kortin otsakkeeseen: Elo-ero+odotusarvo, mallin peruste (tama/viime kausi), oma malli vs markkina -paino, uutismaara ja -vaikuttavuus, uutisikkuna — kaikki mika vaikuttaa analyysiin nakyy ilman osion avaamista", "Kasino-teema uudistettu pelkasta taustavarista oikeaksi identiteetiksi: Cinzel-otsikkofontti (vain otsikot, numerot pysyvat jarjestelmafontissa), kortin nurkkaan ♠-vesileima, messinkireunat, kulta-liuska paanapissa ja aktiivisessa valilehdessa, kohokuvioidut painikkeet", "Per-ottelu Kysy LLM:lta -osio jokaisella kortilla oman avaamattoman napin takana — analysoi VAIN sen yhden ottelun, ei koko kierrosta; vastaus sailyy per ottelu omalla localStorage-avaimellaan", "Valilehtipalkki rivittyy — Admin ei jaa enaa nakymattomiin kapealla ruudulla", "471 yksikkotestia + 115 E2E-testia vihreana"], "valmius": 100 },
+    { "id": 45, "epic": "jalkapallo", "nimi": "Valioliigan joukkue- ja voimataulukko", "effort": "M", "riippuvuudet": [24, 25, 30], "status": "done", "acceptance_criteria": ["Uusi 'Joukkueet'-valilehti jalkapallolle (data-sport=football) samalla piirrostavalla kuin jaakiekon oma Joukkueet-tabi — kumpaakaan koodia ei koskettu", "src/publish/football-teams.ts hakee koko Valioliigan (soccer_epl) sarjataulukon football-data.orgista nykyiselta ja edelliselta kaudelta (edellinen priorina) ja laskee hyokkays-/puolustusvoiman strength.ts:lla — ei uutta Elo-jarjestelmaa", "npm run teams:football julkaisee public/data/football-teams.json:in, kytketty football-snapshot.yml-croniin (continue-on-error, ei kaada muuta putkea)", "Ottelukortin Analyysi-osiossa nakyy sama voimaluku molemmille joukkueille (model.home_strength/away_strength) — sama luku jolla lambda laskettiin, ei erillista nimentasmaytysta selaimessa", "Ei committoitua football-teams.json-esimerkkia: FOOTBALL_DATA_TOKENia ei ollut paikallisesti eika dataa keksita (sama periaate kuin tiketissa 32) — cron tayttaa sen tuotannossa", "6 uutta yksikkotestia (football-teams.test.ts) + 3 uutta snapshot.test.ts-testia + 3 uutta E2E-testia, 423/423 unit ja 63/63 e2e vihreana", "Numeroitu 45 (ei 36): tiketit 35-40 ja varatut 41-44 (PLAN-foorumit.md) olivat jo kaytossa toisessa rinnakkaisessa sessiossa"], "valmius": 100 }
   ],
   "mvp_scope": "Tiketit 1–21. Yksi uutislähde, yksi odds-provider, yksi hälytyskanava. Staattinen mobiili-web UI GitHub Pagesissa. Malli ennustaa jokaisen ottelun ja träkkää osumatarkkuutta. Interaktiivinen demo pelipäiväsimulaatiolla ja vedonlyöntikassalla.",
   "vaihe3_scope": "Tiketit 35-39. Vedonlyojan tyokalut: tappioketju stop-lossilla, kauden Elo nollasta, viiden kierroksen harjoitusdata, LLM-analyysi OpenRouterilla ja laskennan lapinakyvyys nayttoasetuksineen.",

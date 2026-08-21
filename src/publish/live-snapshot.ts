@@ -253,7 +253,14 @@ function buildCard(
     }
   }
 
-  return buildMatchCard({ ...base, poisson, stats: matchStats, adjustments });
+  return buildMatchCard({
+    ...base,
+    poisson,
+    stats: matchStats,
+    adjustments,
+    homeStrength: { attack: round(home.strength.attack, 2), defense: round(home.strength.defense, 2) },
+    awayStrength: { attack: round(away.strength.attack, 2), defense: round(away.strength.defense, 2) },
+  });
 }
 
 function sumDeltas(adjustments: Array<{ side: 'home' | 'away'; delta: number }>, side: 'home' | 'away'): number {
