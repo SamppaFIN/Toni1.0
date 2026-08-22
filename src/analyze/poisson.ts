@@ -55,9 +55,35 @@ export const DEFAULT_LEAGUE: LeagueAverages = { homeGoals: 1.5, awayGoals: 1.2 }
 export const LEAGUE_AVG_PRIOR_MATCHES = 10;
 
 /**
+ * Kuinka monen ottelun painoarvo priorilla on KOTI/VIERAS-JAKAUMAA
+ * arvioitaessa. Selvästi suurempi kuin LEAGUE_AVG_PRIOR_MATCHES, ja syy on
+ * empiirinen:
+ *
+ * TOINEN TUOTANTOVIKA, löytyi 22.8.2026 illalla. Kun nollalambda oli korjattu,
+ * malli liputti 4/5 kohteesta KOTIJOUKKUEEN puolelle. Syy: sarjan mitattu
+ * koti/vieras-suhde oli 1.68 (koti 1.68, vieras 1.01) kun Valioliigan
+ * pitkän ajan suhde on ~1.25. Kotietu oli yliarvioitu 34 %, ja se meni suoraan
+ * λ_koti:hin — jokainen kotijoukkue sai perusteetonta etua.
+ *
+ * Miksi kaksi eri painoa: sarjan KOKONAISMAALIMÄÄRÄ vakiintuu nopeasti
+ * (muutama kierros riittää), mutta se miten maalit jakautuvat kotiin ja
+ * vieraaseen on paljon kohinaisempaa alkukaudesta — muutama kotivoitto riittää
+ * vääristämään sen. Siksi taso kutistetaan kevyesti ja jakauma raskaasti.
+ */
+export const LEAGUE_SPLIT_PRIOR_MATCHES = 40;
+
+/**
  * Sarjan maalikeskiarvot kutistettuna prioriin otoskoon mukaan.
  *
- *   ka = (mitatut_maalit + priori × K) / (ottelut + K)
+ * Kutistus tehdään KAHDESSA OSASSA, koska osat vakiintuvat eri tahtiin:
+ *
+ *   1. Taso   — maalia per ottelu yhteensä, kevyt kutistus (K = 10)
+ *        T = (mitatut_maalit + priorin_summa × K) / (ottelut + K)
+ *
+ *   2. Jakauma — kotijoukkueiden osuus maaleista, raskas kutistus (K = 40)
+ *        S = (kotimaalit + priorin_kotimaalit × K2) / (maalit + priorin_summa × K2)
+ *
+ *   koti = T × S,  vieras = T × (1 − S)
  *
  * Palauttaa aina positiiviset keskiarvot, joten λ ei voi mennä nollaan
  * vaikka sarjassa ei olisi tehty yhtään maalia.
@@ -68,16 +94,29 @@ export function shrinkLeagueAverages(
   awayGoals: number,
   awayMatches: number,
   prior: LeagueAverages = DEFAULT_LEAGUE,
-  k: number = LEAGUE_AVG_PRIOR_MATCHES
+  k: number = LEAGUE_AVG_PRIOR_MATCHES,
+  splitK: number = LEAGUE_SPLIT_PRIOR_MATCHES
 ): LeagueAverages {
-  const shrink = (goals: number, matches: number, priorMean: number) => {
-    const g = Number.isFinite(goals) && goals >= 0 ? goals : 0;
-    const n = Number.isFinite(matches) && matches > 0 ? matches : 0;
-    return (g + priorMean * k) / (n + k);
-  };
+  const safe = (x: number) => (Number.isFinite(x) && x >= 0 ? x : 0);
+
+  const gh = safe(homeGoals);
+  const ga = safe(awayGoals);
+  const goals = gh + ga;
+  // Koti- ja vierasotteluita on määritelmällisesti yhtä monta; otetaan suurempi
+  // siltä varalta että lähde antaa vajaan taulukon toiselle puolelle.
+  const matches = Math.max(safe(homeMatches), safe(awayMatches));
+
+  const priorTotal = prior.homeGoals + prior.awayGoals;
+
+  // 1. Taso: maalia per ottelu yhteensä
+  const total = (goals + priorTotal * k) / (matches + k);
+
+  // 2. Jakauma: kotijoukkueiden osuus maaleista
+  const homeShare = (gh + prior.homeGoals * splitK) / (goals + priorTotal * splitK);
+
   return {
-    homeGoals: shrink(homeGoals, homeMatches, prior.homeGoals),
-    awayGoals: shrink(awayGoals, awayMatches, prior.awayGoals),
+    homeGoals: total * homeShare,
+    awayGoals: total * (1 - homeShare),
   };
 }
 

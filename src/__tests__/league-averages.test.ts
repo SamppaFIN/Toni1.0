@@ -27,12 +27,49 @@ describe('shrinkLeagueAverages', () => {
 
   it('pieni otos pysyy lähellä prioria', () => {
     const avg = shrinkLeagueAverages(3, 1, 0, 1);
-    expect(avg.homeGoals).toBeCloseTo((3 + 1.5 * 10) / 11, 5);
-    expect(avg.awayGoals).toBeCloseTo((0 + 1.2 * 10) / 11, 5);
     // Olennaista ei ole tarkka luku vaan se, että yhden ottelun otos jää
     // realistiselle alueelle eikä romahda nollaan niin kuin tuotannossa kävi.
     expect(avg.awayGoals).toBeGreaterThan(0.9);
     expect(avg.awayGoals).toBeLessThan(DEFAULT_LEAGUE.awayGoals);
+    expect(avg.homeGoals).toBeGreaterThan(1.2);
+    expect(avg.homeGoals).toBeLessThan(2.0);
+  });
+
+  it('REGRESSIO: koti/vieras-suhde ei karkaa pienellä otoksella', () => {
+    const priorRatio = DEFAULT_LEAGUE.homeGoals / DEFAULT_LEAGUE.awayGoals;
+
+    // Aito tuotantotilanne 22.8.2026 illalla: 6 ottelua, koti 12 maalia, vieras 4.
+    // Vanha kaava antoi suhteeksi 1.67 (kotietu +34 %) ja liputti 4/5 kohteesta
+    // kotivoiton puolelle.
+    const avg = shrinkLeagueAverages(12, 6, 4, 6);
+    const ratio = avg.homeGoals / avg.awayGoals;
+
+    expect(ratio).toBeGreaterThan(priorRatio); // dataa saa kuunnella
+    expect(ratio).toBeLessThan(1.5); // muttei tuolla tavalla
+  });
+
+  it('jakauma kutistuu raskaammin kuin taso', () => {
+    // Sama kokonaismaalimäärä, eri jakauma: taso seuraa dataa, suhde ei juuri liiku
+    const tasainen = shrinkLeagueAverages(8, 6, 8, 6);
+    const vino = shrinkLeagueAverages(14, 6, 2, 6);
+
+    const totalA = tasainen.homeGoals + tasainen.awayGoals;
+    const totalB = vino.homeGoals + vino.awayGoals;
+    expect(totalA).toBeCloseTo(totalB, 6); // taso on sama, koska maaleja yhtä paljon
+
+    // Jakauma liikkuu, mutta jää selvästi lähemmäs prioria kuin mitattua (7.0)
+    const mitattuSuhde = 14 / 2;
+    const saatuSuhde = vino.homeGoals / vino.awayGoals;
+    expect(saatuSuhde).toBeLessThan(2);
+    expect(saatuSuhde).toBeLessThan(mitattuSuhde / 3);
+  });
+
+  it('ääritapaus jossa vieras teki enemmän ei käännä kotietua nurin', () => {
+    const avg = shrinkLeagueAverages(0, 5, 10, 5);
+    expect(avg.homeGoals).toBeGreaterThan(0.5);
+    expect(avg.awayGoals).toBeGreaterThan(0.5);
+    // Suhde saa laskea alle priorin muttei romahtaa
+    expect(avg.homeGoals / avg.awayGoals).toBeGreaterThan(0.8);
   });
 
   it('iso otos konvergoi mitattuun keskiarvoon', () => {

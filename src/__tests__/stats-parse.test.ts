@@ -164,10 +164,13 @@ describe('football-data.orgin sarjataulukon parsinta', () => {
     // Tiketti #48: luvut kutistetaan prioriin otoskoon mukaan, jotta yhden
     // ottelun otos ei tuota nollakeskiarvoa. 38 ottelulla mitattu data painaa
     // 79 % (K = 10), joten luku on lähellä mitattua muttei täsmälleen se.
-    expect(s.homeGoalsAvg).toBeCloseTo((84 + 1.5 * 10) / 48, 4);
-    expect(s.awayGoalsAvg).toBeCloseTo((64 + 1.2 * 10) / 48, 4);
+    // Kutistus tehdään kahdessa osassa (ks. shrinkLeagueAverages):
+    //   taso    T = (148 + 2.7×10) / (38+10)   = 3.6458
+    //   jakauma S = (84 + 1.5×40) / (148+2.7×40) = 0.5625
+    expect(s.homeGoalsAvg).toBeCloseTo(3.6458333 * 0.5625, 4);
+    expect(s.awayGoalsAvg).toBeCloseTo(3.6458333 * 0.4375, 4);
     expect(s.homeGoalsAvg).toBeGreaterThan(s.awayGoalsAvg);
-    // Mitattu data dominoi: luku on selvästi lähempänä mitattua kuin prioria
+    // Mitattu data dominoi tasoa: luku on selvästi lähempänä mitattua kuin prioria
     expect(Math.abs(s.homeGoalsAvg - 84 / 38)).toBeLessThan(Math.abs(s.homeGoalsAvg - 1.5));
   });
 
