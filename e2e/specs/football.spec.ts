@@ -49,7 +49,15 @@ test.describe('Jalkapallonäkymä', () => {
     const bestCount = await best.count();
     expect(bestCount).toBeGreaterThanOrEqual(3);
     expect(bestCount % 3).toBe(0);
-    await expect(best.first()).toContainText('⭐');
+
+    // Paras hinta merkitään ⭐:llä VAIN jos siinä ei ole value-lippua — liputettu
+    // ruutu näyttää lippunsa (🟡/💎) tähden sijaan (tiketti #39: tähti = paras
+    // hinta, väri ja ikoni = ylikerroin). Testi ei siis saa olettaa että
+    // ensimmäinen paras ruutu on tähdellinen; se riippuu siitä mikä ottelu
+    // sattuu olemaan listan kärjessä.
+    const markers = await best.allTextContents();
+    const marked = markers.filter((t) => /⭐|💎|🟡/.test(t));
+    expect(marked.length, `paras kerroin ilman merkintää: ${markers.join(' | ')}`).toBe(markers.length);
   });
 
   test('paras kerroin on rivinsä korkein näytetty arvo tai voittaa komission jälkeen', async ({ page }) => {

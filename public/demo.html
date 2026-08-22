@@ -369,7 +369,37 @@ const HOCKEY_DATA_VERSION_KEY='bt_hockey_data_version';
 const DEFAULT_BOOKMAKERS=[{name:'bet365',url:'https://www.bet365.com'},{name:'Pinnacle',url:'https://www.pinnacle.com'},{name:'Unibet',url:'https://www.unibet.com'},{name:'Betsson',url:'https://www.betsson.com'},{name:'NordicBet',url:'https://www.nordicbet.com'},{name:'Veikkaus',url:'https://www.veikkaus.fi'}];
 let bookmakers=JSON.parse(localStorage.getItem('bt_bookmakers')||'null')||DEFAULT_BOOKMAKERS.map(b=>({...b}));
 
-function save(){localStorage.setItem('bt_bankroll',bankroll.toFixed(2));localStorage.setItem('bt_bets',JSON.stringify(bets));localStorage.setItem('bt_history',JSON.stringify(betHistory));localStorage.setItem('bt_simResults',JSON.stringify(simResults));localStorage.setItem('bt_pressure',pressureTeam);localStorage.setItem('bt_ratings',JSON.stringify(ratings))}
+// Tiketti #52: tallennuksen järjestys ja virheenkäsittely.
+//
+// Aiemmin tämä oli yksi ketju ilman try/catchia, ja kassa kirjoitettiin ENNEN
+// vetoja. Jos jokin setItem heitti kesken (localStorage täynnä, privaatti-
+// ikkuna, selaimen tallennusesto), lopputulos oli pahin mahdollinen: kassasta
+// oli vähennetty mutta vetoa ei ollut tallennettu. Raha meni, lappu katosi,
+// eikä käyttäjälle kerrottu mitään.
+//
+// Kaksi muutosta:
+//  1. JÄRJESTYS — kriittisin ensin. Jos tallennus katkeaa, halutaan mieluummin
+//     että veto on tallessa ja kassa liian suuri (korjattavissa) kuin että
+//     raha on mennyt ilman vetoa (ei korjattavissa). simResults on viimeisenä,
+//     koska se on ylivoimaisesti suurin ja vähiten kriittinen.
+//  2. VIRHE KERROTAAN — hiljainen epäonnistuminen on se mikä teki tästä
+//     vaarallisen. Nyt käyttäjä näkee heti ettei tila tallentunut.
+function save(){
+  const steps=[
+    ['bt_bets',()=>JSON.stringify(bets)],
+    ['bt_bankroll',()=>bankroll.toFixed(2)],
+    ['bt_history',()=>JSON.stringify(betHistory)],
+    ['bt_pressure',()=>pressureTeam],
+    ['bt_ratings',()=>JSON.stringify(ratings)],
+    ['bt_simResults',()=>JSON.stringify(simResults)],
+  ];
+  let failed=null;
+  for(const [key,value] of steps){
+    try{localStorage.setItem(key,value())}
+    catch(err){if(!failed)failed=key}
+  }
+  if(failed)toast('⚠️ Tilaa ei voitu tallentaa ('+failed+') — selaimen tallennustila voi olla täynnä');
+}
 function updateBankroll(){const e=document.getElementById('bankroll-display');e.textContent=bankroll.toFixed(2)+' €';e.className='bankroll-amount '+(bankroll>=100?'positive':'negative')}
 const teamColors={'Tappara':'#005B9F','Ilves':'#006400','Kärpät':'#DEB906','HIFK':'#E31E26','TPS':'#000000','Lukko':'#003D7C','KalPa':'#FFCC00','Pelicans':'#00A9A5','HPK':'#E87722','Jukurit':'#B9975B','Sport':'#C41230','Ässät':'#D41B2C','SaiPa':'#FFD700','JYP':'#C8102E','KooKoo':'#000000'};
 const teamAbbr={'Tappara':'Ta','Ilves':'Il','Kärpät':'Kä','HIFK':'HF','TPS':'TP','Lukko':'Lu','KalPa':'Ka','Pelicans':'Pe','HPK':'HP','Jukurit':'Ju','Sport':'Sp','Ässät':'Äs','SaiPa':'Sa','JYP':'JY','KooKoo':'Ko'};

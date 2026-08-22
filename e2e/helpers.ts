@@ -63,6 +63,13 @@ export async function useFixtureSnapshot(page: Page): Promise<void> {
     m.kickoff = new Date(Date.now() + (i + 2) * 3600_000).toISOString();
   }
 
+  // Päiväsuodatin (tiketti #46) pois päältä fikstuuritesteille. Kickoffit
+  // asetetaan nyt-hetkestä eteenpäin tunnin välein, jolloin osa niistä valuu
+  // paikallisesti seuraavalle kalenteripäivälle riippuen siitä mihin aikaan
+  // testi ajetaan — ja suodatin piilottaisi ne. Nämä testit koskevat kortin
+  // SISÄLTÖÄ, eivät suodatinta, joten niiden ei pidä riippua kellonajasta.
+  await page.addInitScript(() => localStorage.setItem('bt_football_day_filter', 'all'));
+
   await page.route('**/data/today.json', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) })
   );
