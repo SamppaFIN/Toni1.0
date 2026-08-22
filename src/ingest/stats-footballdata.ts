@@ -11,6 +11,7 @@
 import { pathToFileURL } from 'node:url';
 import { config } from '../config.js';
 import { LeagueSeasonStats, TeamSeasonStats } from '../types-football.js';
+import { shrinkLeagueAverages, LEAGUE_AVG_PRIOR_MATCHES } from '../analyze/poisson.js';
 import { cached } from './cache.js';
 
 interface FdTeam {
@@ -111,14 +112,21 @@ export function parseStandings(data: FdStandingsResponse): LeagueSeasonStats {
 
   const hasSplits = homeMatches > 0 && awayMatches > 0;
 
+  // Kutistus prioriin otoskoon mukaan. Pelkkä "> 0" -portti ei riitä: kauden
+  // avauskierroksella yksi pelattu ottelu läpäisi sen ja tuotti awayGoalsAvg = 0,
+  // josta seurasi λ_vieras = 0 koko sarjaan. Ks. shrinkLeagueAverages().
+  const averages = shrinkLeagueAverages(homeGoals, homeMatches, awayGoals, awayMatches);
+
   return {
     league: COMPETITION_LABELS[data.competition.code] || data.competition.name,
     season: data.season.startDate.slice(0, 4),
     teams,
-    homeGoalsAvg: hasSplits ? homeGoals / homeMatches : 1.5,
-    awayGoalsAvg: hasSplits ? awayGoals / awayMatches : 1.2,
+    homeGoalsAvg: averages.homeGoals,
+    awayGoalsAvg: averages.awayGoals,
     source: 'football-data.org',
-    splitsEstimated: !hasSplits,
+    // Luku on "estimoitu" myös silloin kun priori yhä dominoi mitattua dataa —
+    // käyttäjälle näytetään sama varoitus kuin puuttuvista spliteistä.
+    splitsEstimated: !hasSplits || homeMatches + awayMatches < LEAGUE_AVG_PRIOR_MATCHES,
   };
 }
 

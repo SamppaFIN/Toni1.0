@@ -29,6 +29,58 @@ export interface TeamStrength {
 
 export const DEFAULT_LEAGUE: LeagueAverages = { homeGoals: 1.5, awayGoals: 1.2 };
 
+/**
+ * Kuinka monen ottelun painoarvo priorilla (DEFAULT_LEAGUE) on sarjan
+ * maalikeskiarvoja laskettaessa.
+ *
+ * MIKSI TÄMÄ ON OLEMASSA — todellinen tuotantovika 22.8.2026:
+ * Valioliigan avauskierroksella oli pelattu tasan yksi ottelu (Arsenal 3–0
+ * Coventry). Vierasjoukkueet olivat siis tehneet 0 maalia 1 ottelussa, joten
+ * mitattu awayGoalsAvg oli 0.00. Siitä seurasi λ_vieras = 0 KAIKKIIN yhdeksään
+ * Valioliigan otteluun: malli väitti että jokainen vierasjoukkue tekee nolla
+ * maalia varmuudella (btts = 0, vierasvoitto = 0), ja tuotti +292 %:n
+ * "edgejä" jotka olivat puhdasta laskentaroskaa.
+ *
+ * Vanha suoja `homeMatches > 0 && awayMatches > 0` esti vain nollalla jaon,
+ * ei mieletöntä otosta. Yksi ottelu läpäisi portin.
+ *
+ * Painoksi on valittu 10 ottelua tarkoituksellisen pieneksi: tehtävä on tehdä
+ * yhden ottelun otoksesta vaaraton, EI korvata mitattua dataa. Sarjat eroavat
+ * oikeasti toisistaan (Veikkausliiga ei ole Valioliiga), joten liian vahva
+ * globaali priori vääristäisi juuri sen eron jota malli tarvitsee.
+ *
+ * Vaikutus: 1 ottelu → priori kantaa (0 maalia → 1.09, ei 0.00). 38 ottelua →
+ * mitattu data painaa 79 %. Täysi kausi → priori on kohinaa.
+ */
+export const LEAGUE_AVG_PRIOR_MATCHES = 10;
+
+/**
+ * Sarjan maalikeskiarvot kutistettuna prioriin otoskoon mukaan.
+ *
+ *   ka = (mitatut_maalit + priori × K) / (ottelut + K)
+ *
+ * Palauttaa aina positiiviset keskiarvot, joten λ ei voi mennä nollaan
+ * vaikka sarjassa ei olisi tehty yhtään maalia.
+ */
+export function shrinkLeagueAverages(
+  homeGoals: number,
+  homeMatches: number,
+  awayGoals: number,
+  awayMatches: number,
+  prior: LeagueAverages = DEFAULT_LEAGUE,
+  k: number = LEAGUE_AVG_PRIOR_MATCHES
+): LeagueAverages {
+  const shrink = (goals: number, matches: number, priorMean: number) => {
+    const g = Number.isFinite(goals) && goals >= 0 ? goals : 0;
+    const n = Number.isFinite(matches) && matches > 0 ? matches : 0;
+    return (g + priorMean * k) / (n + k);
+  };
+  return {
+    homeGoals: shrink(homeGoals, homeMatches, prior.homeGoals),
+    awayGoals: shrink(awayGoals, awayMatches, prior.awayGoals),
+  };
+}
+
 /** Dixon–Coles-parametri. 0 = puhdas Poisson. Empiirisesti ~-0.03…-0.15. */
 export const DEFAULT_RHO = -0.05;
 

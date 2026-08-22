@@ -216,6 +216,18 @@ function buildCard(
   const league: LeagueAverages = { homeGoals: stats.current.homeGoalsAvg, awayGoals: stats.current.awayGoalsAvg };
   let poisson = predictPoisson(home.strength, away.strength, league, config.model.rho);
 
+  // Puolustus syvyydessä: λ = 0 tarkoittaa "tämä joukkue ei tee maalia
+  // varmuudella", mikä ei ole ennuste vaan laskentavirhe. Se tuottaa btts = 0
+  // ja toispuoleisen voiton todennäköisyydeksi 0, ja niistä syntyy valtavia
+  // valheellisia edgejä. Juurisyy on korjattu shrinkLeagueAverages():ssa,
+  // mutta jos λ silti päätyy kelvottomaksi, market-only on ainoa rehellinen tila.
+  if (!isUsableLambda(poisson.lambdaHome) || !isUsableLambda(poisson.lambdaAway)) {
+    console.warn(
+      `[Malli] ${e.home.name} vs ${e.away.name}: kelvoton λ (${poisson.lambdaHome} / ${poisson.lambdaAway}) — market-only`
+    );
+    return buildMatchCard({ ...base, poisson: null, stats: null });
+  }
+
   const matchStats: MatchStats = {
     home: toTeamStats(home.stats, true, elo),
     away: toTeamStats(away.stats, false, elo),
@@ -261,6 +273,16 @@ function buildCard(
     homeStrength: { attack: round(home.strength.attack, 2), defense: round(home.strength.defense, 2) },
     awayStrength: { attack: round(away.strength.attack, 2), defense: round(away.strength.defense, 2) },
   });
+}
+
+/**
+ * Kelvollinen λ. Alarajaksi 0.05 eikä 0, koska mielivaltaisen pieni λ on yhtä
+ * epäuskottava kuin nolla: 0.001 maalin odotusarvo väittää käytännössä samaa.
+ * Yläraja 8 suojaa vastakkaiselta virheeltä (rikkinäinen sarjataulukko → valtava
+ * keskiarvo), jonka jälkeen jokainen ottelu näyttäisi runsasmaaliselta.
+ */
+export function isUsableLambda(lambda: number): boolean {
+  return Number.isFinite(lambda) && lambda >= 0.05 && lambda <= 8;
 }
 
 function sumDeltas(adjustments: Array<{ side: 'home' | 'away'; delta: number }>, side: 'home' | 'away'): number {

@@ -160,10 +160,15 @@ describe('football-data.orgin sarjataulukon parsinta', () => {
   });
 
   it('laskee sarjan koti/vierasmaalikeskiarvot mitatuista taulukoista', () => {
-    // koti: (40+44)/(19+19) = 2.21, vieras: (31+33)/38 = 1.68
-    expect(s.homeGoalsAvg).toBeCloseTo(84 / 38, 4);
-    expect(s.awayGoalsAvg).toBeCloseTo(64 / 38, 4);
+    // Mitattu: koti (40+44)/(19+19) = 2.21, vieras (31+33)/38 = 1.68.
+    // Tiketti #48: luvut kutistetaan prioriin otoskoon mukaan, jotta yhden
+    // ottelun otos ei tuota nollakeskiarvoa. 38 ottelulla mitattu data painaa
+    // 79 % (K = 10), joten luku on lähellä mitattua muttei täsmälleen se.
+    expect(s.homeGoalsAvg).toBeCloseTo((84 + 1.5 * 10) / 48, 4);
+    expect(s.awayGoalsAvg).toBeCloseTo((64 + 1.2 * 10) / 48, 4);
     expect(s.homeGoalsAvg).toBeGreaterThan(s.awayGoalsAvg);
+    // Mitattu data dominoi: luku on selvästi lähempänä mitattua kuin prioria
+    expect(Math.abs(s.homeGoalsAvg - 84 / 38)).toBeLessThan(Math.abs(s.homeGoalsAvg - 1.5));
   });
 
   it('tiivistää formin muodosta "W,W,D" muotoon "WWD"', () => {
