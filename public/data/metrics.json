@@ -1,62 +1,62 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-22T08:35:02.897Z",
+  "generated_at": "2026-08-22T14:28:36.215Z",
   "sample": {
     "predictions": 21,
-    "results": 6,
-    "matched": 5,
+    "results": 9,
+    "matched": 8,
     "sufficient": false,
     "minimum": 20
   },
   "accuracy": {
     "model": {
-      "total": 5,
-      "correct": 4,
-      "rate": 0.8
+      "total": 8,
+      "correct": 6,
+      "rate": 0.75
     },
     "market": {
-      "total": 5,
-      "correct": 3,
-      "rate": 0.6
+      "total": 8,
+      "correct": 4,
+      "rate": 0.5
     }
   },
   "brier": {
-    "model": 0.574870486,
-    "market": 0.5979039039999999,
+    "model": 0.57396368625,
+    "market": 0.6193089237499999,
     "uniform": 0.6666666666666667
   },
   "logLoss": {
-    "model": 0.9781856053231021,
-    "market": 1.004231317819078
+    "model": 0.971769882416552,
+    "market": 1.0505186369278505
   },
   "calibration": [
     {
       "from": 0,
       "to": 0.2,
-      "predicted": 0.152,
-      "observed": 0.25,
-      "count": 4
+      "predicted": 0.14225,
+      "observed": 0.16666666666666666,
+      "count": 6
     },
     {
       "from": 0.2,
       "to": 0.4,
-      "predicted": 0.30675714285714284,
-      "observed": 0.14285714285714285,
-      "count": 7
+      "predicted": 0.2974583333333333,
+      "observed": 0.25,
+      "count": 12
     },
     {
       "from": 0.4,
       "to": 0.6000000000000001,
-      "predicted": 0.42635,
-      "observed": 1,
-      "count": 2
+      "predicted": 0.4768333333333333,
+      "observed": 0.6666666666666666,
+      "count": 3
     },
     {
       "from": 0.6000000000000001,
       "to": 0.8,
-      "predicted": 0.6959500000000001,
-      "observed": 0.5,
-      "count": 2
+      "predicted": 0.7154666666666666,
+      "observed": 0.6666666666666666,
+      "count": 3
     },
     {
       "from": 0.8,
@@ -68,9 +68,9 @@
   ],
   "clv": {
     "summary": {
-      "count": 10,
-      "average": 0.06961197000000002,
-      "beatRate": 0.6
+      "count": 11,
+      "average": 0.06810097272727272,
+      "beatRate": 0.6363636363636364
     },
     "picks": [
       {
@@ -119,22 +119,22 @@
         "matchId": "soccer_epl:2026-08-22:BRE-TOT",
         "side": "home",
         "oddsTaken": 2.53,
-        "fairClosingOdds": 2.1404109589041096,
-        "clv": 0.18201599999999996
+        "fairClosingOdds": 2.205558006175562,
+        "clv": 0.14710200000000007
       },
       {
         "matchId": "soccer_epl:2026-08-23:MAN-BOU",
         "side": "away",
         "oddsTaken": 6.75,
-        "fairClosingOdds": 6.12369871402327,
-        "clv": 0.10227500000000012
+        "fairClosingOdds": 5.924170616113744,
+        "clv": 0.13939999999999997
       },
       {
         "matchId": "soccer_finland_veikkausliiga:2026-08-23:TPS-INT",
         "side": "draw",
         "oddsTaken": 3.9,
-        "fairClosingOdds": 3.757985719654265,
-        "clv": 0.03778999999999999
+        "fairClosingOdds": 3.7230081906180192,
+        "clv": 0.047539999999999916
       },
       {
         "matchId": "soccer_epl:2026-08-23:NEW-LIV",
@@ -142,129 +142,136 @@
         "oddsTaken": 3.955,
         "fairClosingOdds": 4.0273862263391065,
         "clv": -0.017973500000000087
+      },
+      {
+        "matchId": "soccer_epl:2026-08-24:FUL-CHE",
+        "side": "home",
+        "oddsTaken": 4.3,
+        "fairClosingOdds": 4.130524576621231,
+        "clv": 0.0410299999999999
       }
     ]
   },
   "paperRoi": {
-    "bets": 0,
-    "staked": 0,
-    "returned": 0,
-    "profit": 0,
-    "roi": 0,
-    "wins": 0,
-    "hitRate": 0
+    "bets": 5,
+    "staked": 5,
+    "returned": 9.668,
+    "profit": 4.667999999999999,
+    "roi": 0.9335999999999999,
+    "wins": 1,
+    "hitRate": 0.2
   },
   "blendCalibration": {
     "best": {
       "weight": 1,
-      "brier": 0.5366779610363228,
-      "logLoss": 0.9370624387537184
+      "brier": 0.5092228063623829,
+      "logLoss": 0.8888142288886929
     },
     "candidates": [
       {
         "weight": 0,
-        "brier": 0.5978900114560656,
-        "logLoss": 1.0042313158190779
+        "brier": 0.6192969482638282,
+        "logLoss": 1.0505061350528087
       },
       {
         "weight": 0.05,
-        "brier": 0.5944980943394027,
-        "logLoss": 1.000335241703843
+        "brier": 0.6123721433417121,
+        "logLoss": 1.036393369553687
       },
       {
         "weight": 0.1,
-        "brier": 0.5911410524433373,
-        "logLoss": 0.9964984259672123
+        "brier": 0.6055969503216788,
+        "logLoss": 1.023498127272207
       },
       {
         "weight": 0.15,
-        "brier": 0.5878188857678693,
-        "logLoss": 0.9927203119670718
+        "brier": 0.598971365427059,
+        "logLoss": 1.0116238900786614
       },
       {
         "weight": 0.2,
-        "brier": 0.5845315943129987,
-        "logLoss": 0.9890003710495927
+        "brier": 0.5924953848812955,
+        "logLoss": 1.0006200287265912
       },
       {
         "weight": 0.25,
-        "brier": 0.5812791780787256,
-        "logLoss": 0.985338101954144
+        "brier": 0.586169004907945,
+        "logLoss": 0.9903685548534955
       },
       {
         "weight": 0.3,
-        "brier": 0.5780616370650501,
-        "logLoss": 0.981733030264943
+        "brier": 0.5799922217306777,
+        "logLoss": 0.9807753363079524
       },
       {
         "weight": 0.35,
-        "brier": 0.5748789712719719,
-        "logLoss": 0.9781847079078588
+        "brier": 0.5739650315732765,
+        "logLoss": 0.9717640847492558
       },
       {
         "weight": 0.4,
-        "brier": 0.571731180699491,
-        "logLoss": 0.9746927126909506
+        "brier": 0.5680874306596378,
+        "logLoss": 0.963272127766639
       },
       {
         "weight": 0.45,
-        "brier": 0.5686182653476077,
-        "logLoss": 0.9712566478874729
+        "brier": 0.5623594152137716,
+        "logLoss": 0.9552473654476527
       },
       {
         "weight": 0.5,
-        "brier": 0.5655402252163219,
-        "logLoss": 0.9678761418602413
+        "brier": 0.5567809814598009,
+        "logLoss": 0.9476460343043676
       },
       {
         "weight": 0.55,
-        "brier": 0.5624970603056334,
-        "logLoss": 0.964550847726381
+        "brier": 0.5513521256219618,
+        "logLoss": 0.9404310345070963
       },
       {
         "weight": 0.6,
-        "brier": 0.5594887706155425,
-        "logLoss": 0.9612804430616325
+        "brier": 0.5460728439246039,
+        "logLoss": 0.9335706583376502
       },
       {
         "weight": 0.65,
-        "brier": 0.556515356146049,
-        "logLoss": 0.9580646296435142
+        "brier": 0.5409431325921901,
+        "logLoss": 0.9270376097132222
       },
       {
         "weight": 0.7,
-        "brier": 0.5535768168971529,
-        "logLoss": 0.9549031332327822
+        "brier": 0.5359629878492962,
+        "logLoss": 0.9208082383804257
       },
       {
         "weight": 0.75,
-        "brier": 0.5506731528688542,
-        "logLoss": 0.9517957033927511
+        "brier": 0.5311324059206117,
+        "logLoss": 0.91486193480453
       },
       {
         "weight": 0.8,
-        "brier": 0.5478043640611531,
-        "logLoss": 0.948742113346172
+        "brier": 0.5264513830309392,
+        "logLoss": 0.9091806469839246
       },
       {
         "weight": 0.85,
-        "brier": 0.5449704504740492,
-        "logLoss": 0.9457421598694846
+        "brier": 0.5219199154051943,
+        "logLoss": 0.9037484909189463
       },
       {
         "weight": 0.9,
-        "brier": 0.542171412107543,
-        "logLoss": 0.942795663224399
+        "brier": 0.5175379992684064,
+        "logLoss": 0.8985514338351518
       },
       {
         "weight": 0.95,
-        "brier": 0.5394072489616341,
-        "logLoss": 0.9399024671268764
+        "brier": 0.5133056308457173,
+        "logLoss": 0.8935770345149423
       },
       {
         "weight": 1,
-        "brier": 0.5366779610363228,
-        "logLoss": 0.9370624387537184
+        "brier": 0.5092228063623829,
+        "logLoss": 0.8888142288886929
       }
     ],
     "sufficientSample": false
