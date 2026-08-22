@@ -1,0 +1,67 @@
+# Tiketti #50: Julkaise UI Pagesiin jokaisella pushilla
+#
+# MIKSI TÄMÄ ON OLEMASSA: aiemmin GitHub Pages päivittyi VAIN cron-ajossa
+# (football-snapshot.yml, 08:00/14:00 UTC). Push mainiin ei julkaissut mitään,
+# joten tuotannon käyttöliittymä oli säännöllisesti useita committeja jäljessä
+# koodista — ja korjaus jota testattiin paikallisesti ei näkynyt livenä ennen
+# seuraavaa croniä. Tämä on kirjattu claude.md:n gotchana; nyt se on korjattu.
+#
+# TYÖNJAKO:
+#   football-snapshot.yml — hakee DATAN (kertoimet, tilastot) ja deployaa
+#   pages-deploy.yml      — deployaa KOODIN heti kun se muuttuu
+#
+# Molemmat kirjoittavat gh-pages-haaraan, joten ne jakavat concurrency-ryhmän.
+# Ilman sitä kaksi yhtäaikaista pushia samaan haaraan konfliktoisi ja toinen
+# hukkaisi työnsä.
+
+name: Julkaise Pagesiin
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/**'
+      - '.github/workflows/pages-deploy.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # --ignore-scripts ohittaa playwrightin selainlatauksen (~130 MB).
+      # Portti on yksikkötestit; E2E ajetaan paikallisesti ennen pushia.
+      - name: Asenna riippuvuudet
+        run: npm ci --ignore-scripts
+
+      # Portti julkaisun eteen: rikkinäinen laskenta ei saa päätyä liveen.
+      # Vain yksikkötestit + typecheck — ne ovat nopeita (~5 s) ja kattavat
+      # sen mitä tässä oikeasti suojataan eli mallin matematiikan.
+      - name: Aja testit
+        run: npm test
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Deployaa GitHub Pagesiin
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
+          enable_jekyll: false
+          force_orphan: false
+          commit_message: 'Deploy: ${{ github.event.head_commit.message }}'

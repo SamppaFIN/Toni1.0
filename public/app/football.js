@@ -231,11 +231,11 @@ export async function start(containerId = 'round-games') {
 // joten kontti on jo DOM:ssa. Lajilippu luetaan suoraan localStoragesta,
 // jolloin moduuli ei riipu inline-skriptin latausjärjestyksestä.
 //
-// Oletus on 'hockey' — sama päätös kuin demo.html:n SPORT-lipussa, ei
-// tarkoituksellisesti eriävä. Football-moduuli ei siis itsekäynnisty
-// oletuksena, mutta pysyy täysin toimivana: Admin-välilehden setSport()
-// lataa koko sivun uudelleen lajia vaihdettaessa, jolloin tämä ehto
-// arvioidaan uudestaan tuoreella bt_sport-arvolla.
-if ((localStorage.getItem('bt_sport') || 'hockey') !== 'hockey') {
+// Oletus on 'football' — sama päätös kuin demo.html:n SPORT-lipussa.
+// PIDÄ NÄMÄ SYNKASSA: jos demo.html olettaa jalkapalloa mutta tämä jääkiekkoa,
+// moduuli ei käynnisty ja kierrosnäkymä jää tyhjäksi ilman virheilmoitusta.
+// Admin-välilehden setSport() lataa sivun uudelleen, jolloin ehto arvioidaan
+// uudestaan tuoreella bt_sport-arvolla.
+if ((localStorage.getItem('bt_sport') || 'football') !== 'hockey') {
   start();
 }

@@ -21,8 +21,10 @@ on:
 
 # Vain yksi ajo kerrallaan: kaksi rinnakkaista committia samaan haaraan
 # aiheuttaisi push-konfliktin ja toinen ajo hukkaisi datansa.
+# Jaettu ryhmä pages-deploy.yml:n kanssa: molemmat kirjoittavat gh-pages-haaraan,
+# ja kaksi yhtäaikaista pushia samaan haaraan konfliktoisi. Ryhmä sarjallistaa ne.
 concurrency:
-  group: football-snapshot
+  group: gh-pages
   cancel-in-progress: false
 
 jobs:

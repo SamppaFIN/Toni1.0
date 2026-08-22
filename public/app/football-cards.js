@@ -1127,9 +1127,16 @@ export function renderAllCards() {
   const practice = getDataSource() === 'mock';
   const mode = practice ? 'all' : getDayFilter();
   const { started, todayUpcoming, later } = partitionByDay(currentSnapshot.matches);
+
+  // Kun päivän ottelut on pelattu, tyhjä sivu on huonoin mahdollinen lopputulos:
+  // käyttäjä ei näe kohteita eikä syytä. Pudotaan silloin automaattisesti
+  // seuraaviin otteluihin ja kerrotaan miksi. Suodatin ei ole itsetarkoitus —
+  // sen tehtävä oli piilottaa alkaneet, ei jättää käyttäjää tyhjän eteen.
+  const fellBack = !practice && mode === 'today' && todayUpcoming.length === 0 && later.length > 0;
+
   const visible = practice
     ? currentSnapshot.matches
-    : mode === 'all'
+    : mode === 'all' || fellBack
       ? [...todayUpcoming, ...later]
       : todayUpcoming;
 
@@ -1146,7 +1153,10 @@ export function renderAllCards() {
 
   const notes = [];
   if (!practice && started.length) notes.push(`${started.length} alkanutta piilotettu`);
-  if (!practice && mode === 'today' && later.length) notes.push(`${later.length} myöhempää piilotettu`);
+  if (fellBack) notes.push('tämän päivän ottelut on pelattu — näytetään seuraavat');
+  else if (!practice && mode === 'today' && later.length) notes.push(`${later.length} myöhempää piilotettu`);
+
+  const label = practice || mode === 'all' || fellBack ? 'ottelua' : 'ottelua tänään';
 
   const toggle = practice
     ? ''
@@ -1154,7 +1164,7 @@ export function renderAllCards() {
 
   const summary = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px 2px">
     <span style="font-size:.65rem;color:var(--c-text-muted)">
-      <b style="color:var(--c-text)">${visible.length}</b> ${!practice && mode === 'today' ? 'ottelua tänään' : 'ottelua'} ·
+      <b style="color:var(--c-text)">${visible.length}</b> ${label} ·
       ${flaggedCount ? `<b style="color:var(--c-success)">${flaggedCount} value-kohdetta</b>` : 'ei value-kohteita — markkina on tiukka'}
       ${notes.length ? `<br><span style="font-size:.58rem">${notes.join(' · ')}</span>` : ''}
     </span>
@@ -1162,11 +1172,17 @@ export function renderAllCards() {
   </div>`;
 
   if (!visible.length) {
+    // Tänne päädytään vain kun aikaikkunassa ei ole yhtään pelaamatonta ottelua
+    const allStarted = started.length > 0;
     container.innerHTML =
       roundNav() +
       sourceBanner(currentSnapshot) +
       summary +
-      `<div class="empty">${mode === 'today' ? 'Ei enää tämän päivän otteluita — katso myöhemmät "Näytä kaikki" -napista.' : 'Ei otteluita aikaikkunassa.'}</div>`;
+      `<div class="empty">${
+        allStarted
+          ? 'Kaikki aikaikkunan ottelut ovat alkaneet. Aja putki uudelleen tuoreille kohteille.'
+          : 'Ei otteluita aikaikkunassa.'
+      }</div>`;
     return;
   }
 

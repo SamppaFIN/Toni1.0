@@ -20,9 +20,27 @@ test.describe('Ottelulistan päiväsuodatin', () => {
   });
 
   test('oletuksena rajaa tähän päivään ja tarjoaa napin kaikkiin', async ({ page }) => {
-    const summary = page.locator('#round-games').first();
-    await expect(summary).toContainText('ottelua tänään', { timeout: 10000 });
-    await expect(page.locator('button:has-text("Näytä kaikki")')).toBeVisible();
+    await expect(page.locator('button:has-text("Näytä kaikki")')).toBeVisible({ timeout: 10000 });
+    // Joko tämän päivän ottelut näkyvät, tai ne on jo pelattu ja pudottiin
+    // seuraaviin — molemmat ovat oikeita, kumpi sattuu riippuu kellonajasta.
+    const text = (await page.locator('#round-games').textContent()) ?? '';
+    expect(/ottelua tänään|näytetään seuraavat/.test(text)).toBe(true);
+  });
+
+  test('EI KOSKAAN tyhjää listaa jos aikaikkunassa on pelaamattomia otteluita', async ({ page }) => {
+    await expect(page.locator('button:has-text("Näytä kaikki")')).toBeVisible({ timeout: 10000 });
+
+    const upcoming = await page.evaluate(() => {
+      const s = (window as any).BTF.getSnapshot();
+      return s.matches.filter((m: any) => Date.parse(m.kickoff) > Date.now()).length;
+    });
+    test.skip(upcoming === 0, 'Snapshotissa ei ole yhtään pelaamatonta ottelua');
+
+    // Oletustilassa (vain tänään) kortteja pitää näkyä, vaikka päivän ottelut
+    // olisi jo pelattu — silloin pudotaan automaattisesti seuraaviin.
+    await expect(page.locator('#round-games .card').first()).toBeVisible();
+    const cards = await page.locator('#round-games .card').count();
+    expect(cards).toBeGreaterThan(0);
   });
 
   test('napista saa kaikki ottelut näkyviin ja takaisin', async ({ page }) => {
