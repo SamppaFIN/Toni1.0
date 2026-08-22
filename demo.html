@@ -333,7 +333,11 @@ const API='/rest/v1';
 // kertoimet, eriytetyt lähtö-Elot) on nyt pääasiallinen kehityskohde, joten
 // oletus on jääkiekko. Jalkapallo pysyy täysin toimivana ja tavoitettavissa
 // Admin-välilehdeltä.
-let SPORT=localStorage.getItem('bt_sport')||'hockey';
+// Oletuslaji on jalkapallo: se on aktiivisessa kehityksessä oikealla datalla.
+// Jääkiekko on Admin-välilehden takana koskematta. PIDÄ TÄMÄ SYNKASSA
+// football.js:n itsekäynnistyksen kanssa — eriävä oletus jättäisi
+// jalkapallomoduulin lataamatta ja kierros näyttäisi tyhjältä.
+let SPORT=localStorage.getItem('bt_sport')||'football';
 function isHockey(){return SPORT==='hockey'}
 
 // Käyttöliittymäteema. 'system' = alkuperäinen tumma OKLCH-teema, koskematta.
