@@ -25,6 +25,106 @@ import {
   getMockRoundCount,
 } from './snapshot.js';
 import { isVisible } from './football-prefs.js';
+import * as calc from './football-calc.js';
+
+// ─── Päiväsuodatin (tiketti #46) ──────────────────────────────────────────
+//
+// Snapshotin aikaikkuna on 72 h, joten lista sisältää myös huomisen ja
+// ylihuomisen ottelut — ja cron-ajojen välissä myös jo alkaneita. Alkanut
+// ottelu on aktiivisesti haitallinen kortilla: sen kerroin on vanhentunut
+// eikä siihen voi enää lyödä, mutta se näyttää samalta kuin pelattava kohde.
+//
+// Oletus on siis "vain tänään, ei alkaneita". Myöhemmät ottelut eivät katoa
+// — ne ovat toggle-napin takana, koska niiden analyysi on täysin validi,
+// vain ajankohta on eri.
+
+const DAY_FILTER_KEY = 'bt_football_day_filter';
+
+export function getDayFilter() {
+  try {
+    return localStorage.getItem(DAY_FILTER_KEY) === 'all' ? 'all' : 'today';
+  } catch {
+    return 'today';
+  }
+}
+
+export function setDayFilter(mode) {
+  try {
+    localStorage.setItem(DAY_FILTER_KEY, mode === 'all' ? 'all' : 'today');
+  } catch {
+    /* privaatti-ikkuna: suodatin toimii silti istunnon ajan */
+  }
+  renderAllCards();
+}
+
+/** Paikallinen kalenteripäivä — kortti näyttää kellonajat paikallisessa ajassa, joten myös päivä on paikallinen */
+function localDayKey(value) {
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** Jaa ottelut kolmeen: jo alkaneet, tänään pelattavat, myöhemmät */
+export function partitionByDay(matches, now = new Date()) {
+  const today = localDayKey(now);
+  const started = [];
+  const todayUpcoming = [];
+  const later = [];
+  for (const m of matches) {
+    const t = Date.parse(m.kickoff);
+    if (Number.isFinite(t) && t < now.getTime()) started.push(m);
+    else if (localDayKey(m.kickoff) === today) todayUpcoming.push(m);
+    else later.push(m);
+  }
+  return { started, todayUpcoming, later };
+}
+
+// ─── Toimistolinkit (tiketti #47) ─────────────────────────────────────────
+//
+// The Odds APIn ilmaistaso EI palauta ottelukohtaisia syvälinkkejä
+// (`includeLinks` on maksullisten pakettien ominaisuus), joten linkki vie
+// toimiston jalkapallosivulle eikä suoraan tähän otteluun. Se sanotaan
+// käyttäjälle vihjetekstissä — väärin luvattu syvälinkki olisi pahempi kuin
+// rehellinen etusivulinkki.
+//
+// Jos API joskus alkaa palauttaa `link`-kentän, se käytetään automaattisesti:
+// rivikohtainen linkki voittaa aina tämän kartan.
+
+const BOOKMAKER_SITES = {
+  pinnacle: 'https://www.pinnacle.com/en/soccer/matchups/',
+  onexbet: 'https://1xbet.com/en/line/football/',
+  betfair_ex_eu: 'https://www.betfair.com/exchange/plus/football',
+  marathonbet: 'https://www.marathonbet.com/en/betting/Football/',
+  williamhill: 'https://sports.williamhill.com/betting/en-gb/football',
+  unibet_se: 'https://www.unibet.se/betting/sports/filter/football',
+  unibet_eu: 'https://www.unibet.com/betting/sports/filter/football',
+  coolbet: 'https://www.coolbet.com/en/sports/football',
+  nordicbet: 'https://www.nordicbet.com/en/sportsbook/football',
+  betsson: 'https://www.betsson.com/en/sportsbook/football',
+  matchbook: 'https://www.matchbook.com/exchange/sports/soccer',
+};
+
+/** Rivikohtainen linkki jos API antoi sen, muuten toimiston jalkapallosivu, muuten null */
+export function bookmakerUrl(row) {
+  if (row?.link && /^https:\/\//i.test(row.link)) return row.link;
+  return BOOKMAKER_SITES[row?.key] ?? null;
+}
+
+/**
+ * Toimiston nimi linkkinä. rel="noopener noreferrer" on pakollinen:
+ * target="_blank" ilman sitä antaisi kohdesivulle pääsyn window.openeriin.
+ */
+function bookmakerLabel(row) {
+  const url = bookmakerUrl(row);
+  const deep = Boolean(row?.link);
+  const tip = url
+    ? `${row.bookmaker} — avaa ${deep ? 'tämän ottelun sivun' : 'toimiston jalkapallosivun'} uuteen välilehteen`
+    : row.bookmaker;
+
+  if (!url) return `<span class="bk-name" title="${esc(tip)}">${esc(row.bookmaker)}</span>`;
+
+  return `<a class="bk-name bk-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="${esc(tip)}" onclick="event.stopPropagation()">${esc(row.bookmaker)}${deep ? ' ↗' : ''}</a>`;
+}
 
 /** Joukkueen logo värillisenä ympyränä — sama tyyli kuin jääkiekkopuolella */
 function teamLogo(team, size = 26) {
@@ -66,13 +166,13 @@ function oddsTable(match, index) {
         const icon = edge && edge.flag !== 'none' ? ` ${FLAG_META[edge.flag].icon}` : isBest ? ' ⭐' : '';
         return `<button class="bk-odds${isBest ? ' best' : ''}${valueClass}" onclick="event.stopPropagation();window.BTF.openBetPopup('${esc(match.id)}','${side}',${value},'${esc(row.bookmaker)}')" title="${esc(row.bookmaker)} — ${SIDE_LABELS[side]} ${value.toFixed(2)}${isBest ? ' (paras hinta)' : ''}${commissionNote}${valueNote}">${value.toFixed(2)}${icon}</button>`;
       };
-      return `<div class="odds-row"><span class="bk-name" title="${esc(row.bookmaker)}">${esc(row.bookmaker)}</span>${cell('home')}${cell('draw')}${cell('away')}</div>`;
+      return `<div class="odds-row">${bookmakerLabel(row)}${cell('home')}${cell('draw')}${cell('away')}</div>`;
     })
     .join('');
 
   return `<div class="odds-list">${head}${rows}</div>
     <div style="font-size:.6rem;color:var(--c-text-muted);margin-top:4px;line-height:1.5">
-      👆 Klikkaa kerrointa asettaaksesi vedon<br>
+      👆 Klikkaa kerrointa asettaaksesi vedon · toimiston nimestä sen jalkapallosivulle (ei tähän otteluun — API ei anna syvälinkkiä)<br>
       ⭐ paras hinta komission jälkeen — <i>ei</i> tarkoita että veto kannattaa<br>
       🟡 edge yli 3 % · 💎 edge yli 5 % — vain nämä ovat ylikertoimia
     </div>
@@ -688,6 +788,122 @@ function calcSection(match) {
  * moduuli ei tuo football-llm.js:ää importilla — silta kulkee window.BTL:n
  * kautta, sama kapea rajapinta kuin muuallakin (window.BT / window.BTF).
  */
+// ─── Kerroinlaskuri (tiketti #49) ─────────────────────────────────────────
+//
+// Käyttäjä lisää omia tekijöitä ("avainhyökkääjä poissa −15 %"), jotka
+// siirtävät λ:aa ja siten koko ketjua: Poisson → blendi → edge → Kelly.
+//
+// Yksikkö on PROSENTTIMUUTOS λ:aan, ei maalimäärä eikä Elo-piste. Syy: se on
+// sama yksikkö jota mallin omat uutissäädöt käyttävät (adjustLambda), joten
+// käyttäjän tekijä ja mallin säätö ovat yhteismitallisia eivätkä kilpaile
+// eri asteikoilla.
+//
+// Snapshotin luku näytetään AINA säädetyn rinnalla. Näin käyttäjä näkee mitä
+// hänen oma arvionsa teki, eikä sekoita sitä mallin sanomaan.
+
+/** Rivi jossa alkuperäinen ja säädetty arvo rinnakkain */
+function beforeAfter(label, before, after, format = (v) => pct(v, 1)) {
+  const moved = Math.abs(after - before) > 0.0005;
+  return `<div style="display:grid;grid-template-columns:1fr auto auto auto;gap:6px;font-size:.65rem;padding:2px 0;align-items:center">
+    <span style="color:var(--c-text-muted)">${esc(label)}</span>
+    <span style="color:var(--c-text-muted)">${format(before)}</span>
+    <span style="color:var(--c-text-muted)">→</span>
+    <span style="font-weight:700;color:${moved ? 'var(--c-accent)' : 'var(--c-text)'}">${format(after)}</span>
+  </div>`;
+}
+
+function factorsSection(match, index) {
+  if (match.model.lambda_home === null || match.model.lambda_away === null) {
+    return `<div style="font-size:.7rem;color:var(--c-text-muted);padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
+      Tälle ottelulle ei ole maalimallia (<b>market-only</b>), joten λ:aa ei ole olemassa eikä sitä voi säätää.
+      Kerroinlaskuri vaatii tunnuslukulähteen sarjalle.
+    </div>`;
+  }
+
+  const factors = calc.factorsFor(match.id);
+  const bankroll = window.BT?.getBankroll?.() ?? 100;
+  const r = calc.recalculate(match, factors, bankroll);
+  if (!r) return '<div class="empty" style="font-size:.7rem">Laskenta ei onnistunut.</div>';
+
+  const list = factors.length
+    ? factors
+        .map(
+          (f) => `<div class="row" style="font-size:.66rem;padding:4px 0;border-bottom:1px dashed oklch(1 1 0/0.1)">
+        <span>${f.side === 'home' ? '🏠' : '✈️'} ${esc(f.label)}
+          <b style="color:${f.delta > 0 ? 'var(--c-success)' : 'var(--c-danger)'}">${f.delta > 0 ? '+' : ''}${(f.delta * 100).toFixed(0)} %</b>
+        </span>
+        <button class="btn btn-danger" style="font-size:.55rem;padding:2px 7px;min-height:24px;border-radius:12px" onclick="event.stopPropagation();window.BTF.removeFactor('${esc(match.id)}',${f.id})">✕</button>
+      </div>`
+        )
+        .join('')
+    : '<div style="font-size:.64rem;color:var(--c-text-muted);padding:4px 0">Ei omia tekijöitä — luvut ovat mallin omat.</div>';
+
+  const edgeRows = r.edges
+    .map((e) => {
+      const label = e.side === 'home' ? match.home.short : e.side === 'away' ? match.away.short : 'Tasapeli';
+      const color = e.edge > 0.05 ? 'var(--c-success)' : e.edge > 0.03 ? 'var(--c-warning)' : e.edge > 0 ? 'var(--c-text-muted)' : 'var(--c-danger)';
+      const moved = Math.abs(e.edge - e.base_edge) > 0.0005;
+      return `<div style="display:grid;grid-template-columns:auto 1fr auto auto;gap:6px;font-size:.65rem;padding:3px 0;align-items:center">
+        <span style="font-weight:700;width:14px">${SIDE_LABELS[e.side]}</span>
+        <span style="color:var(--c-text-muted)">${esc(label)} @ ${num(e.odds)}</span>
+        <span style="color:var(--c-text-muted)">${(e.base_edge * 100).toFixed(1)} % →</span>
+        <span style="font-weight:700;color:${color}">${e.edge > 0 ? '+' : ''}${(e.edge * 100).toFixed(1)} %${moved ? '' : ''}</span>
+      </div>
+      ${e.stake_suggestion > 0 || e.base_stake > 0
+        ? `<div style="font-size:.6rem;color:var(--c-text-muted);padding-left:20px;margin-bottom:2px">panos ${e.base_stake.toFixed(2)} € → <b style="color:${e.stake_suggestion > 0 ? 'var(--c-success)' : 'var(--c-text-muted)'}">${e.stake_suggestion.toFixed(2)} €</b></div>`
+        : ''}`;
+    })
+    .join('');
+
+  return `<div style="padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
+    <div style="font-size:.68rem;font-weight:700;margin-bottom:4px">🧮 Omat tekijät</div>
+    <div style="font-size:.62rem;color:var(--c-text-muted);line-height:1.5;margin-bottom:6px">
+      Tekijä siirtää odotettua maalimäärää prosentteina — sama yksikkö jota mallin omat uutissäädöt käyttävät.
+      Esim. <i>avainhyökkääjä poissa</i> → koti <b>−15 %</b>. Muutos vaikuttaa edgeen ja panossuositukseen.
+    </div>
+
+    ${list}
+
+    <div style="display:grid;grid-template-columns:1fr auto auto;gap:5px;margin-top:8px">
+      <input type="text" id="fac-label-${index}" placeholder="esim. avainhyökkääjä poissa" maxlength="40"
+        style="padding:6px;border-radius:4px;border:1px solid var(--c-text-muted);background:var(--c-bg);color:var(--c-text);font-size:.68rem">
+      <select id="fac-side-${index}" style="padding:6px;border-radius:4px;border:1px solid var(--c-text-muted);background:var(--c-bg);color:var(--c-text);font-size:.68rem">
+        <option value="home">🏠 ${esc(match.home.short)}</option>
+        <option value="away">✈️ ${esc(match.away.short)}</option>
+      </select>
+      <input type="number" id="fac-delta-${index}" value="-15" step="5" min="-90" max="200"
+        style="width:64px;padding:6px;border-radius:4px;border:1px solid var(--c-text-muted);background:var(--c-bg);color:var(--c-text);font-size:.68rem;text-align:center" title="Muutos prosentteina">
+    </div>
+    <div style="display:flex;gap:5px;margin-top:5px">
+      <button class="btn btn-primary" style="flex:1;font-size:.65rem;min-height:32px" onclick="event.stopPropagation();window.BTF.addFactor('${esc(match.id)}',${index})">➕ Lisää tekijä</button>
+      ${factors.length ? `<button class="btn" style="font-size:.65rem;min-height:32px;background:oklch(1 1 0/0.1);color:var(--c-text)" onclick="event.stopPropagation();window.BTF.clearFactors('${esc(match.id)}')">🔄 Nollaa</button>` : ''}
+    </div>
+
+    <div style="margin-top:10px;padding-top:6px;border-top:1px dashed oklch(1 1 0/0.12)">
+      <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:6px;font-size:.58rem;color:var(--c-text-muted);border-bottom:1px solid oklch(1 1 0/0.1);padding-bottom:2px">
+        <span></span><span>malli</span><span></span><span>säädetty</span>
+      </div>
+      ${beforeAfter(`λ ${match.home.short}`, match.model.lambda_home, r.lambdaHome, (v) => num(v, 2))}
+      ${beforeAfter(`λ ${match.away.short}`, match.model.lambda_away, r.lambdaAway, (v) => num(v, 2))}
+      ${beforeAfter('1 kotivoitto', match.model.probs.home, r.probs.home)}
+      ${beforeAfter('X tasapeli', match.model.probs.draw, r.probs.draw)}
+      ${beforeAfter('2 vierasvoitto', match.model.probs.away, r.probs.away)}
+      ${match.model.over25 !== null ? beforeAfter('Yli 2.5 maalia', match.model.over25, r.over25) : ''}
+      ${match.model.btts !== null ? beforeAfter('Molemmat maalin', match.model.btts, r.btts) : ''}
+    </div>
+
+    <div style="margin-top:8px;padding-top:6px;border-top:1px dashed oklch(1 1 0/0.12)">
+      <div style="font-size:.64rem;font-weight:700;margin-bottom:3px">Edge ja panos</div>
+      ${edgeRows}
+    </div>
+
+    <div style="font-size:.58rem;color:var(--c-text-muted);margin-top:7px;line-height:1.5">
+      Laskenta tehdään selaimessa samoilla kaavoilla kuin palvelimella (todennettu yksikkötesteillä).
+      Omat tekijät ovat <b>sinun arviosi</b>, eivät mallin — ne tallentuvat vain tähän selaimeen.
+    </div>
+  </div>`;
+}
+
 export function llmContainerId(match) {
   return `fllm-${match.id.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
 }
@@ -697,6 +913,7 @@ const SECTIONS = {
   news: { icon: '📰', label: 'Uutiset', render: newsSection },
   analysis: { icon: '💎', label: 'Analyysi', render: analysisSection },
   calc: { icon: '🔬', label: 'Laskenta', render: calcSection },
+  factors: { icon: '🧮', label: 'Kerroinlaskuri', render: factorsSection },
   llm: { icon: '🤖', label: 'Kysy LLM:ltä', render: (match) => `<div id="${llmContainerId(match)}"></div>` },
 };
 
@@ -707,6 +924,41 @@ export function toggleSection(index, key) {
   const current = openSections.get(index);
   openSections.set(index, current === key ? null : key);
   renderAllCards();
+}
+
+// ─── Kerroinlaskurin käsittelijät (tiketti #49) ───────────────────────────
+
+export function addFactorFromForm(matchId, index) {
+  const label = document.getElementById(`fac-label-${index}`)?.value.trim();
+  const side = document.getElementById(`fac-side-${index}`)?.value;
+  const percent = parseFloat(document.getElementById(`fac-delta-${index}`)?.value ?? '');
+
+  if (!label) {
+    window.BT?.toast?.('⚠️ Anna tekijälle nimi');
+    return;
+  }
+  if (!Number.isFinite(percent) || percent === 0) {
+    window.BT?.toast?.('⚠️ Anna muutos prosentteina (esim. −15)');
+    return;
+  }
+  // −90 % on käytännön alaraja: λ ei mene nollaan (adjustLambda lattioi 0.1),
+  // mutta sitä pienempi luku ei enää tarkoita mitään tulkittavaa.
+  const clamped = Math.max(-90, Math.min(200, percent));
+
+  calc.addFactor(matchId, { label, side: side === 'away' ? 'away' : 'home', delta: clamped / 100 });
+  renderAllCards();
+  window.BT?.toast?.(`🧮 ${label} ${clamped > 0 ? '+' : ''}${clamped} %`);
+}
+
+export function removeFactorById(matchId, factorId) {
+  calc.removeFactor(matchId, factorId);
+  renderAllCards();
+}
+
+export function clearFactorsFor(matchId) {
+  calc.clearFactors(matchId);
+  renderAllCards();
+  window.BT?.toast?.('🔄 Omat tekijät nollattu');
 }
 
 function sectionButtons(match, index) {
@@ -866,8 +1118,23 @@ export function renderAllCards() {
     return;
   }
 
+  // Päiväsuodatin ennen järjestystä: alkaneita ei näytetä koskaan, koska
+  // niiden kerroin on vanhentunut eikä vetoa voi enää lyödä.
+  //
+  // POIKKEUS harjoitustilassa: harjoituskierrosten ottelupäivät ovat kiinteitä
+  // eivätkä seuraa kalenteria, joten päiväsuodatin piilottaisi koko kierroksen.
+  // Siellä yksikkö on kierros, ei päivä.
+  const practice = getDataSource() === 'mock';
+  const mode = practice ? 'all' : getDayFilter();
+  const { started, todayUpcoming, later } = partitionByDay(currentSnapshot.matches);
+  const visible = practice
+    ? currentSnapshot.matches
+    : mode === 'all'
+      ? [...todayUpcoming, ...later]
+      : todayUpcoming;
+
   // Value-kohteet ensin, sitten aikajärjestyksessä — käyttäjä näkee löydöt heti
-  const ordered = [...currentSnapshot.matches].map((m, i) => ({ m, i })).sort((a, b) => {
+  const ordered = visible.map((m) => ({ m, i: currentSnapshot.matches.indexOf(m) })).sort((a, b) => {
     const ea = bestEdge(a.m)?.edge ?? -1;
     const eb = bestEdge(b.m)?.edge ?? -1;
     const flagged = (e) => (e > 0.03 ? 1 : 0);
@@ -875,10 +1142,33 @@ export function renderAllCards() {
     return Date.parse(a.m.kickoff) - Date.parse(b.m.kickoff);
   });
 
-  const flaggedCount = currentSnapshot.matches.filter((m) => (bestEdge(m)?.edge ?? 0) > 0.03).length;
-  const summary = `<div style="font-size:.65rem;color:var(--c-text-muted);margin:0 0 8px 2px">
-    ${currentSnapshot.matches.length} ottelua · ${flaggedCount ? `<b style="color:var(--c-success)">${flaggedCount} value-kohdetta</b>` : 'ei value-kohteita — markkina on tiukka'}
+  const flaggedCount = visible.filter((m) => (bestEdge(m)?.edge ?? 0) > 0.03).length;
+
+  const notes = [];
+  if (!practice && started.length) notes.push(`${started.length} alkanutta piilotettu`);
+  if (!practice && mode === 'today' && later.length) notes.push(`${later.length} myöhempää piilotettu`);
+
+  const toggle = practice
+    ? ''
+    : `<button class="btn" style="font-size:.6rem;padding:3px 9px;min-height:26px;border-radius:12px;background:oklch(1 1 0/0.08);color:var(--c-text)" onclick="window.BTF.setDayFilter('${mode === 'today' ? 'all' : 'today'}')">${mode === 'today' ? `📅 Näytä kaikki (${todayUpcoming.length + later.length})` : '📅 Vain tänään'}</button>`;
+
+  const summary = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px 2px">
+    <span style="font-size:.65rem;color:var(--c-text-muted)">
+      <b style="color:var(--c-text)">${visible.length}</b> ${!practice && mode === 'today' ? 'ottelua tänään' : 'ottelua'} ·
+      ${flaggedCount ? `<b style="color:var(--c-success)">${flaggedCount} value-kohdetta</b>` : 'ei value-kohteita — markkina on tiukka'}
+      ${notes.length ? `<br><span style="font-size:.58rem">${notes.join(' · ')}</span>` : ''}
+    </span>
+    ${toggle}
   </div>`;
+
+  if (!visible.length) {
+    container.innerHTML =
+      roundNav() +
+      sourceBanner(currentSnapshot) +
+      summary +
+      `<div class="empty">${mode === 'today' ? 'Ei enää tämän päivän otteluita — katso myöhemmät "Näytä kaikki" -napista.' : 'Ei otteluita aikaikkunassa.'}</div>`;
+    return;
+  }
 
   container.innerHTML = roundNav() + sourceBanner(currentSnapshot) + summary + ordered.map(({ m, i }) => matchCard(m, i)).join('');
   renderPlacedBets();
