@@ -19,7 +19,7 @@ import {
   setMockRound,
   getMockRoundCount,
 } from './snapshot.js';
-import { initCards, setSnapshot, renderAllCards, renderPlacedBets, toggleSection, findMatch, matchIndex, getSnapshot } from './football-cards.js';
+import { initCards, setSnapshot, renderAllCards, renderPlacedBets, toggleSection, findMatch, matchIndex, getSnapshot, setDayFilter, getDayFilter } from './football-cards.js';
 import * as tracker from './football-tracker.js';
 import * as metrics from './football-metrics.js';
 import { DISPLAY_OPTIONS, getPrefs, togglePref, resetPrefs } from './football-prefs.js';
@@ -186,6 +186,8 @@ window.BTF = {
   renderAllCards,
   renderPlacedBets,
   toggleSection,
+  setDayFilter,
+  getDayFilter,
   setStake,
   confirmBet,
   openBetPopup,

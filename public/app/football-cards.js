@@ -26,6 +26,105 @@ import {
 } from './snapshot.js';
 import { isVisible } from './football-prefs.js';
 
+// ─── Päiväsuodatin (tiketti #46) ──────────────────────────────────────────
+//
+// Snapshotin aikaikkuna on 72 h, joten lista sisältää myös huomisen ja
+// ylihuomisen ottelut — ja cron-ajojen välissä myös jo alkaneita. Alkanut
+// ottelu on aktiivisesti haitallinen kortilla: sen kerroin on vanhentunut
+// eikä siihen voi enää lyödä, mutta se näyttää samalta kuin pelattava kohde.
+//
+// Oletus on siis "vain tänään, ei alkaneita". Myöhemmät ottelut eivät katoa
+// — ne ovat toggle-napin takana, koska niiden analyysi on täysin validi,
+// vain ajankohta on eri.
+
+const DAY_FILTER_KEY = 'bt_football_day_filter';
+
+export function getDayFilter() {
+  try {
+    return localStorage.getItem(DAY_FILTER_KEY) === 'all' ? 'all' : 'today';
+  } catch {
+    return 'today';
+  }
+}
+
+export function setDayFilter(mode) {
+  try {
+    localStorage.setItem(DAY_FILTER_KEY, mode === 'all' ? 'all' : 'today');
+  } catch {
+    /* privaatti-ikkuna: suodatin toimii silti istunnon ajan */
+  }
+  renderAllCards();
+}
+
+/** Paikallinen kalenteripäivä — kortti näyttää kellonajat paikallisessa ajassa, joten myös päivä on paikallinen */
+function localDayKey(value) {
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** Jaa ottelut kolmeen: jo alkaneet, tänään pelattavat, myöhemmät */
+export function partitionByDay(matches, now = new Date()) {
+  const today = localDayKey(now);
+  const started = [];
+  const todayUpcoming = [];
+  const later = [];
+  for (const m of matches) {
+    const t = Date.parse(m.kickoff);
+    if (Number.isFinite(t) && t < now.getTime()) started.push(m);
+    else if (localDayKey(m.kickoff) === today) todayUpcoming.push(m);
+    else later.push(m);
+  }
+  return { started, todayUpcoming, later };
+}
+
+// ─── Toimistolinkit (tiketti #47) ─────────────────────────────────────────
+//
+// The Odds APIn ilmaistaso EI palauta ottelukohtaisia syvälinkkejä
+// (`includeLinks` on maksullisten pakettien ominaisuus), joten linkki vie
+// toimiston jalkapallosivulle eikä suoraan tähän otteluun. Se sanotaan
+// käyttäjälle vihjetekstissä — väärin luvattu syvälinkki olisi pahempi kuin
+// rehellinen etusivulinkki.
+//
+// Jos API joskus alkaa palauttaa `link`-kentän, se käytetään automaattisesti:
+// rivikohtainen linkki voittaa aina tämän kartan.
+
+const BOOKMAKER_SITES = {
+  pinnacle: 'https://www.pinnacle.com/en/soccer/matchups/',
+  onexbet: 'https://1xbet.com/en/line/football/',
+  betfair_ex_eu: 'https://www.betfair.com/exchange/plus/football',
+  marathonbet: 'https://www.marathonbet.com/en/betting/Football/',
+  williamhill: 'https://sports.williamhill.com/betting/en-gb/football',
+  unibet_se: 'https://www.unibet.se/betting/sports/filter/football',
+  unibet_eu: 'https://www.unibet.com/betting/sports/filter/football',
+  coolbet: 'https://www.coolbet.com/en/sports/football',
+  nordicbet: 'https://www.nordicbet.com/en/sportsbook/football',
+  betsson: 'https://www.betsson.com/en/sportsbook/football',
+  matchbook: 'https://www.matchbook.com/exchange/sports/soccer',
+};
+
+/** Rivikohtainen linkki jos API antoi sen, muuten toimiston jalkapallosivu, muuten null */
+export function bookmakerUrl(row) {
+  if (row?.link && /^https:\/\//i.test(row.link)) return row.link;
+  return BOOKMAKER_SITES[row?.key] ?? null;
+}
+
+/**
+ * Toimiston nimi linkkinä. rel="noopener noreferrer" on pakollinen:
+ * target="_blank" ilman sitä antaisi kohdesivulle pääsyn window.openeriin.
+ */
+function bookmakerLabel(row) {
+  const url = bookmakerUrl(row);
+  const deep = Boolean(row?.link);
+  const tip = url
+    ? `${row.bookmaker} — avaa ${deep ? 'tämän ottelun sivun' : 'toimiston jalkapallosivun'} uuteen välilehteen`
+    : row.bookmaker;
+
+  if (!url) return `<span class="bk-name" title="${esc(tip)}">${esc(row.bookmaker)}</span>`;
+
+  return `<a class="bk-name bk-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="${esc(tip)}" onclick="event.stopPropagation()">${esc(row.bookmaker)}${deep ? ' ↗' : ''}</a>`;
+}
+
 /** Joukkueen logo värillisenä ympyränä — sama tyyli kuin jääkiekkopuolella */
 function teamLogo(team, size = 26) {
   return `<span class="team-logo" style="background:${esc(team.color)};width:${size}px;height:${size}px;font-size:${Math.round(size * 0.34)}px" title="${esc(team.name)}">${esc(team.short)}</span>`;
@@ -66,13 +165,13 @@ function oddsTable(match, index) {
         const icon = edge && edge.flag !== 'none' ? ` ${FLAG_META[edge.flag].icon}` : isBest ? ' ⭐' : '';
         return `<button class="bk-odds${isBest ? ' best' : ''}${valueClass}" onclick="event.stopPropagation();window.BTF.openBetPopup('${esc(match.id)}','${side}',${value},'${esc(row.bookmaker)}')" title="${esc(row.bookmaker)} — ${SIDE_LABELS[side]} ${value.toFixed(2)}${isBest ? ' (paras hinta)' : ''}${commissionNote}${valueNote}">${value.toFixed(2)}${icon}</button>`;
       };
-      return `<div class="odds-row"><span class="bk-name" title="${esc(row.bookmaker)}">${esc(row.bookmaker)}</span>${cell('home')}${cell('draw')}${cell('away')}</div>`;
+      return `<div class="odds-row">${bookmakerLabel(row)}${cell('home')}${cell('draw')}${cell('away')}</div>`;
     })
     .join('');
 
   return `<div class="odds-list">${head}${rows}</div>
     <div style="font-size:.6rem;color:var(--c-text-muted);margin-top:4px;line-height:1.5">
-      👆 Klikkaa kerrointa asettaaksesi vedon<br>
+      👆 Klikkaa kerrointa asettaaksesi vedon · toimiston nimestä sen jalkapallosivulle (ei tähän otteluun — API ei anna syvälinkkiä)<br>
       ⭐ paras hinta komission jälkeen — <i>ei</i> tarkoita että veto kannattaa<br>
       🟡 edge yli 3 % · 💎 edge yli 5 % — vain nämä ovat ylikertoimia
     </div>
@@ -866,8 +965,14 @@ export function renderAllCards() {
     return;
   }
 
+  // Päiväsuodatin ennen järjestystä: alkaneita ei näytetä koskaan, koska
+  // niiden kerroin on vanhentunut eikä vetoa voi enää lyödä.
+  const mode = getDayFilter();
+  const { started, todayUpcoming, later } = partitionByDay(currentSnapshot.matches);
+  const visible = mode === 'all' ? [...todayUpcoming, ...later] : todayUpcoming;
+
   // Value-kohteet ensin, sitten aikajärjestyksessä — käyttäjä näkee löydöt heti
-  const ordered = [...currentSnapshot.matches].map((m, i) => ({ m, i })).sort((a, b) => {
+  const ordered = visible.map((m) => ({ m, i: currentSnapshot.matches.indexOf(m) })).sort((a, b) => {
     const ea = bestEdge(a.m)?.edge ?? -1;
     const eb = bestEdge(b.m)?.edge ?? -1;
     const flagged = (e) => (e > 0.03 ? 1 : 0);
@@ -875,10 +980,31 @@ export function renderAllCards() {
     return Date.parse(a.m.kickoff) - Date.parse(b.m.kickoff);
   });
 
-  const flaggedCount = currentSnapshot.matches.filter((m) => (bestEdge(m)?.edge ?? 0) > 0.03).length;
-  const summary = `<div style="font-size:.65rem;color:var(--c-text-muted);margin:0 0 8px 2px">
-    ${currentSnapshot.matches.length} ottelua · ${flaggedCount ? `<b style="color:var(--c-success)">${flaggedCount} value-kohdetta</b>` : 'ei value-kohteita — markkina on tiukka'}
+  const flaggedCount = visible.filter((m) => (bestEdge(m)?.edge ?? 0) > 0.03).length;
+
+  const notes = [];
+  if (started.length) notes.push(`${started.length} alkanutta piilotettu`);
+  if (mode === 'today' && later.length) notes.push(`${later.length} myöhempää piilotettu`);
+
+  const toggle = `<button class="btn" style="font-size:.6rem;padding:3px 9px;min-height:26px;border-radius:12px;background:oklch(1 1 0/0.08);color:var(--c-text)" onclick="window.BTF.setDayFilter('${mode === 'today' ? 'all' : 'today'}')">${mode === 'today' ? `📅 Näytä kaikki (${todayUpcoming.length + later.length})` : '📅 Vain tänään'}</button>`;
+
+  const summary = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px 2px">
+    <span style="font-size:.65rem;color:var(--c-text-muted)">
+      <b style="color:var(--c-text)">${visible.length}</b> ${mode === 'today' ? 'ottelua tänään' : 'ottelua'} ·
+      ${flaggedCount ? `<b style="color:var(--c-success)">${flaggedCount} value-kohdetta</b>` : 'ei value-kohteita — markkina on tiukka'}
+      ${notes.length ? `<br><span style="font-size:.58rem">${notes.join(' · ')}</span>` : ''}
+    </span>
+    ${toggle}
   </div>`;
+
+  if (!visible.length) {
+    container.innerHTML =
+      roundNav() +
+      sourceBanner(currentSnapshot) +
+      summary +
+      `<div class="empty">${mode === 'today' ? 'Ei enää tämän päivän otteluita — katso myöhemmät "Näytä kaikki" -napista.' : 'Ei otteluita aikaikkunassa.'}</div>`;
+    return;
+  }
 
   container.innerHTML = roundNav() + sourceBanner(currentSnapshot) + summary + ordered.map(({ m, i }) => matchCard(m, i)).join('');
   renderPlacedBets();

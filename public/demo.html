@@ -189,6 +189,9 @@ body{
 .odds-head span{font-size:.6rem;color:var(--c-text-muted);text-align:center}
 .odds-head span:first-child{text-align:left}
 .bk-name{font-size:.65rem;color:var(--c-text-muted);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Tiketti #47: toimiston nimi linkkinä toimiston sivulle */
+a.bk-link{text-decoration:none;border-bottom:1px dotted currentColor;cursor:pointer}
+a.bk-link:hover,a.bk-link:focus-visible{color:var(--c-accent)}
 .bk-odds{min-height:34px;padding:4px;border-radius:var(--radius-sm);border:1.5px solid oklch(1 0 0 / 0.12);background:transparent;color:var(--c-text);cursor:pointer;font-size:.75rem;font-weight:700;font-variant-numeric:tabular-nums;text-align:center;transition:all .15s ease}
 .bk-odds:hover{border-color:var(--c-accent);color:var(--c-accent)}
 /* Paras hinta on pelkkä hintavertailun tulos, ei arvolöytö: se saa vain
