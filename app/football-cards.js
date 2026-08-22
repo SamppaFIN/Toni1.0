@@ -1134,11 +1134,19 @@ export function renderAllCards() {
   // sen tehtävä oli piilottaa alkaneet, ei jättää käyttäjää tyhjän eteen.
   const fellBack = !practice && mode === 'today' && todayUpcoming.length === 0 && later.length > 0;
 
+  // Viimeinen varakeino: jos pelaamattomia ei ole lainkaan, näytetään alkaneet
+  // selvästi merkittynä. Alkaneen ottelun piilottaminen on oikein NIIN KAUAN
+  // kuin näytettävää on jäljellä — mutta tyhjä sivu on aina huonompi kuin
+  // vanhentunut kortti jonka vieressä lukee että se on vanhentunut.
+  const onlyStarted = !practice && todayUpcoming.length === 0 && later.length === 0 && started.length > 0;
+
   const visible = practice
     ? currentSnapshot.matches
-    : mode === 'all' || fellBack
-      ? [...todayUpcoming, ...later]
-      : todayUpcoming;
+    : onlyStarted
+      ? started
+      : mode === 'all' || fellBack
+        ? [...todayUpcoming, ...later]
+        : todayUpcoming;
 
   // Value-kohteet ensin, sitten aikajärjestyksessä — käyttäjä näkee löydöt heti
   const ordered = visible.map((m) => ({ m, i: currentSnapshot.matches.indexOf(m) })).sort((a, b) => {
@@ -1152,11 +1160,12 @@ export function renderAllCards() {
   const flaggedCount = visible.filter((m) => (bestEdge(m)?.edge ?? 0) > 0.03).length;
 
   const notes = [];
-  if (!practice && started.length) notes.push(`${started.length} alkanutta piilotettu`);
+  if (onlyStarted) notes.push('⚠️ kaikki ottelut ovat jo alkaneet — kertoimet ovat vanhentuneet');
+  else if (!practice && started.length) notes.push(`${started.length} alkanutta piilotettu`);
   if (fellBack) notes.push('tämän päivän ottelut on pelattu — näytetään seuraavat');
-  else if (!practice && mode === 'today' && later.length) notes.push(`${later.length} myöhempää piilotettu`);
+  else if (!practice && !onlyStarted && mode === 'today' && later.length) notes.push(`${later.length} myöhempää piilotettu`);
 
-  const label = practice || mode === 'all' || fellBack ? 'ottelua' : 'ottelua tänään';
+  const label = practice || mode === 'all' || fellBack || onlyStarted ? 'ottelua' : 'ottelua tänään';
 
   const toggle = practice
     ? ''
