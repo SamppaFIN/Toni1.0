@@ -31,6 +31,83 @@ import { findTeam } from '../ingest/team-match.js';
  */
 export const SEASON_REGRESSION = 0.75;
 
+/**
+ * Kuinka monen nykyisen kauden ottelun arvoinen EDELLINEN kausi on
+ * mallin luottamusta arvioitaessa.
+ *
+ * Edellinen kausi on aitoa tietoa, mutta se on vuoden vanhaa ja
+ * SEASON_REGRESSION on jo vaimentanut sen eroja. Kahdeksan ottelua on
+ * konservatiivinen arvio: se riittää tekemään mallista puoliksi
+ * uskottavan mutta ei anna sen kuvitella tietävänsä yhtä paljon kuin
+ * kaudella joka on oikeasti pelattu.
+ */
+export const PREVIOUS_SEASON_WORTH = 8;
+
+/**
+ * Kuinka monta tehollista ottelua tarvitaan ennen kuin malli saa PUOLET
+ * täydestä painostaan markkinaa vastaan.
+ */
+export const CONFIDENCE_HALF_POINT = 8;
+
+/**
+ * Nousijan prioria (PROMOTED_STRENGTH) vastaava ottelumäärä. Selvästi pienempi
+ * kuin PREVIOUS_SEASON_WORTH: yleinen sääntö "nousijat ovat heikompia" on
+ * paljon vähemmän informatiivinen kuin joukkueen oma edellinen kausi.
+ */
+export const PROMOTED_PRIOR_WORTH = 3;
+
+/**
+ * Mallin luottamus 0–1 — kuinka paljon dataa voimaluvun takana oikeasti on.
+ *
+ * MIKSI TÄMÄ ON OLEMASSA — kolmas tuotantovika 22.8.2026:
+ * Blend-paino oli kiinteä 0.35 riippumatta siitä tiesikö malli mitään.
+ * Kauden avauskierroksella (played = 0) voimaluvut tulivat regressoidusta
+ * viime kaudesta ja olivat litistyneet 1.0:n ympärille — Liverpoolin
+ * hyökkäysvoima oli 1.18 — mutta malli sai silti 35 %:n painon 10 toimiston
+ * markkinaa ja Pinnaclen sharp-ankkuria vastaan. Tulos: Newcastle sai 31 %
+ * kun markkina sanoi 25 %, ja siitä syntyi +40 %:n "edge" joka ei ollut
+ * arvoa vaan mallin tietämättömyyttä.
+ *
+ * Kun mallilla ei ole dataa, oikea paino ei ole 0.35 vaan lähellä nollaa:
+ * Pinnaclen linja sisältää enemmän informaatiota kuin vuoden vanha
+ * regressoitu Poisson. Kauden edetessä paino nousee itsestään.
+ *
+ * NOUSIJA (ei edellistä kautta samassa sarjassa) saa luottamuksen 0, jolloin
+ * malli ei osallistu lainkaan — juuri se tapaus jossa se oli pahimmin väärässä
+ * (Hull City "edge +292 %", Coventry "+75 %").
+ */
+export function modelConfidence(playedThisSeason: number, hasPreviousSeason: boolean): number {
+  const played = Number.isFinite(playedThisSeason) && playedThisSeason > 0 ? playedThisSeason : 0;
+  const effective = played + (hasPreviousSeason ? PREVIOUS_SEASON_WORTH : 0);
+  return effective / (effective + CONFIDENCE_HALF_POINT);
+}
+
+/**
+ * Ottelun mallin luottamus: HEIKOMMAN puolen mukaan.
+ *
+ * Ottelun ennuste on vain niin hyvä kuin sen huonommin tunnettu joukkue.
+ * Jos toinen on nousija josta ei tiedetä mitään, koko ottelun arvio on
+ * epäluotettava vaikka toisesta tiedettäisiin kaikki.
+ */
+export function matchConfidence(home: StrengthResult, away: StrengthResult): number {
+  return Math.min(sideConfidence(home), sideConfidence(away));
+}
+
+/**
+ * Yhden joukkueen luottamus. Kolme tasoa:
+ *   - edellinen kausi samassa sarjassa → PREVIOUS_SEASON_WORTH
+ *   - nousija (PROMOTED_STRENGTH-priori) → PROMOTED_PRIOR_WORTH, heikompi
+ *     mutta ei nolla: tiedämme nousijoista jotain, emme vain paljon
+ *   - ei kumpaakaan → pelkkä kausidata
+ */
+function sideConfidence(s: StrengthResult): number {
+  if (s.basis === 'league-average') {
+    const effective = s.playedThisSeason + PROMOTED_PRIOR_WORTH;
+    return effective / (effective + CONFIDENCE_HALF_POINT);
+  }
+  return modelConfidence(s.playedThisSeason, true);
+}
+
 export interface StrengthResult {
   strength: TeamStrength;
   /** Mistä voima muodostui — näytetään ottelukortilla läpinäkyvyyden vuoksi */
@@ -44,6 +121,26 @@ export interface StrengthResult {
 export function rawStrength(stats: TeamSeasonStats, league: LeagueAverages): TeamStrength {
   if (!stats.played) return { attack: 1, defense: 1 };
   return teamStrength(stats.gf / stats.played, stats.ga / stats.played, league);
+}
+
+/**
+ * Nousijan priori. Empiirinen sääntö ylimmissä sarjoissa: noussut joukkue
+ * tekee noin 15 % vähemmän ja päästää noin 15 % enemmän maaleja kuin sarjan
+ * keskiverto. Luku on tarkoituksella maltillinen — se on priori jota data
+ * korjaa, ei väite jonka pitäisi kestää yksinään.
+ */
+export const PROMOTED_STRENGTH: TeamStrength = { attack: 0.85, defense: 1.15 };
+
+/**
+ * Siirrä voimaa kohti prioria sitä enemmän mitä vähemmän otteluita on pelattu.
+ * Kun `played` = 0, tulos on priori; kun dataa kertyy, se ottaa vallan.
+ */
+function blendToward(strength: TeamStrength, prior: TeamStrength, k: number, played: number): TeamStrength {
+  const w = played / (played + k);
+  return {
+    attack: w * strength.attack + (1 - w) * prior.attack,
+    defense: w * strength.defense + (1 - w) * prior.defense,
+  };
 }
 
 /** Regressoi voima kohti sarjan keskitasoa annetulla kertoimella */
@@ -85,11 +182,24 @@ export function combineSeasons(
     };
   }
 
-  // Vain nykyinen kausi (nousija tai puuttuva historia) → kutistus keskitasoon
+  // Vain nykyinen kausi → joukkue on noussut sarjaan (ylimmässä sarjassa
+  // "ei edellistä kautta" tarkoittaa käytännössä nousijaa).
+  //
+  // Kutistus SARJAN KESKITASOON olisi väärä priori: se väittää nousijan olevan
+  // keskiverto pääsarjajoukkue, mitä se ei ole. Juuri tämä tuotti 22.8.2026
+  // pahimmat väärät positiiviset — Hull City "edge +292 %" ja Coventry "+75 %"
+  // syntyivät siitä että malli piti nousijaa Manchester Unitedin veroisena.
+  //
+  // PROMOTED_STRENGTH on empiirinen sääntö: nousijat tekevät vähemmän ja
+  // päästävät enemmän maaleja kuin sarjan keskiverto. Se on heikko priori
+  // muttei tyhjä — ja heikko oikea priori on parempi kuin vahva väärä.
   if (!previous && current) {
+    const enoughData = played >= k * 3;
     return {
-      strength: shrinkStrength(rawStrength(current, league), played, k),
-      basis: played >= k * 3 ? 'current-season' : 'league-average',
+      strength: enoughData
+        ? shrinkStrength(rawStrength(current, league), played, k)
+        : blendToward(shrinkStrength(rawStrength(current, league), played, k), PROMOTED_STRENGTH, k, played),
+      basis: enoughData ? 'current-season' : 'league-average',
       currentWeight: played / (played + k),
       playedThisSeason: played,
     };

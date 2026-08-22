@@ -18,7 +18,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { config } from '../config.js';
 import { ingestFootballOdds, buildMatchId, FootballOddsEvent } from '../ingest/odds-football.js';
 import { fetchStatsFor, LeagueStatsPair } from '../ingest/stats.js';
-import { strengthForTeam } from '../analyze/strength.js';
+import { strengthForTeam, matchConfidence } from '../analyze/strength.js';
 import { predictPoisson, predictFromLambda, adjustLambda, LeagueAverages } from '../analyze/poisson.js';
 import { fetchAllFeeds, attachNews, MatchNews } from '../ingest/news-football.js';
 import { fetchSeasonResults, normalizeTeam } from '../ingest/results-veikkausliiga.js';
@@ -236,12 +236,28 @@ function buildCard(
 
   // Mallin peruste näkyviin: käyttäjän pitää tietää nojaako luku tähän vai
   // viime kauteen, koska se muuttaa kuinka paljon siihen voi luottaa
+  // Blend-paino skaalataan sen mukaan kuinka paljon dataa mallin takana on.
+  // Kiinteä paino antoi kauden avauskierroksella regressoidulle viime kaudelle
+  // saman painon kuin täydelle kaudelle dataa — ks. strength.ts:modelConfidence.
+  const confidence = matchConfidence(home, away);
+  const effectiveBlendWeight = config.model.blendWeight * confidence;
+
   const adjustments: ModelAdjustment[] = [
     {
       reason:
         `Voimat: ${basisLabel(home.basis)} (${e.home.short}, ${home.playedThisSeason} ottelua) / ` +
         `${basisLabel(away.basis)} (${e.away.short}, ${away.playedThisSeason} ottelua)` +
         `${stats.current.splitsEstimated ? ' · koti/vierasjakauma estimoitu' : ''}`,
+    },
+    {
+      reason:
+        `Mallin luottamus ${(confidence * 100).toFixed(0)} % → paino markkinaa vastaan ` +
+        `${(effectiveBlendWeight * 100).toFixed(0)} % (täysi ${(config.model.blendWeight * 100).toFixed(0)} %). ` +
+        (confidence < 0.35
+          ? 'Vähän dataa — arvio nojaa markkinaan.'
+          : confidence < 0.7
+            ? 'Kohtalaisesti dataa.'
+            : 'Kausidataa riittävästi.'),
     },
   ];
 
@@ -270,6 +286,7 @@ function buildCard(
     poisson,
     stats: matchStats,
     adjustments,
+    blendWeight: effectiveBlendWeight,
     homeStrength: { attack: round(home.strength.attack, 2), defense: round(home.strength.defense, 2) },
     awayStrength: { attack: round(away.strength.attack, 2), defense: round(away.strength.defense, 2) },
   });

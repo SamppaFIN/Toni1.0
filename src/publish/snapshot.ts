@@ -149,7 +149,34 @@ export function buildModelView(
   };
 }
 
-function flagFor(edge: number): ValueFlagLevel {
+/**
+ * Pienin todennäköisyysero jonka mallin on voitettava markkina, prosenttiyksikköinä.
+ *
+ * MIKSI PELKKÄ EDGE-KYNNYS EI RIITÄ:
+ * Devigatulle markkinalle pätee likimain p_markkina × kerroin = 1, joten
+ *
+ *     edge = p_malli × kerroin − 1 ≈ (p_malli − p_markkina) × kerroin
+ *
+ * Sama 3 %:n edge tarkoittaa siis eri suuruista todennäköisyysväitettä eri
+ * kertoimilla: kertoimella 2.0 se vaatii 1.5 prosenttiyksikön eron, mutta
+ * kertoimella 20.0 vain 0.15 prosenttiyksikköä. Kynnys on kymmenen kertaa
+ * löysempi juuri siellä missä malli on epäluotettavin — pitkässä hännässä.
+ *
+ * Tämä tuotti aidot väärät positiiviset 22.8.2026: Hull City "edge +292 %"
+ * ja Coventry "+75 %" syntyivät 2–3 prosenttiyksikön eroista, jotka kerroin
+ * suurensi järjettömiksi luvuiksi.
+ *
+ * 2 prosenttiyksikköä on suora vaatimus: malli saa liputtaa vain jos se
+ * oikeasti väittää tietävänsä jotain, ei siksi että kerroin on iso.
+ */
+const MIN_PROB_EDGE = 0.02;
+
+/**
+ * Value-lippu. Vaatii SEKÄ riittävän edgen ETTÄ riittävän
+ * todennäköisyyseron — ks. MIN_PROB_EDGE.
+ */
+function flagFor(edge: number, probEdge: number): ValueFlagLevel {
+  if (probEdge < MIN_PROB_EDGE) return 'none';
   if (edge > STRONG_THRESHOLD) return 'strong';
   if (edge > VALUE_THRESHOLD) return 'candidate';
   return 'none';
@@ -177,12 +204,17 @@ export function buildAnalysisView(
   const edges: EdgeRow[] = sides.map((s) => {
     // Edge ja Kelly komission jälkeisestä hinnasta — se on se mitä veto todella maksaa
     const edge = s.effective > 0 ? edgeOf(s.model_prob, s.effective) : -1;
-    // Panossuositus vain kynnyksen ylittäville kohteille. Kelly antaisi
-    // positiivisen panoksen heti kun edge > 0, mutta alle 3 %:n edge on
-    // mallin virherajojen sisällä — panossuositus siitä olisi valheellista
+    // Kuinka monta prosenttiyksikköä malli väittää markkinan olevan väärässä.
+    // Tämä on se väite jonka pitää olla riittävän suuri — ei edge, joka on
+    // sama väite kertoimella kerrottuna (ks. MIN_PROB_EDGE).
+    const probEdge = s.model_prob - s.implied_prob;
+    const flag = flagFor(edge, probEdge);
+    // Panossuositus vain liputetuille kohteille. Kelly antaisi positiivisen
+    // panoksen heti kun edge > 0, mutta alle kynnyksen jäävä ero on mallin
+    // virherajojen sisällä — panossuositus siitä olisi valheellista
     // tarkkuutta. Lippu ja panos pysyvät näin samaa mieltä.
     const kelly =
-      edge > VALUE_THRESHOLD
+      flag !== 'none'
         ? kellyStake(s.model_prob, s.effective, bankroll, kellyOptions)
         : { full_fraction: 0, fraction: 0, stake: 0, capped: false };
     return {
@@ -193,7 +225,7 @@ export function buildAnalysisView(
       model_prob: round(s.model_prob, 4),
       implied_prob: round(s.implied_prob, 4),
       edge: round(edge, 4),
-      flag: flagFor(edge),
+      flag,
       kelly_fraction: round(kelly.fraction, 4),
       stake_suggestion: kelly.stake,
     };
