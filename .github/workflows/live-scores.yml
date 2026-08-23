@@ -1,0 +1,84 @@
+# Tiketti #55: Käynnissä olevien otteluiden tilanne
+#
+# ERILLINEN workflow snapshotista, koska tämä on eri asia eri tahdilla:
+# snapshot on raskas (kertoimet + tilastot + uutiset) ja ajetaan 2x/vrk,
+# tämä on kevyt ja ajetaan vain kun otteluita on käynnissä.
+#
+# KVOOTTA — lue tämä ennen kuin lisäät cron-rivejä:
+# /scores ilman daysFrom maksaa 1 krediitin per sarja, eli 2 kr per ajo
+# (Veikkausliiga + Valioliiga). Ilmaistaso on 500 kr/kk ja snapshot-putki
+# käyttää jo ~240. Jos tämä ajettaisiin 15 min välein läpi vuorokauden, se
+# olisi 192 kr/vrk eli kvootta loppuisi kolmessa päivässä.
+#
+# Siksi OLETUS ON MANUAALINEN: paina Run workflow kun haluat päivittää
+# seurattavan ottelun tilanteen. Alla oleva cron on kommentoitu esimerkiksi
+# siitä miten kapea ikkuna pitäisi olla jos sen ottaa käyttöön.
+
+name: Live-tilanne
+
+on:
+  workflow_dispatch:
+  # Esimerkki kapeasta ikkunasta: la-su iltapäivä, 30 min välein = 12 ajoa/vkl
+  # eli 24 kr/vkl. Ota käyttöön vain jos kvootassa on varaa.
+  # schedule:
+  #   - cron: '0,30 13-17 * * 6,0'
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    env:
+      ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+      CACHE_DISABLED: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Asenna riippuvuudet
+        run: npm ci --ignore-scripts
+
+      - name: Tarkista salaisuus
+        run: |
+          if [ -z "$ODDS_API_KEY" ]; then
+            echo "::error::ODDS_API_KEY puuttuu"
+            exit 1
+          fi
+
+      - name: Hae live-tilanne
+        run: npm run live
+
+      - name: Committoi ja deployaa
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/data/live.json
+          if git diff --cached --quiet; then
+            echo "Tilanne ei muuttunut"
+          else
+            git commit -m "Live: tilanne $(date -u +%H:%MZ) [skip ci]"
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+          fi
+
+      - name: Deployaa GitHub Pagesiin
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
+          enable_jekyll: false
+          force_orphan: false
+          commit_message: 'Deploy: live-tilanne'

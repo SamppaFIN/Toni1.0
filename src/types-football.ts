@@ -25,6 +25,17 @@ export interface BookmakerOdds {
    */
   commission: number;
   fetched_at: string;
+  /**
+   * Suora linkki tähän kohteeseen toimiston palvelussa (tiketti #54).
+   *
+   * Tulee The Odds APIn `includeLinks`-parametrista. null jos toimisto ei
+   * tarjoa linkkiä tai tilaus ei sisällä ominaisuutta — kortti putoaa silloin
+   * toimiston jalkapallosivulle, ja käyttäjälle kerrotaan kumpi on kyseessä.
+   *
+   * API antaa linkin kolmella tasolla (kuponki > markkina > tapahtuma);
+   * tarkin saatavilla oleva valitaan, koska se vie käyttäjän lähimmäs vetoa.
+   */
+  link?: string | null;
 }
 
 /**

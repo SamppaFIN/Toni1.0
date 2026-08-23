@@ -24,6 +24,7 @@ import * as tracker from './football-tracker.js';
 import * as metrics from './football-metrics.js';
 import { DISPLAY_OPTIONS, getPrefs, togglePref, resetPrefs } from './football-prefs.js';
 import * as teamsTable from './football-teams.js';
+import * as liveView from './football-live.js';
 import './football-chase.js'; // rekisteröi window.BTC — ei tarvitse suoraa viittausta täältä
 import './football-llm.js'; // rekisteröi window.BTL (tiketti #38)
 
@@ -225,6 +226,11 @@ export async function start(containerId = 'round-games') {
   // Tiketti #45: joukkuetaulukko on myös oma tiedostonsa, samasta syystä
   await teamsTable.load();
   teamsTable.render();
+
+  // Tiketti #55: live-tilanne. Puuttuva tiedosto on normaali tila (cron ei ole
+  // ajanut), joten lataus ei saa estaa muun nakyman toimintaa.
+  await liveView.load();
+  liveView.render();
 }
 
 // Itsekäynnistys. Moduuli latautuu deferoituna eli inline-skriptin jälkeen,

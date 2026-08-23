@@ -172,7 +172,7 @@ function oddsTable(match, index) {
 
   return `<div class="odds-list">${head}${rows}</div>
     <div style="font-size:.6rem;color:var(--c-text-muted);margin-top:4px;line-height:1.5">
-      👆 Klikkaa kerrointa asettaaksesi vedon · toimiston nimestä sen jalkapallosivulle (ei tähän otteluun — API ei anna syvälinkkiä)<br>
+      👆 Klikkaa kerrointa asettaaksesi vedon · toimiston nimestä sen sivulle (↗ = suora linkki tähän otteluun)<br>
       ⭐ paras hinta komission jälkeen — <i>ei</i> tarkoita että veto kannattaa<br>
       🟡 edge yli 3 % · 💎 edge yli 5 % — vain nämä ovat ylikertoimia
     </div>

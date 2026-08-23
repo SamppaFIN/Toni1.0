@@ -103,6 +103,10 @@ export async function fetchFootballOdds(sportKey: string): Promise<FetchOddsResu
     regions: config.odds.regions,
     markets: config.odds.markets,
     oddsFormat: 'decimal',
+    // Tiketti #54: suorat linkit toimiston kupongille. Jos tilaus ei sisalla
+    // ominaisuutta, API jattaa kentat pois eika kaadu -- linkki putoaa silloin
+    // toimiston jalkapallosivulle (public/app/football-cards.js:bookmakerUrl).
+    includeLinks: 'true',
   });
   const url = `${config.odds.baseUrl}/sports/${sportKey}/odds/?${params}`;
 
@@ -148,6 +152,7 @@ export function parseEventOdds(event: OddsApiEvent): BookmakerOdds[] {
       away: away.price,
       commission: commissionFor(book.key),
       fetched_at: book.last_update || new Date().toISOString(),
+      link: bestLink(event, book, h2h, [home, draw, away]),
     });
   }
 
@@ -323,4 +328,41 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       console.error('[Odds] Haku epäonnistui:', err.message);
       process.exit(1);
     });
+}
+
+// ─── Syvälinkit toimiston palveluun (tiketti #54) ─────────────────────────
+
+/** API voi liittää linkin tapahtumaan, markkinaan tai yksittäiseen kohteeseen */
+interface MaybeLinked {
+  link?: string | null;
+  sid?: string | null;
+}
+
+/** Hyväksy vain https — kertoimet tulevat ulkoisesta lähteestä ja linkki päätyy kortille */
+function safeLink(value: unknown): string | null {
+  return typeof value === 'string' && /^https:\/\//i.test(value) ? value : null;
+}
+
+/**
+ * Tarkin saatavilla oleva linkki.
+ *
+ * The Odds API voi palauttaa linkin kolmella tasolla, ja ne vievät käyttäjän
+ * eri etäisyydelle vedosta:
+ *   1. outcome.link — suoraan kupongille valittu kohde (paras)
+ *   2. market.link  — ottelun 1X2-markkinaan
+ *   3. event.link   — ottelusivulle
+ *
+ * Kohdekohtainen linkki jätetään tässä käyttämättä, koska BookmakerOdds-rivi
+ * kattaa kaikki kolme kohdetta (1/X/2) eikä yksi rivi voi osoittaa kolmeen
+ * eri kuponkiin. Markkinataso on siis tarkin joka on rivillä mielekäs.
+ * Jos kohdekohtaiset linkit halutaan, EdgeRow on oikea paikka niille.
+ */
+export function bestLink(
+  event: unknown,
+  book: unknown,
+  market: unknown,
+  _outcomes?: unknown
+): string | null {
+  const link = (x: unknown) => safeLink((x as MaybeLinked | null)?.link);
+  return link(market) ?? link(event) ?? link(book);
 }
