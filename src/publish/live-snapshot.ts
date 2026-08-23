@@ -22,6 +22,7 @@ import { strengthForTeam, matchConfidence } from '../analyze/strength.js';
 import { predictPoisson, predictFromLambda, adjustLambda, LeagueAverages } from '../analyze/poisson.js';
 import { fetchAllFeeds, attachNews, MatchNews } from '../ingest/news-football.js';
 import { fetchSeasonResults, normalizeTeam } from '../ingest/results-veikkausliiga.js';
+import { fetchSeasonResultsEspn, hasEspnResults } from '../ingest/results-espn.js';
 import { calculateSeasonElo } from '../analyze/season-elo.js';
 import { buildMatchCard, buildSnapshot, writeSnapshot } from './snapshot.js';
 import { MatchCard, MatchStats, ModelAdjustment, TeamStats, TeamSeasonStats } from '../types-football.js';
@@ -59,6 +60,65 @@ export async function fetchSeasonEloMap(): Promise<EloLookup> {
 }
 
 /**
+ * Aggressiivinen nimennormalisointi ESPN-sarjoille (tiketti #57).
+ *
+ * Kolme lähdettä kirjoittaa saman joukkueen eri tavoin:
+ *   The Odds API      "Brighton and Hove Albion"
+ *   ESPN              "Brighton & Hove Albion"
+ *   football-data.org "Brighton & Hove Albion FC"
+ *
+ * Veikkausliigalle tämä ratkaistiin käsin ylläpidetyllä kartalla
+ * (STATS_TO_ELO_NAME), koska sarjassa on 12 joukkuetta ja nimet ovat
+ * epäsäännöllisiä. Isoissa sarjoissa se ei skaalaa — siellä poistetaan
+ * seuramuodot ja välimerkit ja verrataan jäljelle jäävää.
+ *
+ * Riski on päinvastainen kuin kartalla: liian aggressiivinen normalisointi
+ * voisi yhdistää kaksi eri joukkuetta. Siksi "united"/"city" ja vastaavat
+ * EROTTELEVAT sanat jätetään paikoilleen — vain seuramuodot poistetaan.
+ */
+const DIACRITICS = new RegExp('[' + String.fromCharCode(0x300) + '-' + String.fromCharCode(0x36f) + ']', 'g');
+
+/** Seuramuodot jotka eivat erottele joukkueita toisistaan */
+const CLUB_FORMS = new Set(['afc', 'fc', 'cf', 'sc', 'ac', 'if', 'ifk', 'club']);
+
+export function normalizeClubName(name: string): string {
+  return String(name ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(DIACRITICS, '')
+    .replace(/&/g, ' and ')
+    // Sanoittain eika regexin sanarajoilla: token-vertailu on tassa seka
+    // selkeampi etta turvallisempi. Korvaus ilman sanarajaa silpoisi nimia
+    // keskelta -- "palace" sisaltaa "ac" ja muuttuisi muotoon "pale",
+    // jolloin kaksi eri joukkuetta voisi normalisoitua samaksi.
+    .split(/[^a-z0-9]+/)
+    .filter((t) => t && !CLUB_FORMS.has(t))
+    .join('');
+}
+
+/**
+ * Kauden Elo yhdelle sarjalle. Veikkausliiga käyttää omaa tuloslähdettään
+ * (tokenipohjainen jäsennys, testattu), muut ESPN:ää. Sarja jolle ei ole
+ * kumpaakaan jää ilman Eloa — sitä ei johdeta sarjataulukosta, koska
+ * pisteistä laskettu luku ei olisi Elo vaan eri suure samalla nimellä.
+ */
+export async function fetchEloMapFor(sportKey: string): Promise<EloLookup | null> {
+  if (sportKey === VEIKKAUSLIIGA_KEY) return fetchSeasonEloMap();
+  if (!hasEspnResults(sportKey)) return null;
+
+  const matches = await fetchSeasonResultsEspn(sportKey);
+  if (!matches.length) return null;
+
+  const result = calculateSeasonElo(matches);
+  const sorted = [...result.ratings].sort((a, b) => b.elo - a.elo);
+  const map: EloLookup = new Map();
+  sorted.forEach((r, i) => {
+    map.set(normalizeClubName(r.team), { elo: Math.round(r.elo), change: Math.round(r.change), rank: i + 1 });
+  });
+  return map;
+}
+
+/**
  * Tilastolähde (Wikipedia/football-data.org) käyttää lyhyempiä nimiä kuin
  * tuloslähde (veikkausliigapelit.fi): "HJK" vs "HJK Helsinki", "Inter Turku"
  * vs "FC Inter Turku". Sama ongelma jota TEAM_NAME_MAP jo ratkaisee
@@ -89,7 +149,8 @@ export function eloKeyFor(statsName: string): string {
 function toTeamStats(s: TeamSeasonStats, isHome: boolean, elo: EloLookup | null): TeamStats {
   const perGame = (v: number | null, n: number | null) => (n && n > 0 && v !== null ? v / n : null);
   // Epäonnistunut täsmäytys jättää luvun nulliksi eikä arvaa.
-  const rating = elo?.get(eloKeyFor(s.name)) ?? null;
+  // Veikkausliigan kartta ensin, sitten yleinen normalisointi muille sarjoille
+  const rating = elo?.get(eloKeyFor(s.name)) ?? elo?.get(normalizeClubName(s.name)) ?? null;
   return {
     rank: s.rank,
     played: s.played,
@@ -140,17 +201,21 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
     console.warn(`[News] Uutishaku epäonnistui kokonaan — ottelut jäävät ilman uutisia: ${(err as Error).message}`);
   }
 
-  // Kauden Elo haetaan vain jos mukana on Veikkausliigan otteluita. Haku on
-  // yhden sivun lataus eikä kuluta API-kvoottaa, mutta se on silti turha
-  // pyyntö jos kierroksella ei ole yhtään suomalaista ottelua.
-  let eloMap: EloLookup | null = null;
-  if (events.some((e) => e.sportKey === VEIKKAUSLIIGA_KEY)) {
+  // Kauden Elo per sarja (tiketti #57). Aiemmin vain Veikkausliigalla oli
+  // ottelutuloslähde; ESPN antaa nyt tulokset myös Valioliigalle ja muille
+  // suurille sarjoille ilman avainta. Haetaan vain ne sarjat joita kierroksella
+  // oikeasti on — turha pyyntö on turha vaikka se olisi ilmainen.
+  const eloByLeague = new Map<string, EloLookup>();
+  for (const sportKey of new Set(events.map((e) => e.sportKey))) {
     try {
-      eloMap = await fetchSeasonEloMap();
-      console.log(`[Elo] Kauden Elo laskettu ${eloMap.size} joukkueelle`);
+      const map = await fetchEloMapFor(sportKey);
+      if (map?.size) {
+        eloByLeague.set(sportKey, map);
+        console.log(`[Elo] ${sportKey}: Elo laskettu ${map.size} joukkueelle`);
+      }
     } catch (err) {
       // Elo on lisätieto, ei ehto analyysille — putki jatkaa ilman sitä
-      console.warn(`[Elo] Elo-lukuja ei saatu: ${(err as Error).message}`);
+      console.warn(`[Elo] ${sportKey}: Elo-lukuja ei saatu: ${(err as Error).message}`);
     }
   }
 
@@ -160,14 +225,15 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
       statsByLeague.get(e.sportKey) ?? null,
       newsByMatch.get(matchId(e)) ?? null,
       options,
-      e.sportKey === VEIKKAUSLIIGA_KEY ? eloMap : null
+      eloByLeague.get(e.sportKey) ?? null
     )
   );
   cards.sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
 
   // Lähteet nimeltä snapshotiin: käyttäjän pitää voida jäljittää mistä luku tuli
   const providers = ['The Odds API'];
-  if (eloMap?.size) providers.push('veikkausliigapelit.fi (Elo)');
+  if (eloByLeague.has(VEIKKAUSLIIGA_KEY)) providers.push('veikkausliigapelit.fi (Elo)');
+  if ([...eloByLeague.keys()].some((k) => k !== VEIKKAUSLIIGA_KEY)) providers.push('ESPN (tulokset & Elo)');
   for (const pair of statsByLeague.values()) {
     if (pair && !providers.includes(pair.current.source)) providers.push(pair.current.source);
   }
