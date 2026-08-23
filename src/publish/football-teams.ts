@@ -18,6 +18,7 @@ import { TeamRef } from '../types-football.js';
 import { fetchStatsFor, LeagueStatsPair } from '../ingest/stats.js';
 import { strengthForTeam, StrengthResult } from '../analyze/strength.js';
 import { teamRef } from '../ingest/odds-football.js';
+import { EloLookup, fetchEloMapFor, eloKeyFor, normalizeClubName } from './live-snapshot.js';
 
 const SPORT_KEY = 'soccer_epl';
 
@@ -38,6 +39,14 @@ export interface FootballTeamRow {
   attack: number;
   defense: number;
   basis: StrengthResult['basis'];
+  /**
+   * Kauden Elo (tiketti #58). null jos joukkue ei ole viela pelannut --
+   * lahtotasoa 1500 EI naytata pelaamattomalle, koska se vaittaisi mitattua
+   * tietoa siella missa sita ei ole.
+   */
+  elo: number | null;
+  elo_change: number | null;
+  elo_rank: number | null;
 }
 
 export interface FootballTeamsFile {
@@ -53,8 +62,19 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
+/**
+ * Elo joukkueelle. Kokeillaan Veikkausliigan kasin yllapidettya karttaa ensin,
+ * sitten yleista normalisointia -- sama kaksivaiheinen haku kuin
+ * live-snapshot.ts:n toTeamStats():ssa, jotta kortti ja taulukko nayttavat
+ * SAMAN luvun. Eri hakulogiikka tuottaisi eri Elon samalle joukkueelle.
+ */
+function eloFor(elo: EloLookup | null, name: string): { elo: number | null; elo_change: number | null; elo_rank: number | null } {
+  const hit = elo?.get(eloKeyFor(name)) ?? elo?.get(normalizeClubName(name)) ?? null;
+  return { elo: hit?.elo ?? null, elo_change: hit?.change ?? null, elo_rank: hit?.rank ?? null };
+}
+
 /** Puhdas funktio — testattavissa ilman verkkoa */
-export function buildTeamsFile(pair: LeagueStatsPair, now = new Date()): FootballTeamsFile {
+export function buildTeamsFile(pair: LeagueStatsPair, elo: EloLookup | null = null, now = new Date()): FootballTeamsFile {
   const { current, previous } = pair;
 
   const teams: FootballTeamRow[] = current.teams
@@ -75,6 +95,7 @@ export function buildTeamsFile(pair: LeagueStatsPair, now = new Date()): Footbal
         attack: round2(strength.attack),
         defense: round2(strength.defense),
         basis: result?.basis ?? 'league-average',
+        ...eloFor(elo, t.name),
       };
     })
     .sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999));
@@ -101,12 +122,19 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const publicDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../public');
 
   fetchStatsFor(SPORT_KEY)
-    .then((pair) => {
+    .then(async (pair) => {
       if (!pair) {
         console.error(`[Joukkuetaulukko] ${SPORT_KEY}: tilastolähdettä ei saatu (FOOTBALL_DATA_TOKEN puuttuu tai haku epäonnistui) — ei julkaistu`);
         process.exit(1);
       }
-      const file = buildTeamsFile(pair);
+      // Elo on lisatieto: jos ESPN pettaa, taulukko julkaistaan ilman sita
+      let elo: EloLookup | null = null;
+      try {
+        elo = await fetchEloMapFor(SPORT_KEY);
+      } catch (err) {
+        console.warn(`[Joukkuetaulukko] Elo-lukuja ei saatu: ${(err as Error).message}`);
+      }
+      const file = buildTeamsFile(pair, elo);
       const dest = writeTeamsFile(publicDir, file);
       console.log(`[Joukkuetaulukko] ${file.league} ${file.season}: ${file.teams.length} joukkuetta → ${dest}`);
     })
