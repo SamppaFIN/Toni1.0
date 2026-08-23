@@ -39,6 +39,22 @@ function formBadges(form) {
     .join('');
 }
 
+/**
+ * Elo-merkki: luku, muutos kauden alusta ja sija. Sama esitystapa kuin
+ * ottelukortilla (football-cards.js:eloParen) -- eri muotoilu samalle luvulle
+ * saisi ne nayttamaan eri luvuilta.
+ *
+ * Pelaamaton joukkue nayttaa viivan eika lahtotasoa 1500: 1500 vaittaisi
+ * mitattua tietoa siella missa sita ei ole.
+ */
+function eloCell(t) {
+  if (t.elo == null) return '<span style="color:var(--muted)">—</span>';
+  const ch = t.elo_change;
+  const color = ch > 0 ? 'var(--c-success)' : ch < 0 ? 'var(--c-danger)' : 'var(--muted)';
+  const arrow = ch > 0 ? '▲' : ch < 0 ? '▼' : '·';
+  const rank = t.elo_rank ? `<span style="color:var(--muted);font-size:.55rem"> #${t.elo_rank}</span>` : '';
+  return `<b style="font-variant-numeric:tabular-nums">${t.elo}</b>${rank} <span style="color:${color};font-size:.58rem">${arrow}${Math.abs(ch ?? 0)}</span>`;
+}
 /** Voimaluku badge — sama kynnyslogiikka kuin hockeyn PDO-badgella (renderTeams()) */
 function strengthBadge(value, betterWhenHigh) {
   const good = betterWhenHigh ? value > 1.1 : value < 0.9;
@@ -56,7 +72,14 @@ export function render(containerId = 'teams-fb-list') {
     return;
   }
 
-  const rows = teams.teams
+  // Elo-jarjestys kun Elo on saatavilla -- sama kuin jaakiekon Joukkueet-tabissa.
+  // Pelaamattomat (elo === null) jaavat loppuun sarjasijan mukaan.
+  const hasElo = teams.teams.some((t) => t.elo != null);
+  const ordered = hasElo
+    ? [...teams.teams].sort((a, b) => (b.elo ?? -Infinity) - (a.elo ?? -Infinity) || (a.rank ?? 999) - (b.rank ?? 999))
+    : teams.teams;
+
+  const rows = ordered
     .map(
       (t) => `<div class="card"><div class="row">
         <div class="matchup"><span class="team-logo" style="background:${esc(t.team.color)};width:22px;height:22px;font-size:8px" title="${esc(t.team.name)}">${esc(t.team.short)}</span> <strong>#${t.rank ?? '—'} ${esc(t.team.name)}</strong></div>
@@ -67,13 +90,14 @@ export function render(containerId = 'teams-fb-list') {
         ${formBadges(t.form)}
       </div>
       <div class="row" style="font-size:.65rem;color:var(--muted);margin-top:3px">
+        <span>Elo ${eloCell(t)}</span>
         <span>Hyökkäys ${strengthBadge(t.attack, true)}</span>
         <span>Puolustus ${strengthBadge(t.defense, false)}</span>
       </div></div>`
     )
     .join('');
 
-  el.innerHTML = `<div style="font-size:.65rem;color:var(--muted);margin-bottom:6px">${esc(teams.league)} ${esc(teams.season)} · voimaluku 1.00 = sarjan keskitaso, puolustuksessa pienempi on parempi</div>${rows}`;
+  el.innerHTML = `<div style="font-size:.65rem;color:var(--muted);margin-bottom:6px">${esc(teams.league)} ${esc(teams.season)} · ${hasElo ? 'jarjestetty Elon mukaan · ' : ''}Elo lahtotaso 1500 · voimaluku 1.00 = sarjan keskitaso, puolustuksessa pienempi on parempi</div>${rows}`;
 }
 
 // BTL on jo varattu football-llm.js:lle (tiketti #38) — joukkuetaulukolle BTS (Sarjataulukko)
