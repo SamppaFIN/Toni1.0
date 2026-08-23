@@ -297,6 +297,9 @@ a.bk-link:hover,a.bk-link:focus-visible{color:var(--c-accent)}
   <div id="round-games" style="margin-top:2px"></div>
 </div>
 <div id="tracker" class="view">
+  <!-- Tiketti #55: oikea live-tilanne ENNEN simulaatiota. Simulaatio on
+       harjoittelua, tama on totta - jarjestys kertoo kumpi on kumpi. -->
+  <div id="live-content" data-sport="football" style="margin-bottom:10px"></div>
   <button class="btn btn-success btn-block" onclick="runSimulation()" id="sim-btn">▶️ Simuloi kierros</button>
   <div id="tracker-list" style="margin-top:8px"></div>
   <!-- Tiketti #33: mittarit. Vain jalkapallomoduuli kirjoittaa tähän, joten
@@ -2008,6 +2011,7 @@ function switchTab(name){
   if(name==='round')renderRound();if(name==='slip')renderSlip();if(name==='tracker')renderTracker();if(name==='history')renderHistory();if(name==='teams')renderTeams();if(name==='info')renderInfo();if(name==='admin')renderAdmin()
   if(name==='chase'&&window.BTC)window.BTC.render();
   if(name==='teams-fb'&&window.BTS)window.BTS.render();
+  if(name==='tracker'&&window.BTV&&!isHockey())window.BTV.render();
 }
 function renderAll(){renderRound();renderSlip();renderTracker();renderHistory();renderTeams();renderInfo();renderAdmin();updateBankroll();updateSlipBadge()}
 
