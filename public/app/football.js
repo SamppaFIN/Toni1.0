@@ -227,9 +227,9 @@ export async function start(containerId = 'round-games') {
   await teamsTable.load();
   teamsTable.render();
 
-  // Tiketti #55: live-tilanne. Puuttuva tiedosto on normaali tila (cron ei ole
-  // ajanut), joten lataus ei saa estaa muun nakyman toimintaa.
-  await liveView.load();
+  // Tiketti #56: live-tilanne. Haku kaynnistyy vasta kun Seuranta-valilehti
+  // avataan (switchTab -> BTV.activate) -- ei turhia kutsuja ESPN:aan
+  // kayttajalle joka ei katso liveä.
   liveView.render();
 }
 

@@ -27,8 +27,7 @@
     "test:watch": "npx vitest",
     "demo": "npx tsx demo/server.ts",
     "e2e": "npx playwright test --config=e2e/playwright.config.ts",
-    "e2e:ui": "npx playwright test --ui --config=e2e/playwright.config.ts",
-    "live": "npx tsx src/ingest/live-scores.ts"
+    "e2e:ui": "npx playwright test --ui --config=e2e/playwright.config.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0",

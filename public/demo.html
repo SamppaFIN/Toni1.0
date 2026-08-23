@@ -2011,7 +2011,7 @@ function switchTab(name){
   if(name==='round')renderRound();if(name==='slip')renderSlip();if(name==='tracker')renderTracker();if(name==='history')renderHistory();if(name==='teams')renderTeams();if(name==='info')renderInfo();if(name==='admin')renderAdmin()
   if(name==='chase'&&window.BTC)window.BTC.render();
   if(name==='teams-fb'&&window.BTS)window.BTS.render();
-  if(name==='tracker'&&window.BTV&&!isHockey())window.BTV.render();
+  if(window.BTV){if(name==='tracker'&&!isHockey())window.BTV.activate();else window.BTV.stop()}
 }
 function renderAll(){renderRound();renderSlip();renderTracker();renderHistory();renderTeams();renderInfo();renderAdmin();updateBankroll();updateSlipBadge()}
 
