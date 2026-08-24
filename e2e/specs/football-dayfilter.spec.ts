@@ -1,75 +1,69 @@
-// E2E: Ottelulistan päiväsuodatin (tiketti #46)
+// E2E: Paivanavigointi kierrossivulla (tiketit #46, #60)
 //
-// Työnjako testien välillä on tarkoituksellinen: jaottelulogiikka on
-// yksikkötestattu injektoidulla kellolla (football-dayfilter.test.ts), joten
-// täällä ei tarkisteta otteluiden lukumääriä — ne riippuisivat ajopäivästä ja
-// testi lakastuisi hiljaa huomenna. Täällä todennetaan vain että suodatin on
-// kytketty renderöintiin ja että tila säilyy.
+// Jaottelulogiikka on yksikkotestattu injektoidulla kellolla
+// (football-dayfilter.test.ts), joten taalla ei tarkisteta otteluiden
+// lukumaaria -- ne riippuisivat ajopaivasta ja testi lakastuisi hiljaa.
+// Taalla todennetaan etta navigointi on kytketty renderointiin ja tila sailyy.
 
 import { test, expect } from '@playwright/test';
 import { useFootball, resetState } from '../helpers.js';
 
-test.describe('Ottelulistan päiväsuodatin', () => {
+test.describe('Paivanavigointi', () => {
   test.beforeEach(async ({ page }) => {
     await useFootball(page);
     await resetState(page);
-    // Ei erillistä bt_football_day_filter-tyhjennystä: Playwright antaa joka
-    // testille tuoreen kontekstin, joten localStorage on jo tyhjä. addInitScript
-    // ajaisi myös reloadissa ja pyyhkisi juuri sen tilan jota säilyvyystesti mittaa.
     await page.goto('/demo.html');
+    await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
   });
 
-  test('oletuksena rajaa tähän päivään ja tarjoaa napin kaikkiin', async ({ page }) => {
-    await expect(page.locator('button:has-text("Näytä kaikki")')).toBeVisible({ timeout: 10000 });
-    // Joko tämän päivän ottelut näkyvät, tai ne on jo pelattu ja pudottiin
-    // seuraaviin — molemmat ovat oikeita, kumpi sattuu riippuu kellonajasta.
-    const text = (await page.locator('#round-games').textContent()) ?? '';
-    expect(/ottelua tänään|näytetään seuraavat/.test(text)).toBe(true);
+  test('tarjoaa eilisen, tanaan, huomisen ja kaikki', async ({ page }) => {
+    const nav = page.locator('#round-games');
+    for (const label of ['Eilen', 'Tänään', 'Huomenna', 'Kaikki']) {
+      await expect(nav.locator(`button:has-text("${label}")`).first()).toBeVisible();
+    }
   });
 
-  test('EI KOSKAAN tyhjää listaa jos aikaikkunassa on pelaamattomia otteluita', async ({ page }) => {
-    await expect(page.locator('button:has-text("Näytä kaikki")')).toBeVisible({ timeout: 10000 });
-
-    const upcoming = await page.evaluate(() => {
-      const s = (window as any).BTF.getSnapshot();
-      return s.matches.filter((m: any) => Date.parse(m.kickoff) > Date.now()).length;
-    });
-    test.skip(upcoming === 0, 'Snapshotissa ei ole yhtään pelaamatonta ottelua');
-
-    // Oletustilassa (vain tänään) kortteja pitää näkyä, vaikka päivän ottelut
-    // olisi jo pelattu — silloin pudotaan automaattisesti seuraaviin.
-    await expect(page.locator('#round-games .card').first()).toBeVisible();
-    const cards = await page.locator('#round-games .card').count();
-    expect(cards).toBeGreaterThan(0);
+  test('oletuksena tanaan on valittuna', async ({ page }) => {
+    const today = page.locator('#round-games button:has-text("Tänään")').first();
+    // Aktiivinen nappi on korostettu aksenttivarilla
+    const weight = await today.evaluate((el) => getComputedStyle(el).fontWeight);
+    expect(Number(weight)).toBeGreaterThanOrEqual(700);
   });
 
-  test('napista saa kaikki ottelut näkyviin ja takaisin', async ({ page }) => {
-    await expect(page.locator('button:has-text("Näytä kaikki")')).toBeVisible({ timeout: 10000 });
-    await page.click('button:has-text("Näytä kaikki")');
+  test('paivan vaihto sailyy sivun paivityksen yli', async ({ page }) => {
+    await page.locator('#round-games button:has-text("Huomenna")').first().click();
+    await expect(page.locator('#round-games')).not.toBeEmpty();
 
-    await expect(page.locator('button:has-text("Vain tänään")')).toBeVisible();
-    await expect(page.locator('#round-games')).not.toContainText('ottelua tänään');
-
-    await page.click('button:has-text("Vain tänään")');
-    await expect(page.locator('button:has-text("Näytä kaikki")')).toBeVisible();
+    await page.reload();
+    await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
+    const tomorrow = page.locator('#round-games button:has-text("Huomenna")').first();
+    const weight = await tomorrow.evaluate((el) => getComputedStyle(el).fontWeight);
+    expect(Number(weight), 'valinnan pitaa sailya').toBeGreaterThanOrEqual(700);
   });
 
-  test('kaikki-tilassa on vähintään yhtä monta korttia kuin tänään-tilassa', async ({ page }) => {
-    await expect(page.locator('button:has-text("Näytä kaikki")')).toBeVisible({ timeout: 10000 });
+  test('eiliseen voi siirtya ja nakyma pysyy ehjana', async ({ page }) => {
+    await page.locator('#round-games button:has-text("Eilen")').first().click();
+    // Joko arkistoituja otteluita tai selkea tyhja tila -- ei koskaan rikki
+    await expect(page.locator('#round-games')).toContainText(/ottelua|Ei otteluita/, { timeout: 5000 });
+    // Navigointi on yha kaytettavissa
+    await expect(page.locator('#round-games button:has-text("Tänään")').first()).toBeVisible();
+  });
+
+  test('kaikki-tilassa on vahintaan yhta monta korttia kuin tanaan', async ({ page }) => {
     const todayCount = await page.locator('#round-games .card').count();
-
-    await page.click('button:has-text("Näytä kaikki")');
+    await page.locator('#round-games button:has-text("Kaikki")').first().click();
     const allCount = await page.locator('#round-games .card').count();
-
     expect(allCount).toBeGreaterThanOrEqual(todayCount);
   });
 
-  test('valinta säilyy sivun päivityksen yli', async ({ page }) => {
-    await expect(page.locator('button:has-text("Näytä kaikki")')).toBeVisible({ timeout: 10000 });
-    await page.click('button:has-text("Näytä kaikki")');
-    await expect(page.locator('button:has-text("Vain tänään")')).toBeVisible();
+  test('EI KOSKAAN tyhjaa listaa kun aikaikkunassa on pelaamattomia otteluita', async ({ page }) => {
+    const upcoming = await page.evaluate(() => {
+      const s = (window as any).BTF.getSnapshot();
+      return s ? s.matches.filter((m: any) => Date.parse(m.kickoff) > Date.now()).length : 0;
+    });
+    test.skip(upcoming === 0, 'Snapshotissa ei ole pelaamattomia otteluita');
 
-    await page.reload();
-    await expect(page.locator('button:has-text("Vain tänään")')).toBeVisible({ timeout: 10000 });
+    await page.locator('#round-games button:has-text("Kaikki")').first().click();
+    await expect(page.locator('#round-games .card').first()).toBeVisible();
   });
 });
