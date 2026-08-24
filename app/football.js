@@ -26,6 +26,7 @@ import { DISPLAY_OPTIONS, getPrefs, togglePref, resetPrefs } from './football-pr
 import * as teamsTable from './football-teams.js';
 import * as liveView from './football-live.js';
 import * as playedToday from './football-results.js';
+import { archiveSnapshot } from './football-archive.js';
 import './football-chase.js'; // rekisteröi window.BTC — ei tarvitse suoraa viittausta täältä
 import './football-llm.js'; // rekisteröi window.BTL (tiketti #38)
 
@@ -122,6 +123,13 @@ function confirmBet(matchId, side, odds, bookmaker) {
 export async function reload() {
   const { snapshot, error } = await loadSnapshot();
   setSnapshot(snapshot, error);
+
+  // Tiketti #60: talleta kertoimet ja mallin arvio ennen kuin ne katoavat.
+  // Cron kirjoittaa today.json:in uusiksi ja pelatut ottelut putoavat siita
+  // pois heti kun API lakkaa tarjoamasta niille kertoimia -- ilman arkistoa
+  // jalkikateisarviointi olisi mahdotonta.
+  if (snapshot) archiveSnapshot(snapshot);
+
   renderAllCards();
   // LLM-paneelin nappi kertoo otteluiden määrän — se vanhenee jos snapshot vaihtuu
   if (window.BTL) window.BTL.render();

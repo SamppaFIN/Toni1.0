@@ -26,6 +26,7 @@ import {
 } from './snapshot.js';
 import { isVisible } from './football-prefs.js';
 import * as calc from './football-calc.js';
+import { archivedDay, toCardShape } from './football-archive.js';
 
 // ─── Päiväsuodatin (tiketti #46) ──────────────────────────────────────────
 //
@@ -40,19 +41,30 @@ import * as calc from './football-calc.js';
 
 const DAY_FILTER_KEY = 'bt_football_day_filter';
 
+/**
+ * Nakyva paiva: siirtyma tastä paivasta (-1 eilen, 0 tanaan, 1 huomenna) tai
+ * "all" koko aikaikkunalle.
+ *
+ * Vanha arvo "today" migroidaan nollaksi, jotta aiemmin tallennettu asetus ei
+ * jata kayttajaa tuntemattomaan tilaan.
+ */
 export function getDayFilter() {
   try {
-    return localStorage.getItem(DAY_FILTER_KEY) === 'all' ? 'all' : 'today';
+    const v = localStorage.getItem(DAY_FILTER_KEY);
+    if (v === 'all') return 'all';
+    if (v === null || v === 'today') return 0;
+    const n = Number(v);
+    return Number.isInteger(n) && n >= -7 && n <= 7 ? n : 0;
   } catch {
-    return 'today';
+    return 0;
   }
 }
 
 export function setDayFilter(mode) {
   try {
-    localStorage.setItem(DAY_FILTER_KEY, mode === 'all' ? 'all' : 'today');
+    localStorage.setItem(DAY_FILTER_KEY, mode === 'all' ? 'all' : String(Number(mode) || 0));
   } catch {
-    /* privaatti-ikkuna: suodatin toimii silti istunnon ajan */
+    /* privaatti-ikkuna: valinta toimii silti istunnon ajan */
   }
   renderAllCards();
 }
@@ -149,6 +161,11 @@ function oddsTable(match, index) {
   if (!match.odds?.length) return '<div class="empty" style="font-size:.7rem">Ei kertoimia</div>';
 
   const head = `<div class="odds-row odds-head"><span>Toimisto</span><span>1</span><span>X</span><span>2</span></div>`;
+
+  // Arkistoitu ottelu on jo pelattu: hinta nayteta&auml;n historiana muttei
+  // klikattavana. Vedon lyominen menneeseen otteluun ei ole mahdollista, ja
+  // klikattava nappi lupaisi jotain mita ei voi tehda.
+  const historic = Boolean(match.fromArchive);
   const edgeBySide = new Map(match.analysis.edges.map((e) => [e.side, e]));
 
   const rows = match.odds
@@ -164,6 +181,9 @@ function oddsTable(match, index) {
         const commissionNote = row.commission > 0 ? ` — pörssin komissio ${(row.commission * 100).toFixed(1)} %` : '';
         const valueNote = valueClass ? ` — ylikerroin, edge ${(edge.edge * 100).toFixed(1)} %` : '';
         const icon = edge && edge.flag !== 'none' ? ` ${FLAG_META[edge.flag].icon}` : isBest ? ' ⭐' : '';
+        if (historic) {
+          return `<span class="bk-odds${isBest ? ' best' : ''}${valueClass}" style="opacity:.75;cursor:default" title="${esc(row.bookmaker)} — ${SIDE_LABELS[side]} ${value.toFixed(2)} (arkistoitu hinta)">${value.toFixed(2)}${icon}</span>`;
+        }
         return `<button class="bk-odds${isBest ? ' best' : ''}${valueClass}" onclick="event.stopPropagation();window.BTF.openBetPopup('${esc(match.id)}','${side}',${value},'${esc(row.bookmaker)}')" title="${esc(row.bookmaker)} — ${SIDE_LABELS[side]} ${value.toFixed(2)}${isBest ? ' (paras hinta)' : ''}${commissionNote}${valueNote}">${value.toFixed(2)}${icon}</button>`;
       };
       return `<div class="odds-row">${bookmakerLabel(row)}${cell('home')}${cell('draw')}${cell('away')}</div>`;
@@ -1113,92 +1133,121 @@ export function renderAllCards() {
     return;
   }
 
-  if (!currentSnapshot.matches.length) {
-    container.innerHTML = `${sourceBanner(currentSnapshot)}<div class="empty">Ei otteluita aikaikkunassa.</div>`;
+  // Harjoitustilassa yksikkö on kierros eikä päivä: harjoituskierrosten
+  // ottelupäivät ovat kiinteitä eivätkä seuraa kalenteria, joten
+  // päivänavigointi piilottaisi koko kierroksen.
+  const practice = getDataSource() === 'mock';
+  if (practice) {
+    renderMatchList(currentSnapshot.matches, { practice: true });
     return;
   }
 
-  // Päiväsuodatin ennen järjestystä: alkaneita ei näytetä koskaan, koska
-  // niiden kerroin on vanhentunut eikä vetoa voi enää lyödä.
+  const mode = getDayFilter();
+
+  if (mode === 'all') {
+    const { todayUpcoming, later } = partitionByDay(currentSnapshot.matches);
+    renderMatchList([...todayUpcoming, ...later], { mode });
+    return;
+  }
+
+  // Päivänäkymä: snapshot + arkisto samalle päivälle.
   //
-  // POIKKEUS harjoitustilassa: harjoituskierrosten ottelupäivät ovat kiinteitä
-  // eivätkä seuraa kalenteria, joten päiväsuodatin piilottaisi koko kierroksen.
-  // Siellä yksikkö on kierros, ei päivä.
-  const practice = getDataSource() === 'mock';
-  const mode = practice ? 'all' : getDayFilter();
-  const { started, todayUpcoming, later } = partitionByDay(currentSnapshot.matches);
+  // Snapshot sisältää vain sen mitä API tarjoaa juuri nyt — eiliset ottelut
+  // ovat pudonneet siitä pois. Arkisto (tiketti #60) täydentää ne takaisin,
+  // jotta eilisen kertoimet ja mallin arvio ovat yhä nähtävissä.
+  const day = dayKeyForOffset(mode);
+  const fromSnapshot = currentSnapshot.matches.filter((m) => localDayKey(m.kickoff) === day);
 
-  // Kun päivän ottelut on pelattu, tyhjä sivu on huonoin mahdollinen lopputulos:
-  // käyttäjä ei näe kohteita eikä syytä. Pudotaan silloin automaattisesti
-  // seuraaviin otteluihin ja kerrotaan miksi. Suodatin ei ole itsetarkoitus —
-  // sen tehtävä oli piilottaa alkaneet, ei jättää käyttäjää tyhjän eteen.
-  const fellBack = !practice && mode === 'today' && todayUpcoming.length === 0 && later.length > 0;
+  // Snapshot voittaa arkiston: se on tuoreempi havainto samasta ottelusta
+  const byId = new Map();
+  for (const a of archivedDay(day)) byId.set(a.id, toCardShape(a));
+  for (const m of fromSnapshot) byId.set(m.id, m);
 
-  // Viimeinen varakeino: jos pelaamattomia ei ole lainkaan, näytetään alkaneet
-  // selvästi merkittynä. Alkaneen ottelun piilottaminen on oikein NIIN KAUAN
-  // kuin näytettävää on jäljellä — mutta tyhjä sivu on aina huonompi kuin
-  // vanhentunut kortti jonka vieressä lukee että se on vanhentunut.
-  const onlyStarted = !practice && todayUpcoming.length === 0 && later.length === 0 && started.length > 0;
+  const all = [...byId.values()].sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
 
-  const visible = practice
-    ? currentSnapshot.matches
-    : onlyStarted
-      ? started
-      : mode === 'all' || fellBack
-        ? [...todayUpcoming, ...later]
-        : todayUpcoming;
+  // Tänään: alkaneet pois toimintalistalta (ne näkyvät "Tänään pelatut"
+  // -osiossa). Menneet ja tulevat päivät näytetään kokonaan.
+  const visible = mode === 0 ? all.filter((m) => Date.parse(m.kickoff) >= Date.now() || m.fromArchive) : all;
+
+  renderMatchList(visible, { mode, day, total: all.length });
+}
+
+/** Päiväavain siirtymän mukaan: -1 = eilen, 0 = tänään, 1 = huomenna */
+function dayKeyForOffset(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return localDayKey(d);
+}
+
+const DAY_LABELS = { '-1': 'Eilen', 0: 'Tänään', 1: 'Huomenna', 2: 'Ylihuomenna' };
+
+/** Päivänavigointi. Arkiston ansiosta myös menneet päivät ovat selattavissa. */
+function dayNav(mode) {
+  const buttons = [-1, 0, 1, 2, 'all']
+    .map((v) => {
+      const active = String(v) === String(mode);
+      const label = v === 'all' ? '📅 Kaikki' : (DAY_LABELS[String(v)] ?? String(v));
+      return `<button class="btn" style="font-size:.6rem;padding:4px 9px;min-height:28px;border-radius:12px;background:${
+        active ? 'var(--c-accent)' : 'oklch(1 1 0/0.08)'
+      };color:${active ? '#000' : 'var(--c-text)'};font-weight:${active ? 700 : 500}" onclick="window.BTF.setDayFilter('${v}')">${label}</button>`;
+    })
+    .join('');
+  return `<div style="display:flex;gap:5px;flex-wrap:wrap;margin:0 0 8px 2px">${buttons}</div>`;
+}
+
+/** Yhteinen renderöinti kaikille päivänäkymille */
+function renderMatchList(list, opts = {}) {
+  const { practice = false, mode = 0, total = list.length } = opts;
 
   // Value-kohteet ensin, sitten aikajärjestyksessä — käyttäjä näkee löydöt heti
-  const ordered = visible.map((m) => ({ m, i: currentSnapshot.matches.indexOf(m) })).sort((a, b) => {
-    const ea = bestEdge(a.m)?.edge ?? -1;
-    const eb = bestEdge(b.m)?.edge ?? -1;
+  const ordered = [...list].sort((a, b) => {
+    const ea = bestEdge(a)?.edge ?? -1;
+    const eb = bestEdge(b)?.edge ?? -1;
     const flagged = (e) => (e > 0.03 ? 1 : 0);
     if (flagged(eb) !== flagged(ea)) return flagged(eb) - flagged(ea);
-    return Date.parse(a.m.kickoff) - Date.parse(b.m.kickoff);
+    return Date.parse(a.kickoff) - Date.parse(b.kickoff);
   });
 
-  const flaggedCount = visible.filter((m) => (bestEdge(m)?.edge ?? 0) > 0.03).length;
+  const flaggedCount = list.filter((m) => (bestEdge(m)?.edge ?? 0) > 0.03).length;
+  const archived = list.filter((m) => m.fromArchive).length;
 
   const notes = [];
-  if (onlyStarted) notes.push('⚠️ kaikki ottelut ovat jo alkaneet — kertoimet ovat vanhentuneet');
-  else if (!practice && started.length) notes.push(`${started.length} alkanutta piilotettu`);
-  if (fellBack) notes.push('tämän päivän ottelut on pelattu — näytetään seuraavat');
-  else if (!practice && !onlyStarted && mode === 'today' && later.length) notes.push(`${later.length} myöhempää piilotettu`);
+  if (archived) notes.push(`${archived} arkistosta — kertoimet ovat historiaa, vetoa ei voi enää lyödä`);
+  if (mode === 0 && total > list.length) notes.push(`${total - list.length} alkanutta piilotettu`);
 
-  const label = practice || mode === 'all' || fellBack || onlyStarted ? 'ottelua' : 'ottelua tänään';
-
-  const toggle = practice
-    ? ''
-    : `<button class="btn" style="font-size:.6rem;padding:3px 9px;min-height:26px;border-radius:12px;background:oklch(1 1 0/0.08);color:var(--c-text)" onclick="window.BTF.setDayFilter('${mode === 'today' ? 'all' : 'today'}')">${mode === 'today' ? `📅 Näytä kaikki (${todayUpcoming.length + later.length})` : '📅 Vain tänään'}</button>`;
-
-  const summary = `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px 2px">
-    <span style="font-size:.65rem;color:var(--c-text-muted)">
-      <b style="color:var(--c-text)">${visible.length}</b> ${label} ·
-      ${flaggedCount ? `<b style="color:var(--c-success)">${flaggedCount} value-kohdetta</b>` : 'ei value-kohteita — markkina on tiukka'}
-      ${notes.length ? `<br><span style="font-size:.58rem">${notes.join(' · ')}</span>` : ''}
-    </span>
-    ${toggle}
+  const summary = `<div style="font-size:.65rem;color:var(--c-text-muted);margin:0 0 8px 2px">
+    <b style="color:var(--c-text)">${list.length}</b> ottelua ·
+    ${flaggedCount ? `<b style="color:var(--c-success)">${flaggedCount} value-kohdetta</b>` : 'ei value-kohteita — markkina on tiukka'}
+    ${notes.length ? `<br><span style="font-size:.58rem">${notes.join(' · ')}</span>` : ''}
   </div>`;
 
-  if (!visible.length) {
-    // Tänne päädytään vain kun aikaikkunassa ei ole yhtään pelaamatonta ottelua
-    const allStarted = started.length > 0;
+  const nav = practice ? '' : dayNav(mode);
+
+  if (!list.length) {
     container.innerHTML =
       roundNav() +
       sourceBanner(currentSnapshot) +
+      nav +
       summary +
-      `<div class="empty">${
-        allStarted
-          ? 'Kaikki aikaikkunan ottelut ovat alkaneet. Aja putki uudelleen tuoreille kohteille.'
-          : 'Ei otteluita aikaikkunassa.'
+      `<div class="empty">Ei otteluita tälle päivälle.${
+        mode < 0 ? ' Arkistossa on vain ne päivät joina sovellus on ollut auki.' : ''
       }</div>`;
     return;
   }
 
-  container.innerHTML = roundNav() + sourceBanner(currentSnapshot) + summary + ordered.map(({ m, i }) => matchCard(m, i)).join('');
+  // Indeksi pitää olla uniikki DOM-tunnisteita varten. Arkistokortti ei ole
+  // snapshotissa, joten sille annetaan oma numeroavaruus.
+  const indexOf = (m) => {
+    const i = currentSnapshot.matches.indexOf(m);
+    return i >= 0 ? i : 1000 + ordered.indexOf(m);
+  };
+
+  container.innerHTML =
+    roundNav() + sourceBanner(currentSnapshot) + nav + summary + ordered.map((m) => matchCard(m, indexOf(m))).join('');
   renderPlacedBets();
   renderOpenLlmPanels();
 }
+
 
 /**
  * Täytä auki olevat "Kysy LLM:ltä" -säiliöt.
