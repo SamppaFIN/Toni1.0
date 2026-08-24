@@ -51,9 +51,18 @@ async function getJson(url) {
   return res.json();
 }
 
-/** Yhden sarjan ottelut tilanteineen */
-export async function fetchScoreboard(leagueCode) {
-  const data = await getJson(`${BASE}/${leagueCode}/scoreboard`);
+/**
+ * Yhden sarjan ottelut tilanteineen.
+ *
+ * `dateStamp` (YYYYMMDD) rajaa yhteen paivaan; ilman sita palautetaan
+ * kaynnissa olevat ja lahipaivien ottelut. Jalkikateisarviointi
+ * (tiketti #70) tarvitsee menneen paivan.
+ */
+export async function fetchScoreboard(leagueCode, dateStamp) {
+  const url = dateStamp
+    ? `${BASE}/${leagueCode}/scoreboard?dates=${dateStamp}`
+    : `${BASE}/${leagueCode}/scoreboard`;
+  const data = await getJson(url);
   return (data.events ?? []).map(parseEvent).filter(Boolean);
 }
 

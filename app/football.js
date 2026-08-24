@@ -26,6 +26,7 @@ import { DISPLAY_OPTIONS, getPrefs, togglePref, resetPrefs } from './football-pr
 import * as teamsTable from './football-teams.js';
 import * as liveView from './football-live.js';
 import * as playedToday from './football-results.js';
+import './football-review.js'; // rekisteroi window.BTA
 import { archiveSnapshot } from './football-archive.js';
 import './football-chase.js'; // rekisteröi window.BTC — ei tarvitse suoraa viittausta täältä
 import './football-llm.js'; // rekisteröi window.BTL (tiketti #38)
