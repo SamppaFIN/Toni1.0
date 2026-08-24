@@ -271,7 +271,7 @@ export interface BlendCandidate {
 export function calibrateBlendWeight(
   samples: Array<{ poisson: SideProbs; market: SideProbs; actual: MarketSide }>,
   step = 0.05
-): { best: BlendCandidate | null; candidates: BlendCandidate[]; sufficientSample: boolean } {
+): { best: BlendCandidate | null; candidates: BlendCandidate[]; sufficientSample: boolean; atBoundary: boolean } {
   const candidates: BlendCandidate[] = [];
 
   for (let w = 0; w <= 1.0001; w += step) {
@@ -293,7 +293,15 @@ export function calibrateBlendWeight(
   }
 
   const best = candidates.length ? candidates.reduce((a, b) => (b.brier < a.brier ? b : a)) : null;
-  return { best, candidates, sufficientSample: samples.length >= MIN_SAMPLE };
+
+  // Reunalla oleva optimi EI ole optimi: se kertoo etta paras arvo on hakuvalin
+  // ULKOPUOLELLA tai ettei data erota arvoja lainkaan. Kummassakin tapauksessa
+  // luvun soveltaminen on arvausta, ja se pitaa sanoa.
+  const atBoundary = Boolean(
+    best && candidates.length > 1 && (best === candidates[0] || best === candidates[candidates.length - 1])
+  );
+
+  return { best, candidates, sufficientSample: samples.length >= MIN_SAMPLE, atBoundary };
 }
 
 function normalize(p: SideProbs): SideProbs {
@@ -338,4 +346,60 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       `  otettu ${taken.toFixed(2)}, reilu sulkeutuminen ${r.fairClosingOdds.toFixed(2)} → CLV ${(r.clv * 100 >= 0 ? '+' : '') + (r.clv * 100).toFixed(1)} %`
     );
   }
+}
+
+// ─── Dixon–Coles-parametrin kalibrointi (tiketti #71) ─────────────────────
+//
+// `rho` on ollut kiinteä −0.05 tiketistä #26 asti. Se on empiirinen
+// kirjallisuusarvo, mutta korjaus on SARJAKOHTAINEN: matalien tulosten
+// ylimäärä riippuu siitä miten sarjassa pelataan. Vahvasti puolustava sarja
+// tarvitsee eri rho:n kuin avoin.
+//
+// Kalibrointi toimii samoin kuin blend-painon (calibrateBlendWeight): kokeile
+// arvoja, valitse se joka minimoi Brier-scoren toteutuneita tuloksia vasten.
+//
+// SAMA VARAUS KUIN KAIKISSA MITTAREISSA: alle MIN_SAMPLE:n otoksella tulos on
+// kohinaa. Funktio kertoo sen `sufficientSample`-lipulla, eikä kutsuja saa
+// soveltaa arvoa ilman että se on tarkistettu.
+
+export interface RhoCandidate {
+  rho: number;
+  brier: number;
+}
+
+/**
+ * Etsi Brier-scoren minimoiva rho.
+ *
+ * @param samples λ-parit ja toteutuneet tulokset
+ * @param predict funktio joka laskee 1X2-todennäköisyydet λ-parista ja rho:sta
+ *                — injektoidaan jottei scoring.ts riipu poisson.ts:stä
+ */
+export function calibrateRho(
+  samples: Array<{ lambdaHome: number; lambdaAway: number; actual: MarketSide }>,
+  predict: (lambdaHome: number, lambdaAway: number, rho: number) => SideProbs,
+  range = { min: -0.2, max: 0.05, step: 0.01 }
+): { best: RhoCandidate | null; candidates: RhoCandidate[]; sufficientSample: boolean; atBoundary: boolean } {
+  const candidates: RhoCandidate[] = [];
+
+  for (let r = range.min; r <= range.max + 1e-9; r += range.step) {
+    const rho = Math.round(r * 1000) / 1000;
+    const outcomes: Outcome[] = samples.map((s, i) => ({
+      matchId: String(i),
+      actual: s.actual,
+      market: null,
+      model: predict(s.lambdaHome, s.lambdaAway, rho),
+    }));
+    const score = brierScore(outcomes, (o) => o.model);
+    if (score !== null) candidates.push({ rho, brier: score });
+  }
+
+  const best = candidates.length ? candidates.reduce((a, b) => (b.brier < a.brier ? b : a)) : null;
+  // Reunalla oleva optimi EI ole optimi: paras arvo on hakuvalin ULKOPUOLELLA
+  // tai data ei erota arvoja lainkaan. Kummassakin tapauksessa soveltaminen
+  // on arvausta, ja se pitaa sanoa.
+  const atBoundary = Boolean(
+    best && candidates.length > 1 && (best === candidates[0] || best === candidates[candidates.length - 1])
+  );
+
+  return { best, candidates, sufficientSample: samples.length >= MIN_SAMPLE, atBoundary };
 }
