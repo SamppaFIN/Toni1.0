@@ -1194,14 +1194,18 @@ function dayKeyForOffset(offset) {
 const DAY_LABELS = { '-1': 'Eilen', 0: 'Tänään', 1: 'Huomenna', 2: 'Ylihuomenna' };
 
 /** Päivänavigointi. Arkiston ansiosta myös menneet päivät ovat selattavissa. */
+/**
+ * Paivanavigointi. Arkiston ansiosta myos menneet paivat ovat selattavissa.
+ *
+ * Varit tulevat .day-btn-luokasta (demo.html) eivatka inline-tyyleista:
+ * kovakoodattu tausta katosi kasino-teeman gradientilla (tiketti #66).
+ */
 function dayNav(mode) {
   const buttons = [-1, 0, 1, 2, 'all']
     .map((v) => {
       const active = String(v) === String(mode);
       const label = v === 'all' ? '📅 Kaikki' : (DAY_LABELS[String(v)] ?? String(v));
-      return `<button class="btn" style="font-size:.6rem;padding:4px 9px;min-height:28px;border-radius:12px;background:${
-        active ? 'var(--c-accent)' : 'oklch(1 1 0/0.08)'
-      };color:${active ? '#000' : 'var(--c-text)'};font-weight:${active ? 700 : 500}" onclick="window.BTF.setDayFilter('${v}')">${label}</button>`;
+      return `<button class="day-btn${active ? ' active' : ''}" onclick="window.BTF.setDayFilter('${v}')">${label}</button>`;
     })
     .join('');
   return `<div style="display:flex;gap:5px;flex-wrap:wrap;margin:0 0 8px 2px">${buttons}</div>`;
