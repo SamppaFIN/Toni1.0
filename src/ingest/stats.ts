@@ -58,6 +58,18 @@ const SOURCES: Record<string, { fetch: StatsFetcher; seasonYear: (now: Date) => 
     fetch: (year) => fetchLeagueStats('FL1', year),
     seasonYear: seasonYearAutumnSpring,
   },
+  soccer_netherlands_eredivisie: {
+    fetch: (year) => fetchLeagueStats('DED', year),
+    seasonYear: seasonYearAutumnSpring,
+  },
+  soccer_portugal_primeira_liga: {
+    fetch: (year) => fetchLeagueStats('PPL', year),
+    seasonYear: seasonYearAutumnSpring,
+  },
+  soccer_uefa_champs_league: {
+    fetch: (year) => fetchLeagueStats('CL', year),
+    seasonYear: seasonYearAutumnSpring,
+  },
 };
 
 /** Syksy–kevät-kaudessa heinäkuusta eteenpäin ollaan jo uudessa kaudessa */

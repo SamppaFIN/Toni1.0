@@ -13,6 +13,7 @@ import { config } from '../config.js';
 import { LeagueSeasonStats, TeamSeasonStats } from '../types-football.js';
 import { shrinkLeagueAverages, LEAGUE_AVG_PRIOR_MATCHES } from '../analyze/poisson.js';
 import { cached } from './cache.js';
+import { Throttle, withRetry, isRateLimit } from './throttle.js';
 
 interface FdTeam {
   id: number;
@@ -54,21 +55,40 @@ export const COMPETITION_LABELS: Record<string, string> = {
   BSA: 'Brasileirão',
 };
 
+/**
+ * football-data.orgin ilmaistaso: 10 pyyntoa/min. Kahdeksalla sarjalla
+ * pyyntoja on 16 (nykyinen + edellinen kausi kullekin), joten tahdistus on
+ * pakollinen. 6.5 s valilla mahtuu ~9 pyyntoa minuutissa eli rajan alle
+ * pienella marginaalilla.
+ *
+ * Jaettu instanssi: kaikki taman moduulin kutsut kulkevat saman jonon lapi.
+ */
+const fdThrottle = new Throttle(6_500, 'football-data.org');
+
 async function fetchStandingsRaw(code: string, season?: number): Promise<FdStandingsResponse> {
   if (!config.footballData.token) throw new Error('FOOTBALL_DATA_TOKEN puuttuu');
 
   const url = `${config.footballData.baseUrl}/competitions/${code}/standings${season ? `?season=${season}` : ''}`;
-  const res = await fetch(url, { headers: { 'X-Auth-Token': config.footballData.token } });
+  const label = `${code}${season ? ` (${season})` : ''}`;
 
-  if (res.status === 429) {
-    throw new Error('football-data.org: pyyntöraja ylittyi (10/min) — odota hetki');
-  }
-  if (!res.ok) {
-    throw new Error(`football-data.org ${code}${season ? ` (${season})` : ''}: ${res.status} ${res.statusText}`);
-  }
-  return (await res.json()) as FdStandingsResponse;
+  // Tahdistus estaa rajan ylityksen, uudelleenyritys korjaa sen jos raja
+  // silti osuu (esim. toinen prosessi kaytti kiintiota samaan aikaan).
+  return withRetry(
+    () =>
+      fdThrottle.run(async () => {
+        const res = await fetch(url, { headers: { 'X-Auth-Token': config.footballData.token } });
+
+        if (res.status === 429) {
+          throw new Error(`football-data.org ${label}: 429 pyyntoraja ylittyi (10/min)`);
+        }
+        if (!res.ok) {
+          throw new Error(`football-data.org ${label}: ${res.status} ${res.statusText}`);
+        }
+        return (await res.json()) as FdStandingsResponse;
+      }),
+    { attempts: 3, shouldRetry: isRateLimit, label }
+  );
 }
-
 /** Muunna API:n taulukot normalisoituun muotoon */
 export function parseStandings(data: FdStandingsResponse): LeagueSeasonStats {
   const total = data.standings.find((s) => s.type === 'TOTAL');

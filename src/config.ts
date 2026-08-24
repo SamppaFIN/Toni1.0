@@ -21,7 +21,21 @@ export const config = {
     bookmakers: (process.env.ODDS_BOOKMAKERS || '').split(',').map((b) => b.trim()).filter(Boolean),
     // Jalkapallosarjat joista kertoimet haetaan (The Odds API sport keys).
     // Yksi pyyntö kuluttaa markkinat × alueet krediittiä — ilmaistasolla 500/kk.
-    footballSports: (process.env.ODDS_FOOTBALL_SPORTS || 'soccer_finland_veikkausliiga,soccer_epl')
+    // Tiketti #61/#62: kahdeksan sarjaa = ilmaistason maksimi.
+    // 8 sarjaa x 2 ajoa/vrk x 30 pv = 480 krediittia/kk (raja 500).
+    // Kaikilla naista on tilastolahde, joten malli on taysi eika market-only.
+    // Lisays: aseta ODDS_FOOTBALL_SPORTS ja tarkista quotaWarning-loki.
+    footballSports: (process.env.ODDS_FOOTBALL_SPORTS ||
+      [
+        'soccer_epl',
+        'soccer_spain_la_liga',
+        'soccer_italy_serie_a',
+        'soccer_germany_bundesliga',
+        'soccer_france_ligue_one',
+        'soccer_efl_champ',
+        'soccer_netherlands_eredivisie',
+        'soccer_finland_veikkausliiga',
+      ].join(','))
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean),
