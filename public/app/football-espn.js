@@ -192,3 +192,91 @@ export function ymd(date) {
   const d = date instanceof Date ? date : new Date(date);
   return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
 }
+
+// ─── Keskinäiset kohtaamiset (tiketti #69) ────────────────────────────────
+//
+// Haetaan SELAIMESTA pyynnöstä eikä cronissa: cron-haku tarkoittaisi noin 50
+// lisäkutsua ESPN:ään joka ajolla (yksi per ottelu), ja käyttäjä avaa
+// Tunnusluvut-osion vain osalle otteluista. Tämä on toisen palvelin.
+//
+// H2H on NÄYTTÖTIETOA eikä syötettä mallille. Kahden joukkueen aiemmat
+// kohtaamiset ovat pieni ja vahvasti valikoitunut otos — samat seurat, eri
+// kokoonpanot, eri vuodet. Poisson saa voimansa koko sarjan datasta, mikä on
+// tilastollisesti paljon vahvempi peruste.
+
+const h2hCache = new Map();
+
+/** Etsi ESPN:n tapahtumatunniste ottelulle nimien perusteella */
+async function findEventId(leagueCode, home, away, kickoff) {
+  const d = new Date(kickoff);
+  const stamp = Number.isNaN(d.getTime()) ? null : ymd(d);
+  const url = stamp ? `${BASE}/${leagueCode}/scoreboard?dates=${stamp}` : `${BASE}/${leagueCode}/scoreboard`;
+  const data = await getJson(url);
+
+  for (const event of data.events ?? []) {
+    const m = parseEvent(event);
+    if (!m) continue;
+    if (normalizeTeam(m.home) === normalizeTeam(home) && normalizeTeam(m.away) === normalizeTeam(away)) {
+      return m.id;
+    }
+  }
+  return null;
+}
+
+/** Kohtaamiset kotijoukkueen näkökulmasta. Virhe tai puuttuva data → tyhjä. */
+export async function fetchH2H(leagueName, home, away, kickoff, limit = 5) {
+  const code = LEAGUE_CODES[leagueName];
+  if (!code) return [];
+
+  const key = `${code}|${normalizeTeam(home)}|${normalizeTeam(away)}`;
+  if (h2hCache.has(key)) return h2hCache.get(key);
+
+  try {
+    const id = await findEventId(code, home, away, kickoff);
+    if (!id) {
+      h2hCache.set(key, []);
+      return [];
+    }
+    const data = await getJson(`${BASE}/${code}/summary?event=${encodeURIComponent(id)}`);
+    const out = parseSeasonSeries(data, home, limit);
+    h2hCache.set(key, out);
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+/** Sama jäsennys kuin palvelimen results-espn.ts:parseH2H — pidä yhtenäisenä */
+export function parseSeasonSeries(data, perspective, limit = 5) {
+  const series = data?.seasonseries;
+  if (!Array.isArray(series)) return [];
+
+  const wanted = normalizeTeam(perspective);
+  const out = [];
+
+  for (const block of series) {
+    for (const e of block.events ?? []) {
+      if (!e.statusType?.completed) continue;
+      const home = e.competitors?.find((c) => c.homeAway === 'home');
+      const away = e.competitors?.find((c) => c.homeAway === 'away');
+      if (!home || !away) continue;
+
+      const hs = Number(home.score);
+      const as = Number(away.score);
+      if (!Number.isFinite(hs) || !Number.isFinite(as)) continue;
+
+      const homeName = normalizeTeam(home.team?.displayName ?? '');
+      const awayName = normalizeTeam(away.team?.displayName ?? '');
+      // Nakokulmaa ei voi paatella jos kumpikaan ei tasmaa -- ohitetaan
+      // mieluummin kuin merkitaan vaarin pain
+      if (wanted !== homeName && wanted !== awayName) continue;
+
+      out.push({
+        date: (e.date ?? '').slice(0, 10),
+        score: `${hs}–${as}`,
+        venue: wanted === homeName ? 'home' : 'away',
+      });
+    }
+  }
+  return out.sort((a, b) => b.date.localeCompare(a.date)).slice(0, limit);
+}

@@ -137,3 +137,96 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       process.exit(1);
     });
 }
+
+// ─── Keskinäiset kohtaamiset (tiketti #69) ────────────────────────────────
+//
+// `stats.h2h` on ollut tyhjä taulukko tiketistä #24 asti: sarjataulukko ei
+// sisällä ottelukohtaisia tuloksia, eikä niille ollut lähdettä. ESPN antaa
+// ne `seasonseries`-kentässä ilmaiseksi.
+//
+// H2H on tarkoituksella VAIN NÄYTTÖTIETOA eikä syötettä mallille. Kahden
+// joukkueen aiemmat kohtaamiset ovat pieni ja vahvasti valikoitunut otos —
+// samat seurat, eri kokoonpanot, eri vuodet. Poisson-malli saa voimansa koko
+// sarjan datasta, mikä on tilastollisesti paljon vahvempi peruste. Historia
+// näytetään koska katsoja haluaa nähdä sen, ei koska se ennustaa.
+
+import { H2HResult } from '../types-football.js';
+
+interface SeriesCompetitor {
+  homeAway?: string;
+  score?: string | number | null;
+  team?: { displayName?: string };
+}
+
+interface SeriesEvent {
+  date?: string;
+  statusType?: { completed?: boolean };
+  competitors?: SeriesCompetitor[];
+}
+
+/**
+ * Poimi keskinäiset kohtaamiset ESPN:n summary-vastauksesta.
+ *
+ * `perspective` kertoo kumman joukkueen näkökulmasta `venue` merkitään —
+ * kortti näyttää historian kotijoukkueen silmin, joten "kotona" tarkoittaa
+ * että KYSEINEN joukkue oli kotona, ei että ottelu oli tässä stadionissa.
+ */
+export function parseH2H(data: unknown, perspective: string, limit = 5): H2HResult[] {
+  const series = (data as { seasonseries?: Array<{ events?: SeriesEvent[] }> })?.seasonseries;
+  if (!Array.isArray(series)) return [];
+
+  const out: H2HResult[] = [];
+  const wanted = normalizeForH2H(perspective);
+
+  for (const block of series) {
+    for (const e of block.events ?? []) {
+      if (!e.statusType?.completed) continue;
+
+      const home = e.competitors?.find((c) => c.homeAway === 'home');
+      const away = e.competitors?.find((c) => c.homeAway === 'away');
+      if (!home || !away) continue;
+
+      const hs = Number(home.score);
+      const as = Number(away.score);
+      if (!Number.isFinite(hs) || !Number.isFinite(as)) continue;
+
+      const homeName = normalizeForH2H(home.team?.displayName ?? '');
+      // Jos kumpikaan ei täsmää, näkökulmaa ei voi päätellä — ohitetaan
+      // mieluummin kuin merkitään väärin päin.
+      const awayName = normalizeForH2H(away.team?.displayName ?? '');
+      if (wanted !== homeName && wanted !== awayName) continue;
+
+      out.push({
+        date: (e.date ?? '').slice(0, 10),
+        score: `${hs}–${as}`,
+        venue: wanted === homeName ? 'home' : 'away',
+      });
+    }
+  }
+
+  // Uusin ensin — vanha kohtaaminen kertoo vähemmän kuin tuore
+  return out.sort((a, b) => b.date.localeCompare(a.date)).slice(0, limit);
+}
+
+/** Kevyt normalisointi H2H-täsmäytykseen; sama periaate kuin normalizeClubName */
+function normalizeForH2H(name: string): string {
+  return String(name ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .split(/[^a-z0-9]+/)
+    .filter((t) => t && !['afc', 'fc', 'cf', 'sc', 'ac', 'if', 'ifk', 'club'].includes(t))
+    .join('');
+}
+
+/** Hae yhden ottelun keskinäiset kohtaamiset. Virhe → tyhjä, ei kaadu. */
+export async function fetchH2H(sportKey: string, eventId: string, perspective: string): Promise<H2HResult[]> {
+  const code = ESPN_LEAGUE_CODES[sportKey];
+  if (!code) return [];
+  try {
+    const res = await fetch(`${BASE}/${code}/summary?event=${encodeURIComponent(eventId)}`);
+    if (!res.ok) return [];
+    return parseH2H(await res.json(), perspective);
+  } catch {
+    return [];
+  }
+}

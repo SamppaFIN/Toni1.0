@@ -27,7 +27,7 @@ import {
 import { isVisible } from './football-prefs.js';
 import * as calc from './football-calc.js';
 import { archivedDay, toCardShape } from './football-archive.js';
-import { LEAGUE_CODES, fetchFixtures, ymd } from './football-espn.js';
+import { LEAGUE_CODES, fetchFixtures, ymd, fetchH2H } from './football-espn.js';
 
 // ─── Päiväsuodatin (tiketti #46) ──────────────────────────────────────────
 //
@@ -396,11 +396,16 @@ function statsSection(match) {
   }
   if (h.form || a.form) rows.push(statRow('viime ottelut', formBadges(h.form), formBadges(a.form)));
 
+  // Keskinaiset kohtaamiset (tiketti #69): snapshot ei sisalla niita, koska
+  // sarjataulukossa ei ole ottelukohtaisia tuloksia. Haetaan ESPN:sta vasta
+  // kun kayttaja avaa taman osion -- se on toisen palvelin, eika jokaista
+  // ottelua katsota.
+  const h2hId = `h2h-${matchIndex(match.id)}`;
   const h2h = match.stats.h2h?.length
-    ? `<div style="margin-top:8px;font-size:.68rem"><b>Aiemmat kohtaamiset</b><br>${match.stats.h2h
-        .map((g) => `<span style="color:var(--c-text-muted)">${g.date}</span> ${esc(g.score)} <span style="font-size:.6rem;color:var(--c-text-muted)">(${g.venue === 'home' ? 'kotona' : 'vieraissa'})</span>`)
-        .join('<br>')}</div>`
-    : `<div style="margin-top:8px;font-size:.65rem;color:var(--c-text-muted)">Aiempia kohtaamisia ei näytetä — sarjataulukko ei sisällä ottelukohtaisia tuloksia.</div>`;
+    ? renderH2H(match.stats.h2h)
+    : `<div id="${h2hId}" style="margin-top:8px;font-size:.65rem;color:var(--c-text-muted)">Haetaan aiempia kohtaamisia…</div>`;
+
+  if (!match.stats.h2h?.length) loadH2H(match, h2hId);
 
   return `<div style="padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
     <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;font-size:.7rem;margin-bottom:4px;color:var(--c-text-muted)">
@@ -820,6 +825,33 @@ function calcSection(match) {
  * moduuli ei tuo football-llm.js:ää importilla — silta kulkee window.BTL:n
  * kautta, sama kapea rajapinta kuin muuallakin (window.BT / window.BTF).
  */
+
+/** Kohtaamislista yhtenaisessa muodossa riippumatta lahteesta */
+function renderH2H(list) {
+  return `<div style="margin-top:8px;font-size:.68rem"><b>Aiemmat kohtaamiset</b><br>${list
+    .map((g) => `<span style="color:var(--c-text-muted)">${esc(g.date)}</span> ${esc(g.score)} <span style="font-size:.6rem;color:var(--c-text-muted)">(${g.venue === 'home' ? 'kotona' : 'vieraissa'})</span>`)
+    .join('<br>')}</div>`;
+}
+
+/**
+ * Hae kohtaamiset taustalla ja korvaa latausteksti.
+ *
+ * Epaonnistuminen kerrotaan eika jateta latausviestia roikkumaan: pysyva
+ * "Haetaan..." nayttaa jumilta eika kerro etta dataa ei yksinkertaisesti ole.
+ */
+async function loadH2H(match, containerId) {
+  let list = [];
+  try {
+    list = await fetchH2H(match.league, match.home.name, match.away.name, match.kickoff);
+  } catch {
+    list = [];
+  }
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.outerHTML = list.length
+    ? renderH2H(list)
+    : `<div style="margin-top:8px;font-size:.65rem;color:var(--c-text-muted)">Aiempia kohtaamisia ei loytynyt talle parille.</div>`;
+}
 // ─── Kerroinlaskuri (tiketti #49) ─────────────────────────────────────────
 //
 // Käyttäjä lisää omia tekijöitä ("avainhyökkääjä poissa −15 %"), jotka

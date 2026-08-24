@@ -118,3 +118,67 @@ test.describe('Live-seuranta', () => {
     await expect(page.locator('#live-content')).toBeHidden();
   });
 });
+
+test.describe('Keskinaiset kohtaamiset (tiketti #69)', () => {
+  const SUMMARY_H2H = {
+    seasonseries: [
+      {
+        events: [
+          {
+            date: '2025-03-10T19:45Z',
+            statusType: { completed: true },
+            competitors: [
+              { homeAway: 'home', team: { displayName: 'Fulham' }, score: '2' },
+              { homeAway: 'away', team: { displayName: 'Chelsea' }, score: '1' },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  test('kohtaamiset haetaan ja naytetaan', async ({ page }) => {
+    await useFootball(page);
+    await resetState(page);
+    await page.route('**/site.api.espn.com/**', async (route: any) => {
+      const url = route.request().url();
+      if (url.includes('/summary')) {
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SUMMARY_H2H) });
+      }
+      // Scoreboard: palauta ottelu jonka nimet vastaavat snapshotia
+      const snap = await (await page.request.get('/data/today.json')).json();
+      const m = snap.matches?.[0];
+      if (!m) return route.fulfill({ status: 200, contentType: 'application/json', body: '{"events":[]}' });
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          events: [
+            {
+              id: '999',
+              date: m.kickoff,
+              status: { type: { state: 'pre', description: 'Scheduled' } },
+              competitions: [
+                {
+                  competitors: [
+                    { homeAway: 'home', team: { displayName: m.home.name }, score: null },
+                    { homeAway: 'away', team: { displayName: m.away.name }, score: null },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      });
+    });
+
+    await page.goto('/demo.html');
+    await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
+
+    const card = page.locator('#round-games .card').filter({ has: page.locator('button:has-text("Tunnusluvut")') }).first();
+    await card.locator('button:has-text("Tunnusluvut")').click();
+
+    // Joko kohtaamiset tai selkea "ei loytynyt" -- ei koskaan jumiin jaava lataus
+    await expect(card).toContainText(/Aiemmat kohtaamiset|ei loytynyt|ei ole ilmaista tunnuslukulahdetta/, { timeout: 10000 });
+  });
+});
