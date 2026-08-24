@@ -27,6 +27,7 @@ import {
 import { isVisible } from './football-prefs.js';
 import * as calc from './football-calc.js';
 import { archivedDay, toCardShape } from './football-archive.js';
+import { LEAGUE_CODES, fetchFixtures, ymd } from './football-espn.js';
 
 // ─── Päiväsuodatin (tiketti #46) ──────────────────────────────────────────
 //
@@ -1224,14 +1225,28 @@ function renderMatchList(list, opts = {}) {
   const nav = practice ? '' : dayNav(mode);
 
   if (!list.length) {
+    // Tyhja paiva ei ole umpikuja. Menneelle paivalle kerrotaan miksi arkisto
+    // on tyhja, tulevalle tarjotaan HAKUNAPPI joka noutaa ottelut ESPN:sta.
+    // Haku tehdaan vasta napista: se on toisen palvelin, eika kayttajaa
+    // kiinnosta huominen ennen kuin han sita kysyy.
+    const canFetch = mode !== 'all' && Number(mode) > 0;
+    const explain =
+      Number(mode) < 0
+        ? 'Arkistossa on vain ne paivat joina sovellus on ollut auki.'
+        : canFetch
+          ? 'Kertoimia ei ole viela haettu talle paivalle.'
+          : '';
+
     container.innerHTML =
       roundNav() +
-      sourceBanner(currentSnapshot) +
       nav +
+      sourceBanner(currentSnapshot) +
       summary +
-      `<div class="empty">Ei otteluita tälle päivälle.${
-        mode < 0 ? ' Arkistossa on vain ne päivät joina sovellus on ollut auki.' : ''
-      }</div>`;
+      `<div class="empty">Ei otteluita talle paivalle.${explain ? ' ' + explain : ''}</div>` +
+      (canFetch
+        ? `<button class="btn btn-primary btn-block" style="margin-top:8px;font-size:.7rem" onclick="window.BTF.fetchDay(${Number(mode)})">🔎 Hae ottelut ja kertoimet</button>`
+        : '') +
+      `<div id="day-preview"></div>`;
     return;
   }
 
@@ -1243,7 +1258,7 @@ function renderMatchList(list, opts = {}) {
   };
 
   container.innerHTML =
-    roundNav() + sourceBanner(currentSnapshot) + nav + summary + ordered.map((m) => matchCard(m, indexOf(m))).join('');
+    roundNav() + nav + sourceBanner(currentSnapshot) + summary + ordered.map((m) => matchCard(m, indexOf(m))).join('');
   renderPlacedBets();
   renderOpenLlmPanels();
 }
@@ -1291,4 +1306,80 @@ export function findMatch(id) {
 
 export function matchIndex(id) {
   return currentSnapshot?.matches.findIndex((m) => m.id === id) ?? -1;
+}
+
+// ─── Tulevan päivän ennakkohaku (tiketti #63) ─────────────────────────────
+
+/**
+ * Hae yhden päivän ottelut ESPN:stä napin takaa.
+ *
+ * MIKSI VASTA NAPISTA: tämä on toisen palvelin, eikä käyttäjää kiinnosta
+ * huominen ennen kuin hän sitä kysyy. Automaattinen haku joka päivänvaihdolla
+ * kuormittaisi turhaan.
+ *
+ * MIKSI EI EDGEÄ: ESPN antaa kertoimet vain yhdeltä toimistolta (DraftKings).
+ * Analyysimme rakentuu kymmenen eurooppalaisen toimiston konsensuksen ja
+ * Pinnacle-ankkurin varaan — yhden toimiston hinnasta laskettu edge olisi eri
+ * mittari samalla nimellä. Siksi tämä on ENNAKKO, ei analyysi.
+ */
+export async function fetchDay(offset) {
+  const el = document.getElementById('day-preview');
+  if (!el) return;
+
+  const d = new Date();
+  d.setDate(d.getDate() + Number(offset || 0));
+  const stamp = ymd(d);
+
+  const snap = getSnapshot();
+  const names = new Set((snap?.matches ?? []).map((m) => m.league));
+  const codes = [...names].map((n) => LEAGUE_CODES[n]).filter(Boolean);
+  const leagues = codes.length ? [...new Set(codes)] : ['eng.1'];
+
+  el.innerHTML = '<div style="font-size:.68rem;color:var(--c-text-muted);padding:8px">Haetaan…</div>';
+
+  const found = [];
+  const failed = [];
+  for (const code of leagues) {
+    try {
+      for (const m of await fetchFixtures(code, stamp, stamp)) found.push(m);
+    } catch (err) {
+      failed.push(code);
+    }
+  }
+  found.sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
+
+  if (!found.length) {
+    el.innerHTML = `<div style="font-size:.68rem;color:var(--c-text-muted);padding:8px">
+      Ei otteluita tälle päivälle näissä sarjoissa.${failed.length ? ` (${failed.length} sarjan haku epäonnistui)` : ''}
+    </div>`;
+    return;
+  }
+
+  const rows = found
+    .map((m) => {
+      const p = m.preview;
+      const price = (v) => (v ? v.toFixed(2) : '—');
+      const odds = p
+        ? `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:5px;font-size:.7rem;text-align:center">
+             <span>1 <b>${price(p.home)}</b></span>
+             <span>X <b>${price(p.draw)}</b></span>
+             <span>2 <b>${price(p.away)}</b></span>
+           </div>
+           <div style="font-size:.55rem;color:var(--c-text-muted);margin-top:3px">Lähde: ${esc(p.provider)} — yksi toimisto, ei mallin arviota</div>`
+        : '<div style="font-size:.6rem;color:var(--c-text-muted);margin-top:4px">Kertoimia ei vielä saatavilla</div>';
+
+      return `<div class="card">
+        <div class="row">
+          <span style="font-size:.74rem">${esc(m.home)} – ${esc(m.away)}</span>
+          <span style="font-size:.62rem;color:var(--c-text-muted)">${esc(kickoffLabel(m.kickoff))}</span>
+        </div>
+        ${odds}
+      </div>`;
+    })
+    .join('');
+
+  el.innerHTML = `<div style="font-size:.63rem;color:var(--c-text-muted);margin:10px 0 6px 2px">
+      🔎 <b style="color:var(--c-text)">${found.length} ottelua</b> — ennakkotieto ESPN:stä.
+      Täysi analyysi (10 toimistoa, malli, edge, panossuositus) tulee snapshot-putkesta.
+    </div>${rows}`;
 }
