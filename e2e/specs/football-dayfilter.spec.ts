@@ -6,6 +6,7 @@
 // Taalla todennetaan etta navigointi on kytketty renderointiin ja tila sailyy.
 
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { useFootball, resetState } from '../helpers.js';
 
 test.describe('Paivanavigointi', () => {
@@ -104,5 +105,31 @@ test.describe('Paivanapit molemmissa teemoissa (tiketti #66)', () => {
     const bg = (l: any) => l.evaluate((el: Element) => getComputedStyle(el).backgroundColor);
 
     expect(await bg(active)).not.toBe(await bg(inactive));
+  });
+});
+
+test.describe('Tyhjan sivun varakeino (regressio #60)', () => {
+  test('kierrosnakyma EI ole tyhja kun paivan ainoa ottelu on alkanut', async ({ page }) => {
+    await useFootball(page);
+    await resetState(page);
+
+    // Fikstuuri levylta, kickoff tunti sitten -> ottelu on "alkanut"
+    const fixture = JSON.parse(
+      readFileSync(new URL('../fixtures/snapshot-with-elo.json', import.meta.url), 'utf8')
+    );
+    fixture.generated_at = new Date().toISOString();
+    fixture.matches = [{ ...fixture.matches[0], kickoff: new Date(Date.now() - 3600_000).toISOString() }];
+
+    await page.route('**/data/today.json', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) })
+    );
+    await page.addInitScript(() => localStorage.removeItem('bt_football_day_filter'));
+    await page.goto('/demo.html');
+
+    // Paivasuodatin piilottaa alkaneet, mutta kun muuta ei ole, ne on
+    // naytettava merkittyna. Tyhja sivu on aina huonompi kuin vanhentunut
+    // kortti jonka vieressa lukee etta se on vanhentunut.
+    await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#round-games')).toContainText('alkaneet');
   });
 });

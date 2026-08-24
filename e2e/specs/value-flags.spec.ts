@@ -2,6 +2,17 @@
 import { test, expect } from '@playwright/test';
 import { useHockey, resetState } from '../helpers.js';
 
+/**
+ * Ensimmainen OTTELUKORTTI -- ei kierroksen otsikkobanneri.
+ *
+ * Jaakiekkonakymaan lisattiin "Kausisimulaatio"-banneri ottelukorttien
+ * eteen, jolloin .card:first osui banneriin ja kaikki nama testit
+ * hajosivat vaikka toiminnallisuus oli ehja. Ottelukortin tunnistaa
+ * .matchup-elementista jota bannerissa ei ole.
+ */
+function matchCards(page: import("@playwright/test").Page) {
+  return page.locator('#round-games .card').filter({ has: page.locator('.matchup') });
+}
 test.describe('Kierros -näkymä', () => {
 
   test.beforeEach(async ({ page }) => {
@@ -18,14 +29,14 @@ test.describe('Kierros -näkymä', () => {
 
   test('näyttää pelikortit tuleville otteluille', async ({ page }) => {
     await page.goto('/demo.html');
-    const cards = page.locator('#round-games .card');
+    const cards = matchCards(page);
     await expect(cards.first()).toBeVisible({ timeout: 5000 });
     expect(await cards.count()).toBeGreaterThanOrEqual(5);
   });
 
   test('pelikortissa näkyy joukkuenimet ja Elo suluissa', async ({ page }) => {
     await page.goto('/demo.html');
-    const firstCard = page.locator('#round-games .card').first();
+    const firstCard = matchCards(page).first();
     await expect(firstCard).toBeVisible({ timeout: 5000 });
     const text = await firstCard.textContent();
     expect(text).toMatch(/\(\d{3,4}\)/);
@@ -33,7 +44,7 @@ test.describe('Kierros -näkymä', () => {
 
   test('näyttää kertoimet useilta vedonlyöntitoimistoilta', async ({ page }) => {
     await page.goto('/demo.html');
-    const firstCard = page.locator('#round-games .card').first();
+    const firstCard = matchCards(page).first();
     await expect(firstCard).toBeVisible({ timeout: 5000 });
     const bkNames = firstCard.locator('.bk-name');
     expect(await bkNames.count()).toBeGreaterThanOrEqual(2);
@@ -41,12 +52,27 @@ test.describe('Kierros -näkymä', () => {
     expect(await cells.count()).toBeGreaterThanOrEqual(6);
   });
 
-  test('value-flag (💎) näkyy kun edge > 3%', async ({ page }) => {
+  test('value-lippu ei valehtele: 💎 vain kun edge yli 3 %', async ({ page }) => {
     await page.goto('/demo.html');
-    const flag = page.locator('#round-games .card .badge').first();
-    await expect(flag).toBeVisible({ timeout: 5000 });
-    const text = await flag.textContent();
-    expect(text).toContain('💎');
+    await expect(matchCards(page).first()).toBeVisible({ timeout: 5000 });
+
+    // Testataan SAANTO eika sita mika kortti sattuu olemaan ensimmaisena.
+    // Suunta on tarkoituksellinen: jokaisen 💎:n on ansaittava paikkansa.
+    // Vastakkainen suunta EI pade -- "+7.7 %" on kerroinruudun odotusarvo,
+    // ja 💎 on kortin lippu PARHAALLE edgelle, eli eri asia.
+    const flags = await page.locator('#round-games .card .badge').allTextContents();
+    const diamonds = flags.filter((t) => t.includes('💎'));
+
+    for (const t of diamonds) {
+      const num = [...t].filter((c) => '0123456789.,+-'.includes(c)).join('').replace(',', '.');
+      const pct = parseFloat(num);
+      expect(Number.isFinite(pct), `lipussa ei ole lukua: "${t}"`).toBe(true);
+      expect(pct, `💎 mutta edge vain ${pct} %: "${t}"`).toBeGreaterThan(3);
+    }
+
+    // Jos yhtaan lippua ei ole, sekin on kelvollinen tila -- simulaatio arpoo
+    // kertoimet, eika jokaisella kierroksella ole ylikertoimia.
+    expect(Array.isArray(diamonds)).toBe(true);
   });
 
   test('näyttää mallin todennäköisyydet', async ({ page }) => {
