@@ -43,12 +43,15 @@ describe('buildTeamsFile — Elo', () => {
     expect(brighton.elo).toBe(1516);
   });
 
-  it('REGRESSIO: pelaamaton joukkue saa null eikä 1500', () => {
+  it('REGRESSIO: pelaamattoman lukua EI esiteta mitattuna', () => {
+    // Periaate on ennallaan: lahtotaso ei saa nayttaa mitatulta. Esitystapa
+    // muuttui tiketissa #64 -- aiemmin null, nyt 1500 MERKITTYNA. Pelkka "—"
+    // kauden alussa sai ominaisuuden nayttamaan rikkinaiselta.
     const f = buildTeamsFile({ current: league([team('Chelsea FC', 0)]), previous: null }, ELO);
     const chelsea = f.teams[0];
-    expect(chelsea.elo).toBeNull();
-    expect(chelsea.elo_change).toBeNull();
-    expect(chelsea.elo_rank).toBeNull();
+    expect(chelsea.elo_provisional).toBe(true);
+    expect(chelsea.elo_rank, 'lahtotasolla ei ole sijaa').toBeNull();
+    expect(chelsea.elo_change, 'lahtotaso ei ole muuttunut mihinkaan').toBe(0);
   });
 
   it('ilman Elo-karttaa kentät ovat null eikä rakenne hajoa', () => {
@@ -62,5 +65,35 @@ describe('buildTeamsFile — Elo', () => {
     expect(f.teams[0].attack).toBeGreaterThan(0);
     expect(f.teams[0].defense).toBeGreaterThan(0);
     expect(f.teams[0].elo).toBe(1515);
+  });
+});
+
+describe('Alustava Elo (tiketti #64)', () => {
+  it('joukkue joka ei ole pelannut saa LAHTOTASON merkittyna', () => {
+    // Kauden alussa "—" saa ominaisuuden nayttamaan rikkinaiselta, mutta
+    // merkitsematon 1500 vaittaisi mitattua tietoa. Naytetaan JA merkitaan.
+    const f = buildTeamsFile({ current: league([team('Chelsea FC', 0)]), previous: null }, ELO);
+    expect(f.teams[0].elo).toBe(1500);
+    expect(f.teams[0].elo_provisional).toBe(true);
+    expect(f.teams[0].elo_rank).toBeNull();
+  });
+
+  it('mitattu Elo EI ole alustava', () => {
+    const f = buildTeamsFile({ current: league([team('Arsenal FC', 5)]), previous: null }, ELO);
+    expect(f.teams[0].elo).toBe(1515);
+    expect(f.teams[0].elo_provisional).toBeUndefined();
+  });
+
+  it('REGRESSIO: ilman Elo-karttaa EI keksita lahtotasoa', () => {
+    // Sarja jolla ei ole tuloslahdetta lainkaan -> Elo on null, ei 1500.
+    // 1500 vaittaisi etta sarjalla on Elo-kasite vaikka sita ei ole.
+    const f = buildTeamsFile({ current: league([team('Jokin FC', 0)]), previous: null }, null);
+    expect(f.teams[0].elo).toBeNull();
+    expect(f.teams[0].elo_provisional).toBeUndefined();
+  });
+
+  it('tyhja Elo-kartta kasitellaan kuin puuttuva', () => {
+    const f = buildTeamsFile({ current: league([team('Jokin FC', 0)]), previous: null }, new Map());
+    expect(f.teams[0].elo).toBeNull();
   });
 });

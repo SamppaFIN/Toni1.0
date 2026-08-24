@@ -49,6 +49,9 @@ function formBadges(form) {
  */
 function eloCell(t) {
   if (t.elo == null) return '<span style="color:var(--muted)">—</span>';
+  if (t.elo_provisional) {
+    return `<span style="color:var(--muted);opacity:.7" title="Kauden lahtotaso — ei viela pelattuja otteluita">${t.elo} <i style="font-size:.55rem">lahtotaso</i></span>`;
+  }
   const ch = t.elo_change;
   const color = ch > 0 ? 'var(--c-success)' : ch < 0 ? 'var(--c-danger)' : 'var(--muted)';
   const arrow = ch > 0 ? '▲' : ch < 0 ? '▼' : '·';

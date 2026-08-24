@@ -161,6 +161,13 @@ export interface TeamStats {
   elo_change: number | null;
   /** Sija Elo-järjestyksessä sarjan sisällä */
   elo_rank: number | null;
+  /**
+   * true kun luku on kauden LÄHTÖTASO eikä mitattu (joukkue ei ole vielä
+   * pelannut). Kauden alussa naytettava "—" saa ominaisuuden nayttamaan
+   * rikkinaiselta, mutta merkitsematon 1500 vaittaisi mitattua tietoa —
+   * siksi luku naytetaan JA merkitaan.
+   */
+  elo_provisional?: boolean;
 }
 
 export interface H2HResult {

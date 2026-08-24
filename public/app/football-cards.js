@@ -218,6 +218,9 @@ export function eloExpected(homeElo, awayElo, homeAdvantage = ELO_HOME_ADVANTAGE
 
 function eloBadge(stats) {
   if (stats?.elo == null) return '<span style="color:var(--c-text-muted)">—</span>';
+  if (stats.elo_provisional) {
+    return `<span style="color:var(--c-text-muted);opacity:.7" title="Kauden lahtotaso — ei viela pelattuja otteluita">${stats.elo} <i style="font-size:.55rem">lahtotaso</i></span>`;
+  }
   const change = stats.elo_change;
   const color = change > 0 ? 'var(--c-success)' : change < 0 ? 'var(--c-danger)' : 'var(--c-text-muted)';
   const arrow = change > 0 ? '▲' : change < 0 ? '▼' : '·';
@@ -228,6 +231,14 @@ function eloBadge(stats) {
 /** Elo suluissa joukkueen nimen perään — luku siinä missä se koskee joukkuetta */
 function eloParen(stats) {
   if (!isVisible('elo') || stats?.elo == null) return '';
+
+  // Lahtotaso naytetaan mutta EI samannakoisena kuin mitattu luku: himmeampi,
+  // ilman muutosnuolta ja omalla selitteella. Merkitsematon 1500 vaittaisi
+  // mitattua tietoa siella missa sita ei ole.
+  if (stats.elo_provisional) {
+    return ` <span style="font-weight:400;font-size:.62rem;color:var(--c-text-muted);opacity:.65;font-variant-numeric:tabular-nums" title="Kauden lahtotaso ${stats.elo} — joukkue ei ole viela pelannut, luku ei ole mitattu">(${stats.elo} lahtotaso)</span>`;
+  }
+
   const change = stats.elo_change;
   const color = change > 0 ? 'var(--c-success)' : change < 0 ? 'var(--c-danger)' : 'var(--c-text-muted)';
   const arrow = change > 0 ? '▲' : change < 0 ? '▼' : '·';

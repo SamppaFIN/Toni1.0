@@ -19,6 +19,7 @@ import { fetchStatsFor, LeagueStatsPair } from '../ingest/stats.js';
 import { strengthForTeam, StrengthResult } from '../analyze/strength.js';
 import { teamRef } from '../ingest/odds-football.js';
 import { EloLookup, fetchEloMapFor, eloKeyFor, normalizeClubName } from './live-snapshot.js';
+import { STARTING_ELO } from '../analyze/season-elo.js';
 
 const SPORT_KEY = 'soccer_epl';
 
@@ -47,6 +48,13 @@ export interface FootballTeamRow {
   elo: number | null;
   elo_change: number | null;
   elo_rank: number | null;
+  /**
+   * true kun luku on kauden LAHTOTASO eika mitattu (joukkue ei ole viela
+   * pelannut). Sama lippu kuin TeamStats:ssa, jotta kortti ja taulukko
+   * kertovat saman -- eri esitystapa samalle luvulle nayttaisi kahdelta
+   * eri luvulta.
+   */
+  elo_provisional?: boolean;
 }
 
 export interface FootballTeamsFile {
@@ -68,9 +76,17 @@ function round2(n: number): number {
  * live-snapshot.ts:n toTeamStats():ssa, jotta kortti ja taulukko nayttavat
  * SAMAN luvun. Eri hakulogiikka tuottaisi eri Elon samalle joukkueelle.
  */
-function eloFor(elo: EloLookup | null, name: string): { elo: number | null; elo_change: number | null; elo_rank: number | null } {
+function eloFor(
+  elo: EloLookup | null,
+  name: string
+): { elo: number | null; elo_change: number | null; elo_rank: number | null; elo_provisional?: boolean } {
   const hit = elo?.get(eloKeyFor(name)) ?? elo?.get(normalizeClubName(name)) ?? null;
-  return { elo: hit?.elo ?? null, elo_change: hit?.change ?? null, elo_rank: hit?.rank ?? null };
+  if (hit) return { elo: hit.elo, elo_change: hit.change, elo_rank: hit.rank };
+
+  // Sarjalla on Elo mutta joukkue ei ole viela pelannut -> lahtotaso merkittyna.
+  // Sama paatos kuin live-snapshot.ts:ssa, jotta kortti ja taulukko kertovat saman.
+  if (elo?.size) return { elo: STARTING_ELO, elo_change: 0, elo_rank: null, elo_provisional: true };
+  return { elo: null, elo_change: null, elo_rank: null };
 }
 
 /** Puhdas funktio — testattavissa ilman verkkoa */

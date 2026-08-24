@@ -24,7 +24,7 @@ import { predictPoisson, predictFromLambda, adjustLambda, LeagueAverages } from 
 import { fetchAllFeeds, attachNews, MatchNews } from '../ingest/news-football.js';
 import { fetchSeasonResults, normalizeTeam } from '../ingest/results-veikkausliiga.js';
 import { fetchSeasonResultsEspn, hasEspnResults } from '../ingest/results-espn.js';
-import { calculateSeasonElo } from '../analyze/season-elo.js';
+import { calculateSeasonElo, STARTING_ELO } from '../analyze/season-elo.js';
 import { buildMatchCard, buildSnapshot, writeSnapshot } from './snapshot.js';
 import { MatchCard, MatchStats, ModelAdjustment, TeamStats, TeamSeasonStats } from '../types-football.js';
 
@@ -151,7 +151,13 @@ function toTeamStats(s: TeamSeasonStats, isHome: boolean, elo: EloLookup | null)
   const perGame = (v: number | null, n: number | null) => (n && n > 0 && v !== null ? v / n : null);
   // Epäonnistunut täsmäytys jättää luvun nulliksi eikä arvaa.
   // Veikkausliigan kartta ensin, sitten yleinen normalisointi muille sarjoille
+  // Veikkausliigan kasin yllapidetty kartta ensin, sitten yleinen normalisointi
   const rating = elo?.get(eloKeyFor(s.name)) ?? elo?.get(normalizeClubName(s.name)) ?? null;
+
+  // Sarjalla ON Elo mutta joukkue ei ole viela pelannut: nayta kauden
+  // LAHTOTASO merkittyna. Pelkka null saa ominaisuuden nayttamaan
+  // rikkinaiselta kauden alussa, merkitsematon 1500 taas vaittaisi mitattua.
+  const provisional = !rating && Boolean(elo?.size);
   return {
     rank: s.rank,
     played: s.played,
@@ -163,9 +169,10 @@ function toTeamStats(s: TeamSeasonStats, isHome: boolean, elo: EloLookup | null)
     xg_pg: null,
     rest_days: null,
     ppg: s.played ? round(s.points / s.played, 2) : null,
-    elo: rating?.elo ?? null,
-    elo_change: rating?.change ?? null,
+    elo: rating?.elo ?? (provisional ? STARTING_ELO : null),
+    elo_change: rating?.change ?? (provisional ? 0 : null),
     elo_rank: rating?.rank ?? null,
+    ...(provisional ? { elo_provisional: true } : {}),
     // isHome ei muuta lukuja, mutta pidetään parametri kutsupaikan luettavuuden vuoksi
     ...(isHome ? {} : {}),
   };
