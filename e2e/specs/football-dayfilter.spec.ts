@@ -67,3 +67,42 @@ test.describe('Paivanavigointi', () => {
     await expect(page.locator('#round-games .card').first()).toBeVisible();
   });
 });
+
+test.describe('Paivanapit molemmissa teemoissa (tiketti #66)', () => {
+  for (const theme of ['system', 'casino']) {
+    test(`napit erottuvat taustasta teemalla "${theme}"`, async ({ page }) => {
+      await useFootball(page);
+      await resetState(page);
+      await page.addInitScript((t) => localStorage.setItem('bt_ui_theme', t), theme);
+      await page.goto('/demo.html');
+      await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
+
+      const btn = page.locator('#round-games .day-btn').first();
+      await expect(btn).toBeVisible();
+
+      const style = await btn.evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return { bg: cs.backgroundColor, border: cs.borderTopColor, width: cs.borderTopWidth };
+      });
+
+      // Aiemmin tausta oli kovakoodattu 8 % valkoista joka katosi kasino-teeman
+      // gradientilla. Nyt napilla on sek\u00e4 lapinakymaton tausta etta reuna.
+      expect(style.bg, 'napilla pitaa olla nakyva tausta').not.toBe('rgba(0, 0, 0, 0)');
+      expect(parseFloat(style.width), 'napilla pitaa olla reuna').toBeGreaterThan(0);
+      expect(style.border, 'reunan pitaa olla nakyva').not.toBe('rgba(0, 0, 0, 0)');
+    });
+  }
+
+  test('aktiivinen nappi erottuu passiivisesta', async ({ page }) => {
+    await useFootball(page);
+    await resetState(page);
+    await page.goto('/demo.html');
+    await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
+
+    const active = page.locator('#round-games .day-btn.active').first();
+    const inactive = page.locator('#round-games .day-btn:not(.active)').first();
+    const bg = (l: any) => l.evaluate((el: Element) => getComputedStyle(el).backgroundColor);
+
+    expect(await bg(active)).not.toBe(await bg(inactive));
+  });
+});
