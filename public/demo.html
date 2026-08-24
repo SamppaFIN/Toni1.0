@@ -327,7 +327,13 @@ a.bk-link:hover,a.bk-link:focus-visible{color:var(--c-accent)}
   <div id="metrics-content" style="margin-top:12px"></div>
 </div>
 <div id="slip" class="view"><div class="grid-2" id="slip-metrics"></div><div id="slip-list"></div><button class="btn btn-danger btn-block" style="margin-top:8px" onclick="clearSlip()">🗑️ Tyhjennä lappu</button><div id="llm-content" data-sport="football" style="margin-top:10px"></div></div>
-<div id="history" class="view"><div class="grid-2" id="history-metrics"></div><div id="history-list"></div></div>
+<div id="history" class="view">
+  <div class="grid-2" id="history-metrics"></div>
+  <div id="history-list"></div>
+  <!-- Tiketti #70: mita malli sanoi vs. mita tapahtui. Historia on oikea
+       paikka: sama valilehti kertoo miten omat vedot ja malli parjasivat. -->
+  <div id="review-content" data-sport="football" style="margin-top:12px"></div>
+</div>
 <!-- Tiketti #35: tappioketju. Toimii molemmilla lajeilla — football-chase.js
      lukee kohteet ja kertoimet window.BT.getChaseMatches()-sillan kautta,
      joka valitsee oikean lähteen SPORT-lipun mukaan (ks. window.BT alempana). -->
@@ -2031,6 +2037,7 @@ function switchTab(name){
   if(name==='round')renderRound();if(name==='slip')renderSlip();if(name==='tracker')renderTracker();if(name==='history')renderHistory();if(name==='teams')renderTeams();if(name==='info')renderInfo();if(name==='admin')renderAdmin()
   if(name==='chase'&&window.BTC)window.BTC.render();
   if(name==='teams-fb'&&window.BTS)window.BTS.render();
+  if(name==='history'&&window.BTA&&!isHockey())window.BTA.render();
   if(window.BTV){if(name==='tracker'&&!isHockey())window.BTV.activate();else window.BTV.stop()}
 }
 function renderAll(){renderRound();renderSlip();renderTracker();renderHistory();renderTeams();renderInfo();renderAdmin();updateBankroll();updateSlipBadge()}
