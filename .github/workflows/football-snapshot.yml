@@ -37,11 +37,17 @@ jobs:
       ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
       FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-      # Kvoottakatto KERROINHAULLE (ingestFootballOdds lukee tämän).
-      # Kerroinhaku 1 krediitti per sarja → 2 sarjaa = 2 kr per ajo.
-      # Tuloshaku 2 krediittiä per sarja = 4 kr, mutta vain kerran vuorokaudessa.
-      # Yhteensä: 2 + 2 + 4 = 8 kr/vrk ≈ 240/kk. Ilmaistaso on 500/kk.
-      ODDS_DAILY_CREDIT_BUDGET: '8'
+      # Kvoottakatto KERROINHAULLE per ajo (ingestFootballOdds lukee taman).
+      #
+      # LASKELMA 8 sarjalla (tiketti #65):
+      #   Kerroinhaku  1 kr/sarja x 8 sarjaa x 2 ajoa/vrk x 30 pv = 480 kr/kk
+      #   Tuloshaku    0 kr -- siirretty ESPN:aan, ks. alla
+      #   Yhteensa                                                 480 / 500
+      #
+      # Katto 12 (ei 8) antaa marginaalin: includeLinks voi nostaa yhden
+      # pyynnon hintaa, ja tasan rajalla oleva katto pudottaisi viimeiset
+      # sarjat hiljaa pois. Katto suojaa karkaamiselta, ei kirista normaalia.
+      ODDS_DAILY_CREDIT_BUDGET: '12'
       # CI:ssä ei ole edellisen ajon välimuistia, ja tuore data on tässä koko pointti
       CACHE_DISABLED: '1'
 
@@ -87,13 +93,15 @@ jobs:
 
       # Tulokset ENNEN mittareita: mittarit lukevat results.json:n.
       #
-      # Vain iltapäivän ajossa (ja käsin käynnistettynä). Tuloshaku kustantaa
-      # 2 krediittiä per sarja, ja päättyneen ottelun tulos ei muutu — sitä ei
-      # tarvitse hakea kahdesti vuorokaudessa. Näin kvootta pysyy 240/kk
-      # tuntumassa eikä 360/kk, ja ilmaistason 500:aan jää pelivaraa.
+      # ESPN eika The Odds API (tiketti #65): /scores maksoi 2 krediittia per
+      # sarja eli 8 sarjalla 480 kr/kk, mika olisi vienyt kokonaiskaytön
+      # 960:een ja loppunut noin 15 paivassa. ESPN antaa samat tulokset
+      # ilmaiseksi. Ottelutunniste haetaan snapshot-historiasta eika johdeta
+      # ESPN:n nimesta -- muuten mittarit eivat loytaisi tuloksia ennusteille.
+      #
+      # Ajetaan joka ajossa koska se on ilmainen.
       - name: Hae päättyneiden otteluiden tulokset
-        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 14 * * *'
-        run: npm run results
+        run: npm run results:espn
         continue-on-error: true # tulosten puuttuminen ei saa kaataa snapshottia
 
       - name: Laske mittarit
