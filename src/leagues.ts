@@ -28,13 +28,20 @@ export interface LeagueDef {
   footballData: string | null;
   /** Veikkausliiga on erikoistapaus: tilastot Wikipediasta (ks. stats-wikipedia.ts) */
   wikipedia?: boolean;
+  /**
+   * Saman maan toisen tason sarja football-data.orgin koodina.
+   * Kaytetaan NOUSIJAN priorina (tiketti #68): joukkue jolla ei ole
+   * edellista kautta tassa sarjassa haetaan taalta. null = ei vastinetta,
+   * jolloin nousija saa kiinteän priorin.
+   */
+  secondTier?: string | null;
   /** Kausityyppi vaikuttaa siihen mikä vuosi on "nykyinen kausi" */
   season: 'autumn-spring' | 'calendar';
 }
 
 export const LEAGUES: LeagueDef[] = [
   // ── Viisi suurta: kertoimet, tilastot ja tulokset kaikki saatavilla ──
-  { sportKey: 'soccer_epl', name: 'Valioliiga', espn: 'eng.1', footballData: 'PL', season: 'autumn-spring' },
+  { sportKey: 'soccer_epl', name: 'Valioliiga', espn: 'eng.1', footballData: 'PL', secondTier: 'ELC', season: 'autumn-spring' },
   { sportKey: 'soccer_spain_la_liga', name: 'La Liga', espn: 'esp.1', footballData: 'PD', season: 'autumn-spring' },
   { sportKey: 'soccer_italy_serie_a', name: 'Serie A', espn: 'ita.1', footballData: 'SA', season: 'autumn-spring' },
   { sportKey: 'soccer_germany_bundesliga', name: 'Bundesliga', espn: 'ger.1', footballData: 'BL1', season: 'autumn-spring' },

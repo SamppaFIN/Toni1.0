@@ -163,7 +163,9 @@ export function combineSeasons(
   current: TeamSeasonStats | null,
   previous: TeamSeasonStats | null,
   league: LeagueAverages,
-  k: number = DEFAULT_SHRINKAGE_K
+  k: number = DEFAULT_SHRINKAGE_K,
+  /** Nousijan oma priori alemmasta sarjasta (tiketti #68). Oletus = keskiverto nousija. */
+  promotedPrior: TeamStrength = PROMOTED_STRENGTH
 ): StrengthResult {
   const played = current?.played ?? 0;
 
@@ -198,7 +200,7 @@ export function combineSeasons(
     return {
       strength: enoughData
         ? shrinkStrength(rawStrength(current, league), played, k)
-        : blendToward(shrinkStrength(rawStrength(current, league), played, k), PROMOTED_STRENGTH, k, played),
+        : blendToward(shrinkStrength(rawStrength(current, league), played, k), promotedPrior, k, played),
       basis: enoughData ? 'current-season' : 'league-average',
       currentWeight: played / (played + k),
       playedThisSeason: played,
@@ -230,7 +232,9 @@ export function strengthForTeam(
   teamName: string,
   currentSeason: LeagueSeasonStats,
   previousSeason: LeagueSeasonStats | null,
-  k?: number
+  k?: number,
+  /** Nousijan priori alemmasta sarjasta; ilman tata kaytetaan keskiverto nousijaa */
+  promotedPrior?: TeamStrength
 ): (StrengthResult & { stats: TeamSeasonStats }) | null {
   const current = findTeam(currentSeason.teams, teamName);
   if (!current) return null;
@@ -241,7 +245,7 @@ export function strengthForTeam(
     awayGoals: currentSeason.awayGoalsAvg,
   };
 
-  return { ...combineSeasons(current, previous, league, k), stats: current };
+  return { ...combineSeasons(current, previous, league, k, promotedPrior), stats: current };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

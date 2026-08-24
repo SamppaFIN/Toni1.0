@@ -19,6 +19,7 @@ import { config } from '../config.js';
 import { quotaWarning } from '../leagues.js';
 import { ingestFootballOdds, buildMatchId, FootballOddsEvent } from '../ingest/odds-football.js';
 import { fetchStatsFor, LeagueStatsPair } from '../ingest/stats.js';
+import { fetchLowerDivision, promotedStrengthFrom } from '../ingest/promoted.js';
 import { strengthForTeam, matchConfidence } from '../analyze/strength.js';
 import { predictPoisson, predictFromLambda, adjustLambda, LeagueAverages } from '../analyze/poisson.js';
 import { fetchAllFeeds, attachNews, MatchNews } from '../ingest/news-football.js';
@@ -193,8 +194,12 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
 
   // Tilastot haetaan kertaalleen per sarja, ei per ottelu
   const statsByLeague = new Map<string, LeagueStatsPair | null>();
+  // Tiketti #68: nousijan priori edellisen kauden alemmasta sarjasta.
+  // Haetaan vain sarjoille joilla on toisen tason vastine rekisterissa.
+  const lowerByLeague = new Map<string, Awaited<ReturnType<typeof fetchLowerDivision>>>();
   for (const sportKey of new Set(events.map((e) => e.sportKey))) {
     statsByLeague.set(sportKey, await fetchStatsFor(sportKey, now));
+    lowerByLeague.set(sportKey, await fetchLowerDivision(sportKey, now.getUTCFullYear()));
   }
 
   // Uutiset haetaan kertaalleen kaikille otteluille. Jos haku pettää, ottelut
@@ -240,7 +245,8 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
       statsByLeague.get(e.sportKey) ?? null,
       newsByMatch.get(matchId(e)) ?? null,
       options,
-      eloByLeague.get(e.sportKey) ?? null
+      eloByLeague.get(e.sportKey) ?? null,
+      lowerByLeague.get(e.sportKey) ?? null
     )
   );
   cards.sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
@@ -267,7 +273,9 @@ function buildCard(
   stats: LeagueStatsPair | null,
   news: MatchNews | null,
   options: BuildLiveOptions,
-  elo: EloLookup | null
+  elo: EloLookup | null,
+  /** Edellisen kauden alempi sarja nousijan prioria varten (tiketti #68) */
+  lowerSeason: import("../types-football.js").LeagueSeasonStats | null = null
 ): MatchCard {
   const base = {
     id: matchId(e),
@@ -284,8 +292,10 @@ function buildCard(
 
   if (!stats) return buildMatchCard({ ...base, poisson: null, stats: null });
 
-  const home = strengthForTeam(e.home.name, stats.current, stats.previous, config.model.shrinkageK);
-  const away = strengthForTeam(e.away.name, stats.current, stats.previous, config.model.shrinkageK);
+  // Nousijan priori haetaan alemmasta sarjasta; null -> keskiverto nousija
+  const promotedFor = (name: string) => (lowerSeason ? promotedStrengthFrom(name, lowerSeason) ?? undefined : undefined);
+  const home = strengthForTeam(e.home.name, stats.current, stats.previous, config.model.shrinkageK, promotedFor(e.home.name));
+  const away = strengthForTeam(e.away.name, stats.current, stats.previous, config.model.shrinkageK, promotedFor(e.away.name));
 
   // Täsmäytys epäonnistui → näkyvä varoitus, ei hiljainen degradaatio
   if (!home || !away) {
