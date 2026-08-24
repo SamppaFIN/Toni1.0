@@ -1157,8 +1157,11 @@ export function renderAllCards() {
   const mode = getDayFilter();
 
   if (mode === 'all') {
-    const { todayUpcoming, later } = partitionByDay(currentSnapshot.matches);
-    renderMatchList([...todayUpcoming, ...later], { mode });
+    // "Kaikki" tarkoittaa kaikkia, myos jo alkaneita. Aiemmin tama
+    // suodatti alkaneet pois, jolloin "Kaikki" saattoi nayttaa VAHEMMAN
+    // otteluita kuin "Tanaan" -- epajohdonmukaisuus jonka testi nappasi.
+    const ordered = [...currentSnapshot.matches].sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
+    renderMatchList(ordered, { mode });
     return;
   }
 
@@ -1179,9 +1182,22 @@ export function renderAllCards() {
 
   // Tänään: alkaneet pois toimintalistalta (ne näkyvät "Tänään pelatut"
   // -osiossa). Menneet ja tulevat päivät näytetään kokonaan.
-  const visible = mode === 0 ? all.filter((m) => Date.parse(m.kickoff) >= Date.now() || m.fromArchive) : all;
+  // Tanaan: alkaneet pois toimintalistalta (ne nakyvat "Tanaan pelatut"
+  // -osiossa). Menneet ja tulevat paivat naytetaan kokonaan.
+  const upcoming = mode === 0 ? all.filter((m) => Date.parse(m.kickoff) >= Date.now() || m.fromArchive) : all;
 
-  renderMatchList(visible, { mode, day, total: all.length });
+  // VARAKEINO: jos suodatus ei jata mitaan mutta naytettavaa olisi, naytetaan
+  // alkaneet merkittyna. Alkaneen piilottaminen on oikein niin kauan kuin
+  // muuta on jaljella -- tyhja sivu on aina huonompi kuin vanhentunut kortti
+  // jonka vieressa lukee etta se on vanhentunut.
+  //
+  // Tama logiikka oli olemassa ennen tiketin #60 refaktorointia ja katosi
+  // siina. Seuraus: kun paivan ainoa ottelu oli alkanut, koko kierrosnakyma
+  // oli tyhja. Regressiotesti lukitsee taman nyt.
+  const fellBackToStarted = mode === 0 && upcoming.length === 0 && all.length > 0;
+  const visible = fellBackToStarted ? all : upcoming;
+
+  renderMatchList(visible, { mode, day, total: all.length, fellBackToStarted });
 }
 
 /** Päiväavain siirtymän mukaan: -1 = eilen, 0 = tänään, 1 = huomenna */
@@ -1213,7 +1229,7 @@ function dayNav(mode) {
 
 /** Yhteinen renderöinti kaikille päivänäkymille */
 function renderMatchList(list, opts = {}) {
-  const { practice = false, mode = 0, total = list.length } = opts;
+  const { practice = false, mode = 0, total = list.length, fellBackToStarted = false } = opts;
 
   // Value-kohteet ensin, sitten aikajärjestyksessä — käyttäjä näkee löydöt heti
   const ordered = [...list].sort((a, b) => {
@@ -1229,7 +1245,8 @@ function renderMatchList(list, opts = {}) {
 
   const notes = [];
   if (archived) notes.push(`${archived} arkistosta — kertoimet ovat historiaa, vetoa ei voi enää lyödä`);
-  if (mode === 0 && total > list.length) notes.push(`${total - list.length} alkanutta piilotettu`);
+  if (fellBackToStarted) notes.push('⚠️ paivan ottelut ovat alkaneet — kertoimet ovat vanhentuneet');
+  else if (mode === 0 && total > list.length) notes.push(`${total - list.length} alkanutta piilotettu`);
 
   const summary = `<div style="font-size:.65rem;color:var(--c-text-muted);margin:0 0 8px 2px">
     <b style="color:var(--c-text)">${list.length}</b> ottelua ·
