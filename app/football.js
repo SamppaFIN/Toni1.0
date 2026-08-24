@@ -25,6 +25,7 @@ import * as metrics from './football-metrics.js';
 import { DISPLAY_OPTIONS, getPrefs, togglePref, resetPrefs } from './football-prefs.js';
 import * as teamsTable from './football-teams.js';
 import * as liveView from './football-live.js';
+import * as playedToday from './football-results.js';
 import './football-chase.js'; // rekisteröi window.BTC — ei tarvitse suoraa viittausta täältä
 import './football-llm.js'; // rekisteröi window.BTL (tiketti #38)
 
@@ -231,6 +232,10 @@ export async function start(containerId = 'round-games') {
   // avataan (switchTab -> BTV.activate) -- ei turhia kutsuja ESPN:aan
   // kayttajalle joka ei katso liveä.
   liveView.render();
+
+  // Tiketti #59: tanaan pelatut. Haku on ESPN:sta eika kuluta kvoottaa.
+  await playedToday.load();
+  playedToday.render();
 }
 
 // Itsekäynnistys. Moduuli latautuu deferoituna eli inline-skriptin jälkeen,
