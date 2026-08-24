@@ -203,7 +203,15 @@ describe('Sarjojen nimet', () => {
     expect(leagueLabel('soccer_epl')).toBe('Valioliiga');
   });
 
+  it('kaantaa myos rekisterin uudemmat sarjat', () => {
+    // Sarjarekisteri (tiketti #61) laajensi kattavuutta 8 -> 20 sarjaan
+    expect(leagueLabel('soccer_norway_eliteserien')).toBe('Eliteserien');
+    expect(leagueLabel('soccer_netherlands_eredivisie')).toBe('Eredivisie');
+  });
+
   it('tuntemattomasta muodostetaan luettava nimi', () => {
-    expect(leagueLabel('soccer_norway_eliteserien')).toBe('norway eliteserien');
+    // Raaka tunniste siistitaan -- ja se on samalla merkki siita etta sarja
+    // pitaisi lisata rekisteriin (src/leagues.ts).
+    expect(leagueLabel('soccer_ei_olemassa_sarja')).toBe('ei olemassa sarja');
   });
 });

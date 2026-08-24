@@ -18,19 +18,20 @@ import { pathToFileURL } from 'node:url';
 import { SeasonMatch } from './results-veikkausliiga.js';
 import { MarketSide } from '../types-football.js';
 import { cached } from './cache.js';
+import { LEAGUES } from '../leagues.js';
 
 const BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
 
 /** The Odds APIn sarjatunniste → ESPN:n sarjakoodi */
-export const ESPN_LEAGUE_CODES: Record<string, string> = {
-  soccer_epl: 'eng.1',
-  soccer_efl_champ: 'eng.2',
-  soccer_spain_la_liga: 'esp.1',
-  soccer_italy_serie_a: 'ita.1',
-  soccer_germany_bundesliga: 'ger.1',
-  soccer_france_ligue_one: 'fra.1',
-  soccer_finland_veikkausliiga: 'fin.1',
-};
+/**
+ * The Odds APIn sarjatunniste -> ESPN:n sarjakoodi.
+ *
+ * JOHDETTU sarjarekisterista (src/leagues.ts) eika yllapidetta erikseen:
+ * aiemmin sama lista oli kolmessa tiedostossa ja paasi hajaantumaan hiljaa.
+ */
+export const ESPN_LEAGUE_CODES: Record<string, string> = Object.fromEntries(
+  LEAGUES.filter((l) => l.espn).map((l) => [l.sportKey, l.espn as string])
+);
 
 export function hasEspnResults(sportKey: string): boolean {
   return sportKey in ESPN_LEAGUE_CODES;

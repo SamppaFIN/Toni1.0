@@ -16,6 +16,7 @@
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { config } from '../config.js';
+import { quotaWarning } from '../leagues.js';
 import { ingestFootballOdds, buildMatchId, FootballOddsEvent } from '../ingest/odds-football.js';
 import { fetchStatsFor, LeagueStatsPair } from '../ingest/stats.js';
 import { strengthForTeam, matchConfidence } from '../analyze/strength.js';
@@ -173,6 +174,13 @@ function toTeamStats(s: TeamSeasonStats, isHome: boolean, elo: EloLookup | null)
 export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
   const now = options.now ?? new Date();
   const until = new Date(now.getTime() + HORIZON_HOURS * 3600_000);
+
+  // Tiketti #61: kerroinhaku maksaa 1 krediitin PER SARJA, joten hinta kasvaa
+  // lineaarisesti sarjojen maarassa. Varoitus ei esta ajoa (kayttaja voi olla
+  // maksavalla tasolla) -- vuorokausikatto ODDS_DAILY_CREDIT_BUDGET on se joka
+  // oikeasti pysayttaa putken.
+  const warning = quotaWarning(config.odds.footballSports.length);
+  if (warning) console.warn(`[Kvootta] ${warning}`);
 
   const events = await ingestFootballOdds({ from: now, until });
 

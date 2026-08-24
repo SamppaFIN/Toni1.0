@@ -13,6 +13,7 @@
 import { pathToFileURL } from 'node:url';
 import { config } from '../config.js';
 import { BookmakerOdds, TeamRef } from '../types-football.js';
+import { leagueName } from '../leagues.js';
 
 export interface OddsApiOutcome {
   name: string;
@@ -221,19 +222,20 @@ export interface FootballOddsEvent {
   odds: BookmakerOdds[];
 }
 
-/** Sarjan tunnisteesta luettava nimi */
+/**
+ * Sarjan tunnisteesta luettava nimi.
+ *
+ * JOHDETTU sarjarekisterista (src/leagues.ts). Aiemmin tama oli oma
+ * kovakoodattu listansa joka paasi eroamaan tilasto- ja tuloslistoista:
+ * sarja saattoi olla tuettu kertoimissa mutta nayttaa raakana tunnisteena.
+ *
+ * Tuntematon sarja siistitaan luettavaan muotoon eika jateta alaviivoiksi --
+ * ja se on merkki siita etta sarja pitaisi lisata rekisteriin.
+ */
 export function leagueLabel(sportKey: string): string {
-  const labels: Record<string, string> = {
-    soccer_finland_veikkausliiga: 'Veikkausliiga',
-    soccer_epl: 'Valioliiga',
-    soccer_efl_champ: 'Championship',
-    soccer_spain_la_liga: 'La Liga',
-    soccer_italy_serie_a: 'Serie A',
-    soccer_germany_bundesliga: 'Bundesliga',
-    soccer_france_ligue_one: 'Ligue 1',
-    soccer_uefa_champs_league: 'Mestarien liiga',
-  };
-  return labels[sportKey] || sportKey.replace(/^soccer_/, '').replace(/_/g, ' ');
+  const known = leagueName(sportKey);
+  if (known !== sportKey) return known;
+  return sportKey.replace(/^soccer_/, '').replace(/_/g, ' ');
 }
 
 /**
