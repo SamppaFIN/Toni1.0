@@ -141,3 +141,54 @@ export function parseKeyEvents(data) {
   }
   return out;
 }
+
+// ─── Tulevien otteluiden ennakko (tiketti #63) ────────────────────────────
+//
+// TÄRKEÄ RAJAUS: ESPN tarjoaa kertoimia vain YHDELTÄ toimistolta (DraftKings,
+// USA) ja amerikkalaisessa muodossa. Meidän analyysimme rakentuu kymmenen
+// eurooppalaisen toimiston konsensuksen ja Pinnacle-sharp-ankkurin varaan,
+// joten yhden toimiston hinnasta EI lasketa edgeä eikä panossuosituksia —
+// se olisi eri mittari samalla nimellä.
+//
+// Tämä on siis ENNAKKOTIETO: mitä otteluita on tulossa ja suunnilleen millä
+// hinnalla. Täysi analyysi tulee snapshot-putkesta.
+
+/** Amerikkalainen kerroin desimaaliksi. -205 → 1.49, +360 → 4.60 */
+export function americanToDecimal(american) {
+  const n = Number(american);
+  if (!Number.isFinite(n) || n === 0) return null;
+  const dec = n > 0 ? n / 100 + 1 : 100 / Math.abs(n) + 1;
+  return Math.round(dec * 100) / 100;
+}
+
+function pickMoneyline(odds) {
+  const ml = odds?.moneyline;
+  const draw = odds?.drawOdds?.moneyLine;
+  if (!ml) return null;
+  // close on tuorein hinta, open avaushinta — otetaan tuorein
+  const side = (s) => americanToDecimal(ml[s]?.close?.odds ?? ml[s]?.open?.odds);
+  const home = side('home');
+  const away = side('away');
+  return home && away ? { home, draw: americanToDecimal(draw), away, provider: odds.provider?.name ?? 'ESPN' } : null;
+}
+
+/** Tulevat ottelut aikavälillä, kertoimineen jos saatavilla */
+export async function fetchFixtures(leagueCode, fromYmd, toYmd) {
+  const range = fromYmd === toYmd ? fromYmd : `${fromYmd}-${toYmd}`;
+  const data = await getJson(`${BASE}/${leagueCode}/scoreboard?dates=${range}&limit=200`);
+
+  return (data.events ?? [])
+    .map((event) => {
+      const base = parseEvent(event);
+      if (!base) return null;
+      const comp = event.competitions?.[0];
+      return { ...base, preview: pickMoneyline((comp?.odds ?? [])[0]) };
+    })
+    .filter(Boolean);
+}
+
+/** YYYYMMDD ESPN:n dates-parametrille */
+export function ymd(date) {
+  const d = date instanceof Date ? date : new Date(date);
+  return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+}

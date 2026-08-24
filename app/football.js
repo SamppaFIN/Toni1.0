@@ -19,7 +19,7 @@ import {
   setMockRound,
   getMockRoundCount,
 } from './snapshot.js';
-import { initCards, setSnapshot, renderAllCards, renderPlacedBets, toggleSection, findMatch, matchIndex, getSnapshot, setDayFilter, getDayFilter, addFactorFromForm, removeFactorById, clearFactorsFor } from './football-cards.js';
+import { initCards, setSnapshot, renderAllCards, renderPlacedBets, toggleSection, findMatch, matchIndex, getSnapshot, setDayFilter, getDayFilter, addFactorFromForm, removeFactorById, clearFactorsFor, fetchDay } from './football-cards.js';
 import * as tracker from './football-tracker.js';
 import * as metrics from './football-metrics.js';
 import { DISPLAY_OPTIONS, getPrefs, togglePref, resetPrefs } from './football-prefs.js';
@@ -198,6 +198,7 @@ window.BTF = {
   toggleSection,
   setDayFilter,
   getDayFilter,
+  fetchDay,
   addFactor: addFactorFromForm,
   removeFactor: removeFactorById,
   clearFactors: clearFactorsFor,
