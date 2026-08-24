@@ -167,7 +167,10 @@ test.describe('Jalkapallonäkymä', () => {
     const shown = await page.locator('#round-games .bk-name').allInnerTexts();
     expect(shown.length).toBeGreaterThan(0);
     for (const name of shown) {
-      expect(allowed, `toimisto "${name}" ei löydy snapshotista — keksittyä dataa?`).toContain(name.trim());
+      // Tiketti #54: nimen perassa voi olla " ↗" kun API antoi suoran
+      // syvalinkin kupongille. Se on merkinta, ei osa toimiston nimea.
+      const clean = name.replace(/s*↗s*$/, '').trim();
+      expect(allowed, `toimisto "${clean}" ei löydy snapshotista — keksittyä dataa?`).toContain(clean);
     }
 
     // Eikä jääkiekkodemon FALLBACK-joukkueita näy missään

@@ -4,13 +4,19 @@
 // Kassa alkaa 100 €:sta, joten jokainen vaihe on tarkistettavissa laskien.
 
 import { test, expect } from '@playwright/test';
-import { useFootball, resetState } from '../helpers.js';
+import { useFootball, resetState, useFixtureSnapshot } from '../helpers.js';
 
 test.describe('Tappioketju', () => {
   test.beforeEach(async ({ page }) => {
     await useFootball(page);
     await resetState(page);
     await page.addInitScript(() => localStorage.removeItem('bt_chase_chains'));
+    // Ketjun jatkaminen vaatii ETTA VALITTAVANA ON USEAMPI OTTELU. Committoitu
+    // today.json muuttuu cron-ajoissa ja kutistui 24.8. yhteen otteluun, jolloin
+    // nama testit hajosivat ilman etta koodissa oli mitaan vikaa. Fikstuuri
+    // kiinnittaa datan: naiden testien kohde on ketjun LOGIIKKA, ei se mita
+    // otteluita sattuu olemaan tanaan tarjolla.
+    await useFixtureSnapshot(page);
     await page.goto('/demo.html');
     await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
     await page.click('.tab[data-tab="chase"]');
