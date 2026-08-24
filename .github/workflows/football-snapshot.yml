@@ -108,6 +108,21 @@ jobs:
         run: npm run metrics
         continue-on-error: true
 
+      # Tiketti #73: Telegram-halytys vahvoista ylikertoimista.
+      #
+      # Tila (public/data/alerts-sent.json) committoidaan muun datan mukana --
+      # Actions ei sailyta mitaan ajojen valilla, ja ilman muistia sama kohde
+      # halyttaisi molemmilla paivittaisilla ajoilla.
+      #
+      # Ilman salaisuuksia askel kirjaa syyn eika kaadu: halytys on lisa, ei
+      # ehto datan julkaisulle.
+      - name: Lähetä Telegram-hälytykset
+        run: npm run alerts:football
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        continue-on-error: true
+
       - name: Yhteenveto ajosta
         run: |
           if [ ! -f public/data/today.json ]; then

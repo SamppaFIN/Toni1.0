@@ -4,6 +4,16 @@
 import { config } from '../config.js';
 import { ValueCheck } from '../engine/value.js';
 
+/**
+ * HTML-erikoismerkit. Telegramin HTML-tila vaatii naista vain kolme, kun
+ * MarkdownV2 vaatii kahdeksantoista (. - ( ) ! _ * [ ] ~ ` > # + = | { }).
+ * Kertoimen piste "2.50" riitti kaatamaan MarkdownV2-viestin 400:aan --
+ * eli JOKAISEN viestin. HTML on tassa pienempi virhepinta.
+ */
+function html(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 export interface AlertPayload {
   game: string;
   market: string;
@@ -21,11 +31,9 @@ export async function sendTelegramAlert(payload: AlertPayload): Promise<boolean>
 
   const edgePct = (payload.edge * 100).toFixed(1);
   const message =
-    `🔔 *Value-flag!*\\n` +
-    `📋 ${payload.game}\\n` +
-    `🎯 ${payload.side.toUpperCase()} @ ${payload.odds.toFixed(2)} \\(edge ${edgePct}%\\)\\n` +
-    `${payload.newsUrl ? `📰 [Uutinen](${payload.newsUrl})` : ''}`;
-
+    `🔔 <b>Ylikerroin</b>\n${html(payload.game)}\n` +
+    `<b>${html(payload.side.toUpperCase())}</b> @ ${payload.odds.toFixed(2)} · edge <b>${edgePct} %</b>` +
+    (payload.newsUrl ? `\n<a href="${html(payload.newsUrl)}">Uutinen</a>` : '');
   try {
     const url = `https://api.telegram.org/bot${config.telegram.botToken}/sendMessage`;
     const res = await fetch(url, {
@@ -34,7 +42,7 @@ export async function sendTelegramAlert(payload: AlertPayload): Promise<boolean>
       body: JSON.stringify({
         chat_id: config.telegram.chatId,
         text: message,
-        parse_mode: 'MarkdownV2',
+        parse_mode: 'HTML',
         disable_web_page_preview: false,
       }),
     });
