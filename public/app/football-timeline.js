@@ -239,6 +239,7 @@ function onPointerMove(e) {
     }
   }
   dragging.strip.scrollLeft = dragging.startScroll - dx;
+  updateEdges(dragging.strip);
 }
 
 function onPointerUp(e) {
@@ -274,7 +275,59 @@ export function attach(root = document) {
   // Raahaus ei saa raahata linkkeja tai tekstia mukanaan
   strip.addEventListener('dragstart', (e) => e.preventDefault());
 
+  strip.addEventListener('wheel', onWheel, { passive: false });
+  strip.addEventListener('scroll', () => updateEdges(strip), { passive: true });
+
   scrollToActive(strip);
+  updateEdges(strip);
+}
+
+/**
+ * Hiiren rulla vaakasuuntaan (tiketti #81).
+ *
+ * Pystyrulla ei tee mitaan vaakasuuntaisessa sailiossa, eika palkkia ole enaa
+ * tartuttavaksi. Ilman tata nauhaa voisi liikuttaa hiirella vain raahaamalla.
+ *
+ * preventDefault VAIN kun rullaus todella kuluu nauhaan: jos nauha on jo
+ * paatepysakilla, sivun pystyvieritys saa jatkua normaalisti. Muuten nauhan
+ * paalle osunut rulla jumittaisi koko sivun.
+ */
+function onWheel(e) {
+  const strip = e.currentTarget;
+  const max = strip.scrollWidth - strip.clientWidth;
+  if (max <= 0) return;
+
+  // Vaakarulla (esim. tackpad) menee lapi sellaisenaan
+  const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  if (!delta) return;
+
+  const next = Math.min(max, Math.max(0, strip.scrollLeft + delta));
+  if (next === strip.scrollLeft) return; // paatepysakki -> anna sivun vierittya
+
+  e.preventDefault();
+  strip.scrollLeft = next;
+}
+
+/**
+ * Reunahaivytyksen tila (tiketti #81).
+ *
+ * Kun selainpalkki poistettiin, katosi samalla ainoa vihje siita etta
+ * sisaltoa on lisaa. Haivytys nakyy vain siihen suuntaan johon voi liikkua;
+ * kiintea haivytys peittaisi ensimmaisen chipin vaikka mitaan ei olisi
+ * piilossa.
+ */
+export function updateEdges(strip) {
+  if (!strip) return;
+  const max = strip.scrollWidth - strip.clientWidth;
+  // Yhden pikselin liukuma: selaimet palauttavat murtolukuja zoomatessa
+  const atStart = strip.scrollLeft <= 1;
+  const atEnd = strip.scrollLeft >= max - 1;
+
+  strip.classList.remove('fade-both', 'fade-start', 'fade-end');
+  if (max <= 1) return; // mahtuu ruudulle -- ei haivytysta
+  if (!atStart && !atEnd) strip.classList.add('fade-both');
+  else if (!atStart) strip.classList.add('fade-start');
+  else strip.classList.add('fade-end');
 }
 
 /**
@@ -290,6 +343,7 @@ export function scrollToActive(strip) {
   // scrollIntoView vierittaisi myos sivua pystysuunnassa; lasketaan itse
   const target = active.offsetLeft - (strip.clientWidth - active.offsetWidth) / 2;
   strip.scrollLeft = Math.max(0, target);
+  updateEdges(strip);
 }
 
 /** Käyttäjä valitsi päivän aikajanalta */
@@ -305,5 +359,5 @@ export function select(date) {
 // Sama vartija kuin muissa moduuleissa: yksikkotestit tuovat naman Nodeen,
 // jossa windowia ei ole (ks. football-chase.js, football-llm.js).
 if (typeof window !== 'undefined') {
-  window.BTL2 = { load, select, renderStrip, renderDayFixtures, getSelectedDay, setSelectedDay, matchesFor, getCalendar, attach };
+  window.BTL2 = { load, select, renderStrip, renderDayFixtures, getSelectedDay, setSelectedDay, matchesFor, getCalendar, attach, updateEdges };
 }

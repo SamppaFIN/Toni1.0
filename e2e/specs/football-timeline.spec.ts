@@ -265,3 +265,145 @@ test.describe('Aikajanan raahaus', () => {
     expect(visible).toBe(true);
   });
 });
+
+// Selainpalkin poisto (tiketti #81)
+//
+// Palkki oli nauhan ainoa vihje siita etta sisaltoa on lisaa, ja hiirella
+// ainoa tapa liikkua raahauksen ohella. Molemmat on korvattava, muuten
+// poisto on huononnus.
+test.describe('Aikajana ilman selainpalkkia', () => {
+  test.beforeEach(async ({ page }) => {
+    await useFootball(page);
+    await resetState(page);
+    await useFixtureSnapshot(page);
+    await useCalendar(page);
+    await page.setViewportSize({ width: 360, height: 720 });
+  });
+
+  test('selainpalkki on piilotettu', async ({ page }) => {
+    await page.goto('/demo.html');
+    const strip = page.locator('.timeline-strip');
+    await expect(strip).toBeVisible({ timeout: 10000 });
+
+    // Vieritettava sisalto, mutta palkki ei vie korkeutta
+    const { scrollable, barHeight } = await strip.evaluate((el) => ({
+      scrollable: el.scrollWidth > el.clientWidth,
+      barHeight: el.offsetHeight - el.clientHeight,
+    }));
+    expect(scrollable).toBe(true);
+    expect(barHeight).toBe(0);
+  });
+
+  test('nauha on YHA vieritettava ilman palkkia', async ({ page }) => {
+    await page.goto('/demo.html');
+    const strip = page.locator('.timeline-strip');
+    await expect(strip).toBeVisible({ timeout: 10000 });
+
+    // scroll-behavior: smooth animoi asetuksen, joten valiton luku antaisi
+    // vanhan arvon. Odotetaan animaation valmistumista.
+    await strip.evaluate((el) => (el.scrollLeft = 0));
+    await strip.evaluate((el) => (el.scrollLeft = 120));
+    await expect.poll(() => strip.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  });
+
+  test('HIIREN RULLA liikuttaa nauhaa vaakasuunnassa', async ({ page }) => {
+    await page.goto('/demo.html');
+    const strip = page.locator('.timeline-strip');
+    await expect(strip).toBeVisible({ timeout: 10000 });
+
+    await strip.evaluate((el) => (el.scrollLeft = 0));
+    const box = (await strip.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.wheel(0, 200);
+    await page.waitForTimeout(150);
+
+    expect(await strip.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  });
+
+  test('rulla EI jumita sivua kun nauha on paatepysakilla', async ({ page }) => {
+    await page.goto('/demo.html');
+    const strip = page.locator('.timeline-strip');
+    await expect(strip).toBeVisible({ timeout: 10000 });
+
+    // Vie nauha loppuun asti
+    await strip.evaluate((el) => (el.scrollLeft = el.scrollWidth));
+    await page.waitForTimeout(100);
+
+    const pageBefore = await page.evaluate(() => window.scrollY);
+    const box = (await strip.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.wheel(0, 400);
+    await page.waitForTimeout(250);
+
+    // Sivu sai vierittya: rulla ei kulunut nauhaan joka on jo lopussa
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThanOrEqual(pageBefore);
+  });
+
+  test('REUNAHAIVYTYS kertoo kumpaan suuntaan voi liikkua', async ({ page }) => {
+    await page.goto('/demo.html');
+    const strip = page.locator('.timeline-strip');
+    await expect(strip).toBeVisible({ timeout: 10000 });
+
+    await strip.evaluate((el) => {
+      el.scrollLeft = 0;
+      el.dispatchEvent(new Event('scroll'));
+    });
+    await expect(strip).toHaveClass(/fade-end/);
+
+    await strip.evaluate((el) => {
+      el.scrollLeft = el.scrollWidth;
+      el.dispatchEvent(new Event('scroll'));
+    });
+    await expect(strip).toHaveClass(/fade-start/);
+  });
+
+  test('keskella molemmat reunat haivytetaan', async ({ page }) => {
+    await page.goto('/demo.html');
+    const strip = page.locator('.timeline-strip');
+    await expect(strip).toBeVisible({ timeout: 10000 });
+
+    await strip.evaluate((el) => {
+      el.scrollLeft = Math.round((el.scrollWidth - el.clientWidth) / 2);
+      el.dispatchEvent(new Event('scroll'));
+    });
+    await expect(strip).toHaveClass(/fade-both/);
+  });
+
+  test('kun nauha mahtuu ruudulle EI haivytysta', async ({ page }) => {
+    // PIENI kalenteri, ei leveampi ruutu: sailio on max-width-rajattu (~476 px)
+    // eika 16 chippia mahdu sinne millaan naytolla. Kaksi chippia mahtuu.
+    await page.route('**/data/fixtures.json', (route: any) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          schema_version: 1,
+          generated_at: new Date().toISOString(),
+          range: { from: ymd(0), to: ymd(0) },
+          days: [{ date: ymd(0), matches: 1, with_odds: 1, leagues: ['Valioliiga'] }],
+          matches: [],
+        }),
+      })
+    );
+    await page.goto('/demo.html');
+    const strip = page.locator('.timeline-strip');
+    await expect(strip).toBeVisible({ timeout: 10000 });
+
+    expect(await strip.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+    await expect(strip).not.toHaveClass(/fade-/);
+  });
+
+  test('raahaus ei maalaa chippien tekstia', async ({ page }) => {
+    await page.goto('/demo.html');
+    const strip = page.locator('.timeline-strip');
+    await expect(strip).toBeVisible({ timeout: 10000 });
+
+    const box = (await strip.boundingBox())!;
+    await page.mouse.move(box.x + box.width - 20, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 20, box.y + box.height / 2, { steps: 8 });
+    await page.mouse.up();
+
+    expect(await page.evaluate(() => String(window.getSelection()))).toBe('');
+  });
+});
