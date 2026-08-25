@@ -64,7 +64,9 @@ test.describe('Tulevan paivan ennakkohaku', () => {
 
     const before = calls;
     // Siirry paivaan jossa ei ole otteluita
-    await page.locator('.timeline-strip .day-btn').nth(2).click();
+    // Kalenterissa on tama paiva ja ylihuominen; huomenna puuttuu, joten
+    // eteenpain-nuoli (indeksi 4) vie ylihuomiseen
+    await page.locator('.day-nav .day-btn').nth(4).click();
     await page.waitForTimeout(500);
     expect(calls, 'paivanvaihto ei saa laukaista hakua').toBe(before);
   });
@@ -75,7 +77,9 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     );
     await page.goto('/demo.html');
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
-    await page.locator('.timeline-strip .day-btn').nth(2).click();
+    // Kalenterissa on tama paiva ja ylihuominen; huomenna puuttuu, joten
+    // eteenpain-nuoli (indeksi 4) vie ylihuomiseen
+    await page.locator('.day-nav .day-btn').nth(4).click();
 
     const btn = page.locator('button:has-text("Hae ottelut ja kertoimet")');
     if (await btn.count()) await expect(btn.first()).toBeVisible();
@@ -87,7 +91,9 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     );
     await page.goto('/demo.html');
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
-    await page.locator('.timeline-strip .day-btn').nth(2).click();
+    // Kalenterissa on tama paiva ja ylihuominen; huomenna puuttuu, joten
+    // eteenpain-nuoli (indeksi 4) vie ylihuomiseen
+    await page.locator('.day-nav .day-btn').nth(4).click();
 
     const btn = page.locator('button:has-text("Hae ottelut ja kertoimet")');
     test.skip((await btn.count()) === 0, 'Paivalla on jo otteluita snapshotissa');
@@ -106,7 +112,9 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     );
     await page.goto('/demo.html');
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
-    await page.locator('.timeline-strip .day-btn').nth(2).click();
+    // Kalenterissa on tama paiva ja ylihuominen; huomenna puuttuu, joten
+    // eteenpain-nuoli (indeksi 4) vie ylihuomiseen
+    await page.locator('.day-nav .day-btn').nth(4).click();
 
     const btn = page.locator('button:has-text("Hae ottelut ja kertoimet")');
     test.skip((await btn.count()) === 0, 'Paivalla on jo otteluita snapshotissa');
@@ -121,7 +129,9 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     await page.route('**/site.api.espn.com/**', (route: any) => route.fulfill({ status: 500, body: '' }));
     await page.goto('/demo.html');
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
-    await page.locator('.timeline-strip .day-btn').nth(2).click();
+    // Kalenterissa on tama paiva ja ylihuominen; huomenna puuttuu, joten
+    // eteenpain-nuoli (indeksi 4) vie ylihuomiseen
+    await page.locator('.day-nav .day-btn').nth(4).click();
     const btn = page.locator('button:has-text("Hae ottelut ja kertoimet")');
     if (await btn.count()) {
       await btn.first().click();

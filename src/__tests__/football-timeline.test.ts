@@ -69,3 +69,75 @@ describe('todayKey', () => {
     expect(todayKey(new Date(2026, 0, 9))).toBe('2026-01-09');
   });
 });
+
+// Tiketti #82: nuolinavigointi
+//
+// Tarkein saanto: nuoli hyppaa OTTELUPAIVAAN eika kalenteripaivaan. Sokea
+// +1 vrk veisi tyhjalle paivalle, ja tyhja paiva nayttaa virheelta vaikka
+// kyse on siita ettei silloin pelata.
+
+// @ts-expect-error — selainmoduuli ilman tyyppejä
+import { stepDay, shiftDay } from '../../public/app/football-timeline.js';
+
+describe('shiftDay', () => {
+  it('siirtaa eteen ja taakse', () => {
+    expect(shiftDay('2026-08-25', 1)).toBe('2026-08-26');
+    expect(shiftDay('2026-08-25', -1)).toBe('2026-08-24');
+  });
+
+  it('kuukauden vaihde toimii', () => {
+    expect(shiftDay('2026-08-31', 1)).toBe('2026-09-01');
+    expect(shiftDay('2026-09-01', -1)).toBe('2026-08-31');
+  });
+
+  it('vuoden vaihde toimii', () => {
+    expect(shiftDay('2026-12-31', 1)).toBe('2027-01-01');
+  });
+
+  it('karkauspaiva', () => {
+    expect(shiftDay('2028-02-28', 1)).toBe('2028-02-29');
+  });
+
+  it('kelvoton paiva palautuu sellaisenaan', () => {
+    expect(shiftDay('rikki', 1)).toBe('rikki');
+  });
+});
+
+describe('stepDay — hyppaa ottelupaiviin', () => {
+  const days = (...dates: string[]) => dates.map((date) => ({ date, matches: 1, with_odds: 0, leagues: [] }));
+
+  it('OHITTAA tyhjan paivan eteenpain', () => {
+    // 26.8. ei ole kalenterissa -> hyppy 27.8:aan
+    expect(stepDay('2026-08-25', 1, days('2026-08-25', '2026-08-27'))).toBe('2026-08-27');
+  });
+
+  it('OHITTAA tyhjan paivan taaksepain', () => {
+    expect(stepDay('2026-08-27', -1, days('2026-08-24', '2026-08-27'))).toBe('2026-08-24');
+  });
+
+  it('viimeisesta eteenpain -> null (nuoli himmenee)', () => {
+    expect(stepDay('2026-08-27', 1, days('2026-08-25', '2026-08-27'))).toBeNull();
+  });
+
+  it('ensimmaisesta taaksepain -> null', () => {
+    expect(stepDay('2026-08-25', -1, days('2026-08-25', '2026-08-27'))).toBeNull();
+  });
+
+  it('valittu paiva EI ole kalenterissa: eteenpain loytyy seuraava', () => {
+    expect(stepDay('2026-08-26', 1, days('2026-08-25', '2026-08-27'))).toBe('2026-08-27');
+  });
+
+  it('valittu paiva EI ole kalenterissa: taaksepain loytyy edellinen', () => {
+    expect(stepDay('2026-08-26', -1, days('2026-08-25', '2026-08-27'))).toBe('2026-08-25');
+  });
+
+  it('ILMAN KALENTERIA askeltaa vuorokauden — muuta tietoa ei ole', () => {
+    expect(stepDay('2026-08-25', 1, null)).toBe('2026-08-26');
+    expect(stepDay('2026-08-25', -1, [])).toBe('2026-08-24');
+  });
+
+  it('yhden paivan kalenterissa molemmat nuolet himmenevat', () => {
+    expect(stepDay('2026-08-25', 1, days('2026-08-25'))).toBeNull();
+    expect(stepDay('2026-08-25', -1, days('2026-08-25'))).toBeNull();
+  });
+});
