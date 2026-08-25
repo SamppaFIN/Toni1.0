@@ -235,10 +235,22 @@ export function renderDayFixtures(date, knownIds = new Set()) {
     })
     .join('');
 
+  // Teksti kertoo mita listalla OIKEASTI on. Aiemmin se vaitti aina "ilman
+  // julkaistuja kertoimia", mika oli vaara niille otteluille joille kertoimet
+  // on olemassa muttei tallessa kortiksi asti -- kayttaja luki siita ettei
+  // dataa ollut, vaikka sita oli.
+  const withOdds = list.filter((m) => m.has_odds).length;
+  const caption =
+    withOdds === 0
+      ? 'Kertoimia ei ole vielä julkaistu näille. Ne ilmestyvät lähempänä ottelua.'
+      : withOdds === list.length
+        ? 'Kertoimet on haettu, mutta analyysia ei ole arkistoitu näille otteluille.'
+        : `${list.length - withOdds} odottaa kertoimia · ${withOdds} haettu muttei arkistoitu.`;
+
   return `<div class="card">
     <div style="font-size:.72rem;font-weight:700">📋 Otteluohjelma</div>
     <div style="font-size:.6rem;color:var(--c-text-muted);margin-top:2px">
-      ${list.length} ottelua ilman julkaistuja kertoimia. Kertoimet ilmestyvät lähempänä ottelua.
+      ${list.length} ottelua. ${esc(caption)}
     </div>
     ${blocks}
   </div>`;

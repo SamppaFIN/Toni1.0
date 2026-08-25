@@ -51,6 +51,28 @@ export interface OddsTimeline {
   home: string;
   away: string;
   points: OddsPoint[];
+  /**
+   * Avaushavainnon toimistorivit ja tunnusluvut — KERRAN per ottelu, ei per
+   * havainto (tiketti #83).
+   *
+   * Selain rakentaa naista ottelukortin menneille paiville. Ilman niita
+   * kortti jaisi ilman kerroinvertailua ja tunnuslukuja, ja pelattu ottelu
+   * nayttaisi silta ettei siita ollut dataa -- vaikka koko analyysi on
+   * tallessa.
+   *
+   * Per havainto tallennettuna nama kolminkertaistaisivat tiedoston koon.
+   * Avaushavainto riittaa, koska analyysi luetaan siita muutenkin.
+   */
+  opening?: {
+    books: unknown[];
+    best: unknown;
+    stats: unknown;
+    /** Taydet edge-rivit sellaisenaan — selaimen ei tarvitse rekonstruoida vajaasti */
+    edges: unknown[];
+    home_team: unknown;
+    away_team: unknown;
+    model_extra: unknown;
+  } | null;
   /** Toteutunut tulos jos tiedossa */
   result: { outcome: MarketSide; home_score: number; away_score: number } | null;
 }
@@ -97,6 +119,35 @@ export function pointFrom(match: MatchCard, at: string): OddsPoint | null {
   return point;
 }
 
+/**
+ * Avaushavainnon lisatiedot: toimistorivit, tunnusluvut ja joukkuemetadata.
+ *
+ * Nama ovat kortin renderointia varten eivatka analyysia -- analyysi on jo
+ * `points`-sarjassa. Siksi ne otetaan sellaisenaan ilman uudelleenmuotoilua.
+ */
+function openingFrom(match: MatchCard): OddsTimeline['opening'] {
+  const m = match as unknown as Record<string, unknown>;
+  return {
+    books: (m.odds as unknown[]) ?? [],
+    best: m.best ?? null,
+    stats: m.stats ?? null,
+    edges: (match.analysis?.edges as unknown[]) ?? [],
+    home_team: match.home,
+    away_team: match.away,
+    model_extra: match.model
+      ? {
+          method: match.model.method,
+          lambda_home: match.model.lambda_home,
+          lambda_away: match.model.lambda_away,
+          poisson_probs: match.model.poisson_probs,
+          blend_weight: match.model.blend_weight,
+          over25: match.model.over25,
+          btts: match.model.btts,
+        }
+      : null,
+  };
+}
+
 /** Onko havaintopiste jo sarjassa — sama ajo kahdesti ei saa kasvattaa sitä */
 function hasPoint(timeline: OddsTimeline, at: string): boolean {
   return timeline.points.some((p) => p.at === at);
@@ -131,9 +182,14 @@ export function mergeSnapshots(existing: OddsHistoryFile | null, snapshots: Arra
           home: match.home.name,
           away: match.away.name,
           points: [],
+          opening: openingFrom(match),
           result: null,
         };
         byId.set(match.id, timeline);
+      } else if (!timeline.opening) {
+        // Vanhassa tiedostossa ei ole avaustietoja; taydennetaan ne kun
+        // ottelu tulee uudelleen vastaan
+        timeline.opening = openingFrom(match);
       }
 
       if (!hasPoint(timeline, at)) timeline.points.push(point);

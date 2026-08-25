@@ -45,6 +45,10 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     // tama paiva ja ylihuominen, jolla on ottelu muttei kertoimia -- juuri
     // se tilanne jossa ennakkohakunappi tarvitaan.
     await useCalendarDays(page, [0, 2]);
+    // Palvelinarkisto pois: siina on otteluita ylihuomiselle, jolloin
+    // ennakkohakunappia ei tarvittaisi eika testi mittaisi mitaan
+    await page.route('**/data/odds-history.json', (route: any) => route.fulfill({ status: 404 }));
+    await page.addInitScript(() => localStorage.removeItem('bt_odds_archive'));
   });
 
   test('EI hae ESPN:aa ennen napin painallusta', async ({ page }) => {
@@ -95,8 +99,10 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     // eteenpain-nuoli (indeksi 4) vie ylihuomiseen
     await page.locator('.day-nav .day-btn').nth(4).click();
 
+    // Ei skippausta: setup takaa etta ylihuomisella ei ole kertoimia. Jos
+    // nappi puuttuu, se ON vika eika ymparistotekija.
     const btn = page.locator('button:has-text("Hae ottelut ja kertoimet")');
-    test.skip((await btn.count()) === 0, 'Paivalla on jo otteluita snapshotissa');
+    await expect(btn.first()).toBeVisible({ timeout: 10000 });
     await btn.first().click();
 
     const preview = page.locator('#day-preview');
@@ -116,8 +122,10 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     // eteenpain-nuoli (indeksi 4) vie ylihuomiseen
     await page.locator('.day-nav .day-btn').nth(4).click();
 
+    // Ei skippausta: setup takaa etta ylihuomisella ei ole kertoimia. Jos
+    // nappi puuttuu, se ON vika eika ymparistotekija.
     const btn = page.locator('button:has-text("Hae ottelut ja kertoimet")');
-    test.skip((await btn.count()) === 0, 'Paivalla on jo otteluita snapshotissa');
+    await expect(btn.first()).toBeVisible({ timeout: 10000 });
     await btn.first().click();
 
     const preview = page.locator('#day-preview');

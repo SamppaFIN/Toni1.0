@@ -28,6 +28,7 @@ import * as liveView from './football-live.js';
 import * as playedToday from './football-results.js';
 import './football-review.js'; // rekisteroi window.BTA
 import * as timeline from './football-timeline.js'; // rekisteroi window.BTL2
+import * as serverArchive from './football-server-archive.js'; // rekisteroi window.BTSA
 import './football-rounds.js'; // rekisteroi window.BTRV
 import { archiveSnapshot } from './football-archive.js';
 import './football-chase.js'; // rekisteröi window.BTC — ei tarvitse suoraa viittausta täältä
@@ -127,7 +128,7 @@ export async function reload() {
   // Tiketti #79: otteluohjelma rinnakkain snapshotin kanssa. Aikajana on
   // lisä eikä ehto — jos kalenteri ei lataudu, kortit renderöityvät kuten
   // ennen ja aikajanan tilalle tulee selitys.
-  const [{ snapshot, error }] = await Promise.all([loadSnapshot(), timeline.load()]);
+  const [{ snapshot, error }] = await Promise.all([loadSnapshot(), timeline.load(), serverArchive.load()]);
   setSnapshot(snapshot, error);
 
   // Tiketti #60: talleta kertoimet ja mallin arvio ennen kuin ne katoavat.

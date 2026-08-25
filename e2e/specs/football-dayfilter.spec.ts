@@ -7,12 +7,16 @@
 
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import { useFootball, resetState } from '../helpers.js';
+import { useFootball, resetState, useFixtureSnapshot, useIsolatedArchives } from '../helpers.js';
 
 test.describe('Paivanavigointi', () => {
   test.beforeEach(async ({ page }) => {
     await useFootball(page);
     await resetState(page);
+    // Kiintea snapshot: elava today.json voi olla tyhja tai sisaltaa vain
+    // pelattuja otteluita, jolloin testit skippaisivat. Skipattu testi
+    // lakastuu hiljaa.
+    await useFixtureSnapshot(page);
     await page.goto('/demo.html');
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
   });
@@ -135,7 +139,8 @@ test.describe('Tyhjan sivun varakeino (regressio #60)', () => {
     await page.route('**/data/today.json', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) })
     );
-    await page.addInitScript(() => localStorage.removeItem('bt_football_day_filter'));
+    // Tama testi koskee VARAKEINOA, ei sita mita cron on sattunut hakemaan
+    await useIsolatedArchives(page);
     await page.goto('/demo.html');
 
     // Paivasuodatin piilottaa alkaneet, mutta kun muuta ei ole, ne on

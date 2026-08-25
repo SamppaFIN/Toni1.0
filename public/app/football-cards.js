@@ -30,6 +30,7 @@ import * as calc from './football-calc.js';
 import { archivedDay, toCardShape } from './football-archive.js';
 import { LEAGUE_CODES, fetchFixtures, ymd, fetchH2H } from './football-espn.js';
 import * as timeline from './football-timeline.js';
+import { serverArchiveDay } from './football-server-archive.js';
 
 // ─── Päiväsuodatin (tiketti #46) ──────────────────────────────────────────
 //
@@ -1207,8 +1208,15 @@ export function renderAllCards() {
   const day = selectedDayKey(mode);
   const fromSnapshot = currentSnapshot.matches.filter((m) => localDayKey(m.kickoff) === day);
 
-  // Snapshot voittaa arkiston: se on tuoreempi havainto samasta ottelusta
+  // Kolme lahdetta, heikoimmasta vahvimpaan:
+  //   1. palvelinarkisto  — mita cron on kerannyt, kaikilla sama
+  //   2. selainarkisto    — mita TAMA selain on nahnyt, tuoreempi
+  //   3. snapshot         — mita API tarjoaa juuri nyt
+  //
+  // Tiketti #83: ilman kohtaa 1 tyhjalla selaimella mennyt paiva nayttaisi
+  // tyhjalta, vaikka palvelimella on kertoimet, tunnusluvut ja tulos.
   const byId = new Map();
+  for (const a of serverArchiveDay(day)) byId.set(a.id, a);
   for (const a of archivedDay(day)) byId.set(a.id, toCardShape(a));
   for (const m of fromSnapshot) byId.set(m.id, m);
 
@@ -1315,7 +1323,7 @@ function renderMatchList(list, opts = {}) {
     const isPast = Boolean(day) && day < today;
     const canFetch = mode !== 'all' && isFuture;
     const explain = isPast
-      ? 'Arkistossa on vain ne paivat joina sovellus on ollut auki.'
+      ? 'Arkistoituja kohteita ei ole talle paivalle.'
       : canFetch
         ? 'Kertoimia ei ole viela haettu talle paivalle.'
         : '';

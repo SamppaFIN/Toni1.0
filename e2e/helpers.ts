@@ -157,3 +157,22 @@ export async function useCalendarDays(page: Page, offsets: number[]): Promise<vo
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(calendar) })
   );
 }
+
+/**
+ * Neutralisoi kalenteri ja palvelinarkisto (tiketit #74, #83).
+ *
+ * Kierrosnakymalla on KOLME datalahdetta: today.json, fixtures.json ja
+ * odds-history.json. Testi joka ohjaa vain ensimmaista saa nakymaan silti
+ * cronin hakemat ottelut, ja mittaa silloin jotain muuta kuin vaittaa.
+ *
+ * Tama kytkee kaksi jalkimmaista pois. Kutsu ENNEN goto:a.
+ */
+export async function useIsolatedArchives(page: Page): Promise<void> {
+  await page.route('**/data/fixtures.json', (route) => route.fulfill({ status: 404 }));
+  await page.route('**/data/odds-history.json', (route) => route.fulfill({ status: 404 }));
+  await page.addInitScript(() => {
+    for (const key of ['bt_timeline_day', 'bt_odds_archive', 'bt_football_day_filter']) {
+      localStorage.removeItem(key);
+    }
+  });
+}

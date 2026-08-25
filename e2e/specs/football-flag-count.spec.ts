@@ -15,7 +15,7 @@
 // Testi syottaa nimenomaan tallaisen kortin: edge 5.5 % mutta flag "none".
 
 import { test, expect } from '@playwright/test';
-import { useFootball, resetState } from '../helpers.js';
+import { useFootball, resetState, useIsolatedArchives } from '../helpers.js';
 
 /** Kortti jonka edge ylittaa 3 % mutta jota palvelin EI liputtanut */
 function snapshotWithUnflaggedEdge() {
@@ -39,7 +39,15 @@ function snapshotWithUnflaggedEdge() {
     matches: [
       {
         id: 'soccer_epl:2099-01-01:AAA-BBB',
-        kickoff: new Date(Date.now() + 6 * 3600_000).toISOString(),
+        // Tanaan klo 23 paikallista jos mahdollista, muuten +2 h — kickoff ei
+        // saa valua seuraavalle kalenteripaivalle, koska paivasuodatin
+        // piilottaisi kortin
+        kickoff: (() => {
+          const d = new Date();
+          const late = new Date(d);
+          late.setHours(23, 0, 0, 0);
+          return (late > d ? late : new Date(d.getTime() + 2 * 3600_000)).toISOString();
+        })(),
         league: 'Valioliiga',
         home: { name: 'Alpha FC' },
         away: { name: 'Beta United' },
@@ -73,6 +81,8 @@ test.describe('Value-laskuri vs. korttien merkinnat', () => {
   test.beforeEach(async ({ page }) => {
     await useFootball(page);
     await resetState(page);
+    // Tama testi koskee LASKURIA, ei sita mita cron on hakenut
+    await useIsolatedArchives(page);
   });
 
   test('liputtamaton yli 3 %:n edge EI nay value-kohteena otsikossa', async ({ page }) => {
