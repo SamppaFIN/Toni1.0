@@ -6,7 +6,7 @@
 // tila säilyy — eli että ketju UI → localStorage → uudelleenlaskenta toimii.
 
 import { test, expect } from '@playwright/test';
-import { useFootball, resetState } from '../helpers.js';
+import { useFootball, resetState, useFixtureSnapshot } from '../helpers.js';
 
 /** Avaa ensimmäisen kortin Kerroinlaskuri-osio */
 async function openCalculator(page: any) {
@@ -20,6 +20,7 @@ test.describe('Kerroinlaskuri', () => {
   test.beforeEach(async ({ page }) => {
     await useFootball(page);
     await resetState(page);
+    await useFixtureSnapshot(page);
     await page.goto('/demo.html');
   });
 

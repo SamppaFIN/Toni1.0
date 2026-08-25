@@ -5,7 +5,7 @@
 // renderointi, elinkaari ja virhetila.
 
 import { test, expect } from '@playwright/test';
-import { useFootball, resetState } from '../helpers.js';
+import { useFootball, resetState, useFixtureSnapshot, fixtureSnapshot, useSimulation } from '../helpers.js';
 
 const SCOREBOARD = {
   events: [
@@ -64,6 +64,8 @@ test.describe('Live-seuranta', () => {
   test.beforeEach(async ({ page }) => {
     await useFootball(page);
     await resetState(page);
+    await useSimulation(page);
+    await useFixtureSnapshot(page);
   });
 
   test('nayttaa tilanteen, kellon ja ottelutilastot', async ({ page }) => {
@@ -140,14 +142,16 @@ test.describe('Keskinaiset kohtaamiset (tiketti #69)', () => {
   test('kohtaamiset haetaan ja naytetaan', async ({ page }) => {
     await useFootball(page);
     await resetState(page);
+    await useFixtureSnapshot(page);
     await page.route('**/site.api.espn.com/**', async (route: any) => {
       const url = route.request().url();
       if (url.includes('/summary')) {
         return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SUMMARY_H2H) });
       }
-      // Scoreboard: palauta ottelu jonka nimet vastaavat snapshotia
-      const snap = await (await page.request.get('/data/today.json')).json();
-      const m = snap.matches?.[0];
+      // Scoreboard: palauta ottelu jonka nimet vastaavat snapshotia.
+      // Luetaan FIKSTUURISTA: page.request ei kulje page.routen lapi, joten
+      // se hakisi elavan tiedoston samalla kun sivu nayttaa fikstuuria.
+      const m = fixtureSnapshot().matches?.[0] as any;
       if (!m) return route.fulfill({ status: 200, contentType: 'application/json', body: '{"events":[]}' });
       return route.fulfill({
         status: 200,

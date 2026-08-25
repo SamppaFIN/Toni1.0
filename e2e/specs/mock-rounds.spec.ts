@@ -129,6 +129,12 @@ test.describe('Harjoituskierrokset', () => {
   });
 
   test('simulaatio toimii harjoituskierroksella ja ratkaisee vedon', async ({ page }) => {
+    // Tiketti #78: simulaationapit ovat oletuksena piilossa. Kytketaan ne
+    // paalle SAMAA POLKUA kuin kayttaja -- Admin-valilehden togglesta.
+    // localStorage-tynka ei kelpaisi tassa: beforeEach on jo navigoinut,
+    // joten addInitScript ei enaa ajaudu.
+    await page.click('.tab[data-tab="admin"]');
+    await page.click('#admin-content button:has-text("Simulaatio")');
     await enableMockRounds(page);
     await page.locator('#round-games .bk-odds').first().click();
     const popup = page.locator('[id^="fbetpop-"]:visible');

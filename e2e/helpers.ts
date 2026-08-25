@@ -53,10 +53,23 @@ export async function resetState(page: Page): Promise<void> {
  * Elo-luvut, yksi vahva value (💎), yksi kandidaatti (🟡) ja useita
  * parhaita hintoja ilman valueta.
  */
-export async function useFixtureSnapshot(page: Page): Promise<void> {
-  const fixture = JSON.parse(
+/**
+ * Fikstuurin sisalto sellaisena kuin sivu sen saa.
+ *
+ * Testi joka vertaa ruudun sisaltoa snapshottiin EI saa hakea sita
+ * `request.get('/data/today.json')`:lla: request-konteksti ei kulje
+ * `page.route`n lapi, joten se lukisi elavan tiedoston samalla kun sivu
+ * nayttaa fikstuuria. Silloin testi vertaa kahta eri lahdetta ja kaatuu
+ * syysta jolla ei ole tekemista koodin kanssa.
+ */
+export function fixtureSnapshot(): { matches: Array<{ odds: Array<{ bookmaker: string }> }> } {
+  return JSON.parse(
     readFileSync(new URL('./fixtures/snapshot-with-elo.json', import.meta.url), 'utf8')
   );
+}
+
+export async function useFixtureSnapshot(page: Page): Promise<void> {
+  const fixture = fixtureSnapshot() as any;
   // Aikaleima nyt-hetkeen, muuten kortti näyttäisi VANHENTUNUT-varoituksen
   fixture.generated_at = new Date().toISOString();
   for (const [i, m] of fixture.matches.entries()) {
@@ -73,4 +86,25 @@ export async function useFixtureSnapshot(page: Page): Promise<void> {
   await page.route('**/data/today.json', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) })
   );
+}
+
+/**
+ * Kytke harjoitussimulaatio päälle (tiketti #78).
+ *
+ * Simulaationapit ovat oletuksena piilossa: ohjelma käyttää oikeaa dataa, ja
+ * simuloitu tulos näyttää kortilla samalta kuin pelattu. Testit jotka
+ * nimenomaan mittaavat simulaatiota kytkevät sen itse päälle — sama toggle
+ * jonka käyttäjä löytää Admin-välilehdeltä.
+ */
+export async function useSimulation(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const key = 'bt_display_prefs';
+    let prefs: Record<string, boolean> = {};
+    try {
+      prefs = JSON.parse(localStorage.getItem(key) || '{}');
+    } catch {
+      /* vioittunut tallennus ei estä testiä */
+    }
+    localStorage.setItem(key, JSON.stringify({ ...prefs, sim: true }));
+  });
 }

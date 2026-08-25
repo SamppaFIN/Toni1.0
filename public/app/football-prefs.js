@@ -25,6 +25,10 @@ export const DISPLAY_OPTIONS = [
   { key: 'analysis', label: 'Analyysi', hint: 'Malli vs markkina, edge, Kelly-panos', default: true },
   { key: 'calc', label: 'Laskennan vaiheet', hint: 'Jokainen välitulos kaavoineen — pitkä', default: false },
   { key: 'llm', label: 'Kysy LLM:ltä (per ottelu)', hint: 'Oma LLM-analyysinappi jokaiselle ottelukortille', default: true },
+  // Oletuksena POIS: ohjelma käyttää oikeaa dataa, ja simuloitu tulos
+  // näyttää kortilla samalta kuin pelattu. Harjoittelu on oma valintansa,
+  // ei jotain johon ajaudutaan vahingossa.
+  { key: 'sim', label: 'Simulaatio', hint: 'Simuloi kierroksen tulokset oikeiden sijaan — vain testaamiseen', default: false },
 ];
 
 const DEFAULTS = Object.fromEntries(DISPLAY_OPTIONS.map((o) => [o.key, o.default]));

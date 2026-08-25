@@ -6,12 +6,13 @@
 // rakenteen ja logiikan, eivät yksittäisiä lukuja.
 
 import { test, expect } from '@playwright/test';
-import { useFootball, resetState } from '../helpers.js';
+import { useFootball, resetState, useFixtureSnapshot, fixtureSnapshot } from '../helpers.js';
 
 test.describe('Jalkapallonäkymä', () => {
   test.beforeEach(async ({ page }) => {
     await useFootball(page);
     await resetState(page);
+    await useFixtureSnapshot(page);
     await page.goto('/demo.html');
     // Moduuli latautuu deferoituna ja hakee snapshotin
     await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
@@ -153,15 +154,14 @@ test.describe('Jalkapallonäkymä', () => {
     await expect(page.locator('#admin-content button:has-text("Jalkapallo")')).toContainText('✓');
   });
 
-  test('näytetyt toimistot tulevat snapshotista — keksittyjä kertoimia ei ole', async ({ page, request }) => {
+  test('näytetyt toimistot tulevat snapshotista — keksittyjä kertoimia ei ole', async ({ page }) => {
     // genOddsForBookmaker() keksii kertoimia jääkiekkodemolle. Jos se pääsisi
     // ajamaan jalkapallotilassa, keksityt ja oikeat kertoimet sekoittuisivat
     // erottamattomasti. Tämä testi todistaa ettei niin käy: jokainen ruudulla
     // näkyvä toimisto löytyy snapshotista.
-    const snapshot = await (await request.get('/data/today.json')).json();
-    const allowed = new Set<string>(
-      snapshot.matches.flatMap((m: { odds: Array<{ bookmaker: string }> }) => m.odds.map((o) => o.bookmaker))
-    );
+    // Sama lahde jonka sivu sai (ks. fixtureSnapshot-kommentti helpers.ts:ssa)
+    const snapshot = fixtureSnapshot();
+    const allowed = new Set<string>(snapshot.matches.flatMap((m) => m.odds.map((o) => o.bookmaker)));
     expect(allowed.size).toBeGreaterThan(0);
 
     const shown = await page.locator('#round-games .bk-name').allInnerTexts();

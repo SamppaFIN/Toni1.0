@@ -155,11 +155,33 @@ export const FLAG_META = {
 
 export const SIDE_LABELS = { home: '1', draw: 'X', away: '2' };
 
-/** Ottelun paras edge — tällä kortit järjestetään ja lipputetaan */
+/** Ottelun paras edge — tällä kortit järjestetään */
 export function bestEdge(match) {
   const edges = match.analysis?.edges ?? [];
   if (!edges.length) return null;
   return edges.reduce((a, b) => (b.edge > a.edge ? b : a));
+}
+
+/**
+ * Ottelun liputetut kohteet.
+ *
+ * KÄYTÄ TÄTÄ, ÄLÄ RAAKAA EDGEÄ. Otsikkolaskuri vertasi aiemmin edgeä
+ * kynnykseen 0.03 suoraan, kun kortit lukivat palvelimen `flag`-kentän.
+ * Ne eivät ole sama asia: palvelin voi kieltäytyä liputtamasta kohdetta
+ * jonka edge ylittää kynnyksen, jos mallin luottamus ei riitä väitteen
+ * tekemiseen (tiketti #53). Oikeassa datassa 3 korttia oli tällaisia, ja
+ * otsikko lupasi kolme value-kohdetta joita yksikään kortti ei näyttänyt.
+ *
+ * Kynnyksen paikka on palvelimella, jossa on kaikki tieto. Selain vain
+ * lukee päätöksen.
+ */
+export function flaggedEdges(match) {
+  return (match.analysis?.edges ?? []).filter((e) => e.flag && e.flag !== 'none');
+}
+
+/** Onko ottelussa yhtään liputettua kohdetta */
+export function hasFlag(match) {
+  return flaggedEdges(match).length > 0;
 }
 
 /** Mallin tilan selitys käyttäjälle — tämä on olennaista luottamuksen kannalta */

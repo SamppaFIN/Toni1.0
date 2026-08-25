@@ -5,12 +5,14 @@
 // invarianttien pitävyyden — eivät yksittäisiä lukuja.
 
 import { test, expect } from '@playwright/test';
-import { useFootball, resetState } from '../helpers.js';
+import { useFootball, resetState, useFixtureSnapshot, useSimulation } from '../helpers.js';
 
 test.describe('Jalkapallon päiväsimulaatio', () => {
   test.beforeEach(async ({ page }) => {
     await useFootball(page);
     await resetState(page);
+    await useSimulation(page);
+    await useFixtureSnapshot(page);
     await page.addInitScript(() => localStorage.removeItem('bt_sim_results'));
     await page.goto('/demo.html');
     await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });

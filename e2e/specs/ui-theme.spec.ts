@@ -4,12 +4,13 @@
 // Uusi 'casino'-teema on sama komponenttirakenne, eri CSS-muuttujat.
 
 import { test, expect } from '@playwright/test';
-import { useFootball, resetState } from '../helpers.js';
+import { useFootball, resetState, useFixtureSnapshot } from '../helpers.js';
 
 test.describe('Käyttöliittymäteema', () => {
   test.beforeEach(async ({ page }) => {
     await useFootball(page);
     await resetState(page);
+    await useFixtureSnapshot(page);
     await page.goto('/demo.html');
     await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
   });

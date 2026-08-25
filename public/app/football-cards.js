@@ -20,6 +20,7 @@ import {
   SIDE_LABELS,
   METHOD_LABELS,
   bestEdge,
+  hasFlag,
   getDataSource,
   getMockRound,
   getMockRoundCount,
@@ -1265,14 +1266,16 @@ function renderMatchList(list, opts = {}) {
 
   // Value-kohteet ensin, sitten aikajärjestyksessä — käyttäjä näkee löydöt heti
   const ordered = [...list].sort((a, b) => {
-    const ea = bestEdge(a)?.edge ?? -1;
-    const eb = bestEdge(b)?.edge ?? -1;
-    const flagged = (e) => (e > 0.03 ? 1 : 0);
-    if (flagged(eb) !== flagged(ea)) return flagged(eb) - flagged(ea);
+    // Sama kriteeri kuin laskurissa ja korteissa: palvelimen lippu.
+    const fa = hasFlag(a) ? 1 : 0;
+    const fb = hasFlag(b) ? 1 : 0;
+    if (fb !== fa) return fb - fa;
+    // Liputettujen kesken suurin edge ensin
+    if (fa === 1) return (bestEdge(b)?.edge ?? 0) - (bestEdge(a)?.edge ?? 0);
     return Date.parse(a.kickoff) - Date.parse(b.kickoff);
   });
 
-  const flaggedCount = list.filter((m) => (bestEdge(m)?.edge ?? 0) > 0.03).length;
+  const flaggedCount = list.filter(hasFlag).length;
   const archived = list.filter((m) => m.fromArchive).length;
 
   const notes = [];
