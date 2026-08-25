@@ -1257,30 +1257,19 @@ function dayKeyForOffset(offset) {
   return localDayKey(d);
 }
 
-const DAY_LABELS = { '-1': 'Eilen', 0: 'Tänään', 1: 'Huomenna', 2: 'Ylihuomenna' };
-
-/** Päivänavigointi. Arkiston ansiosta myös menneet päivät ovat selattavissa. */
 /**
- * Paivanavigointi. Arkiston ansiosta myos menneet paivat ovat selattavissa.
+ * Paivanavigointi: viisi nappia (tiketti #82).
  *
  * Varit tulevat .day-btn-luokasta (demo.html) eivatka inline-tyyleista:
  * kovakoodattu tausta katosi kasino-teeman gradientilla (tiketti #66).
+ *
+ * Renderoidaan MYOS 'all'-tilassa, vaikka sita ei voi enaa valita: aiemmin
+ * "Kaikki"-napin painanut on se localStoragessaan, ja ilman navigointia han
+ * jaisi tilaan josta ei paase pois. Paivan klikkaus siirtaa pois (ks.
+ * timeline.select()), joten yksi painallus riittaa.
  */
-function dayNav(mode) {
-  // Tiketti #79: kun otteluohjelma on ladattu, aikajana korvaa kiinteät
-  // napit. Se kattaa koko aikaikkunan eikä vain neljää päivää, ja näyttää
-  // vain ne päivät joina pelataan.
-  const strip = timeline.renderStrip(undefined, mode);
-  if (strip) return strip;
-
-  const buttons = [-1, 0, 1, 2, 'all']
-    .map((v) => {
-      const active = String(v) === String(mode);
-      const label = v === 'all' ? '📅 Kaikki' : (DAY_LABELS[String(v)] ?? String(v));
-      return `<button class="day-btn${active ? ' active' : ''}" onclick="window.BTF.setDayFilter('${v}')">${label}</button>`;
-    })
-    .join('');
-  return `<div style="display:flex;gap:5px;flex-wrap:wrap;margin:0 0 8px 2px">${buttons}</div>`;
+function dayNav() {
+  return timeline.renderNav();
 }
 
 /** Yhteinen renderöinti kaikille päivänäkymille */
@@ -1312,7 +1301,7 @@ function renderMatchList(list, opts = {}) {
     ${notes.length ? `<br><span style="font-size:.58rem">${notes.join(' · ')}</span>` : ''}
   </div>`;
 
-  const nav = practice ? '' : dayNav(mode);
+  const nav = practice ? '' : dayNav();
 
   if (!list.length) {
     // Tyhja paiva ei ole umpikuja. Menneelle paivalle kerrotaan miksi arkisto
@@ -1343,7 +1332,6 @@ function renderMatchList(list, opts = {}) {
       `<div id="day-preview"></div>` +
       // Kertoimia ei ole, mutta otteluohjelma voi silti olla
       (day ? timeline.renderDayFixtures(day, new Set()) : '');
-    timeline.attach(container);
     return;
   }
 
@@ -1368,9 +1356,6 @@ function renderMatchList(list, opts = {}) {
     summary +
     ordered.map((m) => matchCard(m, indexOf(m))).join('') +
     alsoToday;
-  // Aikajana rakennetaan uudelleen joka renderoinnissa, joten raahaus ja
-  // automaattinen vieritys kiinnitetaan tuoreeseen elementtiin
-  timeline.attach(container);
   renderPlacedBets();
   renderOpenLlmPanels();
 }
