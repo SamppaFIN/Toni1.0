@@ -62,8 +62,27 @@ export const config = {
   },
   /** Mallin viritysparametrit — nämä ovat ne numerot joita kalibroidaan tuloksia vasten */
   model: {
-    /** Poissonin paino blendissä markkinaa vasten (0 = seuraa markkinaa, 1 = luota omaan malliin) */
-    blendWeight: Number(process.env.MODEL_BLEND_WEIGHT || 0.35),
+    /**
+     * Poissonin paino blendissä markkinaa vasten (0 = seuraa markkinaa,
+     * 1 = luota omaan malliin).
+     *
+     * 0.35 -> 0.40 (tiketti #86). Arvo EI ole arvattu vaan mitattu:
+     * calibrateBlendWeight() etsii Brier-scoren minimoivan painon
+     * toteutuneista tuloksista, ja 21 ratkenneella ottelulla se osoitti
+     * arvoon 0.40.
+     *
+     * Kolme ehtoa täyttyi ennen muutosta, ja kaikki kolme ovat tarpeen:
+     *   1. otos >= MIN_SAMPLE (21 >= 20)
+     *   2. optimi loytyi hakuvalin SISALTA, ei reunalta -- reunalla oleva
+     *      arvo tarkoittaa "hylkaa toinen lahde kokonaan" ja on lahes aina
+     *      kohinaa (tiketti #72)
+     *   3. muutos on pieni: 0.05 yksikkoa, ei hyppy
+     *
+     * Edellisella ajolla (n=20) sama laskenta ehdotti painoa 1.0 hakuvalin
+     * reunalta. Sita EI sovellettu juuri siksi. Tarkista metrics.json
+     * ennen seuraavaa saatoa.
+     */
+    blendWeight: Number(process.env.MODEL_BLEND_WEIGHT || 0.4),
     /** Dixon–Coles-korjaus matalille tuloksille */
     rho: Number(process.env.MODEL_RHO || -0.05),
     /** Kutistuksen k: montako ottelua kunnes luotetaan puoliksi omaan dataan */

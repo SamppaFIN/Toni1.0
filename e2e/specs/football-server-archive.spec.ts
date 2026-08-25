@@ -350,3 +350,43 @@ test.describe('Ratkenneen ottelun kortti', () => {
     await expect(page.locator('#round-games')).not.toContainText('ratkennut', { timeout: 10000 });
   });
 });
+
+// Lahdebanneri menneella paivalla (tiketti #87)
+//
+// "Kertoimet haettu 365 min sitten — aja putki uudelleen" nakyi myos
+// mennytta kierrosta katsottaessa. Siella kertoimien KUULUU olla vanhoja,
+// eika putken ajaminen toisi takaisin eilisia hintoja.
+test.describe('Lahdebanneri', () => {
+  test.beforeEach(async ({ page }) => {
+    await useFootball(page);
+    await resetState(page);
+    await setup(page);
+  });
+
+  test('MENNYT PAIVA: arkisto, ei vanhentumisvaroitusta', async ({ page }) => {
+    await page.goto('/demo.html');
+    await expect(page.locator('.day-nav')).toBeVisible({ timeout: 10000 });
+    await yesterdayBtn(page).click();
+    await expect(page.locator('#round-games')).toContainText('Fulham', { timeout: 10000 });
+
+    await expect(page.locator('#round-games')).toContainText('Menneen päivän kohteet');
+    await expect(page.locator('#round-games')).toContainText('ARKISTO');
+    await expect(page.locator('#round-games')).not.toContainText('VANHENTUNUT');
+    await expect(page.locator('#round-games')).not.toContainText('Aja putki uudelleen');
+  });
+
+  test('menneella paivalla sanotaan ettei vetoa voi enaa lyoda', async ({ page }) => {
+    await page.goto('/demo.html');
+    await expect(page.locator('.day-nav')).toBeVisible({ timeout: 10000 });
+    await yesterdayBtn(page).click();
+    await expect(page.locator('#round-games')).toContainText('vetoa ei voi enää lyödä', { timeout: 10000 });
+  });
+
+  test('TANAAN: normaali banneri, ei arkistomerkintaa', async ({ page }) => {
+    await page.goto('/demo.html');
+    await expect(page.locator('.day-nav')).toBeVisible({ timeout: 10000 });
+    await page.locator('.day-nav .day-btn').nth(2).click();
+    await expect(page.locator('#round-games')).toContainText('Päivän kohteet', { timeout: 10000 });
+    await expect(page.locator('#round-games')).not.toContainText('Menneen päivän');
+  });
+});

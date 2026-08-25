@@ -1170,25 +1170,41 @@ function roundNav() {
 }
 
 /** Snapshotin tila ja lähteet — käyttäjän pitää tietää mistä luvut tulevat */
-function sourceBanner(snapshot) {
+/**
+ * Lähdebanneri.
+ *
+ * `day` on katsottava päivä. Se on olennainen, koska vanhentuneisuus on
+ * SUHTEELLINEN KATSOTTAVAAN PÄIVÄÄN eikä kelloon: mennyttä kierrosta
+ * katsottaessa kertoimien KUULUU olla vanhoja, eikä "aja putki uudelleen"
+ * ole silloin ohje vaan hämmennystä — putken ajaminen ei tuo takaisin
+ * hintoja jotka olivat voimassa eilen.
+ */
+function sourceBanner(snapshot, day = null) {
   const isMock = snapshot.source === 'mock';
   const ageMin = Math.round((Date.now() - Date.parse(snapshot.generated_at)) / 60000);
-  const stale = ageMin > 240;
+  const isPast = Boolean(day) && day < localDayKey(new Date());
+  const stale = ageMin > 240 && !isPast;
 
   const warning = isMock
     ? `<div class="badge badge-yellow" style="font-size:.55rem">ESIMERKKIDATA</div>`
-    : stale
-      ? `<div class="badge badge-yellow" style="font-size:.55rem">VANHENTUNUT</div>`
-      : `<div class="badge badge-green" style="font-size:.55rem">OIKEAT KERTOIMET</div>`;
+    : isPast
+      ? `<div class="badge badge-muted" style="font-size:.55rem">ARKISTO</div>`
+      : stale
+        ? `<div class="badge badge-yellow" style="font-size:.55rem">VANHENTUNUT</div>`
+        : `<div class="badge badge-green" style="font-size:.55rem">OIKEAT KERTOIMET</div>`;
 
   const note = isMock
     ? 'Nämä eivät ole oikeita kertoimia. Aja <code>npm run snapshot:live</code> hakeaksesi oikeat.'
-    : stale
-      ? `Kertoimet haettu ${ageMin} min sitten — ne ovat todennäköisesti liikkuneet. Aja putki uudelleen.`
-      : `Kertoimet haettu ${ageMin} min sitten.`;
+    : isPast
+      ? 'Mennyt kierros. Kertoimet ovat ne jotka olivat voimassa ennen ottelua — vetoa ei voi enää lyödä.'
+      : stale
+        ? `Kertoimet haettu ${ageMin} min sitten — ne ovat todennäköisesti liikkuneet. Aja putki uudelleen.`
+        : `Kertoimet haettu ${ageMin} min sitten.`;
 
-  return `<div class="card" style="border:1px solid ${isMock || stale ? 'var(--c-warning)' : 'oklch(0.62 0.20 145 / 0.4)'}">
-    <div class="row"><strong style="font-size:.8rem">⚽ Päivän kohteet</strong>${warning}</div>
+  const border = isMock || stale ? 'var(--c-warning)' : isPast ? 'oklch(1 1 0/0.14)' : 'oklch(0.62 0.20 145 / 0.4)';
+
+  return `<div class="card" style="border:1px solid ${border}">
+    <div class="row"><strong style="font-size:.8rem">${isPast ? '📜 Menneen päivän kohteet' : '⚽ Päivän kohteet'}</strong>${warning}</div>
     <div style="font-size:.62rem;color:var(--c-text-muted);margin-top:4px">${note}</div>
     <div style="font-size:.6rem;color:var(--c-text-muted);margin-top:3px">Lähteet: ${(snapshot.providers ?? []).map(esc).join(' · ') || '—'}</div>
   </div>`;
@@ -1223,6 +1239,17 @@ export function renderAllCards() {
   const mode = getDayFilter();
 
   if (mode === 'all') {
+    // TAMA HAARA ON TARKOITUKSELLA JALJELLA vaikka "Kaikki"-nappi poistui
+    // tiketissa #82. Kaksi syyta:
+    //
+    //   1. Aiemmin napin painanut kayttaja on 'all' localStoragessaan.
+    //      Ilman tata haaraa han nakisi tyhjaa; nyt paivan klikkaus
+    //      siirtaa hanet pois (ks. timeline.select()).
+    //   2. E2E-fikstuuri asettaa sen tahallaan: sen ottelut ovat
+    //      nyt+2h...nyt+5h ja valuvat kahdelle kalenteripaivalle jos testi
+    //      ajetaan illalla. Paivasuodatin piilottaisi osan, ja testit
+    //      alkaisivat hailya kellonajan mukaan.
+    //
     // "Kaikki" tarkoittaa kaikkia, myos jo alkaneita. Aiemmin tama
     // suodatti alkaneet pois, jolloin "Kaikki" saattoi nayttaa VAHEMMAN
     // otteluita kuin "Tanaan" -- epajohdonmukaisuus jonka testi nappasi.
@@ -1362,7 +1389,7 @@ function renderMatchList(list, opts = {}) {
     container.innerHTML =
       roundNav() +
       nav +
-      sourceBanner(currentSnapshot) +
+      sourceBanner(currentSnapshot, day) +
       summary +
       `<div class="empty">Ei otteluita talle paivalle.${explain ? ' ' + explain : ''}</div>` +
       (canFetch
@@ -1391,7 +1418,7 @@ function renderMatchList(list, opts = {}) {
   container.innerHTML =
     roundNav() +
     nav +
-    sourceBanner(currentSnapshot) +
+    sourceBanner(currentSnapshot, day) +
     summary +
     ordered.map((m) => matchCard(m, indexOf(m))).join('') +
     alsoToday;

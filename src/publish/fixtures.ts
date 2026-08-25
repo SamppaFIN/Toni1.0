@@ -24,6 +24,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 import { config } from '../config.js';
 import { leagueFor, leagueName } from '../leagues.js';
 import { normalizeClubName } from './live-snapshot.js';
+import { fetchVeikkausliigaFixtures } from '../ingest/fixtures-veikkausliiga.js';
 import { Snapshot } from '../types-football.js';
 
 const BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
@@ -138,6 +139,42 @@ export function parseFixtures(events: EspnEvent[], sportKey: string, now: Date):
   }
 
   return out;
+}
+
+/** Sarjat joilla on ESPN:n sijaan oma otteluohjelmalahde (tiketti #85) */
+const VEIKKAUSLIIGA = 'soccer_finland_veikkausliiga';
+
+/**
+ * Veikkausliigan ottelut Palloliiton tulospalvelusta.
+ *
+ * ESPN:n `fin.1` vastaa 200 + tyhja lista, joten sarja katosi kalenterista.
+ * Virallinen lahde antaa koko kauden: pelatut tuloksineen ja julkaistut
+ * tulevat ottelut.
+ */
+async function veikkausliigaFixtures(now: Date, from: Date, to: Date): Promise<FixtureMatch[]> {
+  const all = await fetchVeikkausliigaFixtures(now);
+
+  return all
+    // Sama aikaikkuna kuin muilla sarjoilla, jottei kalenteri veny
+    // koko kaudeksi vain yhden sarjan takia
+    .filter((m) => {
+      const t = Date.parse(m.kickoff);
+      return t >= from.getTime() && t <= to.getTime();
+    })
+    .map((m) => ({
+      espn_id: `tp-${m.match_id}`,
+      match_id: null,
+      date: new Date(m.kickoff).toISOString().slice(0, 10),
+      kickoff: m.kickoff,
+      sport_key: VEIKKAUSLIIGA,
+      league: leagueName(VEIKKAUSLIIGA),
+      home: m.home,
+      away: m.away,
+      status: m.status,
+      home_score: m.home_score,
+      away_score: m.away_score,
+      has_odds: false,
+    }));
 }
 
 async function fetchLeagueFixtures(espnCode: string, from: Date, to: Date): Promise<EspnEvent[]> {
@@ -293,6 +330,14 @@ export async function buildFixtures(publicDir: string, now = new Date()): Promis
 
   const all: FixtureMatch[] = [];
   for (const sportKey of config.odds.footballSports) {
+    // Veikkausliigalla on oma lahde: ESPN ei anna siita mitaan
+    if (sportKey === VEIKKAUSLIIGA) {
+      const own = await veikkausliigaFixtures(now, from, to);
+      all.push(...own);
+      console.log(`[Fixtures] ${leagueName(sportKey)}: ${own.length} ottelua (Palloliitto)`);
+      continue;
+    }
+
     const league = leagueFor(sportKey);
     if (!league?.espn) {
       console.warn(`[Fixtures] ${sportKey}: ei ESPN-koodia — ohitetaan`);
