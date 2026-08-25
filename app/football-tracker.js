@@ -10,6 +10,7 @@
 // se luku olisi pahempi kuin ei lukua lainkaan.
 
 import { esc } from './snapshot.js';
+import { isVisible } from './football-prefs.js';
 import { getSnapshot } from './football-cards.js';
 import { start, clear, isRunning, isFinished, getSims, renderSimCard, renderReport, minuteLabel } from './football-sim.js';
 
@@ -141,6 +142,20 @@ function quickBetButtons(sim) {
 export function render() {
   if (!listEl) return;
   const snapshot = getSnapshot();
+
+  // Tiketti #78: simulaatio on harjoitusvaline, ei osa oikeaa nakymaa.
+  // Nappi ilmestyy vasta kun Admin-valilehden Simulaatio-toggle on paalla.
+  // Piilotus tehdaan tassa eika CSS:ssa, jotta se tapahtuu joka
+  // renderoinnissa -- muuten toggle vaikuttaisi vasta sivun latauksen
+  // jalkeen ja nayttaisi rikkinaiselta.
+  const simVisible = isVisible('sim');
+  if (buttonEl) buttonEl.style.display = simVisible ? 'block' : 'none';
+  if (!simVisible && !isRunning() && !isFinished()) {
+    listEl.innerHTML =
+      '<div class="empty">Seuranta näyttää käynnissä olevat ottelut oikeasta datasta.<br>' +
+      '<span style="font-size:.62rem;color:var(--c-text-muted)">Simulaation saa käyttöön Admin-välilehdeltä.</span></div>';
+    return;
+  }
 
   // Simulaatio käynnissä
   if (isRunning()) {

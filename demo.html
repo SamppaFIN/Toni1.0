@@ -320,7 +320,11 @@ a.bk-link:hover,a.bk-link:focus-visible{color:var(--c-accent)}
   <!-- Tiketti #55: oikea live-tilanne ENNEN simulaatiota. Simulaatio on
        harjoittelua, tama on totta - jarjestys kertoo kumpi on kumpi. -->
   <div id="live-content" data-sport="football" style="margin-bottom:10px"></div>
-  <button class="btn btn-success btn-block" onclick="runSimulation()" id="sim-btn">▶️ Simuloi kierros</button>
+  <!-- Tiketti #78: piilossa oletuksena. Nakyvyys tulee Admin-valilehden
+       Simulaatio-togglesta (bt_display_prefs.sim). Nappi on DOM:issa aina,
+       jotta jaakiekon oma logiikka ja testit loytavat sen -- vain
+       nakyvyys muuttuu. -->
+  <button class="btn btn-success btn-block" onclick="runSimulation()" id="sim-btn" style="display:none">▶️ Simuloi kierros</button>
   <div id="tracker-list" style="margin-top:8px"></div>
   <!-- Tiketti #33: mittarit. Vain jalkapallomoduuli kirjoittaa tähän, joten
        jääkiekkotilassa kontti jää tyhjäksi. -->
@@ -1583,7 +1587,7 @@ function updateSlipBadge(){const e=document.getElementById('slip-count');e.textC
 function runSimulation(){
   // Jalkapallon simulaatio on oma moduulinsa; se ei vaadi vetoja, koska
   // ottelutulokset ovat kiinnostavia myös ilman panosta
-  if(!isHockey()){const b=document.getElementById('sim-btn');if(b)b.style.display='block';if(window.BTT)window.BTT.run();return}
+  if(!isHockey()){if(window.BTT)window.BTT.run();return}
   switchTab('tracker');
   const b=document.getElementById('sim-btn');
   b.textContent='🏒 Simuloidaan...';b.className='btn btn-primary btn-block';b.disabled=true;
