@@ -29,6 +29,7 @@ import { isVisible } from './football-prefs.js';
 import * as calc from './football-calc.js';
 import { archivedDay, toCardShape } from './football-archive.js';
 import { LEAGUE_CODES, fetchFixtures, ymd, fetchH2H } from './football-espn.js';
+import * as timeline from './football-timeline.js';
 
 // ─── Päiväsuodatin (tiketti #46) ──────────────────────────────────────────
 //
@@ -1203,7 +1204,7 @@ export function renderAllCards() {
   // Snapshot sisältää vain sen mitä API tarjoaa juuri nyt — eiliset ottelut
   // ovat pudonneet siitä pois. Arkisto (tiketti #60) täydentää ne takaisin,
   // jotta eilisen kertoimet ja mallin arvio ovat yhä nähtävissä.
-  const day = dayKeyForOffset(mode);
+  const day = selectedDayKey(mode);
   const fromSnapshot = currentSnapshot.matches.filter((m) => localDayKey(m.kickoff) === day);
 
   // Snapshot voittaa arkiston: se on tuoreempi havainto samasta ottelusta
@@ -1233,6 +1234,22 @@ export function renderAllCards() {
   renderMatchList(visible, { mode, day, total: all.length, fellBackToStarted });
 }
 
+/**
+ * Näytettävä päivä.
+ *
+ * Aikajanan valinta on absoluuttinen päivä ja voittaa siirtymäpohjaisen
+ * suodattimen. Ilman kalenteria (fixtures.json puuttuu tai ei latautunut)
+ * palataan vanhaan siirtymään, jolloin kortit toimivat kuten ennen.
+ */
+function selectedDayKey(mode) {
+  const cal = timeline.getCalendar();
+  if (cal?.days?.length) {
+    const today = timeline.todayKey();
+    return timeline.getSelectedDay() ?? timeline.nearestDay(cal.days, today);
+  }
+  return dayKeyForOffset(mode);
+}
+
 /** Päiväavain siirtymän mukaan: -1 = eilen, 0 = tänään, 1 = huomenna */
 function dayKeyForOffset(offset) {
   const d = new Date();
@@ -1250,6 +1267,12 @@ const DAY_LABELS = { '-1': 'Eilen', 0: 'Tänään', 1: 'Huomenna', 2: 'Ylihuomen
  * kovakoodattu tausta katosi kasino-teeman gradientilla (tiketti #66).
  */
 function dayNav(mode) {
+  // Tiketti #79: kun otteluohjelma on ladattu, aikajana korvaa kiinteät
+  // napit. Se kattaa koko aikaikkunan eikä vain neljää päivää, ja näyttää
+  // vain ne päivät joina pelataan.
+  const strip = timeline.renderStrip(undefined, mode);
+  if (strip) return strip;
+
   const buttons = [-1, 0, 1, 2, 'all']
     .map((v) => {
       const active = String(v) === String(mode);
@@ -1262,7 +1285,7 @@ function dayNav(mode) {
 
 /** Yhteinen renderöinti kaikille päivänäkymille */
 function renderMatchList(list, opts = {}) {
-  const { practice = false, mode = 0, total = list.length, fellBackToStarted = false } = opts;
+  const { practice = false, mode = 0, day = null, total = list.length, fellBackToStarted = false } = opts;
 
   // Value-kohteet ensin, sitten aikajärjestyksessä — käyttäjä näkee löydöt heti
   const ordered = [...list].sort((a, b) => {
@@ -1296,13 +1319,17 @@ function renderMatchList(list, opts = {}) {
     // on tyhja, tulevalle tarjotaan HAKUNAPPI joka noutaa ottelut ESPN:sta.
     // Haku tehdaan vasta napista: se on toisen palvelin, eika kayttajaa
     // kiinnosta huominen ennen kuin han sita kysyy.
-    const canFetch = mode !== 'all' && Number(mode) > 0;
-    const explain =
-      Number(mode) < 0
-        ? 'Arkistossa on vain ne paivat joina sovellus on ollut auki.'
-        : canFetch
-          ? 'Kertoimia ei ole viela haettu talle paivalle.'
-          : '';
+    // Tulevaisuus ratkaisee, ei siirtymä: aikajanan valinta on absoluuttinen
+    // päivä, joten mode voi olla 0 vaikka katsottaisiin ensi viikkoa.
+    const today = localDayKey(new Date());
+    const isFuture = Boolean(day) && day > today;
+    const isPast = Boolean(day) && day < today;
+    const canFetch = mode !== 'all' && isFuture;
+    const explain = isPast
+      ? 'Arkistossa on vain ne paivat joina sovellus on ollut auki.'
+      : canFetch
+        ? 'Kertoimia ei ole viela haettu talle paivalle.'
+        : '';
 
     container.innerHTML =
       roundNav() +
@@ -1311,9 +1338,12 @@ function renderMatchList(list, opts = {}) {
       summary +
       `<div class="empty">Ei otteluita talle paivalle.${explain ? ' ' + explain : ''}</div>` +
       (canFetch
-        ? `<button class="btn btn-primary btn-block" style="margin-top:8px;font-size:.7rem" onclick="window.BTF.fetchDay(${Number(mode)})">🔎 Hae ottelut ja kertoimet</button>`
+        ? `<button class="btn btn-primary btn-block" style="margin-top:8px;font-size:.7rem" onclick="window.BTF.fetchDay('${day}')">🔎 Hae ottelut ja kertoimet</button>`
         : '') +
-      `<div id="day-preview"></div>`;
+      `<div id="day-preview"></div>` +
+      // Kertoimia ei ole, mutta otteluohjelma voi silti olla
+      (day ? timeline.renderDayFixtures(day, new Set()) : '');
+    timeline.attach(container);
     return;
   }
 
@@ -1324,8 +1354,23 @@ function renderMatchList(list, opts = {}) {
     return i >= 0 ? i : 1000 + ordered.indexOf(m);
   };
 
+  // Tiketti #79: samana päivänä pelattavat ottelut joille ei ole kertoimia.
+  // Ne EIVÄT ole kortteja vaan pelkkä lista — kertoimeton ottelu ei ole
+  // vedonlyöntikohde, mutta sen piilottaminen saisi näyttämään siltä ettei
+  // ottelua ole.
+  const knownIds = new Set(ordered.map((m) => m.id));
+  const alsoToday = practice || !day ? '' : timeline.renderDayFixtures(day, knownIds);
+
   container.innerHTML =
-    roundNav() + nav + sourceBanner(currentSnapshot) + summary + ordered.map((m) => matchCard(m, indexOf(m))).join('');
+    roundNav() +
+    nav +
+    sourceBanner(currentSnapshot) +
+    summary +
+    ordered.map((m) => matchCard(m, indexOf(m))).join('') +
+    alsoToday;
+  // Aikajana rakennetaan uudelleen joka renderoinnissa, joten raahaus ja
+  // automaattinen vieritys kiinnitetaan tuoreeseen elementtiin
+  timeline.attach(container);
   renderPlacedBets();
   renderOpenLlmPanels();
 }
@@ -1389,13 +1434,25 @@ export function matchIndex(id) {
  * Pinnacle-ankkurin varaan — yhden toimiston hinnasta laskettu edge olisi eri
  * mittari samalla nimellä. Siksi tämä on ENNAKKO, ei analyysi.
  */
-export async function fetchDay(offset) {
+/**
+ * Hae yhden päivän ottelut ESPN:stä.
+ *
+ * Hyväksyy sekä päivämäärän ("2026-08-29") että siirtymän (2). Päivämäärä
+ * on se jota aikajana käyttää; siirtymä säilyy, koska ilman kalenteria
+ * kortit palaavat vanhaan päivänavigointiin ja kutsuvat tätä numerolla.
+ */
+export async function fetchDay(dayOrOffset) {
   const el = document.getElementById('day-preview');
   if (!el) return;
 
-  const d = new Date();
-  d.setDate(d.getDate() + Number(offset || 0));
-  const stamp = ymd(d);
+  let stamp;
+  if (typeof dayOrOffset === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dayOrOffset)) {
+    stamp = dayOrOffset.replace(/-/g, '');
+  } else {
+    const d = new Date();
+    d.setDate(d.getDate() + Number(dayOrOffset || 0));
+    stamp = ymd(d);
+  }
 
   const snap = getSnapshot();
   const names = new Set((snap?.matches ?? []).map((m) => m.league));

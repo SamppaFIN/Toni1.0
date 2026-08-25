@@ -108,6 +108,27 @@ jobs:
         run: npm run metrics
         continue-on-error: true
 
+      # Tiketti #74: otteluohjelma kaikille seuratuille sarjoille.
+      # Lahde on ESPN eika The Odds API, joten tama EI kuluta kvoottaa.
+      # Aikajana lukee taman; ilman sita se putoaa vanhaan paivanavigointiin.
+      - name: Rakenna otteluohjelmakalenteri
+        run: npm run fixtures
+        continue-on-error: true
+
+      # Tiketti #75: kerroinhistoria on KUMULATIIVINEN. Se luetaan ja
+      # kirjoitetaan samassa ajossa, ja committoidaan muun datan mukana --
+      # Actions ei sailyta mitaan ajojen valilla.
+      - name: Paivita kerroinhistoria
+        run: npm run odds:history
+        continue-on-error: true
+
+      # Tiketti #76: kierrosarviointi. Tarvitsee seka kerroinhistorian etta
+      # kalenterin (ESPN-ID:t maaliaikajanaa varten), joten se ajetaan
+      # molempien jalkeen.
+      - name: Arvioi ratkenneet kierrokset
+        run: npm run reviews
+        continue-on-error: true
+
       # Tiketti #73: Telegram-halytys vahvoista ylikertoimista.
       #
       # Tila (public/data/alerts-sent.json) committoidaan muun datan mukana --

@@ -27,6 +27,8 @@ import * as teamsTable from './football-teams.js';
 import * as liveView from './football-live.js';
 import * as playedToday from './football-results.js';
 import './football-review.js'; // rekisteroi window.BTA
+import * as timeline from './football-timeline.js'; // rekisteroi window.BTL2
+import './football-rounds.js'; // rekisteroi window.BTRV
 import { archiveSnapshot } from './football-archive.js';
 import './football-chase.js'; // rekisteröi window.BTC — ei tarvitse suoraa viittausta täältä
 import './football-llm.js'; // rekisteröi window.BTL (tiketti #38)
@@ -122,7 +124,10 @@ function confirmBet(matchId, side, odds, bookmaker) {
 
 /** Lataa snapshot ja renderöi. Kutsutaan myös Admin-välilehden päivitysnapista. */
 export async function reload() {
-  const { snapshot, error } = await loadSnapshot();
+  // Tiketti #79: otteluohjelma rinnakkain snapshotin kanssa. Aikajana on
+  // lisä eikä ehto — jos kalenteri ei lataudu, kortit renderöityvät kuten
+  // ennen ja aikajanan tilalle tulee selitys.
+  const [{ snapshot, error }] = await Promise.all([loadSnapshot(), timeline.load()]);
   setSnapshot(snapshot, error);
 
   // Tiketti #60: talleta kertoimet ja mallin arvio ennen kuin ne katoavat.
@@ -195,6 +200,8 @@ async function switchDataSource(source) {
 window.BTF = {
   reload,
   renderAllCards,
+  // Aikajanan valinta pyytaa uudelleenpiirron taman kautta
+  renderAll: renderAllCards,
   renderPlacedBets,
   toggleSection,
   setDayFilter,

@@ -108,3 +108,52 @@ export async function useSimulation(page: Page): Promise<void> {
     localStorage.setItem(key, JSON.stringify({ ...prefs, sim: true }));
   });
 }
+
+/**
+ * Tarjoile hallittu otteluohjelmakalenteri fixtures.json:n sijaan.
+ *
+ * Aikajana (tiketti #79) lukee kalenterin ja nayttaa vain paivat joilla on
+ * otteluita. Testi joka klikkaa tiettya paivaa ei voi luottaa siihen mita
+ * cron on sattunut hakemaan -- sama peruste kuin useFixtureSnapshotissa.
+ *
+ * `offsets` on paivasiirtymia tasta paivasta. Jokaiselle syntyy yksi ottelu
+ * ILMAN kertoimia, mika on juuri se tilanne jossa ennakkohakunappi tarvitaan.
+ */
+export async function useCalendarDays(page: Page, offsets: number[]): Promise<void> {
+  const key = (o: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + o);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+  const kickoff = (o: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + o);
+    d.setHours(18, 0, 0, 0);
+    return d.toISOString();
+  };
+
+  const calendar = {
+    schema_version: 1,
+    generated_at: new Date().toISOString(),
+    range: { from: key(Math.min(...offsets)), to: key(Math.max(...offsets)) },
+    days: offsets.map((o) => ({ date: key(o), matches: 1, with_odds: 0, leagues: ['Valioliiga'] })),
+    matches: offsets.map((o) => ({
+      espn_id: `e${o}`,
+      match_id: null,
+      date: key(o),
+      kickoff: kickoff(o),
+      sport_key: 'soccer_epl',
+      league: 'Valioliiga',
+      home: `Koti ${o}`,
+      away: `Vieras ${o}`,
+      status: o < 0 ? 'finished' : 'upcoming',
+      home_score: null,
+      away_score: null,
+      has_odds: false,
+    })),
+  };
+
+  await page.route('**/data/fixtures.json', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(calendar) })
+  );
+}

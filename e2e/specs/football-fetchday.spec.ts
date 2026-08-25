@@ -5,7 +5,7 @@
 // ennakko EI esita olevansa taysi analyysi.
 
 import { test, expect } from '@playwright/test';
-import { useFootball, resetState } from '../helpers.js';
+import { useFootball, resetState, useCalendarDays, useFixtureSnapshot } from '../helpers.js';
 
 const FIXTURES = {
   events: [
@@ -36,6 +36,15 @@ test.describe('Tulevan paivan ennakkohaku', () => {
   test.beforeEach(async ({ page }) => {
     await useFootball(page);
     await resetState(page);
+    // Kiintea snapshot: sen ottelut ovat TANAAN, joten ylihuominen on
+    // varmasti ilman kertoimia. Elava today.json ei kelpaa -- cron hakee
+    // otteluita useille paiville, ja silloin hakunappia ei tarvita eika
+    // testi ajaisi lainkaan.
+    await useFixtureSnapshot(page);
+    // Aikajana korvasi kiinteat paivanapit (tiketti #79). Kalenterissa on
+    // tama paiva ja ylihuominen, jolla on ottelu muttei kertoimia -- juuri
+    // se tilanne jossa ennakkohakunappi tarvitaan.
+    await useCalendarDays(page, [0, 2]);
   });
 
   test('EI hae ESPN:aa ennen napin painallusta', async ({ page }) => {
@@ -55,7 +64,7 @@ test.describe('Tulevan paivan ennakkohaku', () => {
 
     const before = calls;
     // Siirry paivaan jossa ei ole otteluita
-    await page.locator('#round-games button:has-text("Ylihuomenna")').first().click();
+    await page.locator('.timeline-strip .day-btn').nth(2).click();
     await page.waitForTimeout(500);
     expect(calls, 'paivanvaihto ei saa laukaista hakua').toBe(before);
   });
@@ -66,7 +75,7 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     );
     await page.goto('/demo.html');
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
-    await page.locator('#round-games button:has-text("Ylihuomenna")').first().click();
+    await page.locator('.timeline-strip .day-btn').nth(2).click();
 
     const btn = page.locator('button:has-text("Hae ottelut ja kertoimet")');
     if (await btn.count()) await expect(btn.first()).toBeVisible();
@@ -78,7 +87,7 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     );
     await page.goto('/demo.html');
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
-    await page.locator('#round-games button:has-text("Ylihuomenna")').first().click();
+    await page.locator('.timeline-strip .day-btn').nth(2).click();
 
     const btn = page.locator('button:has-text("Hae ottelut ja kertoimet")');
     test.skip((await btn.count()) === 0, 'Paivalla on jo otteluita snapshotissa');
@@ -97,7 +106,7 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     );
     await page.goto('/demo.html');
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
-    await page.locator('#round-games button:has-text("Ylihuomenna")').first().click();
+    await page.locator('.timeline-strip .day-btn').nth(2).click();
 
     const btn = page.locator('button:has-text("Hae ottelut ja kertoimet")');
     test.skip((await btn.count()) === 0, 'Paivalla on jo otteluita snapshotissa');
@@ -112,7 +121,7 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     await page.route('**/site.api.espn.com/**', (route: any) => route.fulfill({ status: 500, body: '' }));
     await page.goto('/demo.html');
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
-    await page.locator('#round-games button:has-text("Ylihuomenna")').first().click();
+    await page.locator('.timeline-strip .day-btn').nth(2).click();
     const btn = page.locator('button:has-text("Hae ottelut ja kertoimet")');
     if (await btn.count()) {
       await btn.first().click();
