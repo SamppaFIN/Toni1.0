@@ -240,4 +240,4 @@ export function render(containerId = 'review-content') {
   </div>`;
 }
 
-window.BTA = { load, render };
+if (typeof window !== 'undefined') window.BTA = { load, render };
