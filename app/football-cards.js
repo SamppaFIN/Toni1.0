@@ -1050,15 +1050,46 @@ function sectionButtons(match, index) {
 
 function matchCard(match, index) {
   const best = bestEdge(match);
+/**
+ * Ottelun lopputulos jos se on tiedossa (tiketti #84).
+ *
+ * Kortti nayttoi "alkanut" myos ottelulle joka oli pelattu loppuun tunteja
+ * sitten. Se on teknisesti tosi mutta hyodyton: se ei kerro mita tapahtui.
+ *
+ * Kaksi lahdetta, kumpikin oikea:
+ *   1. palvelinarkiston `result` — tulee odds-history.json:ista
+ *   2. kalenterin pistemaara    — ESPN:n otteluohjelmasta
+ * Ensimmainen voittaa koska se on jo tulkittu lopputulokseksi (1X2).
+ */
+function finalScore(match) {
+  const r = match.result;
+  if (r && Number.isFinite(r.home_score) && Number.isFinite(r.away_score)) {
+    return { home: r.home_score, away: r.away_score, outcome: r.outcome };
+  }
+
+  const fx = timeline.calendarMatch(match.id);
+  if (fx?.status === 'finished' && Number.isFinite(fx.home_score) && Number.isFinite(fx.away_score)) {
+    const outcome = fx.home_score > fx.away_score ? 'home' : fx.away_score > fx.home_score ? 'away' : 'draw';
+    return { home: fx.home_score, away: fx.away_score, outcome };
+  }
+  return null;
+}
+
   const flag = best && best.flag !== 'none' ? FLAG_META[best.flag] : null;
   const flagBadge = flag
     ? `<span class="badge ${flag.badge}" title="${flag.label}: ${SIDE_LABELS[best.side]} @ ${best.odds.toFixed(2)} (${esc(best.book ?? '')})">${flag.icon} ${(best.edge * 100).toFixed(1)} %</span>`
     : '';
 
+  // Ratkennut ottelu kertoo tuloksen; muuten aika aloitukseen
+  const score = finalScore(match);
+  const statusLabel = score
+    ? `<b style="color:var(--c-text);font-variant-numeric:tabular-nums">${score.home}–${score.away}</b> · ratkennut`
+    : esc(timeUntil(match.kickoff));
+
   return `<div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;font-size:.62rem;color:var(--c-text-muted)">
       <span>${esc(match.league)} · ${kickoffLabel(match.kickoff)}</span>
-      <span>${timeUntil(match.kickoff)}</span>
+      <span>${statusLabel}</span>
     </div>
 
     <div class="row" style="margin-top:5px">
