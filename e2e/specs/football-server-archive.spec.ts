@@ -301,3 +301,52 @@ test.describe('Palvelinarkisto', () => {
     await expect(page.locator('#round-games')).not.toContainText('Fulham');
   });
 });
+
+// Lopputulos kortilla (tiketti #84)
+//
+// Kortti nayttoi "alkanut" myos ottelulle joka oli pelattu loppuun tunteja
+// sitten. Teknisesti tosi, mutta se ei kerro mita tapahtui.
+test.describe('Ratkenneen ottelun kortti', () => {
+  test.beforeEach(async ({ page }) => {
+    await useFootball(page);
+    await resetState(page);
+    await setup(page);
+  });
+
+  test('nayttaa LOPPUTULOKSEN eika "alkanut"', async ({ page }) => {
+    await page.goto('/demo.html');
+    await expect(page.locator('.day-nav')).toBeVisible({ timeout: 10000 });
+    await yesterdayBtn(page).click();
+
+    const card = page.locator('#round-games .card').filter({ hasText: 'Chelsea' });
+    await expect(card).toContainText('2–3', { timeout: 10000 });
+    await expect(card).toContainText('ratkennut');
+    await expect(card).not.toContainText('alkanut');
+  });
+
+  test('tulos tulee KALENTERISTA kun arkistossa ei ole sita', async ({ page }) => {
+    // Sama ottelu ilman result-kenttaa: kalenteri kertoo 2-3
+    const history: any = oddsHistory();
+    history.matches[0].result = null;
+    await page.unroute('**/data/odds-history.json');
+    await page.route('**/data/odds-history.json', (route: any) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(history) })
+    );
+
+    await page.goto('/demo.html');
+    await expect(page.locator('.day-nav')).toBeVisible({ timeout: 10000 });
+    await yesterdayBtn(page).click();
+
+    const card = page.locator('#round-games .card').filter({ hasText: 'Chelsea' });
+    await expect(card).toContainText('2–3', { timeout: 10000 });
+  });
+
+  test('ALKAMATON ottelu nayttaa yha ajan aloitukseen', async ({ page }) => {
+    await page.goto('/demo.html');
+    await expect(page.locator('.day-nav')).toBeVisible({ timeout: 10000 });
+    // Tanaan: kalenterissa alkamaton ottelu ilman kertoimia -> ei korttia,
+    // mutta otsikko ei saa vaittaa sita ratkenneeksi
+    await page.locator('.day-nav .day-btn').nth(2).click();
+    await expect(page.locator('#round-games')).not.toContainText('ratkennut', { timeout: 10000 });
+  });
+});

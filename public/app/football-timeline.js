@@ -138,6 +138,16 @@ export function matchesFor(date) {
   return (calendar?.matches ?? []).filter((m) => m.date === date);
 }
 
+/**
+ * Etsi ottelu kalenterista tunnisteella.
+ *
+ * EI päivällä: kalenterin `date` on johdettu UTC:sta ja korttien päiväavain
+ * on paikallinen, joten myöhäisillan ottelu ei löytyisi päivähaulla.
+ */
+export function calendarMatch(matchId) {
+  return (calendar?.matches ?? []).find((m) => m.match_id === matchId) ?? null;
+}
+
 /** Montako ottelua päivällä on — nappi kertoo sen pienellä */
 function countFor(date) {
   return calendar?.days?.find((d) => d.date === date)?.matches ?? 0;
@@ -275,6 +285,7 @@ if (typeof window !== 'undefined') {
     getSelectedDay,
     setSelectedDay,
     matchesFor,
+    calendarMatch,
     getCalendar,
   };
 }
