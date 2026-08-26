@@ -556,6 +556,13 @@ function hockeyProbs(hElo,aElo){
 // 12 %:n "huikea" -taso on tarkoituksellisesti epäluuloinen: sellainen edge
 // on demossa mahdollinen, mutta oikeassa maailmassa se tarkoittaa lähes
 // aina että malli on väärässä, ei että markkina on.
+//
+// Jalkapallokortilla samat kynnykset asuvat app/football-cards.js:n
+// EV_CANDIDATE / EV_STRONG / EV_ELITE -vakioissa (tiketti #88), ja ne on
+// lukittu yksikkötestillä palvelimen kynnyksiin. Nämä kolme lukua alla EIVÄT
+// ole testin piirissä, koska demo.html ei ole tuotava moduuli — jos muutat
+// niitä, muuta myös football-cards.js, muuten sama väri tarkoittaa eri asiaa
+// lajista riippuen.
 const EV_WOW=0.08;
 function evClass(ev){
   if(ev>EV_WOW)return'ev-wow';
