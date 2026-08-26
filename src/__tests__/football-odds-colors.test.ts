@@ -11,16 +11,9 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 // @ts-expect-error — selainmoduuli ilman tyyppejä, tuodaan tarkoituksella
-import {
-  cellEdge,
-  edgeBgClass,
-  edgeTextClass,
-  effectiveOdds,
-  EV_CANDIDATE,
-  EV_STRONG,
-  EV_ELITE,
-  MIN_PROB_EDGE,
-} from '../../public/app/football-cards.js';
+// (yhdellä rivillä kuten football-display.test.ts:ssä: direktiivi koskee vain
+// seuraavaa riviä, ja tsc raportoi virheen moduulipolun kohdalta)
+import { cellEdge, edgeBgClass, edgeTextClass, effectiveOdds, EV_CANDIDATE, EV_STRONG, EV_ELITE, MIN_PROB_EDGE } from '../../public/app/football-cards.js';
 import {
   VALUE_THRESHOLD,
   STRONG_THRESHOLD,
