@@ -89,7 +89,7 @@ test.describe('Kerroinvärit erottavat parhaan hinnan ylikertoimesta', () => {
   test('paras hinta ilman valueta saa tähden muttei väritaustaa', async ({ page }) => {
     // Tämä on se korjaus jota käyttäjä pyysi: aiemmin jokainen paras hinta
     // näytti vihreältä vaikka odotusarvo oli negatiivinen
-    const plainBest = page.locator('#round-games .bk-odds.best:not(.value-strong):not(.value-candidate)').first();
+    const plainBest = page.locator('#round-games .bk-odds.best:not(.value-strong):not(.value-candidate):not(.value-elite)').first();
     await expect(plainBest).toBeVisible();
     await expect(plainBest).toContainText('⭐');
 
@@ -107,14 +107,50 @@ test.describe('Kerroinvärit erottavat parhaan hinnan ylikertoimesta', () => {
     expect(bg).not.toBe('rgba(0, 0, 0, 0)');
   });
 
-  test('value-luokka on vain sillä ruudulla jolla edge ylittää kynnyksen', async ({ page }) => {
-    // Snapshotin lippujen määrä ja värillisten ruutujen määrä täsmäävät
-    const flagged = await page.evaluate(() => {
-      const snap = (window as unknown as { BTF: { getSnapshot: () => { matches: Array<{ analysis: { edges: Array<{ flag: string }> } }> } } }).BTF.getSnapshot();
-      return snap.matches.reduce((n, m) => n + m.analysis.edges.filter((e) => e.flag !== 'none').length, 0);
+  test('jokaisen ruudun väri seuraa sen OMAA odotusarvoa (tiketti #88)', async ({ page }) => {
+    // Aiemmin tässä verrattiin värillisten ruutujen määrää snapshotin
+    // lippujen määrään. Se lukitsi väärän säännön: lippu lasketaan pelkästä
+    // parhaasta hinnasta, joten 10.00 sai värin ja saman kohteen 9.80 ei.
+    // Nyt odotus lasketaan ruutu kerrallaan samalla kaavalla kuin kortilla.
+    const expected = await page.evaluate(() => {
+      type Row = { bookmaker: string; home: number; draw: number; away: number; commission: number };
+      type Match = {
+        odds: Row[];
+        analysis: { edges: Array<{ side: 'home' | 'draw' | 'away'; model_prob: number }> };
+      };
+      const snap = (window as unknown as { BTF: { getSnapshot: () => { matches: Match[] } } }).BTF.getSnapshot();
+      const eff = (odds: number, commission: number) => (odds > 1 ? 1 + (odds - 1) * (1 - commission) : odds);
+
+      let colored = 0;
+      let cells = 0;
+      for (const m of snap.matches) {
+        const probs = new Map(m.analysis.edges.map((e) => [e.side, e.model_prob]));
+        for (const row of m.odds) {
+          for (const side of ['home', 'draw', 'away'] as const) {
+            cells++;
+            const p = probs.get(side) ?? 0;
+            if (p > 0 && p * eff(row[side], row.commission) - 1 > 0.03) colored++;
+          }
+        }
+      }
+      return { colored, cells };
     });
-    const colored = await page.locator('#round-games .bk-odds.value-strong, #round-games .bk-odds.value-candidate').count();
-    expect(colored).toBe(flagged);
+
+    // Fikstuuri on olemassa juuri tämän takia — jos siinä ei ole yhtään
+    // ylikerrointa, testi menisi läpi tyhjänä
+    expect(expected.colored).toBeGreaterThan(0);
+    const painted = await page.locator(
+      '#round-games .bk-odds.value-candidate, #round-games .bk-odds.value-strong, #round-games .bk-odds.value-elite'
+    ).count();
+    expect(painted).toBe(expected.colored);
+    expect(await page.locator('#round-games .bk-odds').count()).toBe(expected.cells);
+  });
+
+  test('ruudussa näkyy oma odotusarvoprosentti', async ({ page }) => {
+    // Väri ilman lukua jättäisi käyttäjän arvaamaan miksi ruutu on keltainen
+    const first = page.locator('#round-games .bk-odds').first();
+    await expect(first.locator('.ev')).toBeVisible();
+    await expect(first.locator('.ev')).toContainText('%');
   });
 
   test('selite kertoo että tähti ei tarkoita kannattavaa vetoa', async ({ page }) => {

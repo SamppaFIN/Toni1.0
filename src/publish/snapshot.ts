@@ -31,8 +31,8 @@ import {
   TeamStrengthView,
 } from '../types-football.js';
 
-const VALUE_THRESHOLD = 0.03;
-const STRONG_THRESHOLD = 0.05;
+export const VALUE_THRESHOLD = 0.03;
+export const STRONG_THRESHOLD = 0.05;
 
 /**
  * Kerroin komission jälkeen. Pörssissä komissio veloitetaan vain voitosta,
@@ -169,7 +169,7 @@ export function buildModelView(
  * 2 prosenttiyksikköä on suora vaatimus: malli saa liputtaa vain jos se
  * oikeasti väittää tietävänsä jotain, ei siksi että kerroin on iso.
  */
-const MIN_PROB_EDGE = 0.02;
+export const MIN_PROB_EDGE = 0.02;
 
 /**
  * Value-lippu. Vaatii SEKÄ riittävän edgen ETTÄ riittävän

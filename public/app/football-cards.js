@@ -147,19 +147,113 @@ function teamLogo(team, size = 26) {
   return `<span class="team-logo" style="background:${esc(team.color)};width:${size}px;height:${size}px;font-size:${Math.round(size * 0.34)}px" title="${esc(team.name)}">${esc(team.short)}</span>`;
 }
 
+// ─── Kerroinruudun taustaväri (tiketti #88) ───────────────────────────────
+//
+// Väri kertoo YHDEN ruudun odotusarvon, ei ottelun suositusta.
+//
+// Aiemmin väri piirtyi vain ⭐-ruutuun, koska snapshot laskee edgen pelkästä
+// parhaasta hinnasta. Käytännössä se tarkoitti että 10.00 saattoi olla
+// värillinen ja saman kohteen 9.80 musta — vaikka jos 10.00 on ylikerroin,
+// niin on 9.80 myös, vain pienemmällä marginaalilla. Nyt jokainen ruutu saa
+// oman edgensä omasta hinnastaan.
+//
+// Kynnykset ovat samat kuin jääkiekkokortilla (demo.html: evBgClass) ja
+// palvelimen snapshotissa (VALUE_THRESHOLD, STRONG_THRESHOLD). Yksikkötesti
+// lukitsee ne yhteen — kolmessa paikassa asuva kynnys eriytyy muuten hiljaa.
+
+export const EV_CANDIDATE = 0.03;
+export const EV_STRONG = 0.05;
+export const EV_ELITE = 0.08;
+
+/**
+ * Palvelimen lippukynnys todennäköisyyserolle (snapshot.ts: MIN_PROB_EDGE).
+ * Tarvitaan tässä vain SELITTÄMISEEN: pitkän maksun kerroin saa suuren edgen
+ * pienestäkin erosta mallin ja markkinan välillä, ja juuri silloin ruutu on
+ * värillinen muttei suositeltu.
+ */
+export const MIN_PROB_EDGE = 0.02;
+
+/** Yhden ruudun edge: mallin todennäköisyys × tämän ruudun tehollinen hinta − 1 */
+export function cellEdge(modelProb, odds, commission = 0) {
+  if (!(modelProb > 0) || !(odds > 1)) return null;
+  return modelProb * effectiveOdds(odds, commission) - 1;
+}
+
+/** Taustaväriluokka: '' = musta eli ei suositusta */
+export function edgeBgClass(edge) {
+  if (edge == null) return '';
+  if (edge > EV_ELITE) return 'value-elite';
+  if (edge > EV_STRONG) return 'value-strong';
+  if (edge > EV_CANDIDATE) return 'value-candidate';
+  return '';
+}
+
+/** Ruudun sisällä näkyvän prosenttiluvun väriluokka */
+export function edgeTextClass(edge) {
+  if (edge == null) return 'ev-flat';
+  if (edge > EV_ELITE) return 'ev-wow';
+  if (edge > EV_STRONG) return 'ev-good';
+  if (edge > EV_CANDIDATE) return 'ev-ok';
+  if (edge < 0) return 'ev-bad';
+  return 'ev-flat';
+}
+
+/** Sanallinen taso vihjetekstiin — sama sanasto kuin jääkiekkokortilla */
+export function edgeLabel(edge) {
+  if (edge == null) return '';
+  if (edge > EV_ELITE) return '🌈 poikkeuksellinen — epäile mallia ennen markkinaa';
+  if (edge > EV_STRONG) return '🟢 vahva signaali';
+  if (edge > EV_CANDIDATE) return '🟡 kandidaatti';
+  if (edge < 0) return '🔴 negatiivinen odotusarvo';
+  return '⚪ nolla-alue (alle 3 % on mallin virherajojen sisällä)';
+}
+
+/**
+ * Mallin todennäköisyys per kohde, luettuna snapshotin edge-riveiltä.
+ *
+ * Lähde on edge-rivi eikä model.probs, jotta ⭐-ruudun väri lasketaan samasta
+ * luvusta jonka analyysi näyttää. Jos lähteet eroaisivat, sama kortti
+ * näyttäisi kahta eri edgeä samasta hinnasta.
+ */
+function modelProbBySide(match) {
+  const probs = {};
+  for (const e of match.analysis?.edges ?? []) probs[e.side] = e.model_prob;
+  return probs;
+}
+
+/**
+ * Miksi värillinen ruutu jäi ilman panossuositusta.
+ *
+ * Kaksi eri syytä, ja ero on olennainen käyttäjälle:
+ *   - ruutu ei ole paras hinta → suositus on laskettu toiselle toimistolle
+ *   - todennäköisyysero jää alle kynnyksen → malli ei ole tarpeeksi eri
+ *     mieltä markkinasta, vaikka pitkä maksu tekee edgestä suuren
+ */
+function stakeGateNote(snapshotEdge, isBest) {
+  if (!isBest) return 'panossuositus lasketaan parhaasta hinnasta';
+  if (!snapshotEdge) return '';
+  const pp = (snapshotEdge.model_prob - snapshotEdge.implied_prob) * 100;
+  if (pp < MIN_PROB_EDGE * 100) {
+    return `malli ja markkina eroavat vain ${pp.toFixed(1)} pp (kynnys ${(MIN_PROB_EDGE * 100).toFixed(0)} pp) → ei panossuositusta`;
+  }
+  return '';
+}
+
 /**
  * Kertoimet toimisto per rivi.
  *
- * Kaksi eri asiaa, kaksi eri merkintää — tämä ero on tarkoituksellinen:
+ * Kolme eri asiaa, kolme eri merkintää — ero on tarkoituksellinen:
  *
- *   ⭐ paras hinta   = pelkkä hintavertailun voittaja. Kertoo mistä veto
- *                      kannattaa lyödä JOS sen lyö. Ei ota kantaa siihen
- *                      onko veto järkevä.
- *   🟡/🟢 väritäyttö = edge ylittää kynnyksen eli odotusarvo on positiivinen.
+ *   ⭐ paras hinta = pelkkä hintavertailun voittaja komission jälkeen.
+ *                    Kertoo mistä veto kannattaa lyödä JOS sen lyö.
+ *   taustaväri     = TÄMÄN ruudun odotusarvo (ks. edgeBgClass). Keltainen yli
+ *                    3 %, vihreä yli 5 %, kultainen yli 8 %, musta alle sen.
+ *   🟡/💎 ikoni    = palvelimen panossuositus, joka vaatii edgen LISÄKSI
+ *                    riittävän todennäköisyyseron (MIN_PROB_EDGE).
  *
- * Aiemmin paras hinta sai vihreän taustan, jolloin jokaisella ottelulla oli
- * kolme vihreää ruutua vaikka yksikään ei olisi ollut pelaamisen arvoinen.
- * Vihreä menetti merkityksensä. Nyt väri tarkoittaa aina ylikerrointa.
+ * Väri ja ikoni voivat siis olla eri mieltä. Se ei ole ristiriita vaan juuri
+ * se tieto joka aiemmin puuttui — vihjeteksti kertoo kumpi tilanne on
+ * käsillä, ja value-rivi kortin ylälaidassa sanoo saman sanoin.
  */
 function oddsTable(match, index) {
   if (!match.odds?.length) return '<div class="empty" style="font-size:.7rem">Ei kertoimia</div>';
@@ -171,24 +265,42 @@ function oddsTable(match, index) {
   // klikattava nappi lupaisi jotain mita ei voi tehda.
   const historic = Boolean(match.fromArchive);
   const edgeBySide = new Map(match.analysis.edges.map((e) => [e.side, e]));
+  const probs = modelProbBySide(match);
 
   const rows = match.odds
     .map((row) => {
       const cell = (side) => {
         const value = row[side];
         const isBest = match.best[`${side}_book`] === row.bookmaker && Math.abs(match.best[side] - value) < 1e-9;
-        // Edge on laskettu parhaasta hinnasta, joten value-merkintä kuuluu
-        // vain sille ruudulle jota luku koskee
-        const edge = isBest ? edgeBySide.get(side) : null;
-        const valueClass = edge && edge.flag !== 'none' ? ` value-${edge.flag === 'strong' ? 'strong' : 'candidate'}` : '';
-        // Pörssin komissio näkyy vihjeessä: näytetty hinta ei ole se mitä veto maksaa
-        const commissionNote = row.commission > 0 ? ` — pörssin komissio ${(row.commission * 100).toFixed(1)} %` : '';
-        const valueNote = valueClass ? ` — ylikerroin, edge ${(edge.edge * 100).toFixed(1)} %` : '';
-        const icon = edge && edge.flag !== 'none' ? ` ${FLAG_META[edge.flag].icon}` : isBest ? ' ⭐' : '';
+        const snapshotEdge = edgeBySide.get(side) ?? null;
+        // Lippu ja panossuositus on laskettu parhaasta hinnasta, joten ikoni
+        // kuuluu vain sille ruudulle jota luku koskee
+        const flag = isBest && snapshotEdge && snapshotEdge.flag !== 'none' ? snapshotEdge.flag : null;
+        const ev = cellEdge(probs[side], value, row.commission);
+        const bg = edgeBgClass(ev);
+        const evHtml = ev == null ? '' : `<span class="ev ${edgeTextClass(ev)}">${ev > 0 ? '+' : ''}${(ev * 100).toFixed(1)} %</span>`;
+        const icon = flag ? ` ${FLAG_META[flag].icon}` : isBest ? ' ⭐' : '';
+        const cls = `bk-odds${isBest ? ' best' : ''}${bg ? ` ${bg}` : ''}`;
+        const inner = `<span>${value.toFixed(2)}${icon}</span>${evHtml}`;
+
+        const tip = [
+          `${row.bookmaker} — ${SIDE_LABELS[side]} ${value.toFixed(2)}`,
+          isBest ? 'paras hinta' : '',
+          // Pörssin komissio näkyy vihjeessä: näytetty hinta ei ole se mitä veto maksaa
+          row.commission > 0
+            ? `pörssin komissio ${(row.commission * 100).toFixed(1)} % → tehollinen ${effectiveOdds(value, row.commission).toFixed(2)}`
+            : '',
+          ev == null ? '' : `odotusarvo ${ev > 0 ? '+' : ''}${(ev * 100).toFixed(1)} % · ${edgeLabel(ev)}`,
+          ev != null && ev > EV_CANDIDATE && !flag ? stakeGateNote(snapshotEdge, isBest) : '',
+          historic ? 'arkistoitu hinta' : '',
+        ]
+          .filter(Boolean)
+          .join('\n');
+
         if (historic) {
-          return `<span class="bk-odds${isBest ? ' best' : ''}${valueClass}" style="opacity:.75;cursor:default" title="${esc(row.bookmaker)} — ${SIDE_LABELS[side]} ${value.toFixed(2)} (arkistoitu hinta)">${value.toFixed(2)}${icon}</span>`;
+          return `<span class="${cls}" style="opacity:.75;cursor:default" title="${esc(tip)}">${inner}</span>`;
         }
-        return `<button class="bk-odds${isBest ? ' best' : ''}${valueClass}" onclick="event.stopPropagation();window.BTF.openBetPopup('${esc(match.id)}','${side}',${value},'${esc(row.bookmaker)}')" title="${esc(row.bookmaker)} — ${SIDE_LABELS[side]} ${value.toFixed(2)}${isBest ? ' (paras hinta)' : ''}${commissionNote}${valueNote}">${value.toFixed(2)}${icon}</button>`;
+        return `<button class="${cls}" onclick="event.stopPropagation();window.BTF.openBetPopup('${esc(match.id)}','${side}',${value},'${esc(row.bookmaker)}')" title="${esc(tip)}">${inner}</button>`;
       };
       return `<div class="odds-row">${bookmakerLabel(row)}${cell('home')}${cell('draw')}${cell('away')}</div>`;
     })
@@ -197,8 +309,9 @@ function oddsTable(match, index) {
   return `<div class="odds-list">${head}${rows}</div>
     <div style="font-size:.6rem;color:var(--c-text-muted);margin-top:4px;line-height:1.5">
       👆 Klikkaa kerrointa asettaaksesi vedon · toimiston nimestä sen sivulle (↗ = suora linkki tähän otteluun)<br>
+      Taustaväri ja prosentti = <b>tämän hinnan</b> odotusarvo: keltainen yli 3 %, vihreä yli 5 %, kultainen yli 8 %<br>
       ⭐ paras hinta komission jälkeen — <i>ei</i> tarkoita että veto kannattaa<br>
-      🟡 edge yli 3 % · 💎 edge yli 5 % — vain nämä ovat ylikertoimia
+      🟡/💎 panossuositus — vaatii odotusarvon lisäksi ${(MIN_PROB_EDGE * 100).toFixed(0)} pp:n eron mallin ja markkinan välillä
     </div>
     <div id="fbetpop-${index}" style="display:none;margin-top:4px"></div>`;
 }
@@ -327,9 +440,17 @@ function valueLine(match) {
 
   if (!flagged.length) {
     const best = [...match.analysis.edges].sort((a, b) => b.edge - a.edge)[0];
+    // Kaksi eri syytä olla ilman kohdetta, ja aiemmin kortti kertoi vain
+    // toisen: iso edge pienestä todennäköisyyserosta sai lukemaan "jää alle
+    // 3 %:n kynnyksen" +11 %:n vieressä, mikä on suoraan väärä väite.
+    const pp = (best.model_prob - best.implied_prob) * 100;
+    const reason =
+      best.edge > EV_CANDIDATE
+        ? `edge tulee pitkästä maksusta: malli ja markkina eroavat vain <b>${pp.toFixed(1)} pp</b>, ja panossuositus vaatii ${(MIN_PROB_EDGE * 100).toFixed(0)} pp`
+        : 'jää alle 3 %:n kynnyksen';
     return `<div style="margin-top:6px;padding:6px 8px;border-radius:7px;background:oklch(1 1 0/0.05);font-size:.63rem;color:var(--c-text-muted);line-height:1.45">
       ⚫ <b>Ei value-kohdetta.</b> Paras edge ${SIDE_LABELS[best.side]} ${esc(name(best.side))} @ ${num(best.odds)}
-      = <b>${best.edge > 0 ? '+' : ''}${(best.edge * 100).toFixed(1)} %</b> — jää alle 3 %:n kynnyksen, joten panossuositusta ei anneta.
+      = <b>${best.edge > 0 ? '+' : ''}${(best.edge * 100).toFixed(1)} %</b> — ${reason}, joten panossuositusta ei anneta.
     </div>`;
   }
 
