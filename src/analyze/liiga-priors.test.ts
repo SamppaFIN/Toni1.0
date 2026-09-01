@@ -30,16 +30,13 @@ describe('joukkuelista', () => {
     expect(RELEGATION_SPOTS).toBe(3);
   });
 
-  it('annetut sijaluvut ovat uniikkeja ja valilla 1-17', () => {
-    const sijat = TEAM_PRIORS.map((p) => p.rank).filter((r): r is number => r !== null);
-    expect(new Set(sijat).size).toBe(sijat.length);
-    expect(Math.min(...sijat)).toBeGreaterThanOrEqual(1);
-    expect(Math.max(...sijat)).toBeLessThanOrEqual(TEAM_COUNT);
-  });
-
-  it('SIJALUKUA EI KEKSITA: osalla se on null', () => {
-    // Ennakko ei antanut lukua kaikille. Arvattu sija nayttaisi mittaukselta.
-    expect(TEAM_PRIORS.some((p) => p.rank === null)).toBe(true);
+  it('sijaluvut ovat taydellinen permutaatio 1-17', () => {
+    // 2026-09-01: ennakko antoi sijan kaikille 17 joukkueelle
+    // (data/liiga-kausiennakko-2026-27.md). Aiemmin osa oli null.
+    const sijat = TEAM_PRIORS.map((p) => p.rank)
+      .filter((r): r is number => r !== null)
+      .sort((a, b) => a - b);
+    expect(sijat).toEqual(Array.from({ length: TEAM_COUNT }, (_, i) => i + 1));
   });
 
   it('jokaisella on silti taso', () => {
