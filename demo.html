@@ -2109,16 +2109,22 @@ window.BT={
     save();updateBankroll();renderSlip();updateSlipBadge();
   },
   /**
-   * Ratkaise jalkapalloveto. simulated-lippu kulkee historiaan, jotta
-   * simuloitu ja oikea tuotto voidaan erottaa tiketissä 33 — sekoitettuna
-   * ROI-luku ei mittaisi mitään.
+   * Ratkaise veto. simulated-lippu kulkee historiaan, jotta simuloitu ja
+   * oikea tuotto voidaan erottaa tiketissa 33 -- sekoitettuna ROI-luku ei
+   * mittaisi mitaan.
+   *
+   * Tiketti #91: lippu on nyt PARAMETRI eika kovakoodattu true. Aiemmin
+   * jokainen veto merkittiin simuloiduksi riippumatta siita miten se
+   * ratkesi -- myos Jahti-ketjun vedot -- ja oikeista tuloksista ratkaistut
+   * olisivat menneet samaan pinoon. Oletus on false: ratkaisu on oikea
+   * ellei kutsuja erikseen sano sita simuloiduksi.
    */
-  settleFootballBet(betId,won,resultLabel){
+  settleFootballBet(betId,won,resultLabel,opts){
     const b=bets.find(x=>x.id===betId);
     if(!b)return;
     const profit=won?b.stake*b.odds:0;
     bankroll+=profit;
-    betHistory.push({...b,won,profit,resolved_at:new Date().toISOString(),game_result:resultLabel,simulated:true});
+    betHistory.push({...b,won,profit,resolved_at:new Date().toISOString(),game_result:resultLabel,simulated:opts?.simulated===true});
     bets=bets.filter(x=>x.id!==betId);
     save();updateBankroll();renderSlip();updateSlipBadge();renderHistory();
   },
