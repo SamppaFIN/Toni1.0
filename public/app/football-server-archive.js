@@ -143,6 +143,16 @@ export function serverArchiveDays() {
   return [...new Set(file.matches.map((t) => localDayKey(t.kickoff)))].filter(Boolean).sort().reverse();
 }
 
+/**
+ * Kaikki arkistoidut ottelut raakamuodossa.
+ *
+ * Vetojen ratkaisu (tiketti #91) tarvitsee tuloksia paivasta riippumatta:
+ * veto voi olla auki viikkoja, eika sen paivaa tiedeta etukateen.
+ */
+export function allMatches() {
+  return file?.matches ?? [];
+}
+
 if (typeof window !== 'undefined') {
-  window.BTSA = { load, serverArchiveDay, serverArchiveDays, isReady, failure };
+  window.BTSA = { load, serverArchiveDay, serverArchiveDays, allMatches, isReady, failure };
 }

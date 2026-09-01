@@ -29,6 +29,7 @@ import * as playedToday from './football-results.js';
 import './football-review.js'; // rekisteroi window.BTA
 import * as timeline from './football-timeline.js'; // rekisteroi window.BTL2
 import * as serverArchive from './football-server-archive.js'; // rekisteroi window.BTSA
+import { settleFromLiveData } from './football-settle.js'; // rekisteroi window.BTST
 import './football-rounds.js'; // rekisteroi window.BTRV
 import { archiveSnapshot } from './football-archive.js';
 import './football-chase.js'; // rekisteröi window.BTC — ei tarvitse suoraa viittausta täältä
@@ -140,6 +141,23 @@ export async function reload() {
   renderAllCards();
   // LLM-paneelin nappi kertoo otteluiden määrän — se vanhenee jos snapshot vaihtuu
   if (window.BTL) window.BTL.render();
+
+  // Tiketti #91: ratkaise avoimet vedot oikeista tuloksista. Tehdaan VASTA
+  // renderoinnin jalkeen, jottei hidas ratkaisu viivyta kortteja -- ja
+  // hiljaa, koska tavallisesti ratkaistavaa ei ole. Ratkaisu kerrotaan
+  // kayttajalle vain kun rahaa oikeasti liikkui.
+  try {
+    const { settled } = await settleFromLiveData();
+    if (settled.length) {
+      const voitot = settled.filter((b) => b.won).length;
+      window.BT.toast(`Ratkaistiin ${settled.length} vetoa oikeista tuloksista — ${voitot} osui`);
+      renderPlacedBets();
+    }
+  } catch (err) {
+    // Ratkaisun pettaminen ei saa estaa korttien nakymista
+    console.warn('[Settle] vetoja ei voitu ratkaista:', err.message);
+  }
+
   return { snapshot, error };
 }
 
