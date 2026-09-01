@@ -23,7 +23,8 @@ import { ingestFootballOdds, buildMatchId, FootballOddsEvent } from '../ingest/o
 import { fetchStatsFor, LeagueStatsPair } from '../ingest/stats.js';
 import { fetchLowerDivision, promotedStrengthFrom } from '../ingest/promoted.js';
 import { strengthForTeam, matchConfidence } from '../analyze/strength.js';
-import { predictPoisson, predictFromLambda, adjustLambda, LeagueAverages } from '../analyze/poisson.js';
+import { predictPoisson, predictFromLambda, adjustLambda, LeagueAverages, DEFAULT_LEAGUE } from '../analyze/poisson.js';
+import { priorFor } from '../analyze/liiga-priors.js';
 import { fetchAllFeeds, attachNews, MatchNews } from '../ingest/news-football.js';
 import { fetchSeasonResults, normalizeTeam } from '../ingest/results-veikkausliiga.js';
 import { fetchSeasonResultsEspn, hasEspnResults } from '../ingest/results-espn.js';
@@ -192,6 +193,76 @@ function toTeamStats(s: TeamSeasonStats, isHome: boolean, elo: EloLookup | null)
   };
 }
 
+/** Joukkueen TeamStats kun pelattuja otteluita ei ole: pelkkä lähtö-Elo, muu nolla/null. */
+function priorTeamStats(name: string, elo: EloLookup | null): TeamStats {
+  const r = elo?.get(eloKeyFor(name)) ?? elo?.get(normalizeClubName(name)) ?? null;
+  return {
+    rank: r?.rank ?? null,
+    played: 0,
+    form: '',
+    gf_pg: 0,
+    ga_pg: 0,
+    home_gf_pg: null,
+    away_gf_pg: null,
+    xg_pg: null,
+    rest_days: null,
+    ppg: null,
+    elo: r?.elo ?? null,
+    elo_change: r?.change ?? 0,
+    elo_rank: r?.rank ?? null,
+    ...(r ? { elo_provisional: true } : {}),
+  };
+}
+
+/**
+ * Kausiennakkomalli (tiketit #89, #96): kun sarjalla ei ole vielä pelattuja
+ * otteluita eikä tilastolähdettä, malli johdetaan Ristikakon ennakon
+ * sijaluvuista (data/liiga-kausiennakko-2026-27.md). Se on LÄHTÖARVO eikä
+ * mittaus — matala blend-paino — ja korvautuu Poisson-mallilla heti kun
+ * otteluita on. Ennakon vahvuudet/heikkoudet menevät `adjustments`:iin, jotta
+ * ne näkyvät kortin perusteluissa.
+ */
+export function priorModelFields(e: FootballOddsEvent, elo: EloLookup | null) {
+  if (sportOf(e.sportKey) !== 'hockey') return null;
+  const h = priorFor(e.home.name);
+  const a = priorFor(e.away.name);
+  if (!h || !a) return null;
+
+  let poisson = predictPoisson(
+    { attack: h.attack, defense: h.defense },
+    { attack: a.attack, defense: a.defense },
+    DEFAULT_LEAGUE,
+    config.model.rho
+  );
+  poisson = { ...poisson, probs: applyDrawBoost(poisson.probs) };
+
+  const note = (t: NonNullable<ReturnType<typeof priorFor>>) =>
+    `+ ${t.strengthNote ?? '—'}  ·  − ${t.weaknessNote ?? '—'}`;
+
+  const adjustments: ModelAdjustment[] = [
+    {
+      reason:
+        `Kausiennakko (Ristikaksi): ${e.home.short} #${h.rank ?? '?'} vs ${e.away.short} #${a.rank ?? '?'}. ` +
+        `Ei pelattuja otteluita — luku on ennakon lähtöarvo, ei mittaus.`,
+    },
+    { reason: `${e.home.short} — ${note(h)}` },
+    { reason: `${e.away.short} — ${note(a)}` },
+  ];
+
+  return {
+    poisson,
+    stats: {
+      home: priorTeamStats(e.home.name, elo),
+      away: priorTeamStats(e.away.name, elo),
+      h2h: [],
+    } as MatchStats,
+    adjustments,
+    blendWeight: config.model.blendWeight * 0.35,
+    homeStrength: { attack: round(h.attack, 2), defense: round(h.defense, 2) },
+    awayStrength: { attack: round(a.attack, 2), defense: round(a.defense, 2) },
+  };
+}
+
 export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
   const now = options.now ?? new Date();
   const until = new Date(now.getTime() + HORIZON_HOURS * 3600_000);
@@ -311,7 +382,13 @@ function buildCard(
     blendWeight: config.model.blendWeight,
   };
 
-  if (!stats) return buildMatchCard({ ...base, poisson: null, stats: null });
+  if (!stats) {
+    // Ei tilastolähdettä (Liiga kauden alussa, 0 pelattua ottelua). Ennen tämä
+    // putosi suoraan market-only-tilaan; nyt malli johdetaan Ristikakon
+    // kausiennakon sijaluvuista (data/liiga-kausiennakko-2026-27.md).
+    const prior = priorModelFields(e, elo);
+    return buildMatchCard(prior ? { ...base, ...prior } : { ...base, poisson: null, stats: null });
+  }
 
   // Nousijan priori haetaan alemmasta sarjasta; null -> keskiverto nousija
   const promotedFor = (name: string) => (lowerSeason ? promotedStrengthFrom(name, lowerSeason) ?? undefined : undefined);
