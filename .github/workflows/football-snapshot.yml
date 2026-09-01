@@ -193,15 +193,34 @@ jobs:
             # ajossa kokonaan uudelleen lahteista, joten TUORE VERSIO ON AINA
             # OIKEA. Siirretaan siis vain tyopuun sisalto tuoreimman mainin
             # paalle ilman yhdistamista.
-            git fetch origin main
-            git reset --soft origin/main
-            git add public/data
-            if git diff --cached --quiet; then
-              echo "Data vastaa jo mainia — ei committia"
-            else
+            #
+            # UUDELLEENYRITYS (tiketti #102): main voi edeta fetchin ja pushin
+            # valissa, jolloin tyonto hylataan. Nain kavi oikeasti: ajo alkoi,
+            # main eteni kesken ajon, ja push epaonnistui. Yritetaan kolmesti
+            # -- joka kierroksella haetaan tuorein main uudelleen, joten
+            # kilpailutilanne ratkeaa itsestaan.
+            JULKAISTU=0
+            for YRITYS in 1 2 3; do
+              git fetch origin main
+              git reset --soft origin/main
+              git add public/data
+              if git diff --cached --quiet; then
+                echo "Data vastaa jo mainia — ei committia"
+                JULKAISTU=1
+                break
+              fi
               git commit -m "Data: $COUNT ottelua, snapshot $STAMP [skip ci]"
-              git push origin HEAD:main
-              echo "Data committoitu ja tyonnetty"
+              if git push origin HEAD:main; then
+                echo "Data committoitu ja tyonnetty (yritys $YRITYS)"
+                JULKAISTU=1
+                break
+              fi
+              echo "::warning::Tyonto hylattiin (yritys $YRITYS) — main eteni, haetaan uudelleen"
+              sleep 3
+            done
+            if [ "$JULKAISTU" != "1" ]; then
+              echo "::error::Datan tyonto ei onnistunut kolmella yrityksella"
+              exit 1
             fi
           fi
 
