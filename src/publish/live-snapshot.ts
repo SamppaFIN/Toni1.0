@@ -107,6 +107,17 @@ export function normalizeClubName(name: string): string {
  * pisteistä laskettu luku ei olisi Elo vaan eri suure samalla nimellä.
  */
 export async function fetchEloMapFor(sportKey: string): Promise<EloLookup | null> {
+  // Tiketti #96: Liigan kausi alkaa 1.9.2026 eika pelattuja otteluita ole
+  // yhtaan. Elo laskettaisiin tuloksista, joten sarake jai tyhjaksi kaikilta.
+  // Kausiennakko (#89) antaa lahtoarvon; se korvautuu mitatulla Elolla heti
+  // kun otteluita on.
+  //
+  // TODO kun kausi etenee: siirry laskettuun Eloon (season-elo.ts) kun
+  // pelattuja otteluita on riittavasti. Nyt niita ei ole yhtaan.
+  if (sportKey === 'icehockey_liiga') {
+    const { priorEloMap } = await import('../analyze/liiga-priors.js');
+    return priorEloMap();
+  }
   if (sportKey === VEIKKAUSLIIGA_KEY) return fetchSeasonEloMap();
   if (!hasEspnResults(sportKey)) return null;
 

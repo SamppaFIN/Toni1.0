@@ -45,3 +45,45 @@ describe('bookmakerUrl', () => {
     expect(bookmakerUrl(null)).toBeNull();
   });
 });
+
+// Tiketti #98: linkin pitaa vieda oikean LAJIN sivulle
+//
+// BUGI: kartta oli yksilajinen ajalta jolloin putki oli, ja jaakiekko
+// lisattiin sen ymparilta huomaamatta. Jaakiekkokortilta linkki vei
+// toimiston jalkapallosivulle.
+describe('Lajitietoiset toimistolinkit (tiketti #98)', () => {
+  const rivi = (key: string) => ({ bookmaker: 'X', key, link: null });
+
+  it('jaakiekkokortilta EI viedä jalkapallosivulle', () => {
+    const url = bookmakerUrl(rivi('coolbet'), 'hockey');
+    expect(url).toBeTruthy();
+    expect(url).not.toContain('football');
+    expect(url).toContain('hockey');
+  });
+
+  it('jalkapallokortti toimii kuten ennen', () => {
+    expect(bookmakerUrl(rivi('coolbet'), 'football')).toContain('football');
+  });
+
+  it('oletus on jalkapallo — vanhat kutsupaikat eivat riko', () => {
+    expect(bookmakerUrl(rivi('coolbet'))).toContain('football');
+  });
+
+  it('RIVIKOHTAINEN syvalinkki voittaa lajikartan', () => {
+    const deep = { bookmaker: 'X', key: 'coolbet', link: 'https://esimerkki.fi/ottelu/1' };
+    expect(bookmakerUrl(deep, 'hockey')).toBe('https://esimerkki.fi/ottelu/1');
+  });
+
+  it('tuntematon toimisto -> null molemmilla lajeilla', () => {
+    expect(bookmakerUrl(rivi('tuntematon'), 'hockey')).toBeNull();
+    expect(bookmakerUrl(rivi('tuntematon'), 'football')).toBeNull();
+  });
+
+  it('KAIKILLA tunnetuilla toimistoilla on molemmat lajit', () => {
+    const kirjat = ['pinnacle', 'onexbet', 'coolbet', 'nordicbet', 'betsson', 'unibet_se', 'matchbook'];
+    for (const k of kirjat) {
+      expect(bookmakerUrl(rivi(k), 'football'), k).toBeTruthy();
+      expect(bookmakerUrl(rivi(k), 'hockey'), k).toBeTruthy();
+    }
+  });
+});

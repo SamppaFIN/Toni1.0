@@ -152,3 +152,40 @@ describe('Väri ei enää seuraa palvelimen lippua', () => {
     expect(edgeBgClass(cellEdge(0.505, 1.98))).toBe('');
   });
 });
+
+// Tiketti #97: vari ja panossuositus eivat saa sanoa eri asiaa
+//
+// BUGI: kortti naytti VIHREAA ruutua (Assat 4.30, +6.9 %) ja samaan aikaan
+// sanoi "Ei value-kohdetta ... panossuositusta ei anneta". Syy oli kahdessa
+// eri saannossa: vari katsoi pelkkaa edgea, lippu vaati myos 2 pp:n eron
+// mallin ja markkinan valilla.
+describe('Vari noudattaa lipun saantoa (tiketti #97)', () => {
+  it('RIITTAMATON todennakoisyysero -> EI varia vaikka edge olisi iso', () => {
+    // Juuri se tapaus jonka kayttaja nappasi: pitka maksu, olematon ero
+    expect(edgeBgClass(0.069, 0.0)).toBe('');
+    expect(edgeBgClass(0.15, 0.005)).toBe('');
+  });
+
+  it('riittava ero -> vari kuten ennen', () => {
+    expect(edgeBgClass(0.069, 0.03)).toBe('value-strong');
+    expect(edgeBgClass(0.04, 0.025)).toBe('value-candidate');
+    expect(edgeBgClass(0.12, 0.05)).toBe('value-elite');
+  });
+
+  it('tasan kynnyksella vari annetaan', () => {
+    expect(edgeBgClass(0.069, MIN_PROB_EDGE)).toBe('value-strong');
+  });
+
+  it('PUUTTUVA tieto ei ole sama kuin nolla — vanha kutsu toimii ennallaan', () => {
+    expect(edgeBgClass(0.069)).toBe('value-strong');
+    expect(edgeBgClass(0.069, null)).toBe('value-strong');
+  });
+
+  it('negatiivinen edge ei saa varia erosta riippumatta', () => {
+    expect(edgeBgClass(-0.05, 0.1)).toBe('');
+  });
+
+  it('null-edge pysyy varittomana', () => {
+    expect(edgeBgClass(null, 0.1)).toBe('');
+  });
+});

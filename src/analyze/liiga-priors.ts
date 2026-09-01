@@ -54,6 +54,14 @@ export interface TeamPrior {
   tier: Tier;
   /** Markkinoiden mukaan putoamisvaarassa (ennakon oma maininta) */
   relegationRisk: boolean;
+  /** Ennakon nostama vahvuus, lyhyesti */
+  strengthNote?: string;
+  /** Ennakon nostama heikkous */
+  weaknessNote?: string;
+  /** Nimeltä mainitut tulokkaat */
+  arrivals?: string[];
+  /** Nimeltä mainitut lähtijät */
+  departures?: string[];
 }
 
 /**
@@ -65,25 +73,25 @@ export interface TeamPrior {
  * järjestelmällisesti. `tier` kantaa sen mitä ennakko tosiasiassa sanoi.
  */
 export const TEAM_PRIORS: TeamPrior[] = [
-  { team: 'Tappara', rank: 1, tier: 'karki', relegationRisk: false },
-  { team: 'Ilves', rank: 2, tier: 'karki', relegationRisk: false },
-  { team: 'JYP', rank: 3, tier: 'karki', relegationRisk: false },
-  { team: 'KalPa', rank: 6, tier: 'ylakeski', relegationRisk: false },
-  { team: 'Jokerit', rank: 8, tier: 'ylakeski', relegationRisk: false },
-  { team: 'HIFK', rank: 9, tier: 'ylakeski', relegationRisk: false },
-  { team: 'Kärpät', rank: 11, tier: 'alakeski', relegationRisk: false },
-  { team: 'HPK', rank: 12, tier: 'alakeski', relegationRisk: true },
-  { team: 'Kiekko-Espoo', rank: 15, tier: 'putoaja', relegationRisk: true },
-  { team: 'Jukurit', rank: 17, tier: 'putoaja', relegationRisk: true },
+  { team: 'Tappara', rank: 1, tier: 'karki', relegationRisk: false, strengthNote: "Hallitseva mestari, Kari Jalonen valmentajana", weaknessNote: "Mestaruuden puolustuspaine, kokoonpanomuutoksia", arrivals: ["Kasper Kulonummi", "Justin Addamo"], departures: ["Eetu Tuulola", "Olli Juolevi"] },
+  { team: 'Ilves', rank: 2, tier: 'karki', relegationRisk: false, strengthNote: "Eliittitason hyokkaysvoima, Niemelan pelitapa", weaknessNote: "Maalivahtitilanne (Armalis-Rifalk), erikoistilanteet", arrivals: ["Leo Loof", "Topias Hynninen", "Tony Sund", "Jan-Mikael Jarvinen"], departures: ["Simon Johansson", "Matias Mantykivi"] },
+  { team: 'JYP', rank: 3, tier: 'karki', relegationRisk: false, strengthNote: "Hyokkaysvoimaa, tasapainoinen ryhma, eliittitason ylivoima", weaknessNote: "Maalivahtisyvyys, pudotuspelihistoria", arrivals: ["Harri Pesonen", "Juuso Arola", "Malte Setkov"] },
+  { team: 'KalPa', rank: 6, tier: 'ylakeski', relegationRisk: false, strengthNote: "Selkea peli-identiteetti, vahva kotivire", weaknessNote: "Merkittavia hyokkaajamenetyksia, ikaantyva runko", arrivals: ["Elias Vilen", "Jesper Piitulainen", "Joonas Lyytinen"], departures: ["Patrick Curry", "Benjamin Korhonen"] },
+  { team: 'Jokerit', rank: 8, tier: 'ylakeski', relegationRisk: false, strengthNote: "Paluu Liigaan 12 vuoden tauon jalkeen, hyokkays sarjan parempaa puoliskoa", weaknessNote: "Maalivahtius todistamatta, puolustuksen syvyys, uusi jarjestelma", arrivals: ["Patrick Curry", "Maxime Fortier", "Teemu Turunen", "Henri Nikkanen", "Matt Caito"] },
+  { team: 'HIFK', rank: 9, tier: 'ylakeski', relegationRisk: false, strengthNote: "Tasapainoinen hyokkays, yhtenainen puolustus", weaknessNote: "Maalivahtisyvyys, keskuksien keskikasto, loukkaantumiset", arrivals: ["Niko Huuhtanen", "Kasper Puutio", "Jake Leschyshyn"], departures: ["Tony Sund", "Petr Kodytek"] },
+  { team: 'Kärpät', rank: 11, tier: 'alakeski', relegationRisk: false, strengthNote: "Kokenut runko sailyi, syvyytta ketjuissa", weaknessNote: "Ikaantyva ryhma, kysymysmerkkeja karkijoukkueita vastaan", arrivals: ["Samuli Ratinen"], departures: ["Andreas Okany", "Samuel Jung"] },
+  { team: 'HPK', rank: 12, tier: 'alakeski', relegationRisk: true, strengthNote: "Kim Saarinen nousi Liigan parhaimmistoon, taktinen valmennus", weaknessNote: "Ulkomaalaisten epavarmuus, hyokkayksen epatasaisuus", arrivals: ["Chad Nychuk", "Brendan Ranford", "Jacob Crespin"], departures: ["Cameron Wright", "Jesse Kiiskinen"] },
+  { team: 'Kiekko-Espoo', rank: 15, tier: 'putoaja', relegationRisk: true, strengthNote: "Eliittitason ykkosmaalivahti Petteri Rimpinen, Ahon jarjestelma", weaknessNote: "Syvyys erityisesti hyokkayksessa, ei varaa loukkaantumisiin", arrivals: ["Jere Sallinen", "Ville Lajunen", "Connor Corcoran"], departures: ["Cameron Hillis", "Kasper Kulonummi", "Santeri Virtanen"] },
+  { team: 'Jukurit', rank: 17, tier: 'putoaja', relegationRisk: true, strengthNote: "Altavastaajan mentaliteetti", weaknessNote: "Materiaali Liigan heikoimpia, ohut ryhma", arrivals: ["Linus Sjodin", "Jesper Olofsson", "Jesper Myrenberg"], departures: ["Aleks Haatanen", "Jesper Piitulainen", "Sakke Hamalainen"] },
 
   // Ennakko ei antanut naille sijalukua. Taso on se mita se sanoi sanoin.
-  { team: 'KooKoo', rank: null, tier: 'ylakeski', relegationRisk: false },
-  { team: 'Lukko', rank: null, tier: 'alakeski', relegationRisk: false },
-  { team: 'SaiPa', rank: null, tier: 'alakeski', relegationRisk: false },
-  { team: 'Ässät', rank: null, tier: 'alakeski', relegationRisk: false },
-  { team: 'Pelicans', rank: null, tier: 'alakeski', relegationRisk: true },
-  { team: 'TPS', rank: null, tier: 'putoaja', relegationRisk: true },
-  { team: 'Sport', rank: null, tier: 'putoaja', relegationRisk: true },
+  { team: 'KooKoo', rank: null, tier: 'ylakeski', relegationRisk: false, strengthNote: "Jouko Myrran johdolla uskottava, eliittimaalivahti Randelin", weaknessNote: "Puolustus heikkeni (Suomi/Loponen), hyokkayksen tasaisuus", arrivals: ["Arttu Pelli", "Axel Holmstrom", "Jasper Patrikainen"], departures: ["Jimi Suomi", "Kalle Loponen", "Otto Paajanen"] },
+  { team: 'Lukko', rank: null, tier: 'alakeski', relegationRisk: false, strengthNote: "Vakaa maalivahtipeli, kilpailukykyinen runko", weaknessNote: "Rajallinen hyokkayssyvyys", arrivals: ["Santeri Virtanen", "Connor Ford"], departures: ["Atte Joki"] },
+  { team: 'SaiPa', rank: null, tier: 'alakeski', relegationRisk: false, strengthNote: "Raimo Helminen valmennuksessa, veteraaniosaamista", weaknessNote: "Rajallinen syvyys", departures: ["Patrick Curry", "Henri Nikkanen", "Maxime Fortier"] },
+  { team: 'Ässät', rank: null, tier: 'alakeski', relegationRisk: false, strengthNote: "Jarno Pikkarainen valmentajana, jatkuvuutta", weaknessNote: "Rajallinen syvyys", departures: ["Kasper Puutio"] },
+  { team: 'Pelicans', rank: null, tier: 'alakeski', relegationRisk: true, strengthNote: "Sami Kapanen paavalmentajana, vakiintunut rakenne", weaknessNote: "Epatasainen historia, keskikastin materiaali", arrivals: ["Aaro Chrons"], departures: ["Sakke Hamalainen"] },
+  { team: 'TPS', rank: null, tier: 'putoaja', relegationRisk: true, strengthNote: "Toni Soderholm paavalmentajana, kokenut ryhma", weaknessNote: "Alustavasti vaaran vyohykkeella", departures: ["Mitja Jokinen"] },
+  { team: 'Sport', rank: null, tier: 'putoaja', relegationRisk: true, strengthNote: "Lauri Mikkola valmentajana", weaknessNote: "Maaliodottamalla sarjan toiseksi heikoin viime kaudella" },
 ];
 
 /**
@@ -198,4 +206,53 @@ export function rankedTeams(): Array<TeamPrior & PriorStrength> {
   return [...TEAM_PRIORS]
     .sort((a, b) => effectiveRank(a) - effectiveRank(b))
     .map((p) => ({ ...p, ...strengthFromRank(effectiveRank(p)) }));
+}
+
+// ─── Elo kauden alussa (tiketti #96) ──────────────────────────────────────
+//
+// Elo lasketaan normaalisti pelatuista otteluista (tiketti #57). Liigassa
+// niitä on kauden alussa NOLLA, joten Elo-sarake jäi tyhjäksi kaikilta
+// joukkueilta — juuri se puute jonka käyttäjä huomasi.
+//
+// Tässä Elo johdetaan kausiennakon sijaluvusta. Se on LÄHTÖARVO eikä mittaus,
+// ja se korvautuu oikeilla otteluilla heti kun niitä on: season-elo.ts laskee
+// Elon tuloksista, ja tämä on vain se piste josta lähdetään.
+
+/** Elo-haitari ennakon karjen ja hannan valilla, +- keskiarvosta */
+export const ELO_SPREAD = 120;
+
+/**
+ * Lähtö-Elo ennustetusta sijaluvusta.
+ *
+ * Haitari on maltillinen (±120) samasta syystä kuin voimakartta on loiva:
+ * sijaluku on järjestysasteikko eikä mittaus. Vertailun vuoksi mitattu
+ * Veikkausliigan Elo-haitari kauden lopussa on noin ±150, eli tämä on
+ * hieman kapeampi kuin todellinen kauden mittaan syntyvä ero — mikä on
+ * oikein, koska ennakko ei tiedä mitä kaudella tapahtuu.
+ */
+export function eloFromRank(rank: number, teams = TEAM_COUNT, base = 1500): number {
+  const mid = (teams + 1) / 2;
+  const spread = Math.max(1, (teams - 1) / 2);
+  const position = Math.max(-1, Math.min(1, (mid - rank) / spread));
+  return Math.round(base + position * ELO_SPREAD);
+}
+
+/**
+ * Elo-kartta kaikille Liigan joukkueille kausiennakosta.
+ *
+ * Sama muoto kuin `EloLookup`:lla (live-snapshot.ts): avain on normalisoitu
+ * nimi, arvo sisältää Elon, muutoksen ja sijan. `change` on nolla koska
+ * kausi ei ole alkanut — mitään ei ole vielä tapahtunut, ja nollan
+ * näyttäminen on rehellisempää kuin keksitty liike.
+ */
+export function priorEloMap(base = 1500): Map<string, { elo: number; change: number; rank: number }> {
+  const map = new Map<string, { elo: number; change: number; rank: number }>();
+  for (const [i, t] of rankedTeams().entries()) {
+    map.set(normalizeLiigaName(t.team), {
+      elo: eloFromRank(effectiveRank(t), TEAM_COUNT, base),
+      change: 0,
+      rank: i + 1,
+    });
+  }
+  return map;
 }

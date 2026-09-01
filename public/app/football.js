@@ -283,6 +283,16 @@ export async function start(containerId = 'round-games') {
 // moduuli ei käynnisty ja kierrosnäkymä jää tyhjäksi ilman virheilmoitusta.
 // Admin-välilehden setSport() lataa sivun uudelleen, jolloin ehto arvioidaan
 // uudestaan tuoreella bt_sport-arvolla.
-if ((localStorage.getItem('bt_sport') || 'football') !== 'hockey') {
+// Tiketti #95: `football-*` on nykyaan MODERNI KORTTIPUTKI eika
+// jalkapallomoduuli. Se renderoi molemmat lajit samasta snapshotista,
+// joten se alustetaan AINA -- myos jaakiekkotilassa. Liiga on nyt
+// snapshotissa oikeilla kertoimilla, ja sama kortti antaa jaakiekolle
+// kaiken mita jalkapallolla on: toimistolinkit, tunnusluvut, edge,
+// Kelly ja arkisto.
+//
+// Nimi on historiallinen. Uudelleennimeaminen olisi 19 tiedoston
+// mekaaninen muutos ilman kayttajalle nakyvaa hyotya, joten se jaa
+// omaksi siivouksekseen.
+{
   start();
 }
