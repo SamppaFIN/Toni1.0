@@ -90,6 +90,14 @@ export function hasStatsSource(sportKey: string): boolean {
  * tilaan. Raaputus on hauras, ja hauras lähde ei saa estää koko analyysiä.
  */
 export async function fetchStatsFor(sportKey: string, now = new Date()): Promise<LeagueStatsPair | null> {
+  // Tiketti #92: Liigalla on oma lahde joka tuottaa SEKA nykyisen etta
+  // edellisen kauden yhdella kutsulla -- rakenne on eri kuin
+  // jalkapallolahteilla, joten se ohitetaan tassa eika SOURCES-kartassa.
+  if (sportKey === 'icehockey_liiga') {
+    const { fetchLiigaStats } = await import('./stats-liiga.js');
+    return fetchLiigaStats(now);
+  }
+
   const source = SOURCES[sportKey];
   if (!source) {
     console.log(`[Stats] ${sportKey}: ei tilastolähdettä — malli jää market-only-tilaan`);
