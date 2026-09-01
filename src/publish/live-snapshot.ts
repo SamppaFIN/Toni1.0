@@ -16,6 +16,8 @@
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { config } from '../config.js';
+import { sportOf } from '../leagues.js';
+import { applyDrawBoost } from '../analyze/hockey-draws.js';
 import { quotaWarning } from '../leagues.js';
 import { ingestFootballOdds, buildMatchId, FootballOddsEvent } from '../ingest/odds-football.js';
 import { fetchStatsFor, LeagueStatsPair } from '../ingest/stats.js';
@@ -306,6 +308,15 @@ function buildCard(
 
   const league: LeagueAverages = { homeGoals: stats.current.homeGoalsAvg, awayGoals: stats.current.awayGoalsAvg };
   let poisson = predictPoisson(home.strength, away.strength, league, config.model.rho);
+
+  // Tiketti #93: jaakiekossa Poisson aliarvioi tasapelit 5 prosenttiyksikkoa.
+  // Syy on rakenteellinen: varsinainen peliaika paattyy 60 minuuttiin ja
+  // tasatilanne on stabiili paatepiste, jota riippumattomuusoletus ei tunne.
+  // Korjaus koskee VAIN 1X2-jakaumaa; maalimaaraennusteet jaavat puhtaaksi
+  // Poissoniksi koska niille ei ole vastaavaa mitattua poikkeamaa.
+  if (sportOf(e.sportKey) === 'hockey') {
+    poisson = { ...poisson, probs: applyDrawBoost(poisson.probs) };
+  }
 
   // Puolustus syvyydessä: λ = 0 tarkoittaa "tämä joukkue ei tee maalia
   // varmuudella", mikä ei ole ennuste vaan laskentavirhe. Se tuottaa btts = 0
