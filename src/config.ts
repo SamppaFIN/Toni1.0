@@ -27,18 +27,21 @@ export const config = {
     // Lisays: aseta ODDS_FOOTBALL_SPORTS ja tarkista quotaWarning-loki.
     footballSports: (process.env.ODDS_FOOTBALL_SPORTS ||
       [
+        // NELJA SARJAA, KAKSI MARKKINAA (tiketti #94).
+        //
+        // Yli/alle-kertoimet kaksinkertaistavat kvootan, koska The Odds API
+        // veloittaa per markkina. Kahdeksan sarjaa kahdella markkinalla
+        // maksaisi 960/500 -- lahes kaksinkertaisesti ilmaistason.
+        //
+        // Nelja sarjaa x 2 markkinaa x 2 ajoa x 30 pv = 480/500.
+        // Kaksi ajoa sailytettiin, koska ilman niita CLV-mittaus (#72)
+        // lakkaisi toimimasta kokonaan.
+        //
+        // Valinta: Valioliiga ja Championship tuottivat arkistossa eniten
+        // liputettuja kohteita (9 ja 6), ja kaksi kotimaista ovat ne joita
+        // oikeasti seurataan.
         'soccer_epl',
-        'soccer_spain_la_liga',
-        'soccer_italy_serie_a',
-        'soccer_germany_bundesliga',
-        'soccer_france_ligue_one',
         'soccer_efl_champ',
-        // Eredivisie pudotettiin kun Liiga tuli mukaan (tiketti #90):
-        // 8 sarjaa x 2 ajoa x 30 pv = 480/500, yhdeksas ei mahtuisi.
-        // Valinta on datasta: Eredivisiella oli arkistossa vahiten
-        // otteluita (9) ja liputettuja kohteita (2). Ero Bundesliigaan oli
-        // kaytannossa olematon, joten tama on yhden rivin muutos jos
-        // haluat kaantaa sen toisin pain.
         'soccer_finland_veikkausliiga',
         'icehockey_liiga',
       ].join(','))
@@ -46,8 +49,20 @@ export const config = {
       .map((s) => s.trim())
       .filter(Boolean),
     regions: process.env.ODDS_REGIONS || 'eu',
-    markets: process.env.ODDS_MARKETS || 'h2h',
+    /**
+     * Haettavat markkinat (tiketti #94).
+     *
+     * HINNOITTELU: The Odds API veloittaa 1 krediitin PER MARKKINA PER ALUE.
+     * `h2h,totals` maksaa siis KAKSINKERTAISEN pelkkaan h2h:hen verrattuna,
+     * ja se on syy siihen miksi sarjoja on nelja eika kahdeksan.
+     */
+    markets: process.env.ODDS_MARKETS || 'h2h,totals',
     /** Vuorokausikatto krediiteille — putki keskeytyy ennen kuin kvootta palaa loppuun */
+    /**
+     * Vuorokausikatto. 4 sarjaa x 2 markkinaa x 2 ajoa = 16 krediittia/vrk.
+     * Katto on se joka oikeasti pysayttaa putken jos konfiguraatio kasvaa
+     * huomaamatta -- quotaWarning vain varoittaa.
+     */
     dailyCreditBudget: Number(process.env.ODDS_DAILY_CREDIT_BUDGET || 16),
   },
   /** API-Football (API-Sports) — tunnusluvut, loukkaantumiset, kokoonpanot. 100 pyyntöä/vrk. */

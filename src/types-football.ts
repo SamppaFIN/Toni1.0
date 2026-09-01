@@ -257,6 +257,11 @@ export interface MatchCard {
   /** null kun sarjalle ei ole ilmaista tilastolähdettä */
   stats: MatchStats | null;
   news: NewsItem[];
+  /**
+   * Yli/alle-markkina (tiketti #94). Puuttuu jos markkinaa ei haettu tai
+   * jos toimisto ei tarjonnut sitä — tyhjä on normaali tila eikä virhe.
+   */
+  totals?: { books: unknown[]; edges: unknown[] };
 }
 
 /**

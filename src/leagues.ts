@@ -132,10 +132,25 @@ export interface QuotaEstimate {
  * maksaa 2 krediittiä per sarja, mutta ESPN korvasi sen Elo-laskennassa
  * (tiketti #57) — jäljellä oleva käyttö on pieni ja vakio.
  */
-export function estimateQuota(leagueCount: number, runsPerDay = 2, daysPerMonth = 30): QuotaEstimate {
-  const creditsPerDay = Math.max(0, leagueCount) * Math.max(0, runsPerDay);
+export function estimateQuota(
+  leagueCount: number,
+  runsPerDay = 2,
+  daysPerMonth = 30,
+  /**
+   * Markkinoiden maara (tiketti #94). The Odds API veloittaa 1 krediitin PER
+   * MARKKINA PER ALUE, joten `h2h,totals` maksaa kaksinkertaisesti.
+   *
+   * Tama parametri LISATTIIN koska arvio ja todellinen kulu olivat eri
+   * mielta: ingest laski `markets x regions`, arvio oletti yhden. Kahdella
+   * markkinalla arvio olisi nayttanyt 240/500 kun todellinen kulu on
+   * 480/500 -- ja varoitus olisi jaanyt tulematta juuri kun sita tarvitaan.
+   */
+  marketsPerRequest = 1
+): QuotaEstimate {
+  const perRequest = Math.max(1, marketsPerRequest);
+  const creditsPerDay = Math.max(0, leagueCount) * Math.max(0, runsPerDay) * perRequest;
   const creditsPerMonth = creditsPerDay * daysPerMonth;
-  const perLeagueMonthly = Math.max(1, runsPerDay * daysPerMonth);
+  const perLeagueMonthly = Math.max(1, runsPerDay * daysPerMonth * perRequest);
   return {
     leagues: leagueCount,
     runsPerDay,
@@ -152,12 +167,13 @@ export function estimateQuota(leagueCount: number, runsPerDay = 2, daysPerMonth 
  * Ei estä ajoa: käyttäjä voi olla maksavalla tasolla. Vuorokausikatto
  * (ODDS_DAILY_CREDIT_BUDGET) on se joka oikeasti pysäyttää putken.
  */
-export function quotaWarning(leagueCount: number, runsPerDay = 2): string | null {
-  const q = estimateQuota(leagueCount, runsPerDay);
+export function quotaWarning(leagueCount: number, runsPerDay = 2, marketsPerRequest = 1): string | null {
+  const q = estimateQuota(leagueCount, runsPerDay, 30, marketsPerRequest);
   if (q.withinFreeTier) return null;
+  const markkinat = marketsPerRequest > 1 ? ` × ${marketsPerRequest} markkinaa` : '';
   return (
-    `${q.leagues} sarjaa × ${q.runsPerDay} ajoa/vrk = ${q.creditsPerMonth} krediittiä/kk, ` +
+    `${q.leagues} sarjaa${markkinat} × ${q.runsPerDay} ajoa/vrk = ${q.creditsPerMonth} krediittiä/kk, ` +
     `mutta ilmaistaso on ${FREE_TIER_MONTHLY_CREDITS}. ` +
-    `Ilmaistasolle mahtuu ${q.maxLeaguesOnFreeTier} sarjaa tällä ajotiheydellä.`
+    `Ilmaistasolle mahtuu ${q.maxLeaguesOnFreeTier} sarjaa tällä ajotiheydellä ja markkinamäärällä.`
   );
 }

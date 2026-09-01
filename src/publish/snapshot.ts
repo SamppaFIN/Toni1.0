@@ -5,6 +5,8 @@
 // kuukausikvootta palaisi jokaisella sivulatauksella. Node-putki laskee kaiken
 // valmiiksi, kirjoittaa tiedoston, ja selain vain renderöi sen.
 
+import { buildTotalsView } from './totals-analysis.js';
+import { scoreMatrix, DEFAULT_RHO } from '../analyze/poisson.js';
 import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { removeMargin } from '../analyze/margin.js';
@@ -250,6 +252,8 @@ export interface BuildMatchCardInput {
   bankroll?: number;
   blendWeight?: number;
   newsWindow?: boolean;
+  /** Yli/alle-kertoimet toimistoilta (tiketti #94); tyhjä on normaali tila */
+  totals?: import('../ingest/odds-football.js').TotalsOdds[];
   /** Sama voima jolla λ laskettiin — kulkee mukaan joukkuetaulukon vertailua varten (tiketti #45) */
   homeStrength?: TeamStrengthView | null;
   awayStrength?: TeamStrengthView | null;
@@ -269,7 +273,27 @@ export function buildMatchCard(input: BuildMatchCardInput): MatchCard {
   );
   const analysis = buildAnalysisView(model, market, best, input.bankroll ?? 100, input.newsWindow ?? false);
 
+  // Yli/alle: lasketaan vain jos markkina haettiin JA malli on olemassa.
+  // Ilman mallia kertoimet nakyvat mutta edgeja ei lasketa -- puolikas
+  // vertailu olisi harhaanjohtava.
+  //
+  // Matriisi lasketaan lambdasta uudelleen eika kanneta ennusteen mukana:
+  // se on 2D-taulukko joka paatyisi turhaan today.json:iin ja kasvattaisi
+  // snapshotin kokoa jokaisella ottelulla.
+  //
+  // HUOM: jaakiekon tasapelikorjaus (#93) EI vaikuta tahan. Se muuttaa vain
+  // 1X2-jakaumaa, ja maalimaaran jakauma on siita riippumaton -- juuri kuten
+  // korjauksen rajaus sanoo.
+  const totals = input.totals?.length
+    ? buildTotalsView(
+        input.totals,
+        input.poisson ? scoreMatrix(input.poisson.lambdaHome, input.poisson.lambdaAway, DEFAULT_RHO) : null,
+        input.bankroll ?? 100
+      )
+    : undefined;
+
   return {
+    ...(totals ? { totals } : {}),
     id: input.id,
     league: input.league,
     kickoff: input.kickoff,

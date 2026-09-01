@@ -189,7 +189,12 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
   // lineaarisesti sarjojen maarassa. Varoitus ei esta ajoa (kayttaja voi olla
   // maksavalla tasolla) -- vuorokausikatto ODDS_DAILY_CREDIT_BUDGET on se joka
   // oikeasti pysayttaa putken.
-  const warning = quotaWarning(config.odds.footballSports.length);
+  const warning = quotaWarning(
+    config.odds.footballSports.length,
+    2,
+    // Markkinoiden maara kertoo kulun (tiketti #94)
+    config.odds.markets.split(',').length * config.odds.regions.split(',').length
+  );
   if (warning) console.warn(`[Kvootta] ${warning}`);
 
   const events = await ingestFootballOdds({ from: now, until });
@@ -286,6 +291,7 @@ function buildCard(
     home: e.home,
     away: e.away,
     odds: e.odds,
+    totals: e.totals,
     news: news?.news ?? [],
     newsWindow: news?.newsWindow ?? false,
     bankroll: options.bankroll ?? 100,

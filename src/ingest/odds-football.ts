@@ -18,6 +18,8 @@ import { leagueName } from '../leagues.js';
 export interface OddsApiOutcome {
   name: string;
   price: number;
+  /** Yli/alle-markkinan raja; puuttuu h2h-markkinalta */
+  point?: number;
 }
 
 export interface OddsApiBookmaker {
@@ -160,6 +162,54 @@ export function parseEventOdds(event: OddsApiEvent): BookmakerOdds[] {
   return rows;
 }
 
+/**
+ * Poimi yli/alle-kertoimet kaikilta toimistoilta.
+ *
+ * Toimisto voi tarjota USEITA rajoja samasta ottelusta (2.5 ja 3.5). Kaikki
+ * otetaan talteen: malli osaa laskea todennakoisyyden mille tahansa rajalle,
+ * ja paras edge voi olla missa tahansa niista.
+ *
+ * Rivi hylataan jos kumpi tahansa puoli puuttuu. Yksipuolinen kerroin ei ole
+ * vertailukelpoinen -- marginaalia ei voi poistaa yhdesta luvusta.
+ */
+export function parseEventTotals(event: OddsApiEvent): TotalsOdds[] {
+  const rows: TotalsOdds[] = [];
+
+  for (const book of event.bookmakers) {
+    const totals = book.markets.find((m) => m.key === 'totals');
+    if (!totals) continue;
+
+    // Ryhmittele rajan mukaan: yksi markkina voi sisaltaa monta rajaa
+    const byLine = new Map<number, { over?: OddsApiOutcome; under?: OddsApiOutcome }>();
+    for (const o of totals.outcomes) {
+      const line = Number(o.point);
+      if (!Number.isFinite(line)) continue;
+      const slot = byLine.get(line) ?? {};
+      if (o.name === 'Over') slot.over = o;
+      else if (o.name === 'Under') slot.under = o;
+      byLine.set(line, slot);
+    }
+
+    for (const [line, { over, under }] of byLine) {
+      if (!over || !under) continue;
+      if (!(over.price > 1) || !(under.price > 1)) continue;
+
+      rows.push({
+        bookmaker: book.title,
+        key: book.key,
+        line,
+        over: over.price,
+        under: under.price,
+        commission: commissionFor(book.key),
+        fetched_at: book.last_update || new Date().toISOString(),
+        link: bestLink(event, book, totals, [over, under]),
+      });
+    }
+  }
+
+  return rows.sort((a, b) => a.line - b.line || a.bookmaker.localeCompare(b.bookmaker));
+}
+
 /** Suodata allowlistan mukaan. Tyhjä allowlist = kaikki läpi. */
 export function filterByAllowlist(rows: BookmakerOdds[], allowlist: string[]): BookmakerOdds[] {
   if (!allowlist.length) return rows;
@@ -212,6 +262,26 @@ export function teamRef(name: string): TeamRef {
 
 // ─── Kokoava haku ─────────────────────────────────────────────────────────
 
+/**
+ * Yhden toimiston yli/alle-kertoimet yhdelle rajalle (tiketti #94).
+ *
+ * `line` on toimiston tarjoama raja. SE VAIHTELEE: jalkapallossa yleensa
+ * 2.5, jaakiekossa 5.5, mutta toimisto voi tarjota myos 2.25 tai 6.0 ja
+ * eri toimistot eri rajoja samasta ottelusta. Mallia EI saa verrata
+ * kiinteaan rajaan vaan siihen jonka toimisto oikeasti antoi -- muuten
+ * edge lasketaan kahdesta eri asiasta.
+ */
+export interface TotalsOdds {
+  bookmaker: string;
+  key: string;
+  line: number;
+  over: number;
+  under: number;
+  commission: number;
+  fetched_at: string;
+  link: string | null;
+}
+
 export interface FootballOddsEvent {
   eventId: string;
   sportKey: string;
@@ -220,6 +290,8 @@ export interface FootballOddsEvent {
   home: TeamRef;
   away: TeamRef;
   odds: BookmakerOdds[];
+  /** Yli/alle-kertoimet jos toimisto tarjosi ne — tyhjä on normaali tila */
+  totals: TotalsOdds[];
 }
 
 /**
@@ -289,12 +361,19 @@ export async function ingestFootballOdds(options: IngestOptions = {}): Promise<F
       if (options.until && kickoff > options.until) continue;
 
       const odds = filterByAllowlist(parseEventOdds(event), allowlist);
+      // Yli/alle on VAPAAEHTOINEN: tyhja lista on normaali tila eika virhe.
+      // Se puuttuu jos markkinaa ei haettu (ODDS_MARKETS) tai jos toimisto ei
+      // tarjoa sita tahan otteluun.
+      const totals = parseEventTotals(event).filter(
+        (t) => !allowlist.length || allowlist.includes(t.key)
+      );
       if (!odds.length) {
         console.warn(`[Odds] ${event.home_team} vs ${event.away_team}: ei kertoimia allowlistan toimistoilta — ohitetaan`);
         continue;
       }
 
       results.push({
+        totals,
         eventId: event.id,
         sportKey,
         league: leagueLabel(sportKey),
