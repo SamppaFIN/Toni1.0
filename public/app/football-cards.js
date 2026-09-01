@@ -156,6 +156,11 @@ const BOOKMAKER_SITES = {
     nordicbet: 'https://www.nordicbet.com/en/sportsbook/football',
     betsson: 'https://www.betsson.com/en/sportsbook/football',
     matchbook: 'https://www.matchbook.com/exchange/sports/soccer',
+    // Tiketti #103: Veikkaus ei tule rajapinnasta vaan kasisyotosta
+    // (data/veikkaus-odds-manual.json). Linkki vie kerroinsivulle; syvalinkkia
+    // yksittaiseen otteluun ei ole, koska Veikkauksen kohdetunnistetta ei ole
+    // saatavilla ilman rajapintaa — vaarin luvattu syvalinkki olisi pahempi.
+    veikkaus: 'https://www.veikkaus.fi/fi/vedonlyonti',
   },
   // Tiketti #98: jaakiekkokortilta linkki vei toimiston JALKAPALLOSIVULLE.
   // Kartta oli yksilajinen ajalta jolloin putki oli, ja laji lisattiin sen
@@ -172,6 +177,7 @@ const BOOKMAKER_SITES = {
     nordicbet: 'https://www.nordicbet.com/en/sportsbook/ice-hockey',
     betsson: 'https://www.betsson.com/en/sportsbook/ice-hockey',
     matchbook: 'https://www.matchbook.com/exchange/sports/ice-hockey',
+    veikkaus: 'https://www.veikkaus.fi/fi/vedonlyonti',
   },
 };
 
@@ -195,15 +201,28 @@ export function bookmakerUrl(row, sport = 'football') {
  */
 function bookmakerLabel(row, sport = 'football') {
   const url = bookmakerUrl(row, sport);
-  const deep = Boolean(row?.link);
+  // Kasisyotetylla rivilla `link` on toimiston kerroinsivu, ei taman ottelun
+  // sivu. Se ei siis ansaitse ↗-merkkia eika lupausta syvalinkista.
+  const deep = Boolean(row?.link) && !row?.manual;
   const lajiSana = sport === 'hockey' ? 'jääkiekkosivun' : 'jalkapallosivun';
-  const tip = url
-    ? `${row.bookmaker} — avaa ${deep ? 'tämän ottelun sivun' : `toimiston ${lajiSana}`} uuteen välilehteen`
-    : row.bookmaker;
 
-  if (!url) return `<span class="bk-name" title="${esc(tip)}">${esc(row.bookmaker)}</span>`;
+  const tip = [
+    url
+      ? `${row.bookmaker} — avaa ${deep ? 'tämän ottelun sivun' : `toimiston ${lajiSana}`} uuteen välilehteen`
+      : row.bookmaker,
+    // Tiketti #103: kasin syotetty hinta voi olla vanhentunut tavalla jota
+    // haettu ei voi olla. Kayttajan ei kuulu joutua arvaamaan kumpi on kyseessa.
+    row?.manual ? `✍️ Käsin syötetty kerroin${row.note ? ` — ${row.note}` : ''}` : '',
+    row?.manual && row.fetched_at ? `Syötetty ${esc(String(row.fetched_at).slice(0, 16).replace('T', ' '))} UTC` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
 
-  return `<a class="bk-name bk-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="${esc(tip)}" onclick="event.stopPropagation()">${esc(row.bookmaker)}${deep ? ' ↗' : ''}</a>`;
+  const nimi = `${esc(row.bookmaker)}${row?.manual ? ' <span style="font-size:.7em;opacity:.75">✍️</span>' : ''}`;
+
+  if (!url) return `<span class="bk-name" title="${esc(tip)}">${nimi}</span>`;
+
+  return `<a class="bk-name bk-link" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="${esc(tip)}" onclick="event.stopPropagation()">${nimi}${deep ? ' ↗' : ''}</a>`;
 }
 
 /** Joukkueen logo värillisenä ympyränä — sama tyyli kuin jääkiekkopuolella */
@@ -398,6 +417,9 @@ function oddsTable(match, index) {
       Taustaväri ja prosentti = <b>tämän hinnan</b> odotusarvo: keltainen yli 3 %, vihreä yli 5 %, kultainen yli 8 %<br>
       ⭐ paras hinta komission jälkeen — <i>ei</i> tarkoita että veto kannattaa<br>
       🟡/💎 panossuositus — vaatii odotusarvon lisäksi ${(MIN_PROB_EDGE * 100).toFixed(0)} pp:n eron mallin ja markkinan välillä
+      ${match.odds.some((r) => r.manual)
+        ? '<br>✍️ käsin syötetty hinta — toimistolla ei ole kerroinrajapintaa, joten luku voi olla vanhentunut. Tarkista toimiston sivulta ennen vetoa.'
+        : ''}
     </div>
     <div id="fbetpop-${index}" style="display:none;margin-top:4px"></div>`;
 }
@@ -623,6 +645,117 @@ function statsSection(match) {
     </div>
     ${rows.join('')}
     ${h2h}
+  </div>`;
+}
+
+/**
+ * Ennakon karjet suoraan kortille, ilman osion avaamista.
+ *
+ * Kayttaja pyysi etta plussat ja miinukset NAKYVAT kortilla. Pelkka nappi
+ * ei ole nakymista: se on lupaus siita etta jossain on jotain. Tassa
+ * naytetaan kummankin joukkueen ENSIMMAINEN plussa ja miinus — kaikki
+ * neljasta kuuteen kohtaa per joukkue tayttaisi kortin ja hukuttaisi
+ * kertoimet, jotka ovat kortin paaasia.
+ *
+ * Loput ovat 📋 Ennakko -osiossa.
+ */
+function previewStrip(match) {
+  const p = match.preview;
+  if (!p || !isVisible('preview')) return '';
+
+  const rivi = (team, side) => {
+    const plus = side.strengths?.[0];
+    const miinus = side.weaknesses?.[0];
+    if (!plus && !miinus) return '';
+    const lisaa = (side.strengths?.length ?? 0) + (side.weaknesses?.length ?? 0) - (plus ? 1 : 0) - (miinus ? 1 : 0);
+    return `<div style="display:flex;gap:5px;align-items:baseline;font-size:.6rem;line-height:1.45">
+      <b style="flex:none;color:var(--c-text-muted);min-width:38px">${esc(team.short)}</b>
+      <span>
+        ${plus ? `<span style="color:var(--c-success)">+</span> ${esc(plus)}` : ''}
+        ${plus && miinus ? '<span style="opacity:.35"> · </span>' : ''}
+        ${miinus ? `<span style="color:var(--c-danger)">−</span> ${esc(miinus)}` : ''}
+        ${lisaa > 0 ? `<span style="color:var(--c-text-muted);opacity:.7"> +${lisaa} muuta</span>` : ''}
+      </span>
+    </div>`;
+  };
+
+  const rivit = [rivi(match.home, p.home), rivi(match.away, p.away)].filter(Boolean).join('');
+  if (!rivit) return '';
+
+  return `<div style="margin-top:5px;padding:5px 7px;background:oklch(1 1 0/0.035);border-radius:6px;border-left:2px solid oklch(1 1 0/0.12)"
+    title="Kausiennakon nostot — ${esc(p.source?.name ?? 'kausiennakko')}. Avaa 📋 Ennakko nähdäksesi kaikki.">
+    ${rivit}
+  </div>`;
+}
+
+// ─── Osio: Kausiennakko (tiketti #103) ────────────────────────────────────
+//
+// Ennakon plussat ja miinukset olivat jo snapshotissa, mutta VAIN mallin
+// perustelutekstissa (`model.adjustments`) — yhtena pitkana pilkkuluettelona
+// Analyysi-osion pohjalla. Kayttaja ei nahnyt niita ilman etta tiesi etsia.
+//
+// Nyt sama tieto on kortilla rakenteisena: plussat ja miinukset erikseen,
+// joukkue kerrallaan. Teksti sailyy adjustments-kentassa koska LLM-kysely ja
+// laskentaerittely lukevat sita.
+//
+// LAHDE SANOTAAN AINA. Tama ei ole mittaus vaan yhden toimituksen arvio, ja
+// kayttajan pitaa nahda kenen arvio se on ennen kuin han punnitsee sen.
+
+function previewNotes(items, icon, color) {
+  if (!items?.length) return `<div style="font-size:.62rem;color:var(--c-text-muted)">—</div>`;
+  return items
+    .map(
+      (t) =>
+        `<div style="font-size:.63rem;line-height:1.45;display:flex;gap:5px"><span style="color:${color};flex:none">${icon}</span><span>${esc(t)}</span></div>`
+    )
+    .join('');
+}
+
+function previewTeam(team, side) {
+  const elo = side.elo != null ? `lähtö-Elo ${side.elo}` : '';
+  const rank = side.rank != null ? `ennakon sija #${side.rank}` : '';
+  const meta = [rank, elo].filter(Boolean).join(' · ');
+
+  const moves = [
+    side.arrivals?.length ? `➡️ tulleet: ${side.arrivals.map(esc).join(', ')}` : '',
+    side.departures?.length ? `⬅️ lähteneet: ${side.departures.map(esc).join(', ')}` : '',
+  ].filter(Boolean);
+
+  return `<div style="flex:1 1 46%;min-width:150px">
+    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+      ${teamLogo(team, 18)}<b style="font-size:.7rem">${esc(team.name)}</b>
+    </div>
+    ${meta ? `<div style="font-size:.58rem;color:var(--c-text-muted);margin-bottom:5px">${esc(meta)}</div>` : ''}
+    ${previewNotes(side.strengths, '+', 'var(--c-success)')}
+    <div style="height:4px"></div>
+    ${previewNotes(side.weaknesses, '−', 'var(--c-danger)')}
+    ${moves.length ? `<div style="font-size:.56rem;color:var(--c-text-muted);margin-top:5px;line-height:1.4">${moves.join('<br>')}</div>` : ''}
+  </div>`;
+}
+
+function previewSection(match) {
+  const p = match.preview;
+  if (!p) {
+    return `<div style="font-size:.7rem;color:var(--c-text-muted);padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
+      Tälle sarjalle ei ole kausiennakkoa, tai malli ei nojaa siihen — kausiennakkoa
+      käytetään vain kun pelattuja otteluita ei vielä ole.
+    </div>`;
+  }
+
+  const lahde = p.source?.url
+    ? `<a href="${esc(p.source.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--c-accent)" onclick="event.stopPropagation()">${esc(p.source.name)} ↗</a>`
+    : esc(p.source?.name ?? 'kausiennakko');
+
+  return `<div style="padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
+    <div style="display:flex;flex-wrap:wrap;gap:12px">
+      ${previewTeam(match.home, p.home)}
+      ${previewTeam(match.away, p.away)}
+    </div>
+    <div style="font-size:.56rem;color:var(--c-text-muted);margin-top:8px;line-height:1.5;border-top:1px dashed oklch(1 1 0/0.1);padding-top:6px">
+      Lähde: ${lahde}${p.source?.readAt ? ` · luettu ${esc(p.source.readAt)}` : ''}<br>
+      Ennakko on <b>yhden toimituksen arvio</b>, ei mittaus. Se on lähtöarvo kauden alkuun
+      ja väistyy oikeiden otteluiden tieltä sitä mukaa kun niitä pelataan.
+    </div>
   </div>`;
 }
 
@@ -1184,6 +1317,9 @@ export function llmContainerId(match) {
 
 const SECTIONS = {
   stats: { icon: '📊', label: 'Tunnusluvut', render: statsSection },
+  // `available` rajaa napin niihin otteluihin joilla ennakko oikeasti on.
+  // Ilman sita jokainen jalkapallokortti saisi napin joka avaa tyhjan osion.
+  preview: { icon: '📋', label: 'Ennakko', render: previewSection, available: (m) => Boolean(m.preview) },
   news: { icon: '📰', label: 'Uutiset', render: newsSection },
   analysis: { icon: '💎', label: 'Analyysi', render: analysisSection },
   calc: { icon: '🔬', label: 'Laskenta', render: calcSection },
@@ -1236,7 +1372,9 @@ export function clearFactorsFor(matchId) {
 }
 
 function sectionButtons(match, index) {
-  const visible = Object.entries(SECTIONS).filter(([key]) => isVisible(key));
+  const visible = Object.entries(SECTIONS).filter(
+    ([key, s]) => isVisible(key) && (!s.available || s.available(match))
+  );
   if (!visible.length) return '';
 
   // Jos avoin osio piilotettiin asetuksista, se ei saa jäädä auki
@@ -1305,6 +1443,7 @@ function finalScore(match) {
     </div>
 
     ${factorPills(match)}
+    ${previewStrip(match)}
     ${valueLine(match)}
 
     ${isVisible('probs')

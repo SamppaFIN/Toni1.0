@@ -1,17 +1,24 @@
-# Liiga 2026–27 — kausiennakko (väliaikainen manuaalinen lähde)
+# Liiga 2026–27 — kausiennakko (mallin LÄHDE)
 
-**Status:** väliaikainen. Ristikaksi.com on poistanut RSS-syötteensä käytöstä, joten
-kausiennakkoa ei scrapata. Tämä tiedosto on käsin koottu yhteenveto ennakon
-**johtopäätöksestä** (ennustettu sijoitus + lyhyet vahvuudet/haitat) — artikkelin tekstiä
-ei kopioida. `src/analyze/liiga-priors.ts` koodaa alla olevan sijalistan malliprioriksi
-(`TEAM_PRIORS`), ja `priorEloMap()` johtaa siitä lähtö-Elon (`eloFromRank`, ±120 keskeltä).
+**Tämä tiedosto on lähde, ei kopio.** `src/analyze/liiga-preview.ts` jäsentää alla olevan
+taulukon, ja putki lukee siitä sijaluvun, **lähtö-Elon sellaisenaan** sekä kortilla
+näytettävät vahvuudet ja haitat. Ennakon päivitys on siis tämän taulukon muokkaus — ei
+koodimuutos.
+
+Ristikaksi.com on poistanut RSS-syötteensä käytöstä, joten kausiennakkoa ei scrapata.
+Tämä on käsin koottu yhteenveto ennakon **johtopäätöksestä** (ennustettu sijoitus +
+lyhyet vahvuudet/haitat) — artikkelin tekstiä ei kopioida.
 
 **Lähde:** Ristikaksi — Liiga-kausiennakko 2026-27
 <https://www.ristikaksi.com/urheilusarjat/liiga-kausiennakko-2026-27> (luettu 2026-09-01)
 
-**Korjattava huomiselle:** pipeline lukee prioria vielä suoraan koodista. Tämä tiedosto
-on tarkoitus tehdä varsinaiseksi lähteeksi, jonka `liiga-priors.ts` (tai ingest-vaihe)
-parsii — jolloin ennakon päivitys ei vaadi koodimuutosta.
+**Muokkausohje.** Taulukon muoto on osa sopimusta: ensimmäinen sarake on sijaluku,
+toinen joukkueen nimi, kolmas lähtö-Elo, neljäs vahvuudet ja viides haitat. Vahvuudet ja
+haitat pilkotaan **pilkuista, mutta ei sulkeiden sisältä** — "terävä kärki (Blichfeld,
+Rautiainen)" pysyy siis yhtenä kohtana. Jos taulukko hajoaa (alle 10 riviä jäsentyy),
+putki varoittaa ja putoaa `liiga-priors.ts`:n `TEAM_PRIORS`-varalukuihin: puolikas
+taulukko antaisi osalle joukkueista lähtö-Elon ja osalle ei, ja ero näkyisi kortilla
+mielivaltaisena.
 
 ## Ennustettu sarjataulukko
 
@@ -35,6 +42,11 @@ parsii — jolloin ennakon päivitys ei vaadi koodimuutosta.
 | 16 | Sport | 1395 | Ennakkoluulottomuus, altavastaajan rooli, vastustajien mahdollinen aliarviointi | Liigan heikoimpia materiaaleja, paljon "palkkasotureita", maalivahtiosasto epävarma (Ortio/Härkönen) |
 | 17 | Jukurit | 1380 | Altavastaajan mentaliteetti, pääsee pelaamaan ilman paineita | Materiaali Liigan heikoin, kapea rosteri, putoamisuhka vakava |
 
-**Lähtö-Elo** = `eloFromRank(sija)` = `1500 + ((9 − sija) / 8) × 120`, pyöristetty.
-Askel on 15 pistettä per sija. Luku korvautuu oikeilla otteluilla heti kun niitä on
-(`season-elo.ts`); tämä on vain lähtöpiste.
+**Lähtö-Elo** on yllä olevan taulukon oma sarake, ja putki käyttää sitä sellaisenaan.
+Nykyiset luvut on tuotettu kaavalla `1500 + ((9 − sija) / 8) × 120` (askel 15 pistettä
+per sija), mutta kaava ei sido: sarakkeen luvun voi asettaa käsin, ja juuri se päätyy
+kortille. Jos sarake puuttuu tai on kelvoton (haitarin 1000–2000 ulkopuolella), Elo
+johdetaan sijasta kuten ennen (`eloFromRank`).
+
+Luku korvautuu oikeilla otteluilla heti kun niitä on (`season-elo.ts`); tämä on vain
+lähtöpiste, ja kortti merkitsee sen *lähtötasoksi* eikä mittaukseksi.

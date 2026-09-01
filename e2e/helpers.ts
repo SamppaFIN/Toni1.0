@@ -89,6 +89,36 @@ export async function useFixtureSnapshot(page: Page): Promise<void> {
 }
 
 /**
+ * Tarjoile Liigan avauskierros fikstuurina (tiketti #103).
+ *
+ * Miksi oma fikstuuri eikä `snapshot-with-elo.json`: se on jalkapalloa,
+ * eikä siinä ole kausiennakkoa, lähtö-Eloa eikä käsin syötettyjä kertoimia
+ * — eli ei mitään siitä mitä nämä testit mittaavat.
+ *
+ * LAJITILA ASETETAAN TÄSSÄ: Liiga on `icehockey_liiga`, ja jalkapallotila
+ * suodattaa jääkiekkokortit pois (`visibleBySport`). Ilman tätä testi
+ * katsoisi tyhjää listaa eikä kertoisi mitään kortin sisällöstä.
+ */
+export async function useLiigaFixture(page: Page): Promise<void> {
+  const fixture = JSON.parse(
+    readFileSync(new URL('./fixtures/snapshot-liiga-preview.json', import.meta.url), 'utf8')
+  );
+  fixture.generated_at = new Date().toISOString();
+  for (const [i, m] of (fixture.matches as Array<{ kickoff: string }>).entries()) {
+    m.kickoff = new Date(Date.now() + (i + 2) * 3600_000).toISOString();
+  }
+
+  await page.addInitScript(() => {
+    localStorage.setItem('bt_sport', 'both');
+    localStorage.setItem('bt_football_day_filter', 'all');
+  });
+
+  await page.route('**/data/today.json', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) })
+  );
+}
+
+/**
  * Kytke harjoitussimulaatio päälle (tiketti #78).
  *
  * Simulaationapit ovat oletuksena piilossa: ohjelma käyttää oikeaa dataa, ja

@@ -24,13 +24,14 @@ import { fetchStatsFor, LeagueStatsPair } from '../ingest/stats.js';
 import { fetchLowerDivision, promotedStrengthFrom } from '../ingest/promoted.js';
 import { strengthForTeam, matchConfidence } from '../analyze/strength.js';
 import { predictPoisson, predictFromLambda, adjustLambda, LeagueAverages, DEFAULT_LEAGUE } from '../analyze/poisson.js';
-import { priorFor } from '../analyze/liiga-priors.js';
+import { priorFor, previewSource } from '../analyze/liiga-priors.js';
+import { applyManualOdds, loadManualOdds, unmatchedEvents } from '../ingest/odds-manual.js';
 import { fetchAllFeeds, attachNews, MatchNews } from '../ingest/news-football.js';
 import { fetchSeasonResults, normalizeTeam } from '../ingest/results-veikkausliiga.js';
 import { fetchSeasonResultsEspn, hasEspnResults } from '../ingest/results-espn.js';
 import { calculateSeasonElo, STARTING_ELO } from '../analyze/season-elo.js';
 import { buildMatchCard, buildSnapshot, writeSnapshot } from './snapshot.js';
-import { MatchCard, MatchStats, ModelAdjustment, TeamStats, TeamSeasonStats } from '../types-football.js';
+import { MatchCard, MatchPreview, MatchStats, ModelAdjustment, TeamStats, TeamSeasonStats } from '../types-football.js';
 
 /** Kuinka pitkälle eteenpäin otteluita otetaan mukaan */
 const HORIZON_HOURS = Number(process.env.SNAPSHOT_HORIZON_HOURS || 72);
@@ -236,18 +237,36 @@ export function priorModelFields(e: FootballOddsEvent, elo: EloLookup | null) {
   );
   poisson = { ...poisson, probs: applyDrawBoost(poisson.probs) };
 
-  const note = (t: NonNullable<ReturnType<typeof priorFor>>) =>
-    `+ ${t.strengthNote ?? '—'}  ·  − ${t.weaknessNote ?? '—'}`;
+  type Prior = NonNullable<ReturnType<typeof priorFor>>;
+  const note = (t: Prior) =>
+    `+ ${t.strengths.join(', ') || '—'}  ·  − ${t.weaknesses.join(', ') || '—'}`;
+
+  const source = previewSource();
 
   const adjustments: ModelAdjustment[] = [
     {
       reason:
-        `Kausiennakko (Ristikaksi): ${e.home.short} #${h.rank ?? '?'} vs ${e.away.short} #${a.rank ?? '?'}. ` +
+        `Kausiennakko (${source.name}): ${e.home.short} #${h.rank ?? '?'} vs ${e.away.short} #${a.rank ?? '?'}. ` +
         `Ei pelattuja otteluita — luku on ennakon lähtöarvo, ei mittaus.`,
     },
     { reason: `${e.home.short} — ${note(h)}` },
     { reason: `${e.away.short} — ${note(a)}` },
   ];
+
+  // Sama tieto myos RAKENTEISENA, jotta kortti voi nayttaa plussat ja
+  // miinukset listana eika joutua jasentamaan niita perustelutekstista.
+  // Tekstimuoto jaa `adjustments`:iin koska LLM-kysely ja laskentaerittely
+  // lukevat sita.
+  const side = (t: Prior): import('../types-football.js').PreviewSide => ({
+    rank: t.rank,
+    elo: t.elo,
+    strengths: t.strengths,
+    weaknesses: t.weaknesses,
+    ...(t.arrivals?.length ? { arrivals: t.arrivals } : {}),
+    ...(t.departures?.length ? { departures: t.departures } : {}),
+  });
+
+  const preview: MatchPreview = { source, home: side(h), away: side(a) };
 
   return {
     poisson,
@@ -257,6 +276,7 @@ export function priorModelFields(e: FootballOddsEvent, elo: EloLookup | null) {
       h2h: [],
     } as MatchStats,
     adjustments,
+    preview,
     blendWeight: config.model.blendWeight * 0.35,
     homeStrength: { attack: round(h.attack, 2), defense: round(h.defense, 2) },
     awayStrength: { attack: round(a.attack, 2), defense: round(a.defense, 2) },
@@ -280,6 +300,25 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
   if (warning) console.warn(`[Kvootta] ${warning}`);
 
   const events = await ingestFootballOdds({ from: now, until });
+
+  // Tiketti #103: Veikkauksen kertoimet kasin syotetysta tiedostosta.
+  //
+  // Tehdaan TASSA eika kortin rakennuksessa, jotta kasisyotetty hinta on
+  // mukana kaikessa mita siita johdetaan: paras hinta, katelaskenta,
+  // markkinamediaani, edge ja Kelly. Jos rivi lisattaisiin vasta kortille,
+  // se nakyisi listassa mutta ei vaikuttaisi mihinkaan — ja kortti sanoisi
+  // kahta eri asiaa samasta hinnasta.
+  const manualOdds = loadManualOdds();
+  const manualAdded = applyManualOdds(events, manualOdds);
+  if (manualAdded) {
+    console.log(`[Kasisyotto] ${manualOdds!.bookmaker}: ${manualAdded} ottelulle lisatty kasin syotetyt kertoimet`);
+  }
+  for (const miss of unmatchedEvents(events, manualOdds)) {
+    // Mennyt kierros ei tasmaa eika kuulukaan; tulevan kierroksen rivi joka
+    // ei tasmaa on kirjoitusvirhe joukkuenimessa. Molemmat nakyviin, koska
+    // hiljainen ohitus nayttaa samalta kuin "kertoimia ei ollut".
+    console.warn(`[Kasisyotto] rivi ei tasmannyt yhteenkaan otteluun: ${miss.date} ${miss.home} vs ${miss.away}`);
+  }
 
   // Tilastot haetaan kertaalleen per sarja, ei per ottelu
   const statsByLeague = new Map<string, LeagueStatsPair | null>();
@@ -344,8 +383,15 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
 
   // Lähteet nimeltä snapshotiin: käyttäjän pitää voida jäljittää mistä luku tuli
   const providers = ['The Odds API'];
+  if (manualAdded && manualOdds) providers.push(`${manualOdds.bookmaker} (kasin syotetty)`);
   if (eloByLeague.has(VEIKKAUSLIIGA_KEY)) providers.push('veikkausliigapelit.fi (Elo)');
-  if ([...eloByLeague.keys()].some((k) => k !== VEIKKAUSLIIGA_KEY)) providers.push('ESPN (tulokset & Elo)');
+  // Liigan Elo EI tule ESPN:sta vaan kausiennakosta. Vaara lahdemerkinta on
+  // pahempi kuin puuttuva: koko lahdelistan tarkoitus on etta luvun voi
+  // jaljittaa, ja tama vaitti Elon tulevan mitatusta datasta.
+  if ([...eloByLeague.keys()].some((k) => k !== VEIKKAUSLIIGA_KEY && k !== 'icehockey_liiga')) {
+    providers.push('ESPN (tulokset & Elo)');
+  }
+  if (eloByLeague.has('icehockey_liiga')) providers.push(`${previewSource().name} (lahto-Elo)`);
   for (const pair of statsByLeague.values()) {
     if (pair && !providers.includes(pair.current.source)) providers.push(pair.current.source);
   }
@@ -359,7 +405,8 @@ function matchId(e: FootballOddsEvent): string {
   return buildMatchId(e.sportKey, e.kickoff, e.home.name, e.away.name);
 }
 
-function buildCard(
+/** Vietu ulos jotta tyhjan kauden varareitti (tiketti #103) on testattavissa ilman verkkoa */
+export function buildCard(
   e: FootballOddsEvent,
   stats: LeagueStatsPair | null,
   news: MatchNews | null,
@@ -382,7 +429,18 @@ function buildCard(
     blendWeight: config.model.blendWeight,
   };
 
-  if (!stats) {
+  // Tilastolahde voi VASTATA mutta olla tyhja. Juuri niin kavi Liigan
+  // avauskierroksella: liiga.fi palautti kauden 2027 ohjelman, jossa ei ole
+  // yhtaan paattynytta ottelua, joten `current.teams` oli tyhja lista. Kortti
+  // ei silloin pudonnut kausiennakkoon (koska `stats` ei ollut null) vaan
+  // strengthForTeam palautti nullin ja kortti paatyi market-only-tilaan ILMAN
+  // tunnuslukuja — ja juuri siksi lahto-Elo ei nakynyt joukkueiden nimissa.
+  //
+  // Tyhja kausi on sama tilanne kuin puuttuva lahde: kumpikaan ei kerro
+  // joukkueista mitaan. Kasitellaan se samoin.
+  const emptySeason = !stats || !stats.current.teams.length;
+
+  if (emptySeason) {
     // Ei tilastolähdettä (Liiga kauden alussa, 0 pelattua ottelua). Ennen tämä
     // putosi suoraan market-only-tilaan; nyt malli johdetaan Ristikakon
     // kausiennakon sijaluvuista (data/liiga-kausiennakko-2026-27.md).
@@ -395,11 +453,17 @@ function buildCard(
   const home = strengthForTeam(e.home.name, stats.current, stats.previous, config.model.shrinkageK, promotedFor(e.home.name));
   const away = strengthForTeam(e.away.name, stats.current, stats.previous, config.model.shrinkageK, promotedFor(e.away.name));
 
-  // Täsmäytys epäonnistui → näkyvä varoitus, ei hiljainen degradaatio
+  // Täsmäytys epäonnistui → näkyvä varoitus, ei hiljainen degradaatio.
+  // Kausiennakko on silti parempi kuin ei mitaan: se kertoo joukkueesta
+  // enemman kuin tyhja kortti, ja sen paino markkinaa vastaan on matala.
   if (!home || !away) {
     const missing = [!home && e.home.name, !away && e.away.name].filter(Boolean).join(', ');
-    console.warn(`[Stats] ${e.home.name} vs ${e.away.name}: joukkuetta ei löytynyt tilastoista (${missing}) — market-only`);
-    return buildMatchCard({ ...base, poisson: null, stats: null });
+    const prior = priorModelFields(e, elo);
+    console.warn(
+      `[Stats] ${e.home.name} vs ${e.away.name}: joukkuetta ei löytynyt tilastoista (${missing}) — ` +
+        (prior ? 'käytetään kausiennakkoa' : 'market-only')
+    );
+    return buildMatchCard(prior ? { ...base, ...prior } : { ...base, poisson: null, stats: null });
   }
 
   const league: LeagueAverages = { homeGoals: stats.current.homeGoalsAvg, awayGoals: stats.current.awayGoalsAvg };

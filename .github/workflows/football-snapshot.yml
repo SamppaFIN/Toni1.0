@@ -89,6 +89,23 @@ jobs:
       - name: Hae kertoimet ja laske analyysi
         run: npm run snapshot:live
 
+      # Tiketti #103: Veikkauksen kertoimet kasin syotetysta tiedostosta.
+      #
+      # `snapshot:live` tekee taman jo lennossa, mutta tama on ERILLINEN
+      # NAKYVA VAIHE kahdesta syysta:
+      #   - jos kasisyotetty rivi ei tasmaa yhteenkaan otteluun (kirjoitusvirhe
+      #     joukkuenimessa, vanhentunut kierros), se sanotaan omalla rivillaan
+      #     eika huku kerroinhaun lokiin
+      #   - ajo on idempotentti ja ilmainen, joten se toimii myos silloin kun
+      #     `data/veikkaus-odds-manual.json` on paivitetty ILMAN etta kertoimia
+      #     haetaan uudelleen (kerroinhaku maksaa kvoottaa, tama ei)
+      #
+      # Kortit lasketaan uudelleen, jotta kasin syotetty hinta on mukana
+      # kaikessa mita siita johdetaan: paras hinta, kate, edge ja Kelly.
+      - name: Lisaa kasin syotetyt kertoimet (Veikkaus)
+        run: npm run odds:manual
+        continue-on-error: true
+
       # Tiketti #45: Valioliigan joukkuetaulukko. Vaatii FOOTBALL_DATA_TOKENin;
       # ei saa kaataa koko ajoa jos sitä ei ole tai football-data.org on hidas.
       - name: Hae Valioliigan joukkuetaulukko

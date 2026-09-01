@@ -1,0 +1,35 @@
+{
+  "_comment": [
+    "KÄSIN SYÖTETYT KERTOIMET (tiketti #103).",
+    "",
+    "Veikkaus ei ole The Odds APIn kattamien toimistojen joukossa eikä tarjoa",
+    "julkista kerroinrajapintaa, joten sen hinnat eivät tule putkeen mistään.",
+    "Suomalaiselle käyttäjälle se on kuitenkin se toimisto jolla veto",
+    "tosiasiassa lyödään — ilman sitä kerroinlista vertaa hintoja joita",
+    "käyttäjä ei voi pelata.",
+    "",
+    "Tämä tiedosto on siksi väliaikainen käsisyöttö. Rivit merkitään",
+    "kortilla ✍️-merkillä ja niiden syöttöaika näkyy vihjetekstissä: käsin",
+    "syötetty hinta voi olla vanhentunut tavalla jota haettu ei voi olla.",
+    "",
+    "PÄIVITTÄMINEN: muokkaa `events`-listaa ja päivitä `entered_at`. Ottelu",
+    "täsmätään sarjan, päivämäärän ja joukkuenimien perusteella, joten",
+    "vanhentuneet rivit eivät osu mihinkään eivätkä tee vahinkoa — ne vain",
+    "jäävät käyttämättä. Ks. src/ingest/odds-manual.ts."
+  ],
+  "bookmaker": "Veikkaus",
+  "key": "veikkaus",
+  "link": "https://www.veikkaus.fi/fi/vedonlyonti",
+  "source": "veikkaus.fi/fi/vedonlyonti — kerroinsivu, luettu käsin",
+  "entered_at": "2026-09-01T12:00:00.000Z",
+  "note": "Veikkauksella ei ole kerroinrajapintaa — hinnat syötetty käsin kerroinsivulta",
+  "events": [
+    { "sportKey": "icehockey_liiga", "date": "2026-09-01", "home": "Jukurit",      "away": "HPK",     "odds": [2.82, 3.75, 2.37] },
+    { "sportKey": "icehockey_liiga", "date": "2026-09-01", "home": "K-Espoo",      "away": "KalPa",   "odds": [2.08, 4.00, 3.20] },
+    { "sportKey": "icehockey_liiga", "date": "2026-09-01", "home": "Kärpät",       "away": "Ässät",   "odds": [1.76, 4.30, 4.05] },
+    { "sportKey": "icehockey_liiga", "date": "2026-09-01", "home": "Lukko",        "away": "Ilves",   "odds": [2.22, 3.95, 2.95] },
+    { "sportKey": "icehockey_liiga", "date": "2026-09-01", "home": "SaiPa",        "away": "Tappara", "odds": [2.95, 3.95, 2.20] },
+    { "sportKey": "icehockey_liiga", "date": "2026-09-01", "home": "Sport",        "away": "Jokerit", "odds": [2.55, 3.90, 2.52] },
+    { "sportKey": "icehockey_liiga", "date": "2026-09-01", "home": "TPS",          "away": "KooKoo",  "odds": [2.15, 4.05, 3.05] }
+  ]
+}

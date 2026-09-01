@@ -36,6 +36,18 @@ export interface BookmakerOdds {
    * tarkin saatavilla oleva valitaan, koska se vie käyttäjän lähimmäs vetoa.
    */
   link?: string | null;
+  /**
+   * Rivi on KÄSIN SYÖTETTY eikä rajapinnasta (tiketti #103).
+   *
+   * Veikkaus ei tarjoa kerroinrajapintaa, joten sen hinnat luetaan
+   * `data/veikkaus-odds-manual.json`:sta. Merkintä kulkee kortille asti:
+   * käsin syötetty hinta voi olla vanhentunut tavalla jota haettu ei voi
+   * olla, ja käyttäjän pitää nähdä ero ilman että hänen tarvitsee tietää
+   * mitä toimistoja rajapinta kattaa.
+   */
+  manual?: boolean;
+  /** Miksi rivi on käsin syötetty ja milloin — näytetään vihjetekstissä */
+  note?: string | null;
 }
 
 /**
@@ -262,6 +274,43 @@ export interface MatchCard {
    * jos toimisto ei tarjonnut sitä — tyhjä on normaali tila eikä virhe.
    */
   totals?: { books: unknown[]; edges: unknown[] };
+  /**
+   * Kausiennakon plussat ja miinukset (tiketti #103).
+   *
+   * Vain sarjoille joille ennakko on olemassa ja vain silloin kun malli
+   * tosiasiassa nojaa siihen. Puuttuva kenttä tarkoittaa "ei ennakkoa",
+   * ei "ennakko oli tyhjä" — kortti jättää osion silloin kokonaan pois.
+   */
+  preview?: MatchPreview;
+}
+
+/** Yhden joukkueen ennakkorivi kortille */
+export interface PreviewSide {
+  /** Ennakon ennustama sijoitus */
+  rank: number | null;
+  /** Kauden lähtö-Elo ennakosta */
+  elo: number | null;
+  /** Plussat, yksi per kohta */
+  strengths: string[];
+  /** Miinukset, yksi per kohta */
+  weaknesses: string[];
+  /** Nimeltä mainitut tulokkaat */
+  arrivals?: string[];
+  /** Nimeltä mainitut lähtijät */
+  departures?: string[];
+}
+
+/**
+ * Ottelun kausiennakko.
+ *
+ * `source` kulkee mukana koska luku on YHDEN TOIMITUKSEN ARVIO eikä mittaus:
+ * käyttäjän pitää nähdä kenen arvio se on ja milloin se on luettu, jotta hän
+ * voi punnita sen itse.
+ */
+export interface MatchPreview {
+  source: { name: string; url: string | null; readAt: string | null };
+  home: PreviewSide;
+  away: PreviewSide;
 }
 
 /**

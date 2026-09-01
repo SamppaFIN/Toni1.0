@@ -23,7 +23,15 @@
 // täsmälleen kuten edellisen kauden priori jalkapallossa. Kymmenen ottelun
 // jälkeen tällä ei pitäisi olla juuri merkitystä.
 
-/** Ennakon lähde, näytetään kortilla viittauksena */
+import { loadLiigaPreview, PreviewTeam } from './liiga-preview.js';
+
+/**
+ * Ennakon lähde, näytetään kortilla viittauksena.
+ *
+ * Nämä ovat VARALUKUJA: `previewSource()` lukee saman tiedon dokumentista
+ * (data/liiga-kausiennakko-2026-27.md) ja voittaa aina kun tiedosto on
+ * luettavissa.
+ */
 export const PRIOR_SOURCE = {
   name: 'Ristikaksi — Liiga-kausiennakko 2026-27',
   url: 'https://www.ristikaksi.com/urheilusarjat/liiga-kausiennakko-2026-27',
@@ -146,12 +154,41 @@ export function strengthFromRank(rank: number, teams = TEAM_COUNT): PriorStrengt
   };
 }
 
-/** Joukkueen priori nimellä. null jos joukkue ei ole ennakossa. */
-export function priorFor(teamName: string): (TeamPrior & PriorStrength) | null {
+/**
+ * Joukkueen priori nimellä. null jos joukkue ei ole ennakossa.
+ *
+ * Sijaluku ja lähtö-Elo tulevat DOKUMENTISTA kun se on luettavissa
+ * (data/liiga-kausiennakko-2026-27.md), muuten koodin `TEAM_PRIORS`:ista.
+ * Voimakartta lasketaan aina siitä sijaluvusta joka tosiasiassa käytetään,
+ * jotta kortin luku ja mallin luku eivät voi erota.
+ */
+export function priorFor(
+  teamName: string
+): (TeamPrior & PriorStrength & { elo: number | null; strengths: string[]; weaknesses: string[] }) | null {
   const key = normalizeLiigaName(teamName);
   const prior = TEAM_PRIORS.find((p) => normalizeLiigaName(p.team) === key);
-  if (!prior) return null;
-  return { ...prior, ...strengthFromRank(effectiveRank(prior)) };
+  const doc = previewFor(teamName);
+  if (!prior && !doc) return null;
+
+  const base: TeamPrior = prior ?? {
+    // Dokumentissa on joukkue jota koodi ei tunne — ennakon rivi riittää.
+    team: doc!.team,
+    rank: doc!.rank,
+    tier: 'alakeski',
+    relegationRisk: false,
+  };
+
+  const rank = doc?.rank ?? effectiveRank(base);
+  const notes = notesFor(teamName);
+
+  return {
+    ...base,
+    rank: doc?.rank ?? base.rank,
+    ...strengthFromRank(rank),
+    elo: doc?.elo ?? null,
+    strengths: notes.strengths,
+    weaknesses: notes.weaknesses,
+  };
 }
 
 /**
@@ -199,8 +236,88 @@ const LIIGA_ALIASES: Record<string, string> = {
   turuntps: 'tps',
   kiekkoespoo: 'kiekkoespoo',
   espookiekko: 'kiekkoespoo',
+  // Veikkaus ja osa mediasta kirjoittaa "K-Espoo"; liiga.fi ja ennakko
+  // "Kiekko-Espoo". Ilman tata kasin syotetyt kertoimet eivat kytkeytyisi.
+  kespoo: 'kiekkoespoo',
   jokerithelsinki: 'jokerit',
 };
+
+// ─── Ennakko dokumentista (data/liiga-kausiennakko-2026-27.md) ────────────
+//
+// Dokumentti on LÄHDE ja tämän tiedoston `TEAM_PRIORS` on vara. Ks.
+// liiga-preview.ts: ennakon päivitys on markdown-taulukon muokkaus, ei
+// koodimuutos, mutta putki ei myöskään kaadu jos tiedostoa ei ole.
+
+let previewIndex: Map<string, PreviewTeam> | null | undefined;
+
+/** Ennakon rivit normalisoidulla nimellä. null jos dokumenttia ei saatu. */
+function previewByName(): Map<string, PreviewTeam> | null {
+  if (previewIndex !== undefined) return previewIndex;
+  const preview = loadLiigaPreview();
+  previewIndex = preview
+    ? new Map(preview.teams.map((t) => [normalizeLiigaName(t.team), t]))
+    : null;
+  return previewIndex;
+}
+
+/** Yhden joukkueen rivi ennakkodokumentista, null jos ei löydy */
+export function previewFor(teamName: string): PreviewTeam | null {
+  return previewByName()?.get(normalizeLiigaName(teamName)) ?? null;
+}
+
+/** Lähdeviite: dokumentista jos luettavissa, muuten koodin vara */
+export function previewSource(): { name: string; url: string | null; readAt: string | null } {
+  const preview = loadLiigaPreview();
+  if (!preview) return { ...PRIOR_SOURCE };
+  return {
+    name: preview.source.name || PRIOR_SOURCE.name,
+    url: preview.source.url ?? PRIOR_SOURCE.url,
+    readAt: preview.source.readAt ?? PRIOR_SOURCE.readAt,
+  };
+}
+
+/** Vain testejä varten: pakota ennakon uudelleenluku */
+export function resetPriorPreviewCache(): void {
+  previewIndex = undefined;
+}
+
+/**
+ * Joukkueen plussat ja miinukset kortille.
+ *
+ * Dokumentti antaa ne valmiiksi listana; koodin varaluvut ovat yhtä pitkää
+ * pilkkuluetteloa, joten ne pilkotaan samalla säännöllä. Näin kortti näyttää
+ * samanlaiselta kummasta lähteestä tahansa.
+ */
+export function notesFor(teamName: string): { strengths: string[]; weaknesses: string[] } {
+  const doc = previewFor(teamName);
+  if (doc) return { strengths: doc.strengths, weaknesses: doc.weaknesses };
+
+  const fallback = TEAM_PRIORS.find((p) => normalizeLiigaName(p.team) === normalizeLiigaName(teamName));
+  return {
+    strengths: splitList(fallback?.strengthNote),
+    weaknesses: splitList(fallback?.weaknessNote),
+  };
+}
+
+/** Sama sulkeet huomioiva pilkkojako kuin dokumentin puolella */
+function splitList(text: string | undefined): string[] {
+  if (!text) return [];
+  const out: string[] = [];
+  let depth = 0;
+  let buffer = '';
+  for (const ch of text) {
+    if (ch === '(') depth++;
+    else if (ch === ')') depth = Math.max(0, depth - 1);
+    if (ch === ',' && depth === 0) {
+      out.push(buffer.trim());
+      buffer = '';
+      continue;
+    }
+    buffer += ch;
+  }
+  out.push(buffer.trim());
+  return out.filter(Boolean);
+}
 
 /** Ennakon mukainen järjestys, vahvimmasta heikoimpaan */
 export function rankedTeams(): Array<TeamPrior & PriorStrength> {
@@ -248,6 +365,22 @@ export function eloFromRank(rank: number, teams = TEAM_COUNT, base = 1500): numb
  */
 export function priorEloMap(base = 1500): Map<string, { elo: number; change: number; rank: number }> {
   const map = new Map<string, { elo: number; change: number; rank: number }>();
+  const doc = loadLiigaPreview();
+
+  // Dokumentti on lähde kun se on luettavissa: sen Lähtö-Elo-sarake on se
+  // luku jonka käyttäjä näkee ennakosta, ja kortilla pitää näkyä sama luku.
+  // Ilman dokumenttia Elo johdetaan sijasta kuten ennen (eloFromRank).
+  if (doc) {
+    for (const t of [...doc.teams].sort((a, b) => a.rank - b.rank)) {
+      map.set(normalizeLiigaName(t.team), {
+        elo: t.elo ?? eloFromRank(t.rank, doc.teams.length, base),
+        change: 0,
+        rank: t.rank,
+      });
+    }
+    return map;
+  }
+
   for (const [i, t] of rankedTeams().entries()) {
     map.set(normalizeLiigaName(t.team), {
       elo: eloFromRank(effectiveRank(t), TEAM_COUNT, base),

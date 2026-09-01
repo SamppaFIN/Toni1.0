@@ -21,6 +21,7 @@ export const DISPLAY_OPTIONS = [
   { key: 'probs', label: 'Todennäköisyyspalkki', hint: 'Mallin 1X2-jakauma palkkina', default: true },
   { key: 'odds', label: 'Kerroinvertailu', hint: 'Kaikkien toimistojen hinnat', default: true },
   { key: 'stats', label: 'Tunnusluvut', hint: 'Sarjasija, muoto, maalit per peli', default: true },
+  { key: 'preview', label: 'Kausiennakko', hint: 'Ennakon plussat ja miinukset — vain sarjoille joilla ennakko on', default: true },
   { key: 'news', label: 'Uutiset', hint: 'Otteluun liitetyt uutiset', default: true },
   { key: 'analysis', label: 'Analyysi', hint: 'Malli vs markkina, edge, Kelly-panos', default: true },
   { key: 'calc', label: 'Laskennan vaiheet', hint: 'Jokainen välitulos kaavoineen — pitkä', default: false },

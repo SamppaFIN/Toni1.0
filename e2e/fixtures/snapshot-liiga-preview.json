@@ -1,0 +1,571 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-01T12:18:04.514Z",
+  "sport": "football",
+  "source": "live",
+  "providers": [
+    "The Odds API",
+    "ESPN (tulokset & Elo)",
+    "liiga.fi/api/v2",
+    "RSS-uutissyötteet",
+    "Veikkaus (kasin syotetty)"
+  ],
+  "leagues": [
+    "Liiga"
+  ],
+  "matches": [
+    {
+      "id": "icehockey_liiga:2026-09-01:JUK-HPK",
+      "league": "Liiga",
+      "kickoff": "2026-09-01T15:30:00.000Z",
+      "home": {
+        "name": "Jukurit",
+        "short": "JUK",
+        "color": "#1F6FEB"
+      },
+      "away": {
+        "name": "HPK",
+        "short": "HPK",
+        "color": "#9E6A03"
+      },
+      "odds": [
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 2.88,
+          "draw": 3.7,
+          "away": 2.25,
+          "commission": 0,
+          "fetched_at": "2026-09-01T11:41:00Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028022691"
+        },
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 2.81,
+          "draw": 3.92,
+          "away": 2.21,
+          "commission": 0,
+          "fetched_at": "2026-09-01T11:41:00Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/363129404-mikkelin-jukurit-hpk"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 2.92,
+          "draw": 3.75,
+          "away": 2.38,
+          "commission": 0,
+          "fetched_at": "2026-09-01T11:40:33Z",
+          "link": "https://www.coolbet.com/en/sports/match/6047356"
+        },
+        {
+          "bookmaker": "Veikkaus",
+          "key": "veikkaus",
+          "market": "1X2",
+          "home": 2.82,
+          "draw": 3.75,
+          "away": 2.37,
+          "commission": 0,
+          "fetched_at": "2026-09-01T12:00:00.000Z",
+          "link": "https://www.veikkaus.fi/fi/vedonlyonti",
+          "manual": true,
+          "note": "Veikkauksella ei ole kerroinrajapintaa — hinnat syötetty käsin kerroinsivulta"
+        }
+      ],
+      "best": {
+        "home": 2.92,
+        "draw": 3.92,
+        "away": 2.38,
+        "home_effective": 2.92,
+        "draw_effective": 3.92,
+        "away_effective": 2.38,
+        "home_book": "Coolbet",
+        "draw_book": "1xBet",
+        "away_book": "Coolbet"
+      },
+      "market": {
+        "margin": 0.0177,
+        "implied": {
+          "home": 0.333,
+          "draw": 0.2545,
+          "away": 0.4125
+        },
+        "sharp": {
+          "home": 0.333,
+          "draw": 0.2545,
+          "away": 0.4125
+        },
+        "sharp_source": "mediaani (4 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 1.313,
+        "lambda_away": 1.32,
+        "probs": {
+          "home": 0.3321,
+          "draw": 0.2669,
+          "away": 0.401
+        },
+        "poisson_probs": {
+          "home": 0.3269,
+          "draw": 0.343,
+          "away": 0.3301
+        },
+        "blend_weight": 0.13999999999999999,
+        "over25": 0.4899,
+        "btts": 0.542,
+        "top_scores": [
+          {
+            "score": "1-1",
+            "p": 0.1308
+          },
+          {
+            "score": "0-1",
+            "p": 0.0886
+          },
+          {
+            "score": "1-0",
+            "p": 0.0881
+          },
+          {
+            "score": "1-2",
+            "p": 0.0822
+          },
+          {
+            "score": "2-1",
+            "p": 0.0818
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Kausiennakko (Ristikaksi — Liiga-kausiennakko 2026-27): JUK #17 vs HPK #12. Ei pelattuja otteluita — luku on ennakon lähtöarvo, ei mittaus."
+          },
+          {
+            "reason": "JUK — + Altavastaajan mentaliteetti, pääsee pelaamaan ilman paineita  ·  − Materiaali Liigan heikoin, kapea rosteri, putoamisuhka vakava"
+          },
+          {
+            "reason": "HPK — + Huippumaalivahti Saarinen, valmennus Manner, tasapainoinen puolustus  ·  − Ulkomaalaishankintojen floppaaminen, hyökkäyspään tehottomuus, ratkaisuvoiman puute"
+          }
+        ],
+        "home_strength": {
+          "attack": 0.82,
+          "defense": 1.18
+        },
+        "away_strength": {
+          "attack": 0.93,
+          "defense": 1.07
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.92,
+            "odds_effective": 2.92,
+            "book": "Coolbet",
+            "model_prob": 0.3321,
+            "implied_prob": 0.333,
+            "edge": -0.0303,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 3.92,
+            "odds_effective": 3.92,
+            "book": "1xBet",
+            "model_prob": 0.2669,
+            "implied_prob": 0.2545,
+            "edge": 0.0462,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.38,
+            "odds_effective": 2.38,
+            "book": "Coolbet",
+            "model_prob": 0.401,
+            "implied_prob": 0.4125,
+            "edge": -0.0456,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 17,
+          "played": 0,
+          "form": "",
+          "gf_pg": 0,
+          "ga_pg": 0,
+          "home_gf_pg": null,
+          "away_gf_pg": null,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": null,
+          "elo": 1380,
+          "elo_change": 0,
+          "elo_rank": 17,
+          "elo_provisional": true
+        },
+        "away": {
+          "rank": 12,
+          "played": 0,
+          "form": "",
+          "gf_pg": 0,
+          "ga_pg": 0,
+          "home_gf_pg": null,
+          "away_gf_pg": null,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": null,
+          "elo": 1455,
+          "elo_change": 0,
+          "elo_rank": 12,
+          "elo_provisional": true
+        },
+        "h2h": []
+      },
+      "news": [],
+      "preview": {
+        "source": {
+          "name": "Ristikaksi — Liiga-kausiennakko 2026-27",
+          "url": "https://www.ristikaksi.com/urheilusarjat/liiga-kausiennakko-2026-27",
+          "readAt": "2026-09-01"
+        },
+        "home": {
+          "rank": 17,
+          "elo": 1380,
+          "strengths": [
+            "Altavastaajan mentaliteetti",
+            "pääsee pelaamaan ilman paineita"
+          ],
+          "weaknesses": [
+            "Materiaali Liigan heikoin",
+            "kapea rosteri",
+            "putoamisuhka vakava"
+          ],
+          "arrivals": [
+            "Linus Sjodin",
+            "Jesper Olofsson",
+            "Jesper Myrenberg"
+          ],
+          "departures": [
+            "Aleks Haatanen",
+            "Jesper Piitulainen",
+            "Sakke Hamalainen"
+          ]
+        },
+        "away": {
+          "rank": 12,
+          "elo": 1455,
+          "strengths": [
+            "Huippumaalivahti Saarinen",
+            "valmennus Manner",
+            "tasapainoinen puolustus"
+          ],
+          "weaknesses": [
+            "Ulkomaalaishankintojen floppaaminen",
+            "hyökkäyspään tehottomuus",
+            "ratkaisuvoiman puute"
+          ],
+          "arrivals": [
+            "Chad Nychuk",
+            "Brendan Ranford",
+            "Jacob Crespin"
+          ],
+          "departures": [
+            "Cameron Wright",
+            "Jesse Kiiskinen"
+          ]
+        }
+      }
+    },
+    {
+      "id": "icehockey_liiga:2026-09-01:SAI-TAP",
+      "league": "Liiga",
+      "kickoff": "2026-09-01T15:30:00.000Z",
+      "home": {
+        "name": "SaiPa",
+        "short": "SAI",
+        "color": "#8250DF"
+      },
+      "away": {
+        "name": "Tappara",
+        "short": "TAP",
+        "color": "#9E6A03"
+      },
+      "odds": [
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 3,
+          "draw": 3.9,
+          "away": 2.12,
+          "commission": 0,
+          "fetched_at": "2026-09-01T11:41:00Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028022705"
+        },
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 2.78,
+          "draw": 4.2,
+          "away": 2.15,
+          "commission": 0,
+          "fetched_at": "2026-09-01T11:41:00Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/363131574-saipa-tappara"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 3.05,
+          "draw": 4,
+          "away": 2.22,
+          "commission": 0,
+          "fetched_at": "2026-09-01T11:40:33Z",
+          "link": "https://www.coolbet.com/en/sports/match/6047360"
+        },
+        {
+          "bookmaker": "Veikkaus",
+          "key": "veikkaus",
+          "market": "1X2",
+          "home": 2.95,
+          "draw": 3.95,
+          "away": 2.2,
+          "commission": 0,
+          "fetched_at": "2026-09-01T12:00:00.000Z",
+          "link": "https://www.veikkaus.fi/fi/vedonlyonti",
+          "manual": true,
+          "note": "Veikkauksella ei ole kerroinrajapintaa — hinnat syötetty käsin kerroinsivulta"
+        }
+      ],
+      "best": {
+        "home": 3.05,
+        "draw": 4.2,
+        "away": 2.22,
+        "home_effective": 3.05,
+        "draw_effective": 4.2,
+        "away_effective": 2.22,
+        "home_book": "Coolbet",
+        "draw_book": "1xBet",
+        "away_book": "Coolbet"
+      },
+      "market": {
+        "margin": 0.0164,
+        "implied": {
+          "home": 0.3211,
+          "draw": 0.2415,
+          "away": 0.4374
+        },
+        "sharp": {
+          "home": 0.3211,
+          "draw": 0.2415,
+          "away": 0.4374
+        },
+        "sharp_source": "mediaani (4 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 1.202,
+        "lambda_away": 1.448,
+        "probs": {
+          "home": 0.3152,
+          "draw": 0.2551,
+          "away": 0.4297
+        },
+        "poisson_probs": {
+          "home": 0.279,
+          "draw": 0.3387,
+          "away": 0.3822
+        },
+        "blend_weight": 0.13999999999999999,
+        "over25": 0.4941,
+        "btts": 0.5412,
+        "top_scores": [
+          {
+            "score": "1-1",
+            "p": 0.1291
+          },
+          {
+            "score": "0-1",
+            "p": 0.0961
+          },
+          {
+            "score": "1-2",
+            "p": 0.089
+          },
+          {
+            "score": "1-0",
+            "p": 0.0788
+          },
+          {
+            "score": "0-0",
+            "p": 0.0768
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Kausiennakko (Ristikaksi — Liiga-kausiennakko 2026-27): SAI #10 vs TAP #1. Ei pelattuja otteluita — luku on ennakon lähtöarvo, ei mittaus."
+          },
+          {
+            "reason": "SAI — + Valmennus (Helminen) – kyky repiä potentiaali irti, pelitapaan soveltuva materiaali, laadukas ykkösmaalivahti Piiroinen, kotihurmos  ·  − Hyökkäyspään jättimäiset menetykset (Kivenmäki, Fortier, Nikkanen, Kalapudas, Kuusla), CHL:n lisärasitus, ei kestä loukkaantumisia"
+          },
+          {
+            "reason": "TAP — + Huipputason valmennus (Kari Jalonen), voittamisen kulttuuri, jatkuvuus, terävä kärki (Blichfeld, Rautiainen), eliittimaalivahti Heljanko, korkea perustaso  ·  − Keskikaistan laatu epävarma (Mattila, Räsänen)"
+          }
+        ],
+        "home_strength": {
+          "attack": 0.98,
+          "defense": 1.02
+        },
+        "away_strength": {
+          "attack": 1.18,
+          "defense": 0.82
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 3.05,
+            "odds_effective": 3.05,
+            "book": "Coolbet",
+            "model_prob": 0.3152,
+            "implied_prob": 0.3211,
+            "edge": -0.0386,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.2,
+            "odds_effective": 4.2,
+            "book": "1xBet",
+            "model_prob": 0.2551,
+            "implied_prob": 0.2415,
+            "edge": 0.0714,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.22,
+            "odds_effective": 2.22,
+            "book": "Coolbet",
+            "model_prob": 0.4297,
+            "implied_prob": 0.4374,
+            "edge": -0.0461,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 10,
+          "played": 0,
+          "form": "",
+          "gf_pg": 0,
+          "ga_pg": 0,
+          "home_gf_pg": null,
+          "away_gf_pg": null,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": null,
+          "elo": 1485,
+          "elo_change": 0,
+          "elo_rank": 10,
+          "elo_provisional": true
+        },
+        "away": {
+          "rank": 1,
+          "played": 0,
+          "form": "",
+          "gf_pg": 0,
+          "ga_pg": 0,
+          "home_gf_pg": null,
+          "away_gf_pg": null,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": null,
+          "elo": 1620,
+          "elo_change": 0,
+          "elo_rank": 1,
+          "elo_provisional": true
+        },
+        "h2h": []
+      },
+      "news": [],
+      "preview": {
+        "source": {
+          "name": "Ristikaksi — Liiga-kausiennakko 2026-27",
+          "url": "https://www.ristikaksi.com/urheilusarjat/liiga-kausiennakko-2026-27",
+          "readAt": "2026-09-01"
+        },
+        "home": {
+          "rank": 10,
+          "elo": 1485,
+          "strengths": [
+            "Valmennus (Helminen) – kyky repiä potentiaali irti",
+            "pelitapaan soveltuva materiaali",
+            "laadukas ykkösmaalivahti Piiroinen",
+            "kotihurmos"
+          ],
+          "weaknesses": [
+            "Hyökkäyspään jättimäiset menetykset (Kivenmäki, Fortier, Nikkanen, Kalapudas, Kuusla)",
+            "CHL:n lisärasitus",
+            "ei kestä loukkaantumisia"
+          ],
+          "departures": [
+            "Patrick Curry",
+            "Henri Nikkanen",
+            "Maxime Fortier"
+          ]
+        },
+        "away": {
+          "rank": 1,
+          "elo": 1620,
+          "strengths": [
+            "Huipputason valmennus (Kari Jalonen)",
+            "voittamisen kulttuuri",
+            "jatkuvuus",
+            "terävä kärki (Blichfeld, Rautiainen)",
+            "eliittimaalivahti Heljanko",
+            "korkea perustaso"
+          ],
+          "weaknesses": [
+            "Keskikaistan laatu epävarma (Mattila, Räsänen)"
+          ],
+          "arrivals": [
+            "Kasper Kulonummi",
+            "Justin Addamo"
+          ],
+          "departures": [
+            "Eetu Tuulola",
+            "Olli Juolevi"
+          ]
+        }
+      }
+    }
+  ]
+}
