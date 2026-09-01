@@ -244,6 +244,36 @@ export function hasHockeyContext(text: string): boolean {
  * syötteessä (IS, Yle) se pitää päätellä tekstistä: pelkkä joukkuenimi ei
  * riitä, koska sama nimi voi olla toisen lajin seura.
  */
+export type NewsSport = 'football' | 'hockey' | 'any';
+
+/**
+ * Kasitteleeko juttu TATA lajia? (tiketti #99)
+ *
+ * Sama paattely kuin isAboutFootball():ssa mutta molempiin suuntiin.
+ * Kolme tapausta:
+ *
+ *   1. Omistettu syote (BBC jalkapallo, IS jaakiekko) -> laji tiedetaan
+ *      jo syotteesta, kontekstisanoja ei tarvita.
+ *   2. Kaikkien lajien syote (Yle Urheilu) -> laji paatellaan tekstista.
+ *   3. Vaaran lajin omistettu syote -> ei koskaan.
+ *
+ * TOISEN LAJIN KONTEKSTI SULKEE POIS. Ilves, TPS, KooKoo ja Jokerit ovat
+ * seka jalkapallo- etta jaakiekkoseuroja, ja vaaran lajin juttu ei kerro
+ * ottelusta mitaan. Tama oli jo rakennettu jalkapallon suuntaan; nyt sama
+ * toimii toisin pain.
+ */
+export function isAboutSport(text: string, feedSport: NewsSport, matchSport: NewsSport): boolean {
+  if (feedSport !== 'any') return feedSport === matchSport;
+
+  const jalkapallo = hasFootballContext(text);
+  const jaakiekko = hasHockeyContext(text);
+
+  // Molemmat tai ei kumpaakaan -> ei voi paattaa, ja arvaus olisi vaara
+  // yhta usein kuin oikea
+  if (jalkapallo === jaakiekko) return false;
+  return matchSport === 'football' ? jalkapallo : jaakiekko;
+}
+
 export function isAboutFootball(text: string, feedIsFootballOnly: boolean): boolean {
   if (feedIsFootballOnly) return true;
   if (hasHockeyContext(text)) return false;

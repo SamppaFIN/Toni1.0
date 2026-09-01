@@ -34,6 +34,10 @@ jobs:
       contents: write # datan commit mainiin + gh-pages-deploy
 
     env:
+      # Tiketti #100: JALKAPALLO POIS TOISTAISEKSI. Jaakiekkokausi alkoi
+      # 1.9. ja se on nyt ainoa seurattava. Palautus: poista tama rivi,
+      # jolloin config.ts:n oletuslista (4 sarjaa) astuu voimaan.
+      ODDS_FOOTBALL_SPORTS: 'icehockey_liiga'
       ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
       FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
@@ -52,8 +56,8 @@ jobs:
       CACHE_DISABLED: '1'
 
     steps:
-      # fetch-depth: 0 — commit-vaihe tekee `git pull --rebase`, joka tarvitsee
-      # historian. Oletuksen matala klooni (depth 1) kaataisi rebasen.
+      # fetch-depth: 0 — commit-vaihe tekee `git reset --soft origin/main`,
+      # joka tarvitsee historian. Oletuksen matala klooni (depth 1) ei riita.
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -178,11 +182,27 @@ jobs:
           else
             STAMP=$(node -e "console.log(require('./public/data/today.json').generated_at)")
             COUNT=$(node -e "console.log(require('./public/data/today.json').matches.length)")
-            git commit -m "Data: $COUNT ottelua, snapshot $STAMP [skip ci]"
-            # Rebase varmuuden vuoksi: main on voinut edetä ajon aikana
-            git pull --rebase --autostash origin main
-            git push origin HEAD:main
-            echo "Data committoitu ja työnnetty"
+            # Tiketti #100: EI REBASEA GENEROIDULLE DATALLE.
+            #
+            # Aiemmin tama teki `git pull --rebase`, joka KAATUI konfliktiin
+            # kun main oli edennyt ja sama generoitu tiedosto oli muuttunut
+            # molemmissa. Juuri niin kavi kun odds-history.json:in rakenne
+            # muuttui kesken ajon.
+            #
+            # Generoitua dataa ei tarvitse yhdistaa: se rakennetaan joka
+            # ajossa kokonaan uudelleen lahteista, joten TUORE VERSIO ON AINA
+            # OIKEA. Siirretaan siis vain tyopuun sisalto tuoreimman mainin
+            # paalle ilman yhdistamista.
+            git fetch origin main
+            git reset --soft origin/main
+            git add public/data
+            if git diff --cached --quiet; then
+              echo "Data vastaa jo mainia — ei committia"
+            else
+              git commit -m "Data: $COUNT ottelua, snapshot $STAMP [skip ci]"
+              git push origin HEAD:main
+              echo "Data committoitu ja tyonnetty"
+            fi
           fi
 
       - name: Deployaa GitHub Pagesiin

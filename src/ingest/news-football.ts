@@ -9,29 +9,47 @@
 import { pathToFileURL } from 'node:url';
 import Parser from 'rss-parser';
 import { NewsItem, TeamRef } from '../types-football.js';
-import { buildTeamPattern, mentionsTeam, isAboutFootball, TeamPattern } from './news-match.js';
+import { buildTeamPattern, mentionsTeam, isAboutFootball, TeamPattern, isAboutSport } from './news-match.js';
 import { extractFootballEvents, affectsModel, LAMBDA_DELTA } from '../engine/nlp-football.js';
 import { cached } from './cache.js';
 
 export interface FeedSource {
   name: string;
   url: string;
-  /** true = syöte on pelkkää jalkapalloa, jolloin kontekstisanoja ei tarvita */
-  footballOnly: boolean;
+  /**
+   * Syotteen laji (tiketti #99). `any` tarkoittaa kaikkien lajien
+   * syotetta, jolloin laji paatellaan tekstista.
+   *
+   * Korvasi `footballOnly`-lipun: kaksiarvoinen kentta ei voinut ilmaista
+   * jaakiekkosyotetta lainkaan.
+   */
+  sport: 'football' | 'hockey' | 'any';
 }
 
 /**
- * Syötteet testattu 14.8.2026 — kaikki HTTP 200 ja sisältöä:
- * BBC 81, Guardian 66, IS 100, Iltalehti 20, Yle Urheilu 20, ESPN 19 juttua.
+ * Syotteet testattu 1.9.2026 -- kaikki HTTP 200 ja sisaltoa.
+ *
+ * JAAKIEKKOSYOTTEITA LISATTAESSA loytyi kaksi kuollutta lahdetta joita
+ * config.news.rssFeeds oli listannut alkuperaisesta MVP:sta asti:
+ *   jatkoaika.com/rss/feed        404 (mitaan toimivaa syotetta ei ole)
+ *   feeds.yle.fi/urheilu/jaakiekko 404
+ * Ne on jatetty pois sen sijaan etta seisoisivat listalla toimivan
+ * nakoisina.
  */
 export const FEEDS: FeedSource[] = [
-  { name: 'BBC Sport', url: 'https://feeds.bbci.co.uk/sport/football/rss.xml', footballOnly: true },
-  { name: 'The Guardian', url: 'https://www.theguardian.com/football/rss', footballOnly: true },
-  { name: 'Iltalehti', url: 'https://www.iltalehti.fi/rss/jalkapallo.xml', footballOnly: true },
-  { name: 'ESPN', url: 'https://www.espn.com/espn/rss/soccer/news', footballOnly: true },
-  // Nämä kattavat kaikki lajit, joten jalkapallokonteksti pitää päätellä tekstistä
-  { name: 'Ilta-Sanomat', url: 'https://www.is.fi/rss/urheilu.xml', footballOnly: false },
-  { name: 'Yle Urheilu', url: 'https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_URHEILU', footballOnly: false },
+  // Jalkapallo
+  { name: 'BBC Sport', url: 'https://feeds.bbci.co.uk/sport/football/rss.xml', sport: 'football' },
+  { name: 'The Guardian', url: 'https://www.theguardian.com/football/rss', sport: 'football' },
+  { name: 'Iltalehti jalkapallo', url: 'https://www.iltalehti.fi/rss/jalkapallo.xml', sport: 'football' },
+  { name: 'ESPN', url: 'https://www.espn.com/espn/rss/soccer/news', sport: 'football' },
+
+  // Jaakiekko (tiketti #99): 100 ja 20 juttua testihetkella
+  { name: 'IS jääkiekko', url: 'https://www.is.fi/rss/jaakiekko.xml', sport: 'hockey' },
+  { name: 'Iltalehti jääkiekko', url: 'https://www.iltalehti.fi/rss/jaakiekko.xml', sport: 'hockey' },
+
+  // Kaikki lajit -- laji paatellaan tekstista
+  { name: 'Ilta-Sanomat', url: 'https://www.is.fi/rss/urheilu.xml', sport: 'any' },
+  { name: 'Yle Urheilu', url: 'https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_URHEILU', sport: 'any' },
 ];
 
 /** Kuinka vanhoja juttuja huomioidaan */
@@ -47,7 +65,7 @@ export interface Article {
   publishedAt: string;
   /** Otsikko + kuvaus yhdessä, tästä etsitään joukkueet ja tapahtumat */
   text: string;
-  footballOnly: boolean;
+  sport: 'football' | 'hockey' | 'any';
 }
 
 const parser = new Parser({ timeout: 20000 });
@@ -64,7 +82,7 @@ async function fetchFeed(feed: FeedSource): Promise<Article[]> {
       source: feed.name,
       publishedAt: item.isoDate ?? item.pubDate ?? new Date().toISOString(),
       text: `${title}. ${description}`.slice(0, 1200),
-      footballOnly: feed.footballOnly,
+      sport: feed.sport,
     };
   });
 }
@@ -101,6 +119,11 @@ export interface MatchNewsInput {
   away: TeamRef;
   /** Sarjan nimi vahvistaa monitulkintaiset joukkuenimet */
   league?: string;
+  /**
+   * Ottelun laji (tiketti #99). Ratkaisee mitka uutiset voivat liittya
+   * siihen. Oletus jalkapallo, koska enemmisto sarjoista on sita.
+   */
+  sport?: 'football' | 'hockey';
   homeAliases?: string[];
   awayAliases?: string[];
 }
@@ -155,11 +178,13 @@ export async function attachNews(
   for (const m of matches) candidates.set(m.matchId, []);
 
   for (const article of fresh) {
-    // Kaikkien lajien syötteessä joukkuenimi ei riitä: Ilves ja TPS ovat myös
-    // jääkiekkoseuroja, ja jääkiekkojuttu ei kerro mitään jalkapallo-ottelusta.
-    if (!isAboutFootball(article.text, article.footballOnly)) continue;
-
     for (const m of matches) {
+      // Kaikkien lajien syotteessa joukkuenimi ei riita: Ilves ja TPS ovat
+      // seka jalkapallo- etta jaakiekkoseuroja, eika toisen lajin juttu
+      // kerro ottelusta mitaan. Tarkistus on OTTELUKOHTAINEN, koska sama
+      // syote voi palvella molempia lajeja (tiketti #99).
+      if (!isAboutSport(article.text, article.sport, m.sport ?? 'football')) continue;
+
       const p = patterns.get(m.matchId)!;
       const homeHit = mentionsTeam(article.text, p.home);
       const awayHit = mentionsTeam(article.text, p.away);

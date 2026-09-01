@@ -11,7 +11,7 @@ function article(overrides: Partial<Article> & { title: string }): Article {
     source: 'Testilähde',
     publishedAt: '2026-08-14T10:00:00.000Z',
     text: overrides.text ?? overrides.title,
-    footballOnly: true,
+    sport: 'football' as const,
     ...overrides,
   };
 }
@@ -97,7 +97,7 @@ describe('Uutisten liittäminen otteluihin', () => {
     const hockey = article({
       title: 'HJK:n kiekkojoukkue voitti',
       text: 'HJK:n kiekkojoukkue voitti. SM-liigan ottelussa nähtiin ylivoimamaali.',
-      footballOnly: false,
+      sport: 'any' as const,
     });
     const result = await attachNews(MATCHES, [hockey], NOW);
     expect(result.get('m1')!.news).toHaveLength(0);

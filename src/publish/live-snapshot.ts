@@ -231,6 +231,8 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
         home: e.home,
         away: e.away,
         league: e.league,
+        // Tiketti #99: laji ratkaisee mitka uutiset voivat liittya otteluun
+        sport: sportOf(e.sportKey),
       })),
       articles,
       now
