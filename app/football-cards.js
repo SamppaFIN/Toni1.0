@@ -43,6 +43,43 @@ import { serverArchiveDay } from './football-server-archive.js';
 // — ne ovat toggle-napin takana, koska niiden analyysi on täysin validi,
 // vain ajankohta on eri.
 
+const SPORT_KEY = 'bt_sport';
+
+/**
+ * Ottelun laji tunnisteesta (tiketti #95).
+ *
+ * Sama paattely kuin palvelimen sportOf():ssa, mutta ilman
+ * sarjarekisteria: `id` alkaa aina kerroinrajapinnan sarjatunnisteella,
+ * ja se kertoo lajin yksiselitteisesti. Tuntematon tulkitaan
+ * jalkapalloksi -- se on enemmisto.
+ */
+export function sportOfMatch(match) {
+  return String(match?.id ?? '').startsWith('icehockey_') ? 'hockey' : 'football';
+}
+
+/** Nakyva laji: hockey | football | both. Oletus jaakiekko. */
+export function sportMode() {
+  try {
+    const v = localStorage.getItem(SPORT_KEY);
+    return v === 'football' || v === 'both' ? v : 'hockey';
+  } catch {
+    return 'hockey';
+  }
+}
+
+/**
+ * Suodata ottelut nakyvan lajin mukaan.
+ *
+ * Snapshot sisaltaa MOLEMMAT lajit, koska sarjarekisterissa on seka
+ * jalkapallo- etta jaakiekkosarjoja. Ilman tata jaakiekkotilassa
+ * nakyisivat myos jalkapallo-ottelut.
+ */
+export function visibleBySport(list) {
+  const mode = sportMode();
+  if (mode === 'both') return list;
+  return list.filter((m) => sportOfMatch(m) === mode);
+}
+
 const DAY_FILTER_KEY = 'bt_football_day_filter';
 
 /**
@@ -107,34 +144,61 @@ export function partitionByDay(matches, now = new Date()) {
 // rivikohtainen linkki voittaa aina tämän kartan.
 
 const BOOKMAKER_SITES = {
-  pinnacle: 'https://www.pinnacle.com/en/soccer/matchups/',
-  onexbet: 'https://1xbet.com/en/line/football/',
-  betfair_ex_eu: 'https://www.betfair.com/exchange/plus/football',
-  marathonbet: 'https://www.marathonbet.com/en/betting/Football/',
-  williamhill: 'https://sports.williamhill.com/betting/en-gb/football',
-  unibet_se: 'https://www.unibet.se/betting/sports/filter/football',
-  unibet_eu: 'https://www.unibet.com/betting/sports/filter/football',
-  coolbet: 'https://www.coolbet.com/en/sports/football',
-  nordicbet: 'https://www.nordicbet.com/en/sportsbook/football',
-  betsson: 'https://www.betsson.com/en/sportsbook/football',
-  matchbook: 'https://www.matchbook.com/exchange/sports/soccer',
+  football: {
+    pinnacle: 'https://www.pinnacle.com/en/soccer/matchups/',
+    onexbet: 'https://1xbet.com/en/line/football/',
+    betfair_ex_eu: 'https://www.betfair.com/exchange/plus/football',
+    marathonbet: 'https://www.marathonbet.com/en/betting/Football/',
+    williamhill: 'https://sports.williamhill.com/betting/en-gb/football',
+    unibet_se: 'https://www.unibet.se/betting/sports/filter/football',
+    unibet_eu: 'https://www.unibet.com/betting/sports/filter/football',
+    coolbet: 'https://www.coolbet.com/en/sports/football',
+    nordicbet: 'https://www.nordicbet.com/en/sportsbook/football',
+    betsson: 'https://www.betsson.com/en/sportsbook/football',
+    matchbook: 'https://www.matchbook.com/exchange/sports/soccer',
+  },
+  // Tiketti #98: jaakiekkokortilta linkki vei toimiston JALKAPALLOSIVULLE.
+  // Kartta oli yksilajinen ajalta jolloin putki oli, ja laji lisattiin sen
+  // ymparilta huomaamatta.
+  hockey: {
+    pinnacle: 'https://www.pinnacle.com/en/hockey/matchups/',
+    onexbet: 'https://1xbet.com/en/line/ice-hockey/',
+    betfair_ex_eu: 'https://www.betfair.com/exchange/plus/ice-hockey',
+    marathonbet: 'https://www.marathonbet.com/en/betting/Ice+Hockey/',
+    williamhill: 'https://sports.williamhill.com/betting/en-gb/ice-hockey',
+    unibet_se: 'https://www.unibet.se/betting/sports/filter/ice_hockey',
+    unibet_eu: 'https://www.unibet.com/betting/sports/filter/ice_hockey',
+    coolbet: 'https://www.coolbet.com/en/sports/ice-hockey',
+    nordicbet: 'https://www.nordicbet.com/en/sportsbook/ice-hockey',
+    betsson: 'https://www.betsson.com/en/sportsbook/ice-hockey',
+    matchbook: 'https://www.matchbook.com/exchange/sports/ice-hockey',
+  },
 };
 
-/** Rivikohtainen linkki jos API antoi sen, muuten toimiston jalkapallosivu, muuten null */
-export function bookmakerUrl(row) {
+/**
+ * Rivikohtainen linkki jos API antoi sen, muuten toimiston LAJIN mukainen
+ * etusivu, muuten null.
+ *
+ * Etusivut ovat parasta arvausta eivatka todennettuja: rivikohtainen
+ * syvalinkki (tiketti #54) on ainoa joka varmasti osuu otteluun. Se
+ * sanotaan kayttajalle vihjetekstissa.
+ */
+export function bookmakerUrl(row, sport = 'football') {
   if (row?.link && /^https:\/\//i.test(row.link)) return row.link;
-  return BOOKMAKER_SITES[row?.key] ?? null;
+  const kartta = BOOKMAKER_SITES[sport] ?? BOOKMAKER_SITES.football;
+  return kartta[row?.key] ?? null;
 }
 
 /**
  * Toimiston nimi linkkinä. rel="noopener noreferrer" on pakollinen:
  * target="_blank" ilman sitä antaisi kohdesivulle pääsyn window.openeriin.
  */
-function bookmakerLabel(row) {
-  const url = bookmakerUrl(row);
+function bookmakerLabel(row, sport = 'football') {
+  const url = bookmakerUrl(row, sport);
   const deep = Boolean(row?.link);
+  const lajiSana = sport === 'hockey' ? 'jääkiekkosivun' : 'jalkapallosivun';
   const tip = url
-    ? `${row.bookmaker} — avaa ${deep ? 'tämän ottelun sivun' : 'toimiston jalkapallosivun'} uuteen välilehteen`
+    ? `${row.bookmaker} — avaa ${deep ? 'tämän ottelun sivun' : `toimiston ${lajiSana}`} uuteen välilehteen`
     : row.bookmaker;
 
   if (!url) return `<span class="bk-name" title="${esc(tip)}">${esc(row.bookmaker)}</span>`;
@@ -179,9 +243,27 @@ export function cellEdge(modelProb, odds, commission = 0) {
   return modelProb * effectiveOdds(odds, commission) - 1;
 }
 
-/** Taustaväriluokka: '' = musta eli ei suositusta */
-export function edgeBgClass(edge) {
+/**
+ * Taustavariluokka: '' = musta eli ei suositusta.
+ *
+ * VAATII MYOS TODENNAKOISYYSERON (tiketti #97). Aiemmin vari katsoi pelkkaa
+ * edgea, jolloin kortti saattoi nayttaa vihreaa ruutua ja samaan aikaan
+ * sanoa "ei value-kohdetta, ei panossuositusta". Nain kavi juuri pitkan
+ * maksun kohteissa: 4.30 kertoimella 0.0 pp:n ero mallin ja markkinan
+ * valilla tuottaa +6.9 % edgen, mutta se on mallin virherajojen sisalla.
+ *
+ * Selitysteksti oli olemassa, mutta vari on vahvempi signaali kuin teksti --
+ * kayttaja nakee vihrean ennen kuin lukee mitaan. Nyt vari noudattaa samaa
+ * kahden ehdon saantoa kuin palvelimen lippu ja panossuositus, joten kortti
+ * ei enaa sano kahta eri asiaa.
+ *
+ * `probEdge` puuttuessa vari annetaan pelkan edgen mukaan -- vanhat
+ * kutsupaikat eivat riko, ja puuttuva tieto ei ole sama kuin nolla.
+ */
+export function edgeBgClass(edge, probEdge = null) {
   if (edge == null) return '';
+  // Riittamaton ero mallin ja markkinan valilla -> ei varia, kuten ei lippuakaan
+  if (probEdge != null && probEdge < MIN_PROB_EDGE) return '';
   if (edge > EV_ELITE) return 'value-elite';
   if (edge > EV_STRONG) return 'value-strong';
   if (edge > EV_CANDIDATE) return 'value-candidate';
@@ -277,7 +359,11 @@ function oddsTable(match, index) {
         // kuuluu vain sille ruudulle jota luku koskee
         const flag = isBest && snapshotEdge && snapshotEdge.flag !== 'none' ? snapshotEdge.flag : null;
         const ev = cellEdge(probs[side], value, row.commission);
-        const bg = edgeBgClass(ev);
+        // Todennakoisyysero on sama kaikille saman kohteen ruuduille: se
+        // kertoo kuinka paljon malli ja markkina eroavat, ei mita yksi
+        // toimisto maksaa. Ilman sita vari ja panossuositus voivat erota.
+        const probEdge = snapshotEdge ? snapshotEdge.model_prob - snapshotEdge.implied_prob : null;
+        const bg = edgeBgClass(ev, probEdge);
         const evHtml = ev == null ? '' : `<span class="ev ${edgeTextClass(ev)}">${ev > 0 ? '+' : ''}${(ev * 100).toFixed(1)} %</span>`;
         const icon = flag ? ` ${FLAG_META[flag].icon}` : isBest ? ' ⭐' : '';
         const cls = `bk-odds${isBest ? ' best' : ''}${bg ? ` ${bg}` : ''}`;
@@ -302,7 +388,7 @@ function oddsTable(match, index) {
         }
         return `<button class="${cls}" onclick="event.stopPropagation();window.BTF.openBetPopup('${esc(match.id)}','${side}',${value},'${esc(row.bookmaker)}')" title="${esc(tip)}">${inner}</button>`;
       };
-      return `<div class="odds-row">${bookmakerLabel(row)}${cell('home')}${cell('draw')}${cell('away')}</div>`;
+      return `<div class="odds-row">${bookmakerLabel(row, sportOfMatch(match))}${cell('home')}${cell('draw')}${cell('away')}</div>`;
     })
     .join('');
 
@@ -1353,7 +1439,7 @@ export function renderAllCards() {
   // päivänavigointi piilottaisi koko kierroksen.
   const practice = getDataSource() === 'mock';
   if (practice) {
-    renderMatchList(currentSnapshot.matches, { practice: true });
+    renderMatchList(visibleBySport(currentSnapshot.matches), { practice: true });
     return;
   }
 
@@ -1374,7 +1460,7 @@ export function renderAllCards() {
     // "Kaikki" tarkoittaa kaikkia, myos jo alkaneita. Aiemmin tama
     // suodatti alkaneet pois, jolloin "Kaikki" saattoi nayttaa VAHEMMAN
     // otteluita kuin "Tanaan" -- epajohdonmukaisuus jonka testi nappasi.
-    const ordered = [...currentSnapshot.matches].sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
+    const ordered = visibleBySport(currentSnapshot.matches).sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
     renderMatchList(ordered, { mode });
     return;
   }
@@ -1385,7 +1471,7 @@ export function renderAllCards() {
   // ovat pudonneet siitä pois. Arkisto (tiketti #60) täydentää ne takaisin,
   // jotta eilisen kertoimet ja mallin arvio ovat yhä nähtävissä.
   const day = selectedDayKey(mode);
-  const fromSnapshot = currentSnapshot.matches.filter((m) => localDayKey(m.kickoff) === day);
+  const fromSnapshot = visibleBySport(currentSnapshot.matches).filter((m) => localDayKey(m.kickoff) === day);
 
   // Kolme lahdetta, heikoimmasta vahvimpaan:
   //   1. palvelinarkisto  — mita cron on kerannyt, kaikilla sama
@@ -1395,8 +1481,8 @@ export function renderAllCards() {
   // Tiketti #83: ilman kohtaa 1 tyhjalla selaimella mennyt paiva nayttaisi
   // tyhjalta, vaikka palvelimella on kertoimet, tunnusluvut ja tulos.
   const byId = new Map();
-  for (const a of serverArchiveDay(day)) byId.set(a.id, a);
-  for (const a of archivedDay(day)) byId.set(a.id, toCardShape(a));
+  for (const a of visibleBySport(serverArchiveDay(day))) byId.set(a.id, a);
+  for (const a of visibleBySport(archivedDay(day))) byId.set(a.id, toCardShape(a));
   for (const m of fromSnapshot) byId.set(m.id, m);
 
   const all = [...byId.values()].sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));

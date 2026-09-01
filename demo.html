@@ -380,8 +380,22 @@ const API='/rest/v1';
 // Jääkiekko on Admin-välilehden takana koskematta. PIDÄ TÄMÄ SYNKASSA
 // football.js:n itsekäynnistyksen kanssa — eriävä oletus jättäisi
 // jalkapallomoduulin lataamatta ja kierros näyttäisi tyhjältä.
-let SPORT=localStorage.getItem('bt_sport')||'football';
+/**
+ * Nakyva laji (tiketti #95). Kolme tilaa:
+ *   hockey   - vain jaakiekko (OLETUS, kausi on kaynnissa)
+ *   football - vain jalkapallo
+ *   both     - molemmat samassa listassa
+ *
+ * Vanhat kaksitilaiset arvot ovat yha kelvollisia, joten migraatiota ei
+ * tarvita: aiemmin jalkapallon valinnut sailyttaa sen.
+ */
+let SPORT=localStorage.getItem('bt_sport')||'hockey';
+/** Vain jaakiekko - jaakiekkodemon oma koodi kayttaa tata */
 function isHockey(){return SPORT==='hockey'}
+/** Nakyyko jaakiekko lainkaan (myos molemmat-tilassa) */
+function showHockey(){return SPORT!=='football'}
+/** Nakyyko jalkapallo lainkaan (myos molemmat-tilassa) */
+function showFootball(){return SPORT!=='hockey'}
 
 // Käyttöliittymäteema. 'system' = alkuperäinen tumma OKLCH-teema, koskematta.
 // Sovelletaan heti skriptin alussa (ennen ensimmäistä renderöintiä) jotta
@@ -1080,8 +1094,15 @@ async function loadData(){
 }
 
 function renderRound(){
-  // Jalkapallotilassa kierrosnäkymä on public/app/-moduulien vastuulla
-  if(!isHockey()){if(window.BTF)window.BTF.renderAllCards();return}
+  // Tiketti #95: kierrosnakyma on AINA public/app/-moduulien vastuulla,
+  // myos jaakiekolla. Liiga on snapshotissa oikeilla kertoimilla, ja sama
+  // kortti antaa jaakiekolle kaiken mita jalkapallolla on: toimistolinkit,
+  // tunnusluvut, edge, Kelly ja arkisto.
+  //
+  // Jaakiekon oma renderointi (renderUpcoming / hockeyRoundNav) jaa nain
+  // kayttamatta kierrosnakymassa. Sita EI poisteta viela, koska jaakiekon
+  // omat valilehdet nojaavat samoihin apureihin.
+  if(window.BTF){window.BTF.renderAllCards();return}
   if(calculatorGameId){
     const g=games.find(x=>x.id===calculatorGameId);
     if(g)document.getElementById('round-games').innerHTML=buildCalculator(g);
@@ -1856,8 +1877,9 @@ function renderAdmin(){
 <div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-primary" style="flex:1" onclick="saveAdmin()">💾 Tallenna</button><button class="btn btn-danger" style="flex:1" onclick="resetAdmin()">🔄 Palauta</button></div></div>
 <div class="card"><h3>⚽ Laji</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Jalkapallo käyttää oikeita kertoimia <code>data/today.json</code>-snapshotista. Jääkiekkodemo on mock-datalla toimiva simulaatio — se on piilossa mutta koskematta.</p>
 <div style="display:flex;gap:6px">
-<button class="btn ${SPORT==='football'?'btn-primary':''}" style="flex:1;${SPORT!=='football'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setSport('football')">⚽ Jalkapallo${SPORT==='football'?' ✓':''}</button>
 <button class="btn ${SPORT==='hockey'?'btn-primary':''}" style="flex:1;${SPORT!=='hockey'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setSport('hockey')">🏒 Jääkiekko${SPORT==='hockey'?' ✓':''}</button>
+<button class="btn ${SPORT==='football'?'btn-primary':''}" style="flex:1;${SPORT!=='football'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setSport('football')">⚽ Jalkapallo${SPORT==='football'?' ✓':''}</button>
+<button class="btn ${SPORT==='both'?'btn-primary':''}" style="flex:1;${SPORT!=='both'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setSport('both')">🏒⚽ Molemmat${SPORT==='both'?' ✓':''}</button>
 </div>
 ${SPORT==='football'?'<button class="btn btn-block" style="margin-top:6px;background:oklch(1 1 0/0.1);color:var(--c-text);font-size:.7rem" onclick="if(window.BTF)window.BTF.reload().then(()=>toast(\'🔄 Kohteet päivitetty\'))">🔄 Lataa kohteet uudelleen</button>':''}</div>
 ${SPORT==='hockey'?`<div class="card"><h3>🎲 Kerrointila</h3><p style="font-size:.7rem;color:var(--muted);margin-bottom:8px">Veikkaus-tyyli on tiukka ja tuottaa vain harvoin ylikertoimia. Pehmeä bookkeri jättää harjoittelua varten enemmän hintavirhettä näkyviin.</p><div style="display:flex;gap:6px"><button class="btn ${hockeyMode==='veikkaus'?'btn-primary':''}" style="flex:1;font-size:.7rem;${hockeyMode!=='veikkaus'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setHockeyOddsMode('veikkaus')">🏦 Veikkaus-tyyli${hockeyMode==='veikkaus'?' ✓':''}</button><button class="btn ${hockeyMode==='soft'?'btn-primary':''}" style="flex:1;font-size:.7rem;${hockeyMode!=='soft'?'background:oklch(1 1 0/0.1);color:var(--c-text)':''}" onclick="setHockeyOddsMode('soft')">🎯 Pehmeä bookkeri${hockeyMode==='soft'?' ✓':''}</button></div></div>`:''}
@@ -2068,21 +2090,23 @@ function renderAll(){renderRound();renderSlip();renderTracker();renderHistory();
 // Jääkiekkovälilehdet piiloon jalkapallotilassa. Mitään ei poisteta —
 // Admin-välilehden toggle palauttaa ne.
 function applySportVisibility(){
-  document.querySelectorAll('.tab[data-sport="hockey"]').forEach(t=>{t.style.display=isHockey()?'':'none'});
+  document.querySelectorAll('.tab[data-sport="hockey"]').forEach(t=>{t.style.display=showHockey()?'':'none'});
   // Tiketti #35: Jahti-välilehti on rakennettu jalkapallon kertoimien varaan
   // (window.BTF.getSnapshot()) — piiloon jääkiekkotilassa, ei siirretty sinne.
-  document.querySelectorAll('.tab[data-sport="football"]').forEach(t=>{t.style.display=isHockey()?'none':''});
-  document.querySelector('.glass-header h1').innerHTML=(isHockey()?'🏒':'⚽')+' BetTracker <span class="demo-badge">'+(isHockey()?'JÄÄKIEKKO':'DEMO')+'</span>';
+  document.querySelectorAll('.tab[data-sport="football"]').forEach(t=>{t.style.display=showFootball()?'':'none'});
+  const lajiIkoni=SPORT==='both'?'🏒⚽':SPORT==='hockey'?'🏒':'⚽';
+  const lajiMerkki=SPORT==='both'?'MOLEMMAT':SPORT==='hockey'?'JÄÄKIEKKO':'JALKAPALLO';
+  document.querySelector('.glass-header h1').innerHTML=lajiIkoni+' BetTracker <span class="demo-badge">'+lajiMerkki+'</span>';
   // Seuranta on molemmilla lajeilla, mutta ikoni kertoo kummasta on kyse
   const tr=document.querySelector('.tab[data-tab="tracker"]');
-  if(tr)tr.textContent=(isHockey()?'🏒':'🏟️')+' Seuranta';
+  if(tr)tr.textContent=lajiIkoni+' Seuranta';
   // Jos aktiivinen välilehti piilotettiin, siirry Kierrokseen
   const active=document.querySelector('.tab.active');
   if(active&&active.style.display==='none')switchTab('round');
 }
 function setSport(sport){
   SPORT=sport;localStorage.setItem('bt_sport',sport);
-  toast(sport==='hockey'?'🏒 Jääkiekkokierrokset näkyvissä':'⚽ Jalkapallo käytössä');
+  toast(sport==='both'?'🏒⚽ Molemmat lajit näkyvissä':sport==='hockey'?'🏒 Jääkiekko näkyvissä':'⚽ Jalkapallo näkyvissä');
   // Koko sivun uudelleenlataus on tässä oikea ratkaisu: lajinvaihto muuttaa
   // sekä datalähteen että moduulien alustuksen, ja osittainen vaihto jättäisi
   // vanhaa tilaa roikkumaan.
