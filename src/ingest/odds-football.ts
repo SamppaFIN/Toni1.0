@@ -337,6 +337,8 @@ export async function ingestFootballOdds(options: IngestOptions = {}): Promise<F
   const sports = config.odds.footballSports;
   const results: FootballOddsEvent[] = [];
 
+  /** Sarjat joiden haku epaonnistui — raportoidaan lopussa */
+  const failed: string[] = [];
   let creditsSpent = 0;
   // Yksi pyyntö kuluttaa markkinat × alueet krediittiä
   const costPerRequest = config.odds.markets.split(',').length * config.odds.regions.split(',').length;
@@ -349,7 +351,40 @@ export async function ingestFootballOdds(options: IngestOptions = {}): Promise<F
       break;
     }
 
-    const { events, quota } = await fetchFootballOdds(sportKey);
+    // Tiketti #101: YHDEN SARJAN KAATUMINEN EI SAA TAPPAA KOKO PUTKEA.
+    //
+    // Aiemmin tama kutsu oli ilman virheenkasittelya. Kun Liigan haku palautti
+    // verkkotason virheen ("fetch failed"), koko snapshot jai julkaisematta --
+    // vaikka seitseman muun sarjan kertoimet oli jo haettu ja krediitit
+    // kaytetty. Yksi hetkellinen katkos maksoi siis kaiken.
+    //
+    // Verkkovirhe yritetaan KERRAN uudelleen, koska se on luonteeltaan
+    // hetkellinen. HTTP-virhetta (404, 401, kvootta) ei yriteta: se ei korjaannu
+    // toistamalla ja toinen yritys maksaisi toisen krediitin.
+    type HakuTulos = Awaited<ReturnType<typeof fetchFootballOdds>>;
+    let events: HakuTulos['events'] | null = null;
+    let quota: HakuTulos['quota'] | null = null;
+    for (let yritys = 1; yritys <= 2; yritys++) {
+      try {
+        const tulos = await fetchFootballOdds(sportKey);
+        events = tulos.events;
+        quota = tulos.quota;
+        break;
+      } catch (err) {
+        const viesti = (err as Error).message;
+        const verkkovirhe = /fetch failed|ECONNRESET|ETIMEDOUT|ENOTFOUND|socket/i.test(viesti);
+        if (verkkovirhe && yritys === 1) {
+          console.warn(`[Odds] ${leagueLabel(sportKey)}: verkkovirhe (${viesti}) — yritetään kerran uudelleen`);
+          await new Promise((r) => setTimeout(r, 2000));
+          continue;
+        }
+        console.warn(`[Odds] ${leagueLabel(sportKey)}: haku epäonnistui (${viesti}) — sarja ohitetaan`);
+        failed.push(sportKey);
+        break;
+      }
+    }
+    if (!events || !quota) continue;
+
     creditsSpent += quota.lastCost ?? costPerRequest;
     console.log(
       `[Odds] ${leagueLabel(sportKey)}: ${events.length} ottelua — kvootta jäljellä ${quota.remaining ?? '?'}, käytetty ${quota.used ?? '?'}`
@@ -386,6 +421,18 @@ export async function ingestFootballOdds(options: IngestOptions = {}): Promise<F
   }
 
   console.log(`[Odds] Yhteensä ${results.length} ottelua, ${creditsSpent} krediittiä käytetty`);
+
+  if (failed.length) {
+    console.warn(`[Odds] ${failed.length}/${sports.length} sarjan haku epäonnistui: ${failed.join(', ')}`);
+  }
+
+  // KAIKKIEN kaatuminen on eri asia kuin yhden: silloin vika ei ole yhdessa
+  // sarjassa vaan yhteydessa tai avaimessa, eika tyhjaa snapshottia pida
+  // julkaista hiljaa vanhan paalle.
+  if (failed.length === sports.length && sports.length > 0) {
+    throw new Error(`Kertoimien haku epäonnistui kaikille ${sports.length} sarjalle — tarkista avain ja verkkoyhteys`);
+  }
+
   return results;
 }
 
