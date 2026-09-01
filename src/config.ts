@@ -33,8 +33,14 @@ export const config = {
         'soccer_germany_bundesliga',
         'soccer_france_ligue_one',
         'soccer_efl_champ',
-        'soccer_netherlands_eredivisie',
+        // Eredivisie pudotettiin kun Liiga tuli mukaan (tiketti #90):
+        // 8 sarjaa x 2 ajoa x 30 pv = 480/500, yhdeksas ei mahtuisi.
+        // Valinta on datasta: Eredivisiella oli arkistossa vahiten
+        // otteluita (9) ja liputettuja kohteita (2). Ero Bundesliigaan oli
+        // kaytannossa olematon, joten tama on yhden rivin muutos jos
+        // haluat kaantaa sen toisin pain.
         'soccer_finland_veikkausliiga',
+        'icehockey_liiga',
       ].join(','))
       .split(',')
       .map((s) => s.trim())

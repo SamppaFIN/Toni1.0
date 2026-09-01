@@ -37,6 +37,13 @@ export interface LeagueDef {
   secondTier?: string | null;
   /** Kausityyppi vaikuttaa siihen mikä vuosi on "nykyinen kausi" */
   season: 'autumn-spring' | 'calendar';
+  /**
+   * Laji. Oletus on jalkapallo, koska 20 sarjaa 21:stä on sitä (tiketti #90).
+   *
+   * Laji ratkaisee minkä mallin ja minkä markkinan sarja saa: jääkiekossa
+   * maaliodottama on noin kaksinkertainen ja yli/alle-raja 5.5 eikä 2.5.
+   */
+  sport?: 'football' | 'hockey';
 }
 
 export const LEAGUES: LeagueDef[] = [
@@ -56,6 +63,12 @@ export const LEAGUES: LeagueDef[] = [
   // ── Kotimainen: tilastot Wikipediasta, kalenterikausi ──
   { sportKey: 'soccer_finland_veikkausliiga', name: 'Veikkausliiga', espn: 'fin.1', footballData: null, wikipedia: true, season: 'calendar' },
 
+  // ── Jääkiekko (tiketti #90) ──
+  // Liiga.fi-rajapinta antaa ottelut, tulokset ja tilastot ilmaiseksi
+  // (tiketti #2), joten ESPN:ää tai football-data.orgia ei tarvita.
+  // Kauden alun priori tulee kausiennakosta (tiketti #89).
+  { sportKey: 'icehockey_liiga', name: 'Liiga', espn: null, footballData: null, season: 'autumn-spring', sport: 'hockey' },
+
   // ── Sarjat joilla EI ole ilmaista tilastolähdettä ──
   // Malli jää market-only-tilaan, mutta Elo lasketaan ESPN-tuloksista ja
   // hintavertailu toimii normaalisti. Tämä on tarkoituksellinen degradaatio.
@@ -74,6 +87,11 @@ export const LEAGUES: LeagueDef[] = [
 ];
 
 const BY_KEY = new Map(LEAGUES.map((l) => [l.sportKey, l]));
+
+/** Sarjan laji. Tuntematon sarja tulkitaan jalkapalloksi — se on enemmisto. */
+export function sportOf(sportKey: string): 'football' | 'hockey' {
+  return leagueFor(sportKey)?.sport ?? 'football';
+}
 
 export function leagueFor(sportKey: string): LeagueDef | null {
   return BY_KEY.get(sportKey) ?? null;

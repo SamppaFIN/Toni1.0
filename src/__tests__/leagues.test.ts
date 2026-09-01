@@ -22,8 +22,20 @@ describe('Rekisterin eheys', () => {
     }
   });
 
-  it('sarjatunnisteet noudattavat The Odds APIn muotoa', () => {
-    for (const l of LEAGUES) expect(l.sportKey, l.name).toMatch(/^soccer_/);
+  it('sarjatunniste vastaa lajia — The Odds APIn muoto (tiketti #90)', () => {
+    // Rekisteri ei ole enaa yksilajinen. Etuliite ja `sport`-kentta eivat saa
+    // erota: vaara etuliite tarkoittaisi ettei kertoimia loydy lainkaan,
+    // ja se epaonnistuisi hiljaa ajossa eika tassa.
+    for (const l of LEAGUES) {
+      const odotettu = (l.sport ?? 'football') === 'hockey' ? /^icehockey_/ : /^soccer_/;
+      expect(l.sportKey, l.name).toMatch(odotettu);
+    }
+  });
+
+  it('jokainen laji on tuettu arvo', () => {
+    for (const l of LEAGUES) {
+      expect(['football', 'hockey', undefined], l.name).toContain(l.sport);
+    }
   });
 
   it('ESPN-koodit ovat uniikkeja — kaksi sarjaa ei voi osoittaa samaan', () => {
