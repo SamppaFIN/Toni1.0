@@ -10,6 +10,24 @@
 
 export const SCHEMA_VERSION = 1;
 
+// ─── Lajitila (tiketti #95, siirretty tänne #105) ─────────────────────────
+//
+// Alun perin football-cards.js:ssä. Siirretty tähän JOTTA myös
+// football-timeline.js voi lukea sen — se ei voi tuoda football-cards.js:ää,
+// koska football-cards.js jo tuo football-timeline.js:n (looginen syklinen
+// tuonti). snapshot.js on molempien yhteinen, syklitön riippuvuus.
+const SPORT_KEY = 'bt_sport';
+
+/** Nakyva laji: hockey | football | both. Oletus jaakiekko. */
+export function sportMode() {
+  try {
+    const v = localStorage.getItem(SPORT_KEY);
+    return v === 'football' || v === 'both' ? v : 'hockey';
+  } catch {
+    return 'hockey';
+  }
+}
+
 // ─── Datalähde: oikea vai harjoituskierrokset ─────────────────────────────
 // Tiketti #37. Harjoitustila lataa viisi valmiiksi generoitua kierrosta
 // (data/mock-rounds.json) ja tarjoilee niistä yhtä kerrallaan. Kaikki muu —
