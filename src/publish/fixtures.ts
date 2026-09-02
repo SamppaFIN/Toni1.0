@@ -141,8 +141,9 @@ export function parseFixtures(events: EspnEvent[], sportKey: string, now: Date):
   return out;
 }
 
-/** Sarjat joilla on ESPN:n sijaan oma otteluohjelmalahde (tiketti #85) */
+/** Sarjat joilla on ESPN:n sijaan oma otteluohjelmalahde (tiketti #85, #105) */
 const VEIKKAUSLIIGA = 'soccer_finland_veikkausliiga';
+const LIIGA = 'icehockey_liiga';
 
 /**
  * Veikkausliigan ottelut Palloliiton tulospalvelusta.
@@ -175,6 +176,54 @@ async function veikkausliigaFixtures(now: Date, from: Date, to: Date): Promise<F
       away_score: m.away_score,
       has_odds: false,
     }));
+}
+
+/**
+ * Liigan ottelut Liiga.fi:sta.
+ *
+ * `leagues.ts`:ssa icehockey_liiga:n espn-koodi on null — ESPN:lla ei ole
+ * SM-liigan otteluohjelmaa lainkaan (fin.1 kattaa vain Veikkausliigan).
+ * Ilman omaa lahdetta sarja putoaisi kalenterin `!league?.espn`-suodattimeen
+ * hiljaa, ja paivanavigointi nayttaisi vain niita paivia joille kertoimet
+ * sattuvat osumaan sen sijaan etta nayttaisi OIKEITA pelipaivia.
+ *
+ * fetchLiigaGames() palauttaa koko kauden, seka pelatut etta tulevat —
+ * sama funktio jota liiga-elo.ts ja liiga-reviews-build.ts jo kayttavat,
+ * yhdessa valimuistin kanssa (6 h).
+ */
+async function liigaFixtures(now: Date, from: Date, to: Date): Promise<FixtureMatch[]> {
+  const { fetchLiigaGames } = await import('../ingest/stats-liiga.js');
+  const games = await fetchLiigaGames(now);
+
+  const out: FixtureMatch[] = [];
+  for (const g of games) {
+    const home = g.homeTeam?.teamName?.trim();
+    const away = g.awayTeam?.teamName?.trim();
+    if (!g.id || !g.start || !home || !away) continue;
+
+    const kickoff = new Date(g.start).toISOString();
+    const t = Date.parse(kickoff);
+    if (t < from.getTime() || t > to.getTime()) continue;
+
+    out.push({
+      espn_id: `liiga-${g.id}`,
+      match_id: null,
+      date: kickoff.slice(0, 10),
+      kickoff,
+      sport_key: LIIGA,
+      league: leagueName(LIIGA),
+      home,
+      away,
+      // Liiga.fi ei erottele "kaynnissa"-tilaa yhdella kentalla samoin kuin
+      // ESPN; sama yksinkertaistus kuin Palloliiton lahteessa (#85).
+      status: g.ended ? 'finished' : 'upcoming',
+      home_score: g.ended ? (g.homeTeam?.goals ?? null) : null,
+      away_score: g.ended ? (g.awayTeam?.goals ?? null) : null,
+      has_odds: false,
+    });
+  }
+
+  return out;
 }
 
 async function fetchLeagueFixtures(espnCode: string, from: Date, to: Date): Promise<EspnEvent[]> {
@@ -329,7 +378,25 @@ export async function buildFixtures(publicDir: string, now = new Date()): Promis
   const to = new Date(now.getTime() + DAYS_FORWARD * 86_400_000);
 
   const all: FixtureMatch[] = [];
+
+  // Liiga haetaan AINA, riippumatta config.odds.footballSports-listasta
+  // (tiketti #105). Se lista maarittaa mista sarjoista kertoimet HAETAAN, ja
+  // sen sisalto vaihtelee: tuotannossa se on juuri nyt vain icehockey_liiga
+  // (#100, jalkapallo pois toistaiseksi), mutta kun jalkapallo palautetaan
+  // listaan, Liiga voi pudota siita pois eika kalenteri saisi enaa
+  // yhtaan ottelua. Kalenteri on ilmainen (Liiga.fi, ei kvoottaa), joten
+  // sita ei ole syyta sitoa kertoimien hakulistaan lainkaan.
+  try {
+    const own = await liigaFixtures(now, from, to);
+    all.push(...own);
+    console.log(`[Fixtures] ${leagueName(LIIGA)}: ${own.length} ottelua (Liiga.fi)`);
+  } catch (err) {
+    console.warn(`[Fixtures] ${leagueName(LIIGA)} epäonnistui: ${(err as Error).message}`);
+  }
+
   for (const sportKey of config.odds.footballSports) {
+    if (sportKey === LIIGA) continue; // haettu jo yllä, aina
+
     // Veikkausliigalla on oma lahde: ESPN ei anna siita mitaan
     if (sportKey === VEIKKAUSLIIGA) {
       const own = await veikkausliigaFixtures(now, from, to);

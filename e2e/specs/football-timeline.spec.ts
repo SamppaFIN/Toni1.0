@@ -9,7 +9,7 @@
 // ne hyppaavat OTTELUPAIVIIN eivatka kalenteripaiviin.
 
 import { test, expect, Page } from '@playwright/test';
-import { useFootball, resetState, useFixtureSnapshot } from '../helpers.js';
+import { useFootball, useHockey, resetState, useFixtureSnapshot, useLiigaFixture } from '../helpers.js';
 
 function ymd(offsetDays: number): string {
   const d = new Date();
@@ -58,6 +58,39 @@ function calendar() {
       match(2, 'Ylihuominen', 'Ottelu B', false, 'Serie A'),
       match(2, 'Ylihuominen', 'Ottelu C', false, 'Serie A'),
     ],
+  };
+}
+
+/**
+ * Kalenteri jossa on SEKÄ jalkapallo- että jääkiekko-otteluita samalla
+ * "tänään"-päivällä (tiketti #105).
+ *
+ * fixtures.json kattaa kaikki seuratut sarjat, ei vain yhtä lajia. Ilman
+ * lajisuodatusta jääkiekkotila laskisi mukaan myös jalkapallo-ottelut (ja
+ * päinvastoin) — juuri tämä testaa ettei niin käy.
+ */
+function mixedCalendar() {
+  const base = calendar();
+  const hockey = (offset: number, home: string, away: string) => ({
+    espn_id: `liiga-${home}-${away}`,
+    match_id: null,
+    date: ymd(offset),
+    kickoff: kickoff(offset),
+    sport_key: 'icehockey_liiga',
+    league: 'Liiga',
+    home,
+    away,
+    status: offset < 0 ? 'finished' : 'upcoming',
+    home_score: offset < 0 ? 3 : null,
+    away_score: offset < 0 ? 2 : null,
+    has_odds: false,
+  });
+
+  return {
+    ...base,
+    // days-kenttä ei enää ohjaa selainta (#105: se lasketaan matches:sta
+    // lajisuodatettuna), mutta pidetään mukana rakenteen validoinnin vuoksi.
+    matches: [...base.matches, hockey(0, 'Tappara', 'Ilves')],
   };
 }
 
@@ -238,10 +271,38 @@ test.describe('Päivänavigointi', () => {
     expect(await buttons(page).count()).toBe(5);
   });
 
-  test('navigointi on piilossa jaakiekkotilassa', async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem('bt_sport', 'hockey'));
+  // Tiketti #105: navigointi näkyy NYT myös jääkiekkotilassa ja laskee
+  // vain SM-liigan pelipäivät — se oli aiemmin piilossa kokonaan, koska
+  // jääkiekolla ei ollut omaa otteluohjelmalähdettä (fixtures.ts:n
+  // `espn: null` pudotti sarjan kalenterista, ks. src/publish/fixtures.ts).
+  test('jaakiekkotilassa navigointi nakyy ja laskee vain jaakiekkopaivat', async ({ page }) => {
+    // useLiigaFixture asettaa bt_sport='both' (nayttaakseen kortin
+    // molemmissa tiloissa) — useHockey pitaa rekisteroida SEN JALKEEN, jotta
+    // 'hockey' voittaa initScriptien suoritusjarjestyksessa.
+    await useLiigaFixture(page);
+    await useHockey(page);
+    await useCalendar(page, mixedCalendar());
     await page.goto('/demo.html');
-    await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
-    await expect(nav(page)).toHaveCount(0);
+
+    await expect(nav(page)).toBeVisible({ timeout: 10000 });
+    expect(await buttons(page).count()).toBe(5);
+
+    // "Tänään" sisältää mixedCalendar():ssa 2 jalkapallo-ottelua ja 1
+    // jääkiekko-ottelun — jääkiekkotilan laskurin pitää näyttää 1, ei 3.
+    const labels = await buttons(page).allInnerTexts();
+    expect(labels[2]).toContain('Tänään');
+    expect(labels[2]).toContain('1');
+  });
+
+  test('sama sekakalenteri: jalkapallotilassa laskuri jattaa jaakiekko-ottelun pois', async ({ page }) => {
+    await useCalendar(page, mixedCalendar());
+    await page.goto('/demo.html');
+
+    // Tässä tilassa "Tänään" on kaksi jalkapallo-ottelua (ks. calendar()),
+    // mixedCalendar():n jääkiekko-ottelu ei saa nostaa lukua kolmeen.
+    const labels = await buttons(page).allInnerTexts();
+    expect(labels[2]).toContain('Tänään');
+    expect(labels[2]).toContain('2');
+    expect(labels[2]).not.toContain('3');
   });
 });

@@ -24,7 +24,7 @@
 // näkyy otteluohjelmana kertoimellisten alla. Piilotettuna käyttäjä luulisi
 // ettei ottelua ole.
 
-import { esc } from './snapshot.js';
+import { esc, sportMode } from './snapshot.js';
 
 const SELECTED_KEY = 'bt_timeline_day';
 
@@ -133,9 +133,34 @@ export function getCalendar() {
   return calendar;
 }
 
-/** Valitun päivän ottelut kalenterista */
+// ─── Lajisuodatus (tiketti #105) ──────────────────────────────────────────
+//
+// fixtures.json sisältää KAIKKIEN seurattujen sarjojen ottelut, jalkapallon
+// ja jääkiekon. Ilman suodatusta jääkiekkotilan päivänavigointi näytti myös
+// pelkkiä jalkapallopäiviä pelipäivinä, koska calendar.days on palvelimella
+// laskettu koko kalenterista eikä lajikohtaisesti. Sama sekaannus toimisi
+// jalkapallotilassa toisin päin.
+
+/** Ottelut nykyisen lajitilan mukaan. "both" ei suodata. */
+function visibleMatches() {
+  const all = calendar?.matches ?? [];
+  const mode = sportMode();
+  if (mode === 'both') return all;
+  return all.filter((m) => (m.sport_key === 'icehockey_liiga') === (mode === 'hockey'));
+}
+
+/** Päivät joilla NÄKYVÄN LAJIN otteluita on — ei koko kalenterin päivät */
+function visibleDays() {
+  const byDate = new Map();
+  for (const m of visibleMatches()) byDate.set(m.date, (byDate.get(m.date) ?? 0) + 1);
+  return [...byDate.entries()]
+    .map(([date, matches]) => ({ date, matches }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/** Valitun päivän ottelut kalenterista, nykyisen lajin mukaan suodatettuna */
 export function matchesFor(date) {
-  return (calendar?.matches ?? []).filter((m) => m.date === date);
+  return visibleMatches().filter((m) => m.date === date);
 }
 
 /**
@@ -148,9 +173,9 @@ export function calendarMatch(matchId) {
   return (calendar?.matches ?? []).find((m) => m.match_id === matchId) ?? null;
 }
 
-/** Montako ottelua päivällä on — nappi kertoo sen pienellä */
+/** Montako NÄKYVÄN LAJIN ottelua päivällä on — nappi kertoo sen pienellä */
 function countFor(date) {
-  return calendar?.days?.find((d) => d.date === date)?.matches ?? 0;
+  return visibleDays().find((d) => d.date === date)?.matches ?? 0;
 }
 
 // ─── Renderöinti ──────────────────────────────────────────────────────────
@@ -182,8 +207,10 @@ function arrow(direction, target) {
  * vuorokauden kerrallaan ja pikavalinnat toimivat normaalisti.
  */
 export function renderNav(today = todayKey()) {
-  const selected = getSelectedDay() ?? nearestDay(calendar?.days, today) ?? today;
-  const days = calendar?.days;
+  // Lajisuodatetut päivät (#105) — muuten nuolet ja himmennys perustuisivat
+  // koko kalenteriin, ei siihen mitä ruudulla oikeasti näkyy.
+  const days = calendar ? visibleDays() : null;
+  const selected = getSelectedDay() ?? nearestDay(days, today) ?? today;
 
   const buttons = [
     arrow(-1, stepDay(selected, -1, days)),

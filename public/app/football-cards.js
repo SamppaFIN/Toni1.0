@@ -24,6 +24,7 @@ import {
   getDataSource,
   getMockRound,
   getMockRoundCount,
+  sportMode,
 } from './snapshot.js';
 import { isVisible } from './football-prefs.js';
 import * as calc from './football-calc.js';
@@ -44,8 +45,6 @@ import { hasReview, reviewSection } from './football-liiga-review.js';
 // — ne ovat toggle-napin takana, koska niiden analyysi on täysin validi,
 // vain ajankohta on eri.
 
-const SPORT_KEY = 'bt_sport';
-
 /**
  * Ottelun laji tunnisteesta (tiketti #95).
  *
@@ -56,16 +55,6 @@ const SPORT_KEY = 'bt_sport';
  */
 export function sportOfMatch(match) {
   return String(match?.id ?? '').startsWith('icehockey_') ? 'hockey' : 'football';
-}
-
-/** Nakyva laji: hockey | football | both. Oletus jaakiekko. */
-export function sportMode() {
-  try {
-    const v = localStorage.getItem(SPORT_KEY);
-    return v === 'football' || v === 'both' ? v : 'hockey';
-  } catch {
-    return 'hockey';
-  }
 }
 
 /**
