@@ -39,7 +39,7 @@ interface LiigaApiTeam {
   goals?: number;
 }
 
-interface LiigaApiGame {
+export interface LiigaApiGame {
   id?: number;
   season?: number;
   start?: string;
@@ -256,6 +256,17 @@ export function buildSeason(games: LiigaApiGame[], season: number): LeagueSeason
  * edelliseen kauteen — juuri se tilanne jota varten kausiennakon priori
  * (#89) on olemassa uusille joukkueille joilla ei ole edellistäkään.
  */
+/**
+ * Kauden ottelut raakamuodossa (tiketti #104).
+ *
+ * Elo-laskenta tarvitsee ottelut, ei tilastoja: se kayttaa jokaista tulosta
+ * jarjestyksessa eika kauden summia. Sama valimuisti kuin tilastoilla.
+ */
+export async function fetchLiigaGames(now = new Date()): Promise<LiigaApiGame[]> {
+  const year = seasonYear(now);
+  return cached(`liiga-games-${year}`, () => fetchGames(year), 6 * 3600_000);
+}
+
 export async function fetchLiigaStats(now = new Date()): Promise<LeagueStatsPair | null> {
   const year = seasonYear(now);
 

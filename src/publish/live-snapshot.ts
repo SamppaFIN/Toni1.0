@@ -117,8 +117,22 @@ export async function fetchEloMapFor(sportKey: string): Promise<EloLookup | null
   // TODO kun kausi etenee: siirry laskettuun Eloon (season-elo.ts) kun
   // pelattuja otteluita on riittavasti. Nyt niita ei ole yhtaan.
   if (sportKey === 'icehockey_liiga') {
-    const { priorEloMap } = await import('../analyze/liiga-priors.js');
-    return priorEloMap();
+    // Tiketti #104: kauden alussa Elo tuli pelkasta kausiennakosta, koska
+    // otteluita ei ollut. Nyt niita on, joten lahtoarvot paivitetaan
+    // toteutuneilla tuloksilla -- ja `change` kertoo vihdoin jotain:
+    // kuinka paljon joukkue on liikkunut siita mihin ennakko sen asetti.
+    //
+    // Haun pettaminen ei saa pudottaa Eloa kokonaan: silloin palataan
+    // pelkkiin ennakon lahtoarvoihin, mika on huonompi mutta ei tyhja.
+    try {
+      const { liigaEloMap } = await import('../analyze/liiga-elo.js');
+      const { fetchLiigaGames } = await import('../ingest/stats-liiga.js');
+      return liigaEloMap(await fetchLiigaGames());
+    } catch (err) {
+      console.warn(`[Elo] Liigan tulokset eivat saatavilla (${(err as Error).message}) — kaytetaan kausiennakon lahtoarvoja`);
+      const { priorEloMap } = await import('../analyze/liiga-priors.js');
+      return priorEloMap();
+    }
   }
   if (sportKey === VEIKKAUSLIIGA_KEY) return fetchSeasonEloMap();
   if (!hasEspnResults(sportKey)) return null;

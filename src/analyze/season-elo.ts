@@ -86,11 +86,34 @@ export function goalDifferenceMultiplier(goalDiff: number): number {
  */
 export function calculateSeasonElo(
   matches: SeasonMatch[],
-  options: { k?: number; homeAdvantage?: number; startingElo?: number } = {}
+  options: {
+    k?: number;
+    homeAdvantage?: number;
+    startingElo?: number;
+    /**
+     * JOUKKUEKOHTAINEN lahto-Elo (tiketti #104).
+     *
+     * Veikkausliigassa kaikki aloittavat samasta luvusta, koska mitaan
+     * ennakkotietoa ei kayteta. Liigassa lahtotaso tulee kausiennakosta
+     * (#89/#96): Tappara 1620, Jukurit 1380. Ilman tata kauden ensimmaiset
+     * kierrokset laskisivat Elon tyhjasta ja hukkaisivat sen ainoan
+     * lahtotiedon joka on olemassa.
+     *
+     * Avain on normalisoitu joukkuenimi. Puuttuva joukkue saa `startingElo`n.
+     *
+     * HUOM: nollasummaisuus ei enaa pade jos lahtoarvot eroavat -- summa
+     * sailyy, mutta se ei ole 17 x 1500. Testi tarkistaa sailymisen, ei
+     * absoluuttista arvoa.
+     */
+    startingElos?: Map<string, number>;
+    /** Nimien normalisointi lahtoarvokartan avaimiksi */
+    normalizeKey?: (team: string) => string;
+  } = {}
 ): SeasonEloResult {
   const k = options.k ?? DEFAULT_K;
   const homeAdvantage = options.homeAdvantage ?? HOME_ADVANTAGE;
   const startingElo = options.startingElo ?? STARTING_ELO;
+  const normalize = options.normalizeKey ?? ((t: string) => t);
 
   const elo = new Map<string, number>();
   const stats = new Map<string, Omit<EloRating, 'elo' | 'change'>>();
@@ -98,7 +121,7 @@ export function calculateSeasonElo(
 
   const ensure = (team: string) => {
     if (!elo.has(team)) {
-      elo.set(team, startingElo);
+      elo.set(team, options.startingElos?.get(normalize(team)) ?? startingElo);
       stats.set(team, { team, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0 });
       timeline.set(team, []);
     }
@@ -139,7 +162,17 @@ export function calculateSeasonElo(
   }
 
   const ratings: EloRating[] = [...stats.values()]
-    .map((s) => ({ ...s, elo: elo.get(s.team)!, change: elo.get(s.team)! - startingElo }))
+    // Tiketti #104: muutos mitataan JOUKKUEEN OMASTA lahtoarvosta.
+    //
+    // Aiemmin tassa oli kiintea `startingElo`, mika oli oikein niin kauan
+    // kuin kaikki aloittivat samasta luvusta. Joukkuekohtaisilla
+    // lahtoarvoilla (Liigan kausiennakko) se mittasi etaisyytta 1500:sta
+    // eika liiketta -- ja juuri liike on se mita kortilla halutaan nahda.
+    .map((s) => ({
+      ...s,
+      elo: elo.get(s.team)!,
+      change: elo.get(s.team)! - (options.startingElos?.get(normalize(s.team)) ?? startingElo),
+    }))
     .sort((a, b) => b.elo - a.elo);
 
   return { ratings, timeline, matchesProcessed: ordered.length };
