@@ -1,0 +1,112 @@
+# Tiketti #105: Jaakiekon kierrosarviointi omana ajastuksena
+#
+# MIKSI OMA WORKFLOW EIKA LISAVAIHE football-snapshot.yml:aan: se ajo hakee
+# kertoimet The Odds APIsta ja kuluttaa kvoottaa (#65). Kierrosarviointi ei
+# tarvitse uusia kertoimia — se lukee jo committoidun odds-history.json:in ja
+# hakee Liiga.fi:n TULOKSET, jotka ovat ilmaisia. Kolmas ajo paivassa samassa
+# workflow'ssa olisi vienyt kvootan 480:sta 720:aan kuukaudessa (yli 500:n
+# ilmaisrajan). Erillinen workflow ajaa vain sen mika on ilmaista.
+#
+# AJASTUS: pelipaivan iltana klo 21.15 Suomen aikaa, kun runkosarjan ottelut
+# (alkavat yleensa 18.30) ovat paattyneet. GitHub Actionsin cron on AINA UTC,
+# eika Europe/Helsinki-ajastusta voi antaa suoraan.
+#
+#   18:15 UTC = 21:15 EEST (kesaaika, UTC+3) — TAMA AJASTUS, voimassa nyt
+#   18:15 UTC = 20:15 EET  (talviaika, UTC+2) — VAARIN talviaikaan!
+#
+# Suomen kesaaika paattyy lokakuun viimeisena sunnuntaina. Kun niin kay,
+# tama ajastus liukuu tuntia myohaisemmaksi kellonaikaan nahden — DST-
+# muunnos ei ole automaattinen GH Actionsissa (sama sudenkuoppa kuin #85:ssa,
+# jossa Helsinki-renderointia verrattiin raakaan UTC-lukuun). KORJAUS SILLOIN:
+# vaihda '15 18 * * *' -> '15 19 * * *'. EI ARVATA nyt, koska kausi on
+# viela kesaajassa.
+#
+# Ei vaadi salaisuuksia: Liiga.fi:n rajapinta on julkinen, eika odds-history
+# haeta uudelleen tassa ajossa.
+
+name: Jaakiekon kierrosarviointi
+
+on:
+  schedule:
+    - cron: '15 18 * * *' # 21:15 Suomen kesaaika — ks. yllaoleva DST-huomautus
+  workflow_dispatch: # manuaalinen ajo (mm. taannehtivien paivien taydennys)
+
+# Sama ryhma kuin football-snapshot.yml ja pages-deploy.yml: kaikki kolme
+# kirjoittavat gh-pages-haaraan, joten rinnakkaiset pushit konfliktoisivat.
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
+
+jobs:
+  liiga-reviews:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # fetch-depth: 0 — commit-vaihe tekee git reset --soft origin/main,
+      # sama syy kuin football-snapshot.yml:ssa.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Asenna riippuvuudet
+        run: npm ci --ignore-scripts
+
+      - name: Aja testit
+        run: npm test
+
+      - name: Arvioi jaakiekon paattyneet ottelut
+        run: npm run reviews:liiga
+
+      - name: Committoi data
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/data/liiga-reviews.json
+          if git diff --cached --quiet; then
+            echo "Data ei muuttunut — ei committia"
+          else
+            # Sama uudelleenyritys- ja no-rebase-periaate kuin
+            # football-snapshot.yml:ssa (#100, #102): generoitu tiedosto
+            # rakennetaan joka ajossa lahteista uudelleen, joten tuorein
+            # versio on aina oikea eika sita tarvitse yhdistaa.
+            JULKAISTU=0
+            for YRITYS in 1 2 3; do
+              git fetch origin main
+              git reset --soft origin/main
+              git add public/data/liiga-reviews.json
+              if git diff --cached --quiet; then
+                echo "Data vastaa jo mainia — ei committia"
+                JULKAISTU=1
+                break
+              fi
+              git commit -m "Data: jaakiekon kierrosarviointi [skip ci]"
+              if git push origin HEAD:main; then
+                echo "Data committoitu ja tyonnetty (yritys $YRITYS)"
+                JULKAISTU=1
+                break
+              fi
+              echo "::warning::Tyonto hylattiin (yritys $YRITYS) — main eteni, haetaan uudelleen"
+              sleep 3
+            done
+            if [ "$JULKAISTU" != "1" ]; then
+              echo "::error::Datan tyonto ei onnistunut kolmella yrityksella"
+              exit 1
+            fi
+          fi
+
+      - name: Deployaa GitHub Pagesiin
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
+          enable_jekyll: false
+          force_orphan: false
+          commit_message: 'Deploy: jaakiekon kierrosarviointi'
