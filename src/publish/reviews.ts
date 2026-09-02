@@ -29,8 +29,17 @@ import { FixturesFile } from './fixtures.js';
 
 const BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
 
-/** Varsinainen peliaika. Lisäaika lasketaan mukaan jos maaleja tulee sen jälkeen. */
+/**
+ * Varsinainen peliaika MINUUTTEINA. Lisäaika lasketaan mukaan jos maaleja
+ * tulee sen jälkeen.
+ *
+ * Oletus on jalkapallon 90. Jääkiekossa se on 60, ja funktiot ottavat sen
+ * parametrina (tiketti #105) — laji ei muuta logiikkaa, vain pituuden.
+ */
 export const FULL_TIME = 90;
+
+/** Jääkiekon varsinainen peliaika */
+export const HOCKEY_FULL_TIME = 60;
 /** Minuutti josta alkaen johtoasemassa oleminen lasketaan "loppuvaiheeksi" */
 export const LATE_GAME = 70;
 
@@ -124,9 +133,9 @@ export interface ReviewsFile {
  * asti kun ensimmäinen maali tulee. Loppuhetki on 90 tai viimeinen maali,
  * kumpi on myöhemmin — lisäajalla tehty maali ei saa jäädä nollan mittaiseksi.
  */
-export function leadingMinutes(goals: Goal[]): Record<MarketSide, number> {
+export function leadingMinutes(goals: Goal[], fullTime = FULL_TIME): Record<MarketSide, number> {
   const sorted = [...goals].sort((a, b) => a.minute - b.minute);
-  const end = Math.max(FULL_TIME, ...sorted.map((g) => g.minute));
+  const end = Math.max(fullTime, ...sorted.map((g) => g.minute));
   const out: Record<MarketSide, number> = { home: 0, draw: 0, away: 0 };
 
   let h = 0;
@@ -148,9 +157,9 @@ export function leadingMinutes(goals: Goal[]): Record<MarketSide, number> {
 }
 
 /** Viimeinen minuutti jolloin annettu kohde oli voimassa oleva lopputulos */
-export function lastLeadMinute(goals: Goal[], side: MarketSide): number | null {
+export function lastLeadMinute(goals: Goal[], side: MarketSide, fullTime = FULL_TIME): number | null {
   const sorted = [...goals].sort((a, b) => a.minute - b.minute);
-  const end = Math.max(FULL_TIME, ...sorted.map((g) => g.minute));
+  const end = Math.max(fullTime, ...sorted.map((g) => g.minute));
 
   let h = 0;
   let a = 0;
