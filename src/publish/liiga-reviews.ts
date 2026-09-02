@@ -44,6 +44,12 @@ export interface ClaimResult {
 }
 
 export interface LiigaMatchReview {
+  /**
+   * Liiga.fi-pohjainen oletustunniste. liiga-reviews-build.ts korvaa tämän
+   * kerroinhistorian match_id:llä (today.json:in korttitunniste) ennen
+   * kirjoitusta, jotta selain voi liittää arvion kortille suoralla
+   * merkkijonovertailulla.
+   */
   matchId: string;
   date: string;
   home: string;

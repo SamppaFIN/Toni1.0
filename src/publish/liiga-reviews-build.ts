@@ -77,7 +77,11 @@ export async function buildLiigaReviews(publicDir: string, now = new Date()): Pr
 
     const opening = t.points[0];
     const review = reviewGame(game, opening.model, opening.implied);
-    if (review) reviews.push(review);
+    // matchId korvataan kerroinhistorian omalla tunnisteella: se on sama
+    // muoto jota kortti kayttaa (today.json:in match.id), jolloin selain voi
+    // liittaa arvion kortille suoralla merkkijonovertailulla eika tarvitse
+    // toistaa nimien normalisointia asiakaspaassa.
+    if (review) reviews.push({ ...review, matchId: t.match_id });
   }
 
   console.log(`[LiigaReviews] ${hockeyTimelines.length} arkistoitua jaakiekko-ottelua kerroinhistoriassa · ${liitetty} liitetty paattyneeseen Liiga.fi-tulokseen`);

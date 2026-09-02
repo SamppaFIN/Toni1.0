@@ -31,6 +31,7 @@ import { archivedDay, toCardShape } from './football-archive.js';
 import { LEAGUE_CODES, fetchFixtures, ymd, fetchH2H } from './football-espn.js';
 import * as timeline from './football-timeline.js';
 import { serverArchiveDay } from './football-server-archive.js';
+import { hasReview, reviewSection } from './football-liiga-review.js';
 
 // ─── Päiväsuodatin (tiketti #46) ──────────────────────────────────────────
 //
@@ -1325,6 +1326,11 @@ const SECTIONS = {
   calc: { icon: '🔬', label: 'Laskenta', render: calcSection },
   factors: { icon: '🧮', label: 'Kerroinlaskuri', render: factorsSection },
   llm: { icon: '🤖', label: 'Kysy LLM:ltä', render: (match) => `<div id="${llmContainerId(match)}"></div>` },
+  // Tiketti #105: jälkiarvio näkyy vain päättyneille jääkiekko-otteluille
+  // joille cron on ehtinyt tuottaa data/liiga-reviews.json:in rivin.
+  // `available` lataa tiedoston tarvittaessa taustalla (hasReview) — se ei
+  // saa estää muiden napppien piirtymistä sillä välin kun lataus on kesken.
+  review: { icon: '🔍', label: 'Jälkiarvio', render: reviewSection, available: (m) => sportOfMatch(m) === 'hockey' && hasReview(m) },
 };
 
 /** Avoimet osiot pidetään muistissa, jotta uudelleenrenderöinti ei sulje niitä */
