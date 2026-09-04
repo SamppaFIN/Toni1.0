@@ -25,6 +25,7 @@ import * as metrics from './football-metrics.js';
 import { DISPLAY_OPTIONS, getPrefs, togglePref, resetPrefs } from './football-prefs.js';
 import * as teamsTable from './football-teams.js';
 import * as liveView from './football-live.js';
+import './hockey-live.js'; // rekisteroi window.BTHV — jaakiekon live-seuranta (Liiga.fi)
 import * as playedToday from './football-results.js';
 import './football-review.js'; // rekisteroi window.BTA
 import * as timeline from './football-timeline.js'; // rekisteroi window.BTL2

@@ -125,16 +125,27 @@ test.describe('Paivanapit molemmissa teemoissa (tiketti #66)', () => {
 });
 
 test.describe('Tyhjan sivun varakeino (regressio #60)', () => {
-  test('kierrosnakyma EI ole tyhja kun paivan ainoa ottelu on alkanut', async ({ page }) => {
+  // KAYTTAJAPALAUTE: paivasuodatin piilotti aiemmin myos KAYNNISSA OLEVAT
+  // ottelut (kickoff ohitettu = "alkanut"), mika tyhjensi kierrosnakyman
+  // lahes kokonaan kesken kierroksen. Suodatin tarkistaa nyt onko ottelu
+  // OIKEASTI PAATTYNYT (finalScore(), sama kuin #84:n "ratkennut"-badge) —
+  // kaynnissa oleva nakyy normaalisti. Varakeino testataan siis paattyneella
+  // ottelulla, ei pelkalla kickoffin ohituksella.
+  test('kierrosnakyma EI ole tyhja kun paivan ainoa ottelu on paattynyt', async ({ page }) => {
     await useFootball(page);
     await resetState(page);
 
-    // Fikstuuri levylta, kickoff tunti sitten -> ottelu on "alkanut"
+    // Fikstuuri levylta, kickoff kaksi tuntia sitten JA tulos tiedossa ->
+    // ottelu on OIKEASTI paattynyt, ei vain alkanut.
     const fixture = JSON.parse(
       readFileSync(new URL('../fixtures/snapshot-with-elo.json', import.meta.url), 'utf8')
     );
     fixture.generated_at = new Date().toISOString();
-    fixture.matches = [{ ...fixture.matches[0], kickoff: new Date(Date.now() - 3600_000).toISOString() }];
+    fixture.matches = [{
+      ...fixture.matches[0],
+      kickoff: new Date(Date.now() - 2 * 3600_000).toISOString(),
+      result: { home_score: 2, away_score: 1, outcome: 'home' },
+    }];
 
     await page.route('**/data/today.json', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) })
@@ -143,20 +154,46 @@ test.describe('Tyhjan sivun varakeino (regressio #60)', () => {
     await useIsolatedArchives(page);
     await page.goto('/demo.html');
 
-    // Paivasuodatin piilottaa alkaneet, mutta kun muuta ei ole, ne on
+    // Paivasuodatin piilottaa paattyneet, mutta kun muuta ei ole, ne on
     // naytettava merkittyna. Tyhja sivu on aina huonompi kuin vanhentunut
-    // kortti jonka vieressa lukee etta se on vanhentunut.
+    // kortti jonka vieressa lukee etta se on paattynyt.
     await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('#round-games')).toContainText('alkaneet');
+    await expect(page.locator('#round-games')).toContainText('päättyneet');
+  });
+
+  test('kaynnissa oleva ottelu nakyy normaalisti paalistalla, ei vain varakeinona', async ({ page }) => {
+    await useFootball(page);
+    await resetState(page);
+
+    const fixture = JSON.parse(
+      readFileSync(new URL('../fixtures/snapshot-with-elo.json', import.meta.url), 'utf8')
+    );
+    fixture.generated_at = new Date().toISOString();
+    // Kickoff ohitettu, EI tulosta -> kaynnissa, ei paattynyt
+    fixture.matches = [{ ...fixture.matches[0], kickoff: new Date(Date.now() - 20 * 60_000).toISOString() }];
+
+    await page.route('**/data/today.json', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) })
+    );
+    await useIsolatedArchives(page);
+    await page.goto('/demo.html');
+
+    const view = page.locator('#round-games');
+    await expect(view.locator('.card').first()).toBeVisible({ timeout: 10000 });
+    await expect(view).toContainText('alkanut');
+    // Kertoimet nakyvat (span) muttei klikattavina (button) — vedon
+    // lyominen alkaneeseen otteluun ei ole mahdollista
+    await expect(view.locator('span.bk-odds')).not.toHaveCount(0);
+    await expect(view.locator('button.bk-odds')).toHaveCount(0);
   });
 });
 
-test.describe('Alkanut ottelu jolla ON analyysi ei nayta vaarina "ei arkistoitu" (regressio)', () => {
+test.describe('Paattynyt ottelu jolla ON analyysi ei nayta vaarina "ei arkistoitu" (regressio)', () => {
   function ymd(d: Date): string {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
-  test('alkanut ottelu ei ilmesty Otteluohjelma-varakeinoon vaikka se on piilotettu paalistalta', async ({ page }) => {
+  test('paattynyt ottelu ei ilmesty Otteluohjelma-varakeinoon vaikka se on piilotettu paalistalta', async ({ page }) => {
     await useFootball(page);
     await resetState(page);
 
@@ -165,20 +202,26 @@ test.describe('Alkanut ottelu jolla ON analyysi ei nayta vaarina "ei arkistoitu"
     );
     fixture.generated_at = new Date().toISOString();
 
-    // Ottelu A: alkoi 10 min sitten -> suodattuu pois paalistalta ("alkanutta
-    // piilotettu"), mutta silla ON TAYSI ANALYYSI koska se on ihan tavallinen
-    // korttiolio samasta snapshotista.
-    const started = { ...fixture.matches[0], kickoff: new Date(Date.now() - 10 * 60_000).toISOString() };
+    // Ottelu A: paattyi 2h sitten (result asetettu) -> suodattuu pois
+    // paalistalta ("N paattynyt"), mutta silla ON TAYSI ANALYYSI koska se on
+    // ihan tavallinen korttiolio samasta snapshotista. Kaynnissa oleva EI
+    // enaa suodatu (ks. edellinen describe-lohko) — juuri paattynyt on nyt
+    // ainoa tapa saada ottelu pois paalistalta.
+    const finished = {
+      ...fixture.matches[0],
+      kickoff: new Date(Date.now() - 2 * 3600_000).toISOString(),
+      result: { home_score: 2, away_score: 1, outcome: 'home' },
+    };
     // Ottelu B: alkaa 2h paasta -> nakyy normaalisti paalistalla.
     const upcoming = { ...fixture.matches[1], kickoff: new Date(Date.now() + 2 * 3600_000).toISOString() };
-    fixture.matches = [started, upcoming];
+    fixture.matches = [finished, upcoming];
 
     const today = ymd(new Date());
     await page.route('**/data/today.json', (route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) })
     );
     // fixtures.json TUNTEE molemmat ottelut (has_odds: true) — juuri tama
-    // aiemmin sai alkaneen ottelun nakymaan "ei arkistoitu"-varakeinossa,
+    // aiemmin sai paattyneen ottelun nakymaan "ei arkistoitu"-varakeinossa,
     // koska knownIds rakennettiin vain NAKYVASTA listasta.
     await page.route('**/data/fixtures.json', (route) =>
       route.fulfill({
@@ -188,9 +231,9 @@ test.describe('Alkanut ottelu jolla ON analyysi ei nayta vaarina "ei arkistoitu"
           schema_version: 1,
           generated_at: new Date().toISOString(),
           range: { from: today, to: today },
-          days: [{ date: today, matches: 2, with_odds: 2, leagues: [started.league, upcoming.league] }],
+          days: [{ date: today, matches: 2, with_odds: 2, leagues: [finished.league, upcoming.league] }],
           matches: [
-            { espn_id: 'a', match_id: started.id, date: today, kickoff: started.kickoff, sport_key: 'soccer_epl', league: started.league, home: started.home.name, away: started.away.name, status: 'upcoming', home_score: null, away_score: null, has_odds: true },
+            { espn_id: 'a', match_id: finished.id, date: today, kickoff: finished.kickoff, sport_key: 'soccer_epl', league: finished.league, home: finished.home.name, away: finished.away.name, status: 'upcoming', home_score: null, away_score: null, has_odds: true },
             { espn_id: 'b', match_id: upcoming.id, date: today, kickoff: upcoming.kickoff, sport_key: 'soccer_finland_veikkausliiga', league: upcoming.league, home: upcoming.home.name, away: upcoming.away.name, status: 'upcoming', home_score: null, away_score: null, has_odds: true },
           ],
         }),
@@ -202,11 +245,11 @@ test.describe('Alkanut ottelu jolla ON analyysi ei nayta vaarina "ei arkistoitu"
     await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
 
     const view = page.locator('#round-games');
-    // Nakyvissa vain alkamaton ottelu, ja piilotus sanotaan aakisesti
+    // Nakyvissa vain paattymaton ottelu, ja piilotus sanotaan aakisesti
     await expect(view).toContainText(upcoming.home.name);
-    await expect(view).toContainText('1 alkanutta piilotettu');
+    await expect(view).toContainText('1 päättynyt');
 
-    // ALKANUT OTTELU EI SAA ILMESTYA "ei arkistoitu"-varakeinoon: sille ON
+    // PAATTYNYT OTTELU EI SAA ILMESTYA "ei arkistoitu"-varakeinoon: sille ON
     // analyysi, se on vain piilotettu toisesta syysta.
     await expect(view).not.toContainText('analyysia ei ole arkistoitu');
     await expect(view).not.toContainText('Otteluohjelma');

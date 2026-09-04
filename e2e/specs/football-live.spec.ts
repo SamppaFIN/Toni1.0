@@ -5,7 +5,7 @@
 // renderointi, elinkaari ja virhetila.
 
 import { test, expect } from '@playwright/test';
-import { useFootball, resetState, useFixtureSnapshot, fixtureSnapshot, useSimulation } from '../helpers.js';
+import { useFootball, useHockey, resetState, useFixtureSnapshot, fixtureSnapshot, useSimulation, useLiigaFixture } from '../helpers.js';
 
 const SCOREBOARD = {
   events: [
@@ -113,11 +113,100 @@ test.describe('Live-seuranta', () => {
     await expect(page.locator('#live-content')).toContainText('Live-tilanne', { timeout: 10000 });
   });
 
-  test('live-osio on piilossa jaakiekkotilassa', async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem('bt_sport', 'hockey'));
+});
+
+// Jaakiekon live-seuranta (Liiga.fi, ei ESPN — ESPN ei kata SM-liigaa).
+// Aiemmin taalla oli testi "live-osio on piilossa jaakiekkotilassa": se oli
+// oikein SILLOIN, koska jaakiekolla ei ollut omaa live-lahdetta lainkaan.
+// Nyt on, joten osio EI saa olla piilossa — sen pitaa nayttaa Liiga.fi-data.
+function liigaGame(overrides: Record<string, unknown> = {}) {
+  return {
+    id: 2701282,
+    start: new Date(Date.now() - 20 * 60_000).toISOString(),
+    homeTeam: {
+      teamName: 'KalPa', goals: 2, powerplayInstances: 3, powerplayGoals: 1,
+      shortHandedInstances: 1, shortHandedGoals: 0, expectedGoals: 1.8,
+      goalEvents: [
+        { scorerPlayer: { firstName: 'Teemu', lastName: 'Testaaja' }, assistantPlayers: [{ firstName: 'Ari', lastName: 'Apuri' }], gameTime: 344, period: 1, homeTeamScore: 1, awayTeamScore: 0, goalTypes: ['YV'] },
+        { scorerPlayer: { firstName: 'Kalle', lastName: 'Kakkonen' }, assistantPlayers: [], gameTime: 900, period: 1, homeTeamScore: 2, awayTeamScore: 1, goalTypes: [] },
+      ],
+    },
+    awayTeam: {
+      teamName: 'Jukurit', goals: 1, powerplayInstances: 2, powerplayGoals: 0,
+      shortHandedInstances: 3, shortHandedGoals: 1, expectedGoals: 1.1,
+      goalEvents: [
+        { scorerPlayer: { firstName: 'Ville', lastName: 'Vieras' }, assistantPlayers: [], gameTime: 600, period: 1, homeTeamScore: 1, awayTeamScore: 1, goalTypes: [] },
+      ],
+    },
+    periods: [
+      { index: 1, homeTeamGoals: 2, awayTeamGoals: 1, category: 'NORMAL', startTime: 0, endTime: 1200 },
+      { index: 2, homeTeamGoals: 0, awayTeamGoals: 0, category: 'NORMAL', startTime: 1200, endTime: 2400 },
+      { index: 3, homeTeamGoals: 0, awayTeamGoals: 0, category: 'NORMAL', startTime: 2400, endTime: 3600 },
+    ],
+    finishedType: 'ACTIVE_OR_NOT_STARTED',
+    started: true,
+    ended: false,
+    gameTime: 965,
+    currentPeriod: 1,
+    ...overrides,
+  };
+}
+
+async function stubLiiga(page: any, games: unknown[]) {
+  await page.route('**/liiga.fi/api/v2/games**', (route: any) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(games) })
+  );
+}
+
+test.describe('Jaakiekon live-seuranta (Liiga.fi)', () => {
+  test.beforeEach(async ({ page }) => {
+    await useLiigaFixture(page); // asettaa bt_sport='both' — useHockey rekisteroidaan jalkeen ja voittaa
+    await useHockey(page);
+    await resetState(page);
+  });
+
+  test('nayttaa tilanteen, eran ja erikoistilanteet', async ({ page }) => {
+    await stubLiiga(page, [liigaGame()]);
     await page.goto('/demo.html');
     await page.click('.tab[data-tab="tracker"]');
-    await expect(page.locator('#live-content')).toBeHidden();
+
+    const live = page.locator('#live-content');
+    await expect(live).toContainText('KalPa', { timeout: 10000 });
+    await expect(live).toContainText('2 – 1');
+    await expect(live).toContainText('1. erä');
+    await expect(live).toContainText('Ylivoimaa');
+    await expect(live).toContainText('Teemu Testaaja');
+    await expect(live).toContainText('Ari Apuri');
+  });
+
+  test('paattynyt ottelu ei kysele lisaa eika nayta kello-badgea kaynnissa-tekstilla', async ({ page }) => {
+    await stubLiiga(page, [liigaGame({ ended: true, started: true, gameTime: 3600, currentPeriod: 3 })]);
+    await page.goto('/demo.html');
+    await page.click('.tab[data-tab="tracker"]');
+
+    const live = page.locator('#live-content');
+    await expect(live).toContainText('päättynyt', { timeout: 10000 });
+  });
+
+  test('Liiga.fi-virhe nakyy tekstina eika kaada nakymaa', async ({ page }) => {
+    await page.route('**/liiga.fi/api/v2/games**', (route: any) => route.fulfill({ status: 500, body: '' }));
+    await page.goto('/demo.html');
+    await page.click('.tab[data-tab="tracker"]');
+    // Live-virhe ei saa kaataa muuta nakymaa -- otsikko nakyy silti
+    await expect(page.locator('#live-content')).toContainText('Live-tilanne', { timeout: 10000 });
+    await expect(page.locator('#live-content')).toContainText('⚠️');
+  });
+
+  test('jalkapallotilassa jaakiekon live-osio pysyy tyhjana', async ({ page }) => {
+    await stubLiiga(page, [liigaGame()]);
+    await stubEspn(page, { fail: true }); // ei liity tahan testiin, mutta ei saa jaada verkkoon roikkumaan
+    await useFootball(page);
+    await resetState(page);
+    await useFixtureSnapshot(page);
+    await page.goto('/demo.html');
+    await page.click('.tab[data-tab="tracker"]');
+    await expect(page.locator('#live-content')).toContainText('Live-tilanne', { timeout: 10000 });
+    await expect(page.locator('#live-content')).not.toContainText('KalPa');
   });
 });
 
