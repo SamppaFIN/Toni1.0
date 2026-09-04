@@ -1638,7 +1638,7 @@ export function renderAllCards() {
   const fellBackToStarted = mode === 0 && upcoming.length === 0 && all.length > 0;
   const visible = fellBackToStarted ? all : upcoming;
 
-  renderMatchList(visible, { mode, day, total: all.length, fellBackToStarted });
+  renderMatchList(visible, { mode, day, total: all.length, fellBackToStarted, allIds: all.map((m) => m.id) });
 }
 
 /**
@@ -1681,7 +1681,7 @@ function dayNav() {
 
 /** Yhteinen renderöinti kaikille päivänäkymille */
 function renderMatchList(list, opts = {}) {
-  const { practice = false, mode = 0, day = null, total = list.length, fellBackToStarted = false } = opts;
+  const { practice = false, mode = 0, day = null, total = list.length, fellBackToStarted = false, allIds = null } = opts;
 
   // Value-kohteet ensin, sitten aikajärjestyksessä — käyttäjä näkee löydöt heti
   const ordered = [...list].sort((a, b) => {
@@ -1753,7 +1753,15 @@ function renderMatchList(list, opts = {}) {
   // Ne EIVÄT ole kortteja vaan pelkkä lista — kertoimeton ottelu ei ole
   // vedonlyöntikohde, mutta sen piilottaminen saisi näyttämään siltä ettei
   // ottelua ole.
-  const knownIds = new Set(ordered.map((m) => m.id));
+  //
+  // KORJAUS: `ordered` on vain NÄKYVÄ lista, ei kaikki päivän ottelut —
+  // alkanut mutta ei vielä päättynyt ottelu suodattuu siitä pois (yllä,
+  // "alkanutta piilotettu"). Jos knownIds rakennettaisiin pelkästä
+  // `ordered`:sta, juuri alkanut ottelu jolla ON täysi analyysi näyttäytyisi
+  // täällä väärin "kertoimet haettu mutta analyysia ei arkistoitu" -tekstillä,
+  // vaikka analyysi on olemassa — se on vain piilotettu toisesta syystä.
+  // `allIds` (kaikki päivän ottelut, myös alkaneet) korjaa tämän.
+  const knownIds = new Set(allIds ?? ordered.map((m) => m.id));
   const alsoToday = practice || !day ? '' : timeline.renderDayFixtures(day, knownIds);
 
   container.innerHTML =
