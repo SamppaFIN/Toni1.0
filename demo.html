@@ -326,8 +326,11 @@ a.bk-link:hover,a.bk-link:focus-visible{color:var(--c-accent)}
 </div>
 <div id="tracker" class="view">
   <!-- Tiketti #55: oikea live-tilanne ENNEN simulaatiota. Simulaatio on
-       harjoittelua, tama on totta - jarjestys kertoo kumpi on kumpi. -->
-  <div id="live-content" data-sport="football" style="margin-bottom:10px"></div>
+       harjoittelua, tama on totta - jarjestys kertoo kumpi on kumpi.
+       Sama kontti molemmille lajeille: window.BTV (jalkapallo, ESPN) ja
+       window.BTHV (jaakiekko, Liiga.fi) kirjoittavat siihen SPORT-lipun
+       mukaan (ks. switchTab), ei molempia yhta aikaa. -->
+  <div id="live-content" style="margin-bottom:10px"></div>
   <!-- Tiketti #78: piilossa oletuksena. Nakyvyys tulee Admin-valilehden
        Simulaatio-togglesta (bt_display_prefs.sim). Nappi on DOM:issa aina,
        jotta jaakiekon oma logiikka ja testit loytavat sen -- vain
@@ -2083,6 +2086,7 @@ function switchTab(name){
   if(name==='history'&&window.BTA&&!isHockey())window.BTA.render();
   if(name==='history'&&window.BTRV&&!isHockey())window.BTRV.load();
   if(window.BTV){if(name==='tracker'&&!isHockey())window.BTV.activate();else window.BTV.stop()}
+  if(window.BTHV){if(name==='tracker'&&isHockey())window.BTHV.activate();else window.BTHV.stop()}
 }
 function renderAll(){renderRound();renderSlip();renderTracker();renderHistory();renderTeams();renderInfo();renderAdmin();updateBankroll();updateSlipBadge()}
 

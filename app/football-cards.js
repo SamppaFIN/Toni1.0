@@ -351,10 +351,13 @@ function oddsTable(match, index) {
 
   const head = `<div class="odds-row odds-head"><span>Toimisto</span><span>1</span><span>X</span><span>2</span></div>`;
 
-  // Arkistoitu ottelu on jo pelattu: hinta nayteta&auml;n historiana muttei
-  // klikattavana. Vedon lyominen menneeseen otteluun ei ole mahdollista, ja
-  // klikattava nappi lupaisi jotain mita ei voi tehda.
-  const historic = Boolean(match.fromArchive);
+  // Arkistoitu TAI alkanut ottelu: hinta nayteta&auml;n historiana muttei
+  // klikattavana. Vedon lyominen mahdottomaan otteluun ei ole mahdollista, ja
+  // klikattava nappi lupaisi jotain mita ei voi tehda. Kortti itse pysyy
+  // nakyvissa kickoffin ylitse (kayttaja halusi koko kierroksen nakyviin,
+  // ks. renderRound()) mutta ei enaa tarjoa vanhentunutta hintaa klikattavaksi.
+  const kickoffPassed = Number.isFinite(Date.parse(match.kickoff)) && Date.parse(match.kickoff) < Date.now();
+  const historic = Boolean(match.fromArchive) || kickoffPassed;
   const edgeBySide = new Map(match.analysis.edges.map((e) => [e.side, e]));
   const probs = modelProbBySide(match);
 
@@ -387,7 +390,7 @@ function oddsTable(match, index) {
             : '',
           ev == null ? '' : `odotusarvo ${ev > 0 ? '+' : ''}${(ev * 100).toFixed(1)} % · ${edgeLabel(ev)}`,
           ev != null && ev > EV_CANDIDATE && !flag ? stakeGateNote(snapshotEdge, isBest) : '',
-          historic ? 'arkistoitu hinta' : '',
+          historic ? (match.fromArchive ? 'arkistoitu hinta' : 'ottelu on alkanut — kerroin vanhentunut') : '',
         ]
           .filter(Boolean)
           .join('\n');
@@ -1388,8 +1391,6 @@ function sectionButtons(match, index) {
   return `<div style="display:flex;gap:4px;margin-top:8px">${buttons}</div>${body}`;
 }
 
-function matchCard(match, index) {
-  const best = bestEdge(match);
 /**
  * Ottelun lopputulos jos se on tiedossa (tiketti #84).
  *
@@ -1400,6 +1401,11 @@ function matchCard(match, index) {
  *   1. palvelinarkiston `result` — tulee odds-history.json:ista
  *   2. kalenterin pistemaara    — ESPN:n otteluohjelmasta
  * Ensimmainen voittaa koska se on jo tulkittu lopputulokseksi (1X2).
+ *
+ * MODUULITASOLLA (ei matchCard():n sisalla): renderRound()-tyylinen
+ * paivalistan suodatus tarvitsee taman myos, jotta "kaynnissa oleva ottelu
+ * pysyy nakyvissa" -paatos kayttaa samaa "onko oikeasti paattynyt"
+ * -tarkistusta kuin kortin oma "ratkennut"-badge.
  */
 function finalScore(match) {
   const r = match.result;
@@ -1414,6 +1420,9 @@ function finalScore(match) {
   }
   return null;
 }
+
+function matchCard(match, index) {
+  const best = bestEdge(match);
 
   const flag = best && best.flag !== 'none' ? FLAG_META[best.flag] : null;
   const flagBadge = flag
@@ -1621,16 +1630,21 @@ export function renderAllCards() {
 
   const all = [...byId.values()].sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff));
 
-  // Tänään: alkaneet pois toimintalistalta (ne näkyvät "Tänään pelatut"
-  // -osiossa). Menneet ja tulevat päivät näytetään kokonaan.
-  // Tanaan: alkaneet pois toimintalistalta (ne nakyvat "Tanaan pelatut"
-  // -osiossa). Menneet ja tulevat paivat naytetaan kokonaan.
-  const upcoming = mode === 0 ? all.filter((m) => Date.parse(m.kickoff) >= Date.now() || m.fromArchive) : all;
+  // Tänään: PÄÄTTYNEET pois toimintalistalta (ne näkyvät "Tänään pelatut"
+  // -osiossa) — mutta KÄYNNISSÄ OLEVAT JÄÄVÄT NÄKYVIIN. Aiemmin suodatin oli
+  // kickoff-pohjainen ("alkanut" = ohitettu kickoff), mikä tyhjensi listan
+  // kesken kierroksen: kolme neljästä päivän ottelusta oli alkanut ja vain
+  // yksi näkyi, vaikka kaikki kolme olivat vielä käynnissä. Käyttäjä halusi
+  // koko kierroksen näkyviin vaikka osa on käynnissä — juuri sitä varten
+  // Seuranta-välilehden live-osio (window.BTV/BTHV) nyt on.
+  //
+  // finalScore() (sama funktio jota #84:n "ratkennut"-badge käyttää) kertoo
+  // onko ottelu OIKEASTI päättynyt, ei pelkkää kickoffin ohitusta.
+  const upcoming = mode === 0 ? all.filter((m) => !finalScore(m) || m.fromArchive) : all;
 
   // VARAKEINO: jos suodatus ei jata mitaan mutta naytettavaa olisi, naytetaan
-  // alkaneet merkittyna. Alkaneen piilottaminen on oikein niin kauan kuin
-  // muuta on jaljella -- tyhja sivu on aina huonompi kuin vanhentunut kortti
-  // jonka vieressa lukee etta se on vanhentunut.
+  // paattyneet merkittyna. Tyhja sivu on aina huonompi kuin vanhentunut
+  // kortti jonka vieressa lukee etta se on paattynyt.
   //
   // Tama logiikka oli olemassa ennen tiketin #60 refaktorointia ja katosi
   // siina. Seuraus: kun paivan ainoa ottelu oli alkanut, koko kierrosnakyma
@@ -1699,8 +1713,8 @@ function renderMatchList(list, opts = {}) {
 
   const notes = [];
   if (archived) notes.push(`${archived} arkistosta — kertoimet ovat historiaa, vetoa ei voi enää lyödä`);
-  if (fellBackToStarted) notes.push('⚠️ paivan ottelut ovat alkaneet — kertoimet ovat vanhentuneet');
-  else if (mode === 0 && total > list.length) notes.push(`${total - list.length} alkanutta piilotettu`);
+  if (fellBackToStarted) notes.push('⚠️ päivän ottelut ovat päättyneet — kertoimet ovat vanhentuneet');
+  else if (mode === 0 && total > list.length) notes.push(`${total - list.length} päättynyt, katso "Tänään pelatut"`);
 
   const summary = `<div style="font-size:.65rem;color:var(--c-text-muted);margin:0 0 8px 2px">
     <b style="color:var(--c-text)">${list.length}</b> ottelua ·
