@@ -150,3 +150,65 @@ test.describe('Tyhjan sivun varakeino (regressio #60)', () => {
     await expect(page.locator('#round-games')).toContainText('alkaneet');
   });
 });
+
+test.describe('Alkanut ottelu jolla ON analyysi ei nayta vaarina "ei arkistoitu" (regressio)', () => {
+  function ymd(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  test('alkanut ottelu ei ilmesty Otteluohjelma-varakeinoon vaikka se on piilotettu paalistalta', async ({ page }) => {
+    await useFootball(page);
+    await resetState(page);
+
+    const fixture = JSON.parse(
+      readFileSync(new URL('../fixtures/snapshot-with-elo.json', import.meta.url), 'utf8')
+    );
+    fixture.generated_at = new Date().toISOString();
+
+    // Ottelu A: alkoi 10 min sitten -> suodattuu pois paalistalta ("alkanutta
+    // piilotettu"), mutta silla ON TAYSI ANALYYSI koska se on ihan tavallinen
+    // korttiolio samasta snapshotista.
+    const started = { ...fixture.matches[0], kickoff: new Date(Date.now() - 10 * 60_000).toISOString() };
+    // Ottelu B: alkaa 2h paasta -> nakyy normaalisti paalistalla.
+    const upcoming = { ...fixture.matches[1], kickoff: new Date(Date.now() + 2 * 3600_000).toISOString() };
+    fixture.matches = [started, upcoming];
+
+    const today = ymd(new Date());
+    await page.route('**/data/today.json', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) })
+    );
+    // fixtures.json TUNTEE molemmat ottelut (has_odds: true) — juuri tama
+    // aiemmin sai alkaneen ottelun nakymaan "ei arkistoitu"-varakeinossa,
+    // koska knownIds rakennettiin vain NAKYVASTA listasta.
+    await page.route('**/data/fixtures.json', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          schema_version: 1,
+          generated_at: new Date().toISOString(),
+          range: { from: today, to: today },
+          days: [{ date: today, matches: 2, with_odds: 2, leagues: [started.league, upcoming.league] }],
+          matches: [
+            { espn_id: 'a', match_id: started.id, date: today, kickoff: started.kickoff, sport_key: 'soccer_epl', league: started.league, home: started.home.name, away: started.away.name, status: 'upcoming', home_score: null, away_score: null, has_odds: true },
+            { espn_id: 'b', match_id: upcoming.id, date: today, kickoff: upcoming.kickoff, sport_key: 'soccer_finland_veikkausliiga', league: upcoming.league, home: upcoming.home.name, away: upcoming.away.name, status: 'upcoming', home_score: null, away_score: null, has_odds: true },
+          ],
+        }),
+      })
+    );
+    await page.route('**/data/odds-history.json', (route) => route.fulfill({ status: 404 }));
+
+    await page.goto('/demo.html');
+    await expect(page.locator('#round-games .card').first()).toBeVisible({ timeout: 10000 });
+
+    const view = page.locator('#round-games');
+    // Nakyvissa vain alkamaton ottelu, ja piilotus sanotaan aakisesti
+    await expect(view).toContainText(upcoming.home.name);
+    await expect(view).toContainText('1 alkanutta piilotettu');
+
+    // ALKANUT OTTELU EI SAA ILMESTYA "ei arkistoitu"-varakeinoon: sille ON
+    // analyysi, se on vain piilotettu toisesta syysta.
+    await expect(view).not.toContainText('analyysia ei ole arkistoitu');
+    await expect(view).not.toContainText('Otteluohjelma');
+  });
+});
