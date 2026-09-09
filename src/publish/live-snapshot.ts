@@ -66,6 +66,25 @@ export async function fetchSeasonEloMap(): Promise<EloLookup> {
 }
 
 /**
+ * Liigan Elon lahdemerkinta.
+ *
+ * Luku syntyy KAHDESTA lahteesta perakkain: kausiennakko antaa lahtoarvon
+ * (#103) ja pelatut ottelut siirtavat sita siita eteenpain (#104). Kumpi
+ * tilanne on kasilla, ei ole kosmetiikkaa — lahdelistan koko tarkoitus on
+ * etta luvun voi jaljittaa, ja "lahto-Elo" vaittaa ettei yhtaan ottelua ole
+ * viela vaikuttanut siihen.
+ *
+ * `change` on nimenomaan se siirtyma ennakon lahtoarvosta, joten nollasta
+ * poikkeava muutos kertoo etta tuloksia on luettu. Kauden avauskierroksella
+ * ja tuloshaun kaatuessa (jolloin palataan pelkkiin ennakon lukuihin) kaikki
+ * muutokset ovat nollia ja merkinta sanoo sen suoraan.
+ */
+export function liigaEloProvider(elo: EloLookup): string {
+  const updated = [...elo.values()].some((r) => r.change !== 0);
+  return `${previewSource().name}${updated ? ' + toteutuneet tulokset (Elo)' : ' (lahto-Elo)'}`;
+}
+
+/**
  * Aggressiivinen nimennormalisointi ESPN-sarjoille (tiketti #57).
  *
  * Kolme lähdettä kirjoittaa saman joukkueen eri tavoin:
@@ -405,7 +424,8 @@ export async function buildLiveSnapshot(options: BuildLiveOptions = {}) {
   if ([...eloByLeague.keys()].some((k) => k !== VEIKKAUSLIIGA_KEY && k !== 'icehockey_liiga')) {
     providers.push('ESPN (tulokset & Elo)');
   }
-  if (eloByLeague.has('icehockey_liiga')) providers.push(`${previewSource().name} (lahto-Elo)`);
+  const liigaElo = eloByLeague.get('icehockey_liiga');
+  if (liigaElo) providers.push(liigaEloProvider(liigaElo));
   for (const pair of statsByLeague.values()) {
     if (pair && !providers.includes(pair.current.source)) providers.push(pair.current.source);
   }
