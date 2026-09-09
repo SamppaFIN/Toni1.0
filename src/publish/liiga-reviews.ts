@@ -84,6 +84,26 @@ export function goalMinute(gameTimeSeconds: unknown): number | null {
 }
 
 /**
+ * HYLÄTTY maali. `goalEvents` sisältää myös maalit joita EI hyväksytty:
+ * videotarkistuksessa kumottu (VT0) ja torjuttu rangaistuslaukaus (RL0).
+ * Ne on merkitty tyyppikoodin 0-päätteellä, ja juokseva pistetilanne
+ * tapahtumassa pysyy ennallaan.
+ *
+ * Ilman tätä suodatusta aikajana keksii maalin jota ei tehty — ja juuri
+ * aikajanasta luetaan kummalla joukkueella tulos oli hallussa. Sport–TPS
+ * 9.9. näytti aikajanalla 2–2:lta vaikka ottelu päättyi 2–1, ja siitä
+ * johdettu "kuinka kauan kohde oli voitolla" oli väärin.
+ *
+ * Suodatus on todennettu koko kauden dataa vasten: sen jälkeen
+ * maalitapahtumien määrä täsmää viralliseen tulokseen kaikissa 23
+ * päättyneessä ottelussa (5:ssä niistä oli hylätty maali).
+ */
+export function isDisallowedGoal(event: unknown): boolean {
+  const types = (event as { goalTypes?: unknown })?.goalTypes;
+  return Array.isArray(types) && types.some((t) => /0$/.test(String(t)));
+}
+
+/**
  * Maalit varsinaiselta peliajalta.
  *
  * Jatkoajan maalit (yli 60 min) jätetään pois: 1X2 ratkeaa 60 minuutissa,
@@ -92,6 +112,7 @@ export function goalMinute(gameTimeSeconds: unknown): number | null {
 export function extractGoals(game: LiigaApiGame): Goal[] {
   const kerää = (events: unknown, side: 'home' | 'away'): Goal[] =>
     (Array.isArray(events) ? events : [])
+      .filter((e) => !isDisallowedGoal(e))
       .map((e) => goalMinute((e as { gameTime?: unknown })?.gameTime))
       .filter((m): m is number => m !== null && m <= HOCKEY_FULL_TIME)
       .map((minute) => ({ minute, side }));

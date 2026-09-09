@@ -1,7 +1,7 @@
 // Liigan kierrosarviointi (tiketti #105)
 
 import { describe, it, expect } from 'vitest';
-import { goalMinute, extractGoals, buildClaims, reviewGame, buildRoundReview } from './liiga-reviews.js';
+import { goalMinute, extractGoals, isDisallowedGoal, buildClaims, reviewGame, buildRoundReview } from './liiga-reviews.js';
 import type { SideProbs } from '../types-football.js';
 import type { LiigaApiGame } from '../ingest/stats-liiga.js';
 
@@ -13,8 +13,8 @@ const OT = 'ENDED_DURING_EXTENDED_GAME_TIME';
 function peli(
   koti: string,
   vieras: string,
-  kotiMaalit: { s: number }[],
-  vierasMaalit: { s: number }[],
+  kotiMaalit: { s: number; t?: string[] }[],
+  vierasMaalit: { s: number; t?: string[] }[],
   kg: number,
   vg: number,
   tyyppi = REG,
@@ -24,8 +24,8 @@ function peli(
     start: pvm,
     ended: true,
     finishedType: tyyppi,
-    homeTeam: { teamName: koti, goals: kg, goalEvents: kotiMaalit.map((m) => ({ gameTime: m.s })) } as any,
-    awayTeam: { teamName: vieras, goals: vg, goalEvents: vierasMaalit.map((m) => ({ gameTime: m.s })) } as any,
+    homeTeam: { teamName: koti, goals: kg, goalEvents: kotiMaalit.map((m) => ({ gameTime: m.s, goalTypes: m.t ?? [] })) } as any,
+    awayTeam: { teamName: vieras, goals: vg, goalEvents: vierasMaalit.map((m) => ({ gameTime: m.s, goalTypes: m.t ?? [] })) } as any,
   };
 }
 
@@ -77,6 +77,49 @@ describe('extractGoals', () => {
   it('ei maalitapahtumia -> tyhja lista, ei kaadu', () => {
     const g: LiigaApiGame = { start: '2026-09-01T15:00:00Z', ended: true, finishedType: REG, homeTeam: { teamName: 'A', goals: 0 }, awayTeam: { teamName: 'B', goals: 0 } };
     expect(extractGoals(g)).toEqual([]);
+  });
+
+  // HAVAITTU OIKEASSA DATASSA 9.9.2026: Sport-TPS paattyi 2-1 mutta aikajanalla
+  // oli nelja maalia. TPS:n toinen "maali" oli videotarkistuksessa kumottu
+  // (VT0) ja `goalEvents` sisaltaa senkin. Aikajanasta luetaan kummalla
+  // joukkueella tulos oli hallussa, joten keksitty maali vaaristaa suoraan
+  // kierrosarvion verdiktin. Kauden 23 paattyneesta ottelusta viidessa oli
+  // tallainen tapahtuma.
+  it('HYLATTY MAALI EI PAADY AIKAJANALLE — videotarkistus kumosi (VT0)', () => {
+    const g = peli('Sport', 'TPS', [{ s: 259 }, { s: 2061 }], [{ s: 313, t: ['VT0'] }, { s: 2637, t: ['YV'] }], 2, 1);
+    expect(extractGoals(g)).toEqual([
+      { minute: 4, side: 'home' },
+      { minute: 34, side: 'home' },
+      { minute: 44, side: 'away' },
+    ]);
+  });
+
+  it('HYLATTY MAALI EI PAADY AIKAJANALLE — torjuttu rangaistuslaukaus (RL0)', () => {
+    const g = peli('Jukurit', 'Sport', [{ s: 600 }], [{ s: 900, t: ['RL0'] }], 1, 0);
+    expect(extractGoals(g)).toEqual([{ minute: 10, side: 'home' }]);
+  });
+
+  it('HYVAKSYTTY maali samasta tilanteesta jaa aikajanalle (VT, RL — ilman 0-paatetta)', () => {
+    const g = peli('A', 'B', [{ s: 600, t: ['VT'] }], [{ s: 900, t: ['RL'] }], 1, 1);
+    expect(extractGoals(g).map((x) => x.minute)).toEqual([10, 15]);
+  });
+});
+
+describe('isDisallowedGoal — 0-paate erottaa kumotun maalin hyvaksytysta', () => {
+  it.each([['VT0'], ['RL0']])('%s on hylatty', (t) => {
+    expect(isDisallowedGoal({ goalTypes: [t] })).toBe(true);
+  });
+
+  // Nama kaikki esiintyvat kauden datassa oikeina maaleina. Jos suodatin
+  // laajenisi naihin, aikajanalta katoaisi maaleja jotka oikeasti tehtiin.
+  it.each([['YV'], ['AV'], ['TM'], ['VT'], ['RL'], ['TV'], ['VL'], ['IM']])('%s on hyvaksytty', (t) => {
+    expect(isDisallowedGoal({ goalTypes: [t] })).toBe(false);
+  });
+
+  it('tyyppilista puuttuu tai on tyhja -> hyvaksytty (useimmilla maaleilla ei ole tyyppia)', () => {
+    expect(isDisallowedGoal({ goalTypes: [] })).toBe(false);
+    expect(isDisallowedGoal({})).toBe(false);
+    expect(isDisallowedGoal(null)).toBe(false);
   });
 });
 
