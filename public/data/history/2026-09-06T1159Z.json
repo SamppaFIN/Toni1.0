@@ -1,0 +1,365 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-06T11:59:51.396Z",
+  "sport": "football",
+  "source": "live",
+  "providers": [
+    "The Odds API",
+    "Veikkaus (kasin syotetty)",
+    "Ristikaksi — Liiga-kausiennakko 2026-27 (lahto-Elo)",
+    "liiga.fi/api/v2",
+    "RSS-uutissyötteet"
+  ],
+  "leagues": [
+    "Liiga"
+  ],
+  "matches": [
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 4.5,
+            "over": 1.71,
+            "under": 2.07,
+            "commission": 0,
+            "fetched_at": "2026-09-06T11:59:17Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/367012352-hpk-ilves"
+          },
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 5,
+            "over": 1.93,
+            "under": 1.85,
+            "commission": 0,
+            "fetched_at": "2026-09-06T11:58:41Z",
+            "link": "https://www.coolbet.com/en/sports/match/6089680"
+          }
+        ],
+        "edges": [
+          {
+            "line": 4.5,
+            "side": "over",
+            "odds": 1.71,
+            "odds_effective": 1.71,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/367012352-hpk-ilves",
+            "model_prob": 0.5218,
+            "implied_prob": 0.5476,
+            "edge": -0.1077,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 4.5,
+            "side": "under",
+            "odds": 2.07,
+            "odds_effective": 2.07,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/367012352-hpk-ilves",
+            "model_prob": 0.4782,
+            "implied_prob": 0.4524,
+            "edge": -0.0101,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5,
+            "side": "over",
+            "odds": 1.93,
+            "odds_effective": 1.93,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6089680",
+            "model_prob": 0.3462,
+            "implied_prob": 0.4894,
+            "edge": -0.3318,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5,
+            "side": "under",
+            "odds": 1.85,
+            "odds_effective": 1.85,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6089680",
+            "model_prob": 0.6538,
+            "implied_prob": 0.5106,
+            "edge": 0.2095,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-09-08:HPK-ILV",
+      "league": "Liiga",
+      "kickoff": "2026-09-08T15:30:00.000Z",
+      "home": {
+        "name": "HPK",
+        "short": "HPK",
+        "color": "#9E6A03"
+      },
+      "away": {
+        "name": "Ilves",
+        "short": "ILV",
+        "color": "#238636"
+      },
+      "odds": [
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 2.55,
+          "draw": 3.85,
+          "away": 2.45,
+          "commission": 0,
+          "fetched_at": "2026-09-06T11:59:18Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028022686"
+        },
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 2.45,
+          "draw": 3.96,
+          "away": 2.46,
+          "commission": 0,
+          "fetched_at": "2026-09-06T11:59:17Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/367012352-hpk-ilves"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 2.5,
+          "draw": 3.8,
+          "away": 2.73,
+          "commission": 0,
+          "fetched_at": "2026-09-06T11:58:41Z",
+          "link": "https://www.coolbet.com/en/sports/match/6089680"
+        },
+        {
+          "bookmaker": "Veikkaus",
+          "key": "veikkaus",
+          "market": "1X2",
+          "home": 2.37,
+          "draw": 3.8,
+          "away": 2.72,
+          "commission": 0,
+          "fetched_at": "2026-09-06T09:00:00.000Z",
+          "link": "https://www.veikkaus.fi/fi/vedonlyonti",
+          "manual": true,
+          "note": "Veikkauksella ei ole kerroinrajapintaa — hinnat syötetty käsin kerroinsivulta"
+        }
+      ],
+      "best": {
+        "home": 2.55,
+        "draw": 3.96,
+        "away": 2.73,
+        "home_effective": 2.55,
+        "draw_effective": 3.96,
+        "away_effective": 2.73,
+        "home_book": "Unibet (SE)",
+        "draw_book": "1xBet",
+        "away_book": "Coolbet"
+      },
+      "market": {
+        "margin": 0.011,
+        "implied": {
+          "home": 0.385,
+          "draw": 0.2472,
+          "away": 0.3679
+        },
+        "sharp": {
+          "home": 0.385,
+          "draw": 0.2472,
+          "away": 0.3679
+        },
+        "sharp_source": "mediaani (4 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 3.1,
+        "lambda_away": 1.702,
+        "probs": {
+          "home": 0.4376,
+          "draw": 0.237,
+          "away": 0.3255
+        },
+        "poisson_probs": {
+          "home": 0.6216,
+          "draw": 0.2013,
+          "away": 0.1771
+        },
+        "blend_weight": 0.22222222222222224,
+        "over25": 0.857,
+        "btts": 0.7828,
+        "top_scores": [
+          {
+            "score": "3-1",
+            "p": 0.0697
+          },
+          {
+            "score": "2-1",
+            "p": 0.0675
+          },
+          {
+            "score": "3-2",
+            "p": 0.0593
+          },
+          {
+            "score": "2-2",
+            "p": 0.0574
+          },
+          {
+            "score": "4-1",
+            "p": 0.0541
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (HPK, 2 ottelua) / tämä + viime kausi (ILV, 2 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 56 % → paino markkinaa vastaan 22 % (täysi 40 %). Kohtalaisesti dataa."
+          }
+        ],
+        "home_strength": {
+          "attack": 0.92,
+          "defense": 0.96
+        },
+        "away_strength": {
+          "attack": 0.89,
+          "defense": 0.88
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.55,
+            "odds_effective": 2.55,
+            "book": "Unibet (SE)",
+            "model_prob": 0.4376,
+            "implied_prob": 0.385,
+            "edge": 0.1159,
+            "flag": "strong",
+            "kelly_fraction": 0.0187,
+            "stake_suggestion": 1.87
+          },
+          {
+            "side": "draw",
+            "odds": 3.96,
+            "odds_effective": 3.96,
+            "book": "1xBet",
+            "model_prob": 0.237,
+            "implied_prob": 0.2472,
+            "edge": -0.0615,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.73,
+            "odds_effective": 2.73,
+            "book": "Coolbet",
+            "model_prob": 0.3255,
+            "implied_prob": 0.3679,
+            "edge": -0.1114,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 7,
+          "played": 2,
+          "form": "WL",
+          "gf_pg": 3.5,
+          "ga_pg": 3,
+          "home_gf_pg": null,
+          "away_gf_pg": 3.5,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.5,
+          "elo": 1460,
+          "elo_change": 5,
+          "elo_rank": 14
+        },
+        "away": {
+          "rank": 12,
+          "played": 2,
+          "form": "WL",
+          "gf_pg": 1.5,
+          "ga_pg": 2.5,
+          "home_gf_pg": null,
+          "away_gf_pg": 1.5,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.5,
+          "elo": 1595,
+          "elo_change": -10,
+          "elo_rank": 3
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "SM-liigaan saapui NHL-legendan kiekkonörtti veljenpoika – ihmettelee nykyjunioreiden ”suurinta puutetta”",
+          "url": "https://yle.fi/a/74-20244634?origin=rss",
+          "source": "Yle Urheilu",
+          "published_at": "2026-09-06T05:00:35.000Z",
+          "event_type": null,
+          "team": "HPK",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "HIFK-tähti jakoi kovan pommin – Olli Jokinen ilahtui",
+          "url": "https://www.iltalehti.fi/smliiga/a/a93123b4-653f-414d-ac83-99fb7b182de2?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-09-05T05:26:23.000Z",
+          "event_type": null,
+          "team": "HPK",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Ilveksen johtoportaaseen tuli muutoksia",
+          "url": "https://www.is.fi/sm-liiga/art-2000012253754.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-09-04T16:13:00.000Z",
+          "event_type": null,
+          "team": "Ilves",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "HIFK nousi voittoon – SM-liigatähti lähti tuskaisena jäältä",
+          "url": "https://www.iltalehti.fi/smliiga/a/b3988082-dcb0-49cd-9cfa-e9941ab4aeca?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-09-04T14:57:09.000Z",
+          "event_type": null,
+          "team": "HPK",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        }
+      ]
+    }
+  ]
+}
