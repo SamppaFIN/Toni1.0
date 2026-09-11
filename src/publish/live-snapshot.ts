@@ -227,6 +227,20 @@ function toTeamStats(s: TeamSeasonStats, isHome: boolean, elo: EloLookup | null)
   };
 }
 
+/**
+ * Joukkueen Elo-rivi kahdella nimennormalisoinnilla.
+ *
+ * KAHTA TARVITAAN koska Elo-kartan avain riippuu sarjasta: Veikkausliigan
+ * tuloslähde käyttää käsin ylläpidettyä karttaa (eloKeyFor), ESPN-sarjat
+ * seuramuotojen poistoa (normalizeClubName). Vain toisella kysyminen
+ * palauttaa nullin puolelle sarjoista — ja null näyttää samalta kuin
+ * "joukkueella ei ole vielä Eloa", eli virhe jää huomaamatta. Sama
+ * täsmäytysvirheen laji kuin tiketissä #40.
+ */
+export function eloFor(name: string, elo: EloLookup | null): { elo: number; change: number; rank: number } | null {
+  return elo?.get(eloKeyFor(name)) ?? elo?.get(normalizeClubName(name)) ?? null;
+}
+
 /** Joukkueen TeamStats kun pelattuja otteluita ei ole: pelkkä lähtö-Elo, muu nolla/null. */
 function priorTeamStats(name: string, elo: EloLookup | null): TeamStats {
   const r = elo?.get(eloKeyFor(name)) ?? elo?.get(normalizeClubName(name)) ?? null;

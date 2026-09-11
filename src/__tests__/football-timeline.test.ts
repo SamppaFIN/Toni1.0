@@ -7,7 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 // @ts-expect-error — selainmoduuli ilman tyyppejä, tuodaan tarkoituksella
-import { nearestDay, dayLabel, todayKey } from '../../public/app/football-timeline.js';
+import { nearestDay, dayLabel, calendarLabel, navLabel, todayKey } from '../../public/app/football-timeline.js';
 
 const days = (...dates: string[]) => dates.map((date) => ({ date, matches: 1, with_odds: 0, leagues: [] }));
 
@@ -57,6 +57,46 @@ describe('dayLabel', () => {
 
   it('kaukainen paiva ei saa Huomenna-nimea', () => {
     expect(dayLabel('2026-09-26', '2026-08-25')).not.toBe('Huomenna');
+  });
+});
+
+// Paivanavigointi kutistui kolmeen elementtiin (‹ · paivamaara · ›). Aiemmat
+// viisi nappia eivat kertoneet MITA PAIVAA katsotaan: paivamaara nakyi vain
+// silloin kun valinta oli Eilen/Tanaan/Huomenna -pikavalintojen ulkopuolella.
+// Nama testit lukitsevat sen etta paivamaara on mukana AINA.
+describe('calendarLabel — paivamaara aina samassa muodossa', () => {
+  it('antaa viikonpaivan ja paivamaaran myos tanaiselle', () => {
+    expect(calendarLabel('2026-08-25')).toBe('ti 25.8.');
+    expect(calendarLabel('2026-08-29')).toBe('la 29.8.');
+  });
+
+  it('kelvoton syote palautuu sellaisenaan eika NaN-tekstina', () => {
+    expect(calendarLabel('ei-paiva')).toBe('ei-paiva');
+  });
+});
+
+describe('navLabel — paivamaara JA suhde tahan paivaan', () => {
+  it('tanaan: paivamaara ei katoa suhteellisen sanan alta', () => {
+    expect(navLabel('2026-08-25', '2026-08-25')).toBe('ti 25.8. · Tänään');
+  });
+
+  it('huomenna ja eilen saavat molemmat osat', () => {
+    expect(navLabel('2026-08-26', '2026-08-25')).toBe('ke 26.8. · Huomenna');
+    expect(navLabel('2026-08-24', '2026-08-25')).toBe('ma 24.8. · Eilen');
+  });
+
+  it('kaukainen paiva ei toista paivamaaraa kahdesti', () => {
+    expect(navLabel('2026-08-29', '2026-08-25')).toBe('la 29.8.');
+  });
+
+  it('jokainen paiva 30 vrk ikkunassa sisaltaa paivamaaran', () => {
+    const today = '2026-09-11';
+    for (let i = -15; i <= 15; i++) {
+      const d = new Date('2026-09-11T12:00:00');
+      d.setDate(d.getDate() + i);
+      const date = todayKey(d);
+      expect(navLabel(date, today)).toContain(calendarLabel(date));
+    }
   });
 });
 

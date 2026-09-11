@@ -149,7 +149,9 @@ async function setup(page: Page, opts: { history?: unknown; snapshot?: unknown }
   await page.addInitScript(() => localStorage.removeItem('bt_odds_archive'));
 }
 
-const yesterdayBtn = (page: Page) => page.locator('.day-nav .day-btn').nth(1);
+// Navigointi on < | paivamaara | > : 0 = edellinen ottelupaiva,
+// 1 = keskimmainen (paluu tahan paivaan), 2 = seuraava ottelupaiva.
+const yesterdayBtn = (page: Page) => page.locator('.day-nav .day-btn').nth(0);
 
 test.describe('Palvelinarkisto', () => {
   test.beforeEach(async ({ page }) => {
@@ -288,8 +290,9 @@ test.describe('Palvelinarkisto', () => {
   test('KERTOIMETON ottelu saa yha rehellisen selityksen', async ({ page }) => {
     await page.goto('/demo.html');
     await expect(page.locator('.day-nav')).toBeVisible({ timeout: 10000 });
-    // Tanaan: yksi ottelu ilman kertoimia
-    await page.locator('.day-nav .day-btn').nth(2).click();
+    // Tanaan: yksi ottelu ilman kertoimia. Nakyma on jo tassa paivassa,
+    // joten erillista klikkausta ei tarvita (keskimmainen on silloin pois
+    // kaytosta -- klikkaus joka ei tee mitaan olisi vain hamaava).
     await expect(page.locator('#round-games')).toContainText('Otteluohjelma', { timeout: 10000 });
     await expect(page.locator('#round-games')).toContainText('Kertoimia ei ole vielä julkaistu');
   });
@@ -346,7 +349,6 @@ test.describe('Ratkenneen ottelun kortti', () => {
     await expect(page.locator('.day-nav')).toBeVisible({ timeout: 10000 });
     // Tanaan: kalenterissa alkamaton ottelu ilman kertoimia -> ei korttia,
     // mutta otsikko ei saa vaittaa sita ratkenneeksi
-    await page.locator('.day-nav .day-btn').nth(2).click();
     await expect(page.locator('#round-games')).not.toContainText('ratkennut', { timeout: 10000 });
   });
 });
@@ -385,7 +387,6 @@ test.describe('Lahdebanneri', () => {
   test('TANAAN: normaali banneri, ei arkistomerkintaa', async ({ page }) => {
     await page.goto('/demo.html');
     await expect(page.locator('.day-nav')).toBeVisible({ timeout: 10000 });
-    await page.locator('.day-nav .day-btn').nth(2).click();
     await expect(page.locator('#round-games')).toContainText('Päivän kohteet', { timeout: 10000 });
     await expect(page.locator('#round-games')).not.toContainText('Menneen päivän');
   });

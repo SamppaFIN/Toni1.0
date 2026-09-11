@@ -1,18 +1,19 @@
-// Tiketti #82: Päivänavigointi viitenä nappina
+// Päivänavigointi: nuolet ja päivämäärä
 //
-// Aiempi versio (tiketit #79/#81) oli vieritettävä nauha jossa oli kaikki 38
-// ottelupäivää. Se toimi mutta oli huono käyttää: nauha piti raahata oikeaan
-// kohtaan, päivät vilisivät, eikä yhdellä silmäyksellä nähnyt missä ollaan.
+// Kehitys: vieritettävä nauha (#79/#81) -> viisi nappia (#82) -> tämä.
 //
-// Tilalla viisi nappia jotka mahtuvat ruudulle kerralla:
+//   ‹   pe 11.9. · Tänään · 7 ottelua   ›
 //
-//   ‹   Eilen   Tänään   Huomenna   ›
+// Viisi nappia oli yhä epäselvä: kolme pikavalintaa (Eilen/Tänään/Huomenna)
+// näyttivät samanlaisilta kuin nuolet, eikä mikään niistä kertonut MITÄ
+// PÄIVÄÄ katsotaan — päivämäärä näkyi vain silloin kun valinta oli kaikkien
+// pikavalintojen ulkopuolella. Käyttäjä joutui päättelemään sijaintinsa
+// siitä mikä nappi sattui olemaan korostettuna.
 //
-// Kolme keskimmäistä ovat absoluuttisia pikavalintoja. Nuolet siirtävät
-// valintaa päivä kerrallaan, jolloin koko aikaikkuna on yhä tavoitettavissa —
-// se vain vaatii useamman painalluksen kuin nauhan raahaus. Se on hyväksyttävä
-// hinta siitä että perustapaus (eilen / tänään / huomenna) on yhden
-// klikkauksen päässä.
+// Nyt keskellä on yksi elementti joka SANOO päivän: viikonpäivä, päivämäärä,
+// suhde tähän päivään ja otteluiden määrä. Nuolet liikkuvat, keskimmäinen
+// palauttaa tähän päivään. Kolme elementtiä mahtuu 320 px ruudulle ilman
+// rivitystä, ja katsottava päivä on aina luettavissa eikä pääteltävissä.
 //
 // NUOLET HYPPÄÄVÄT OTTELUPÄIVIIN, EIVÄT KALENTERIPÄIVIIN. Jos huomenna ei
 // pelata, `›` vie seuraavaan päivään jolla on otteluita. Sokea +1 vrk veisi
@@ -107,6 +108,27 @@ export function dayLabel(date, today) {
   return `${WEEKDAYS[d.getDay()]} ${d.getDate()}.${d.getMonth() + 1}.`;
 }
 
+/** Kalenteripäivä aina samassa muodossa: "pe 11.9." */
+export function calendarLabel(date) {
+  const d = new Date(`${date}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return date;
+  return `${WEEKDAYS[d.getDay()]} ${d.getDate()}.${d.getMonth() + 1}.`;
+}
+
+/**
+ * Navigoinnin keskimmäisen napin teksti.
+ *
+ * Päivämäärä on AINA mukana — se on koko napin tarkoitus. Suhteellinen sana
+ * (Tänään/Eilen/Huomenna) tulee sen perään lisätietona silloin kun sellainen
+ * on, koska "Tänään" yksin ei kerro mikä päivä on eikä "pe 11.9." yksin
+ * kerro onko se tänään.
+ */
+export function navLabel(date, today) {
+  const cal = calendarLabel(date);
+  const rel = dayLabel(date, today);
+  return rel === cal ? cal : `${cal} · ${rel}`;
+}
+
 // ─── Lataus ───────────────────────────────────────────────────────────────
 
 export async function load() {
@@ -131,6 +153,77 @@ export async function load() {
 
 export function getCalendar() {
   return calendar;
+}
+
+// ─── Kierrosennusteet ilman kertoimia (previews.json) ─────────────────────
+//
+// Ottelu jolle ei ole kertoimia ei saa korttia, koska kortin sisalto on
+// hinta. Malli osaa silti sanoa jotain, ja Vakio-tyyppisessa kohteessa
+// hintaa ei edes ole — valitaan 1, X tai 2. Ennuste naytetaan siksi
+// otteluohjelman rivilla.
+
+let previews = null;
+
+export async function loadPreviews() {
+  if (previews) return previews;
+  try {
+    const res = await fetch('data/previews.json', { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    previews = Array.isArray(data.matches) ? data : null;
+  } catch {
+    // Ennusteet ovat lisa, ei ehto: ilman niita otteluohjelma toimii kuten ennen
+    previews = null;
+  }
+  return previews;
+}
+
+/**
+ * Ennuste ottelulle.
+ *
+ * Ensisijaisesti tunnisteella. Kertoimettomalla ottelulla `match_id` on null
+ * molemmin puolin, joten silloin vertaillaan paivaa ja joukkuenimia — ne
+ * tulevat samasta kalenterista, joten kirjoitusasu tasmaa.
+ */
+export function previewFor(match, file = previews) {
+  const rows = file?.matches ?? [];
+  if (match.match_id) {
+    const byId = rows.find((r) => r.match_id && r.match_id === match.match_id);
+    if (byId) return byId;
+  }
+  return rows.find((r) => r.date === match.date && r.home === match.home && r.away === match.away) ?? null;
+}
+
+const PICK_LABEL = { home: '1', draw: 'X', away: '2' };
+
+/** Mallin 1X2 kolmena lukuna, valinta korostettuna */
+function previewRow(p) {
+  const cell = (side) => {
+    const active = p.pick === side;
+    return `<span style="display:inline-block;min-width:30px;text-align:center;padding:1px 3px;border-radius:3px;font-variant-numeric:tabular-nums;${
+      active ? 'background:var(--c-accent,oklch(.7 .17 145));color:#000;font-weight:700' : 'opacity:.65'
+    }">${Math.round(p.probs[side] * 100)}</span>`;
+  };
+
+  // Luottamus on osa lukua eika alaviite: 43 %:n luottamuksella laskettu
+  // 56 % ei tarkoita samaa kuin 79 %:n luottamuksella laskettu 56 %.
+  const conf = Math.round(p.confidence * 100);
+  const chips = p.factors
+    .slice(0, 4)
+    .map(
+      (f) =>
+        `<span title="${esc(f.detail)}" style="font-size:.53rem;padding:1px 4px;border-radius:8px;background:oklch(1 1 0/0.08);white-space:nowrap">${
+          f.side === 'home' ? '🏠' : f.side === 'away' ? '✈️' : '⚪'
+        } ${esc(f.label)}</span>`
+    )
+    .join(' ');
+
+  return `<div style="grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:2px 0 4px">
+    <span style="font-size:.53rem;color:var(--c-text-muted)">malli</span>
+    ${cell('home')}${cell('draw')}${cell('away')}
+    <span style="font-size:.53rem;color:var(--c-text-muted)">→ ${PICK_LABEL[p.pick]} · luottamus ${conf} %</span>
+    ${chips}
+  </div>`;
 }
 
 // ─── Lajisuodatus (tiketti #105) ──────────────────────────────────────────
@@ -180,62 +273,62 @@ function countFor(date) {
 
 // ─── Renderöinti ──────────────────────────────────────────────────────────
 
-function shortcut(date, selected, today) {
-  const active = date === selected;
-  const n = countFor(date);
-  // Päivä jolla ei pelata jää himmeäksi mutta pysyy painettavana: käyttäjä
-  // saa nähdä itse ettei otteluita ole, eikä nappi katoa alta.
-  const dim = Boolean(calendar?.days?.length) && n === 0;
-  return `<button class="day-btn${active ? ' active' : ''}"${dim ? ' style="opacity:.5"' : ''}
-    onclick="window.BTL2.select('${esc(date)}')"
-    title="${esc(date)}${n ? ` · ${n} ottelua` : ' · ei otteluita'}">${esc(dayLabel(date, today))}${n ? `<span style="font-size:.55rem;opacity:.75;margin-left:3px">${n}</span>` : ''}</button>`;
-}
-
 function arrow(direction, target) {
   const label = direction > 0 ? '›' : '‹';
   if (!target) {
-    return `<button class="day-btn" disabled style="opacity:.35;cursor:default" title="Ei ${direction > 0 ? 'myöhempiä' : 'aiempia'} ottelupäiviä">${label}</button>`;
+    return `<button class="day-btn" disabled style="opacity:.35;cursor:default;min-width:34px"
+      title="Ei ${direction > 0 ? 'myöhempiä' : 'aiempia'} ottelupäiviä">${label}</button>`;
   }
   const title = direction > 0 ? 'Seuraava ottelupäivä' : 'Edellinen ottelupäivä';
-  return `<button class="day-btn" onclick="window.BTL2.select('${esc(target)}')" title="${title}: ${esc(target)}">${label}</button>`;
+  return `<button class="day-btn" style="min-width:34px"
+    onclick="window.BTL2.select('${esc(target)}')" title="${title}: ${esc(target)}">${label}</button>`;
+}
+
+/**
+ * Keskimmäinen elementti: MITÄ PÄIVÄÄ katsotaan ja montako ottelua siinä on.
+ *
+ * Tämä on navigoinnin ainoa varsinainen tietosisältö. Nuolet kertovat vain
+ * että liikkua voi; ilman tätä käyttäjä ei tietäisi mistä liikutaan.
+ *
+ * Klikkaus palauttaa tähän päivään. Kun ollaan jo tässä päivässä nappi on
+ * korostettu ja passiivinen — klikkaus joka ei tee mitään on huonompi kuin
+ * nappi joka näyttää siltä ettei siihen tarvitse koskea.
+ */
+function current(selected, today) {
+  const isToday = selected === today;
+  const n = countFor(selected);
+  const known = Boolean(calendar?.days?.length);
+  const sub = !known ? '' : n === 1 ? '1 ottelu' : `${n} ottelua`;
+
+  return `<button class="day-btn day-current${isToday ? ' active' : ''}"
+    style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.15${isToday ? ';cursor:default' : ''}"
+    ${isToday ? 'disabled' : `onclick="window.BTL2.select('${esc(today)}')"`}
+    title="${isToday ? 'Katsot tätä päivää' : `Palaa tähän päivään (${esc(today)})`}">
+    <span style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">${esc(navLabel(selected, today))}</span>
+    <span style="font-size:.55rem;opacity:.75;white-space:nowrap">${esc(sub)}${isToday ? '' : ' · ↩ tänään'}</span>
+  </button>`;
 }
 
 /**
  * Päivänavigoinnin HTML.
  *
  * Palauttaa aina jotain — myös ilman kalenteria, jolloin nuolet askeltavat
- * vuorokauden kerrallaan ja pikavalinnat toimivat normaalisti.
+ * vuorokauden kerrallaan ja päivämäärä näkyy silti.
  */
 export function renderNav(today = todayKey()) {
-  // Lajisuodatetut päivät (#105) — muuten nuolet ja himmennys perustuisivat
-  // koko kalenteriin, ei siihen mitä ruudulla oikeasti näkyy.
+  // Lajisuodatetut päivät (#105) — muuten nuolet ja otteluiden määrä
+  // perustuisivat koko kalenteriin, ei siihen mitä ruudulla oikeasti näkyy.
   const days = calendar ? visibleDays() : null;
   const selected = getSelectedDay() ?? nearestDay(days, today) ?? today;
 
-  const buttons = [
-    arrow(-1, stepDay(selected, -1, days)),
-    shortcut(shiftDay(today, -1), selected, today),
-    shortcut(today, selected, today),
-    shortcut(shiftDay(today, 1), selected, today),
-    arrow(1, stepDay(selected, 1, days)),
-  ].join('');
-
-  // Valittu päivä sanotaan erikseen kun se ei ole mikään kolmesta
-  // pikavalinnasta: nuolilla voi kävellä kauas, eikä yksikään nappi silloin
-  // ole korostettuna. Ilman tätä näkymä ei kertoisi mitä päivää katsotaan.
-  const shortcuts = [shiftDay(today, -1), today, shiftDay(today, 1)];
-  const caption = shortcuts.includes(selected)
-    ? ''
-    : `<div style="font-size:.6rem;color:var(--c-text-muted);margin:0 0 6px 3px">
-         Valittuna <b style="color:var(--c-text)">${esc(dayLabel(selected, today))}</b> · ${esc(selected)}
-       </div>`;
+  const bar = [arrow(-1, stepDay(selected, -1, days)), current(selected, today), arrow(1, stepDay(selected, 1, days))].join('');
 
   const warn =
     loadState === 'failed'
       ? `<div style="font-size:.58rem;color:var(--c-text-muted);margin:0 0 6px 3px">Otteluohjelmaa ei saatu (${esc(failReason)}) — nuolet siirtyvät vuorokauden kerrallaan.</div>`
       : '';
 
-  return `<div class="day-nav" style="display:flex;gap:5px;flex-wrap:wrap;margin:0 0 6px 0">${buttons}</div>${caption}${warn}`;
+  return `<div class="day-nav" style="display:flex;gap:5px;align-items:stretch;margin:0 0 6px 0">${bar}</div>${warn}`;
 }
 
 /** Valitun päivän ottelut listana — käytetään kun kertoimia ei ole */
@@ -263,8 +356,9 @@ export function renderDayFixtures(date, knownIds = new Set()) {
               : m.status === 'live'
                 ? '<span style="color:var(--c-danger)">käynnissä</span>'
                 : `<span style="color:var(--c-text-muted)">${esc(time)}</span>`;
+          const p = m.status === 'upcoming' ? previewFor(m) : null;
           return `<div style="display:grid;grid-template-columns:1fr auto;gap:8px;font-size:.66rem;padding:3px 0;border-bottom:1px dashed oklch(1 1 0/0.07)">
-            <span>${esc(m.home)} – ${esc(m.away)}</span>${result}
+            <span>${esc(m.home)} – ${esc(m.away)}</span>${result}${p ? previewRow(p) : ''}
           </div>`;
         })
         .join('');
@@ -276,6 +370,7 @@ export function renderDayFixtures(date, knownIds = new Set()) {
   // julkaistuja kertoimia", mika oli vaara niille otteluille joille kertoimet
   // on olemassa muttei tallessa kortiksi asti -- kayttaja luki siita ettei
   // dataa ollut, vaikka sita oli.
+  const withPreview = list.filter((m) => m.status === 'upcoming' && previewFor(m)).length;
   const withOdds = list.filter((m) => m.has_odds).length;
   const caption =
     withOdds === 0
@@ -289,6 +384,14 @@ export function renderDayFixtures(date, knownIds = new Set()) {
     <div style="font-size:.6rem;color:var(--c-text-muted);margin-top:2px">
       ${list.length} ottelua. ${esc(caption)}
     </div>
+    ${
+      withPreview
+        ? `<div style="font-size:.58rem;color:var(--c-text-muted);margin-top:3px">
+             📐 ${withPreview} ottelulle mallin arvio. Se kertoo mitä malli odottaa — EI sitä kannattaako vetoa lyödä,
+             koska ilman kerrointa odotusarvoa ei voi laskea.
+           </div>`
+        : ''
+    }
     ${blocks}
   </div>`;
 }
@@ -314,5 +417,7 @@ if (typeof window !== 'undefined') {
     matchesFor,
     calendarMatch,
     getCalendar,
+    loadPreviews,
+    previewFor,
   };
 }

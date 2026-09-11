@@ -70,7 +70,7 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     // Siirry paivaan jossa ei ole otteluita
     // Kalenterissa on tama paiva ja ylihuominen; huomenna puuttuu, joten
     // eteenpain-nuoli (indeksi 4) vie ylihuomiseen
-    await page.locator('.day-nav .day-btn').nth(4).click();
+    await page.locator('.day-nav .day-btn').nth(2).click();
     await page.waitForTimeout(500);
     expect(calls, 'paivanvaihto ei saa laukaista hakua').toBe(before);
   });
@@ -83,7 +83,7 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
     // Kalenterissa on tama paiva ja ylihuominen; huomenna puuttuu, joten
     // eteenpain-nuoli (indeksi 4) vie ylihuomiseen
-    await page.locator('.day-nav .day-btn').nth(4).click();
+    await page.locator('.day-nav .day-btn').nth(2).click();
 
     const btn = page.locator('button:has-text("Hae ottelut ja kertoimet")');
     if (await btn.count()) await expect(btn.first()).toBeVisible();
@@ -97,7 +97,7 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
     // Kalenterissa on tama paiva ja ylihuominen; huomenna puuttuu, joten
     // eteenpain-nuoli (indeksi 4) vie ylihuomiseen
-    await page.locator('.day-nav .day-btn').nth(4).click();
+    await page.locator('.day-nav .day-btn').nth(2).click();
 
     // Ei skippausta: setup takaa etta ylihuomisella ei ole kertoimia. Jos
     // nappi puuttuu, se ON vika eika ymparistotekija.
@@ -120,7 +120,7 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
     // Kalenterissa on tama paiva ja ylihuominen; huomenna puuttuu, joten
     // eteenpain-nuoli (indeksi 4) vie ylihuomiseen
-    await page.locator('.day-nav .day-btn').nth(4).click();
+    await page.locator('.day-nav .day-btn').nth(2).click();
 
     // Ei skippausta: setup takaa etta ylihuomisella ei ole kertoimia. Jos
     // nappi puuttuu, se ON vika eika ymparistotekija.
@@ -139,7 +139,7 @@ test.describe('Tulevan paivan ennakkohaku', () => {
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
     // Kalenterissa on tama paiva ja ylihuominen; huomenna puuttuu, joten
     // eteenpain-nuoli (indeksi 4) vie ylihuomiseen
-    await page.locator('.day-nav .day-btn').nth(4).click();
+    await page.locator('.day-nav .day-btn').nth(2).click();
     const btn = page.locator('button:has-text("Hae ottelut ja kertoimet")');
     if (await btn.count()) {
       await btn.first().click();

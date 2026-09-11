@@ -34,7 +34,8 @@
     "e2e": "npx playwright test --config=e2e/playwright.config.ts",
     "e2e:ui": "npx playwright test --ui --config=e2e/playwright.config.ts",
     "results:espn": "npx tsx src/ingest/results-from-espn.ts",
-    "odds:manual": "npx tsx src/publish/manual-odds.ts"
+    "odds:manual": "npx tsx src/publish/manual-odds.ts",
+    "previews": "npx tsx src/publish/previews.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0",

@@ -1,8 +1,10 @@
-// E2E: Päivänavigointi viitenä nappina (tiketti #82)
+// E2E: Paivanavigointi kolmena elementtina
 //
-// Vieritettava nauha (#79/#81) korvattiin viidella napilla. Testit syottavat
-// oman kalenterin, jotta ne eivat riipu siita mita cron on sattunut hakemaan
-// -- sama periaate kuin useFixtureSnapshotissa.
+// Viisi nappia (#82) korvattiin kolmella: < | paivamaara | >. Indeksit ovat
+// siis 0 = taaksepain, 1 = keskimmainen (paivamaara + paluu tahan paivaan),
+// 2 = eteenpain. Testit syottavat oman kalenterin, jotta ne eivat riipu
+// siita mita cron on sattunut hakemaan -- sama periaate kuin
+// useFixtureSnapshotissa.
 //
 // Kalenterissa on tarkoituksella AUKKO: eilen, tanaan ja ylihuomenna
 // pelataan, huomenna ei. Juuri se aukko testaa nuolten tarkeimman saannon --
@@ -115,22 +117,24 @@ test.describe('Päivänavigointi', () => {
     // antaa joka testille tuoreen kontekstin, joten localStorage on tyhja.
   });
 
-  test('VIISI nappia, ei enempaa', async ({ page }) => {
+  test('KOLME elementtia, ei enempaa', async ({ page }) => {
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
-    expect(await buttons(page).count()).toBe(5);
+    expect(await buttons(page).count()).toBe(3);
   });
 
-  test('napit ovat nuoli, eilen, tanaan, huomenna, nuoli', async ({ page }) => {
+  test('jarjestys on nuoli, paivamaara, nuoli', async ({ page }) => {
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
 
     const labels = await buttons(page).allInnerTexts();
-    expect(labels[0]).toContain('‹');
-    expect(labels[1]).toContain('Eilen');
-    expect(labels[2]).toContain('Tänään');
-    expect(labels[3]).toContain('Huomenna');
-    expect(labels[4]).toContain('›');
+    expect(labels[0]).toContain('\u2039');
+    expect(labels[2]).toContain('\u203a');
+
+    // Keskimmainen ei ole nuoli vaan ainoa tietosisalto: paiva ja maara
+    expect(labels[1]).toContain('Tänään');
+    expect(labels[1]).toMatch(/\d+\.\d+\./);
+    expect(labels[1]).toContain('ottelua');
   });
 
   test('EI SCROLLBARIA — navigointi mahtuu ruudulle', async ({ page }) => {
@@ -152,19 +156,23 @@ test.describe('Päivänavigointi', () => {
     await expect(page.locator('.timeline-strip')).toHaveCount(0);
   });
 
-  test('nimetty paiva nayttaa otteluiden maaran', async ({ page }) => {
+  test('keskimmainen nappi kertoo paivan JA otteluiden maaran', async ({ page }) => {
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
-    await expect(buttons(page).nth(2)).toContainText('2'); // tanaan: 2 ottelua
+    await expect(buttons(page).nth(1)).toContainText('Tänään');
+    await expect(buttons(page).nth(1)).toContainText('2 ottelua');
   });
 
-  test('paiva jolla ei pelata jaa himmeaksi mutta pysyy painettavana', async ({ page }) => {
+  // Nuolet eivat vie tyhjaan paivaan, mutta sailytetty valinta voi osua
+  // sellaiseen. Silloin nakyman on sanottava suoraan ettei pelata -- tyhja
+  // lista ilman selitysta nayttaa virheelta.
+  test('tyhja paiva sanotaan suoraan eika jateta arvattavaksi', async ({ page }) => {
+    await page.addInitScript((day: string) => localStorage.setItem('bt_timeline_day', day), ymd(1));
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
 
-    const tomorrow = buttons(page).nth(3); // huomenna puuttuu kalenterista
-    await expect(tomorrow).toHaveAttribute('style', /opacity/);
-    await expect(tomorrow).toBeEnabled();
+    await expect(buttons(page).nth(1)).toContainText('Huomenna');
+    await expect(buttons(page).nth(1)).toContainText('0 ottelua');
   });
 
   test('NUOLI HYPPAA OTTELUPAIVAAN, ei kalenteripaivaan', async ({ page }) => {
@@ -172,7 +180,7 @@ test.describe('Päivänavigointi', () => {
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
 
     // Valittuna tanaan; huomenna ei pelata -> nuolen pitaa vieda ylihuomiseen
-    await buttons(page).nth(4).click();
+    await buttons(page).nth(2).click();
     await expect.poll(() => selectedDay(page)).toBe(ymd(2));
   });
 
@@ -188,33 +196,55 @@ test.describe('Päivänavigointi', () => {
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
 
-    await buttons(page).nth(4).click(); // viimeiseen ottelupaivaan
-    await expect(buttons(page).nth(4)).toBeDisabled();
+    await buttons(page).nth(2).click(); // viimeiseen ottelupaivaan
+    await expect(buttons(page).nth(2)).toBeDisabled();
   });
 
-  test('pikavalinta korostuu kun se on valittuna', async ({ page }) => {
+  test('keskimmainen on korostettu ja passiivinen kun katsotaan tata paivaa', async ({ page }) => {
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
 
-    await buttons(page).nth(1).click(); // Eilen
     await expect(buttons(page).nth(1)).toHaveClass(/active/);
-    await expect(buttons(page).nth(2)).not.toHaveClass(/active/);
+    await expect(buttons(page).nth(1)).toBeDisabled();
   });
 
-  test('VALITTU PAIVA SANOTAAN kun se ei ole mikaan pikavalinnoista', async ({ page }) => {
+  // Keskimmainen on ainoa paluureitti tahan paivaan: nuolilla voi kavella
+  // kauas, eika pikavalintoja enaa ole.
+  test('keskimmainen palauttaa tahan paivaan kun ollaan muualla', async ({ page }) => {
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
 
-    await buttons(page).nth(4).click(); // ylihuominen
-    await expect(page.locator('#round-games')).toContainText('Valittuna', { timeout: 10000 });
-    await expect(page.locator('#round-games')).toContainText(ymd(2));
+    await buttons(page).nth(0).click(); // eiliseen
+    await expect.poll(() => selectedDay(page)).toBe(ymd(-1));
+    await expect(buttons(page).nth(1)).toBeEnabled();
+
+    await buttons(page).nth(1).click();
+    await expect.poll(() => selectedDay(page)).toBe(ymd(0));
+  });
+
+  // Koko uudistuksen syy: aiemmin paivamaara nakyi vain silloin kun valinta
+  // oli pikavalintojen ulkopuolella. Nyt se on aina luettavissa.
+  test('PAIVAMAARA NAKYY AINA -- myos tanaan ja ylihuomenna', async ({ page }) => {
+    await page.goto('/demo.html');
+    await expect(nav(page)).toBeVisible({ timeout: 10000 });
+
+    const dayMonth = (offset: number) => {
+      const d = new Date();
+      d.setDate(d.getDate() + offset);
+      return `${d.getDate()}.${d.getMonth() + 1}.`;
+    };
+
+    await expect(buttons(page).nth(1)).toContainText(dayMonth(0));
+
+    await buttons(page).nth(2).click(); // ylihuominen
+    await expect(buttons(page).nth(1)).toContainText(dayMonth(2), { timeout: 10000 });
   });
 
   test('valinta sailyy sivun paivityksen yli', async ({ page }) => {
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
 
-    await buttons(page).nth(1).click();
+    await buttons(page).nth(0).click();
     const selected = await selectedDay(page);
     expect(selected).toBeTruthy();
 
@@ -227,7 +257,7 @@ test.describe('Päivänavigointi', () => {
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
 
-    await buttons(page).nth(4).click(); // ylihuominen: 3 ottelua ilman kertoimia
+    await buttons(page).nth(2).click(); // ylihuominen: 3 ottelua ilman kertoimia
     await expect(page.locator('#round-games')).toContainText('Otteluohjelma', { timeout: 10000 });
     await expect(page.locator('#round-games')).toContainText('Ylihuominen');
   });
@@ -235,14 +265,14 @@ test.describe('Päivänavigointi', () => {
   test('otteluohjelma ryhmittelee sarjoittain', async ({ page }) => {
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
-    await buttons(page).nth(4).click();
+    await buttons(page).nth(2).click();
     await expect(page.locator('#round-games')).toContainText('Serie A', { timeout: 10000 });
   });
 
   test('mennyt ottelu nayttaa tuloksen otteluohjelmassa', async ({ page }) => {
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
-    await buttons(page).nth(1).click(); // eilinen
+    await buttons(page).nth(0).click(); // eilinen
     await expect(page.locator('#round-games')).toContainText(/2–1|Menneet/, { timeout: 10000 });
   });
 
@@ -251,7 +281,7 @@ test.describe('Päivänavigointi', () => {
     await page.goto('/demo.html');
 
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
-    expect(await buttons(page).count()).toBe(5);
+    expect(await buttons(page).count()).toBe(3);
     await expect(page.locator('#round-games')).toContainText('Otteluohjelmaa ei saatu');
   });
 
@@ -260,7 +290,7 @@ test.describe('Päivänavigointi', () => {
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
 
-    await buttons(page).nth(4).click();
+    await buttons(page).nth(2).click();
     await expect.poll(() => selectedDay(page)).toBe(ymd(1));
   });
 
@@ -268,7 +298,7 @@ test.describe('Päivänavigointi', () => {
     await useCalendar(page, { days: 'ei taulukko' });
     await page.goto('/demo.html');
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
-    expect(await buttons(page).count()).toBe(5);
+    expect(await buttons(page).count()).toBe(3);
   });
 
   // Tiketti #105: navigointi näkyy NYT myös jääkiekkotilassa ja laskee
@@ -285,13 +315,13 @@ test.describe('Päivänavigointi', () => {
     await page.goto('/demo.html');
 
     await expect(nav(page)).toBeVisible({ timeout: 10000 });
-    expect(await buttons(page).count()).toBe(5);
+    expect(await buttons(page).count()).toBe(3);
 
     // "Tänään" sisältää mixedCalendar():ssa 2 jalkapallo-ottelua ja 1
     // jääkiekko-ottelun — jääkiekkotilan laskurin pitää näyttää 1, ei 3.
     const labels = await buttons(page).allInnerTexts();
-    expect(labels[2]).toContain('Tänään');
-    expect(labels[2]).toContain('1');
+    expect(labels[1]).toContain('Tänään');
+    expect(labels[1]).toContain('1 ottelu');
   });
 
   test('sama sekakalenteri: jalkapallotilassa laskuri jattaa jaakiekko-ottelun pois', async ({ page }) => {
@@ -301,8 +331,7 @@ test.describe('Päivänavigointi', () => {
     // Tässä tilassa "Tänään" on kaksi jalkapallo-ottelua (ks. calendar()),
     // mixedCalendar():n jääkiekko-ottelu ei saa nostaa lukua kolmeen.
     const labels = await buttons(page).allInnerTexts();
-    expect(labels[2]).toContain('Tänään');
-    expect(labels[2]).toContain('2');
-    expect(labels[2]).not.toContain('3');
+    expect(labels[1]).toContain('Tänään');
+    expect(labels[1]).toContain('2 ottelua');
   });
 });

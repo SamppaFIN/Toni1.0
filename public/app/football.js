@@ -130,7 +130,7 @@ export async function reload() {
   // Tiketti #79: otteluohjelma rinnakkain snapshotin kanssa. Aikajana on
   // lisä eikä ehto — jos kalenteri ei lataudu, kortit renderöityvät kuten
   // ennen ja aikajanan tilalle tulee selitys.
-  const [{ snapshot, error }] = await Promise.all([loadSnapshot(), timeline.load(), serverArchive.load()]);
+  const [{ snapshot, error }] = await Promise.all([loadSnapshot(), timeline.load(), timeline.loadPreviews(), serverArchive.load()]);
   setSnapshot(snapshot, error);
 
   // Tiketti #60: talleta kertoimet ja mallin arvio ennen kuin ne katoavat.

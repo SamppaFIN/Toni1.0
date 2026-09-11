@@ -19,12 +19,23 @@ export const SCHEMA_VERSION = 1;
 const SPORT_KEY = 'bt_sport';
 
 /** Nakyva laji: hockey | football | both. Oletus jaakiekko. */
+/**
+ * Näytettävä laji: 'both' | 'hockey' | 'football'.
+ *
+ * OLETUS ON 'both'. Aiemmin se oli 'hockey', jolloin uusi käyttäjä näki vain
+ * Liigan eikä tiennyt että jalkapallo on olemassa — sarjat olivat olemassa,
+ * data haettiin ja kortit rakennettiin, mutta suodatin pudotti ne ennen
+ * renderöintiä. Molemmat lajit näkyvissä on ainoa oletus joka ei piilota
+ * puolta järjestelmästä käyttäjältä joka ei ole käynyt Admin-välilehdellä.
+ *
+ * Valinta säilyy: kerran tehty asetus voittaa oletuksen.
+ */
 export function sportMode() {
   try {
     const v = localStorage.getItem(SPORT_KEY);
-    return v === 'football' || v === 'both' ? v : 'hockey';
+    return v === 'football' || v === 'hockey' ? v : 'both';
   } catch {
-    return 'hockey';
+    return 'both';
   }
 }
 

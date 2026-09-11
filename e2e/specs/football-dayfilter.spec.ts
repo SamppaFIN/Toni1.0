@@ -21,49 +21,51 @@ test.describe('Paivanavigointi', () => {
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
   });
 
-  test('tarjoaa eilisen, tanaan ja huomisen', async ({ page }) => {
-    // Tiketti #82: "Kaikki" poistui kun navigointi supistui viiteen nappiin.
-    // Koko aikaikkuna on yha tavoitettavissa nuolilla.
-    const nav = page.locator('#round-games');
-    for (const label of ['Eilen', 'Tänään', 'Huomenna']) {
-      await expect(nav.locator(`button:has-text("${label}")`).first()).toBeVisible();
-    }
-    await expect(nav.locator('button:has-text("Kaikki")')).toHaveCount(0);
+  test('navigointi on kaksi nuolta ja paivamaara', async ({ page }) => {
+    // "Kaikki" poistui jo tiketissa #82. Nyt myos Eilen/Huomenna-pikavalinnat
+    // ovat poissa: koko aikaikkuna tavoitetaan nuolilla, ja keskimmainen
+    // kertoo aina mita paivaa katsotaan.
+    const nav = page.locator('#round-games .day-nav .day-btn');
+    await expect(nav).toHaveCount(3);
+    await expect(nav.nth(1)).toContainText('Tänään');
+    await expect(page.locator('#round-games button:has-text("Kaikki")')).toHaveCount(0);
   });
 
   test('oletuksena tanaan on valittuna', async ({ page }) => {
-    const today = page.locator('#round-games button:has-text("Tänään")').first();
+    const today = page.locator('#round-games .day-nav .day-btn').nth(1);
     // Aktiivinen nappi on korostettu aksenttivarilla
     const weight = await today.evaluate((el) => getComputedStyle(el).fontWeight);
     expect(Number(weight)).toBeGreaterThanOrEqual(700);
   });
 
   test('paivan vaihto sailyy sivun paivityksen yli', async ({ page }) => {
-    await page.locator('#round-games button:has-text("Huomenna")').first().click();
+    const nav = page.locator('#round-games .day-nav .day-btn');
+    await nav.nth(2).click(); // seuraava ottelupaiva
     await expect(page.locator('#round-games')).not.toBeEmpty();
+
+    const chosen = await page.evaluate(() => localStorage.getItem('bt_timeline_day'));
+    expect(chosen, 'valinnan pitaa tallentua').toBeTruthy();
 
     await page.reload();
     await expect(page.locator('#round-games')).not.toBeEmpty({ timeout: 10000 });
-    const tomorrow = page.locator('#round-games button:has-text("Huomenna")').first();
-    const weight = await tomorrow.evaluate((el) => getComputedStyle(el).fontWeight);
-    expect(Number(weight), 'valinnan pitaa sailya').toBeGreaterThanOrEqual(700);
+    expect(await page.evaluate(() => localStorage.getItem('bt_timeline_day')), 'valinnan pitaa sailya').toBe(chosen);
   });
 
   test('eiliseen voi siirtya ja nakyma pysyy ehjana', async ({ page }) => {
-    await page.locator('#round-games button:has-text("Eilen")').first().click();
+    await page.locator('#round-games .day-nav .day-btn').nth(0).click();
     // Joko arkistoituja otteluita tai selkea tyhja tila -- ei koskaan rikki
     await expect(page.locator('#round-games')).toContainText(/ottelua|Ei otteluita/, { timeout: 5000 });
-    // Navigointi on yha kaytettavissa
-    await expect(page.locator('#round-games button:has-text("Tänään")').first()).toBeVisible();
+    // Navigointi on yha kaytettavissa, ja keskimmainen palauttaa tahan paivaan
+    await expect(page.locator('#round-games .day-nav .day-btn').nth(1)).toBeEnabled();
   });
 
   test('NUOLILLA paasee aikaikkunan yli — Kaikki ei ole enaa tarpeen', async ({ page }) => {
     const buttons = page.locator('.day-nav .day-btn');
-    await expect(buttons).toHaveCount(5);
+    await expect(buttons).toHaveCount(3);
 
     // Eteenpain kunnes nuoli himmenee: jokainen askel on ottelupaiva
     for (let i = 0; i < 12; i++) {
-      const next = buttons.nth(4);
+      const next = buttons.nth(2);
       if (await next.isDisabled()) break;
       await next.click();
       await expect(page.locator('#round-games')).not.toBeEmpty();
@@ -79,8 +81,9 @@ test.describe('Paivanavigointi', () => {
     });
     test.skip(upcoming === 0, 'Snapshotissa ei ole pelaamattomia otteluita');
 
-    // Tanaan-nappi: jos snapshotissa on pelaamattomia, kortteja pitaa nakya
-    await page.locator('.day-nav .day-btn').nth(2).click();
+    // Nakyma on jo tassa paivassa, joten keskimmainen on pois kaytosta.
+    // Jos snapshotissa on pelaamattomia, kortteja pitaa nakya heti.
+    await expect(page.locator('.day-nav .day-btn').nth(1)).toBeDisabled();
     await expect(page.locator('#round-games')).toContainText(/ottelua|Ei otteluita/, { timeout: 5000 });
   });
 });

@@ -83,6 +83,40 @@ export function hasStatsSource(sportKey: string): boolean {
 }
 
 /**
+ * Varalähde: sarjataulukko ESPN:n ottelutuloksista.
+ *
+ * Palauttaa null jos sarjalle ei ole ESPN-koodia tai haku pettää sekin.
+ * TYHJÄ KAUSI HYLÄTÄÄN: nolla pelattua ottelua ei kerro joukkueista mitään,
+ * ja tyhjä taulukko näyttäisi kutsujalle toimivalta lähteeltä (#103:n
+ * emptySeason-ansa). Silloin on rehellisempi jäädä market-only-tilaan.
+ *
+ * Edellinen kausi haetaan myös: ilman sitä kolmen ottelun kutistus vetäisi
+ * kaikki joukkueet sarjan keskitasoon ja malli sanoisi jokaisesta ottelusta
+ * lähes samaa.
+ */
+async function espnFallback(sportKey: string, year: number, now: Date): Promise<LeagueStatsPair | null> {
+  const { hasEspnStats, fetchEspnStatsPair } = await import('./stats-espn.js');
+  if (!hasEspnStats(sportKey)) return null;
+
+  try {
+    const pair = await fetchEspnStatsPair(sportKey, year, now);
+    if (!pair.current.teams.length) {
+      console.warn(`[Stats] ${sportKey}: ESPN-varalähde palautti tyhjän kauden — ei käytetä`);
+      return null;
+    }
+    const played = Math.round(pair.current.teams.reduce((s, t) => s + t.played, 0) / 2);
+    console.log(
+      `[Stats] ${sportKey}: VARALÄHDE ESPN — ${pair.current.teams.length} joukkuetta, ${played} ottelua` +
+        `${pair.previous ? `, priori kaudelta ${pair.previous.season}` : ', ei prioria'}`
+    );
+    return pair;
+  } catch (err) {
+    console.warn(`[Stats] ${sportKey}: ESPN-varalähde epäonnistui myös — ${(err as Error).message}`);
+    return null;
+  }
+}
+
+/**
  * Hae sarjan nykyisen ja edellisen kauden tilastot.
  *
  * Palauttaa null jos lähdettä ei ole tai haku epäonnistuu. Epäonnistuminen ei
@@ -110,7 +144,16 @@ export async function fetchStatsFor(sportKey: string, now = new Date()): Promise
   try {
     current = await source.fetch(year);
   } catch (err) {
+    // Ensisijainen lähde petti. ENNEN tästä seurasi suoraan market-only, mutta
+    // samat tulokset ovat ESPN:ssä ilmaiseksi ja sarjataulukko on niistä
+    // johdettavissa — Elo laskettiin niistä jo ennestään (#57). Yleisin syy
+    // tulla tänne on puuttuva FOOTBALL_DATA_TOKEN, jolloin koko jalkapallo
+    // olisi ilman voimalukuja vaikka data on saatavilla.
     console.warn(`[Stats] ${sportKey} (${year}): haku epäonnistui — ${(err as Error).message}`);
+
+    const espn = await espnFallback(sportKey, year, now);
+    if (espn) return espn;
+
     console.warn('[Stats] → malli jää market-only-tilaan tälle sarjalle');
     return null;
   }
