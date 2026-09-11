@@ -15,13 +15,19 @@
     "PÄIVITTÄMINEN: muokkaa `events`-listaa ja päivitä `entered_at`. Ottelu",
     "täsmätään sarjan, päivämäärän ja joukkuenimien perusteella, joten",
     "vanhentuneet rivit eivät osu mihinkään eivätkä tee vahinkoa — ne vain",
-    "jäävät käyttämättä. Ks. src/ingest/odds-manual.ts."
+    "jäävät käyttämättä. Ks. src/ingest/odds-manual.ts.",
+    "",
+    "JALKAPALLON JOUKKUENIMET on kirjoitettava KALENTERIN (ESPN) asussa.",
+    "Tasmaytys vain poistaa valimerkit eika tunne aliaksia, joten",
+    "\"Bournemouth\" EI osu \"AFC Bournemouthiin\" eika \"Brighton and Hove",
+    "Albion\" osu \"Brighton & Hove Albioniin\". Jaakiekolla on oma",
+    "aliaskarttansa (normalizeLiigaName), jalkapallolla ei."
   ],
   "bookmaker": "Veikkaus",
   "key": "veikkaus",
   "link": "https://www.veikkaus.fi/fi/vedonlyonti",
   "source": "veikkaus.fi/fi/vedonlyonti — kerroinsivu, luettu käsin",
-  "entered_at": "2026-09-06T09:00:00.000Z",
+  "entered_at": "2026-09-11T20:00:00.000Z",
   "note": "Veikkauksella ei ole kerroinrajapintaa — hinnat syötetty käsin kerroinsivulta",
   "events": [
     { "sportKey": "icehockey_liiga", "date": "2026-09-01", "home": "Jukurit",      "away": "HPK",     "odds": [2.82, 3.75, 2.37] },
@@ -44,6 +50,17 @@
     { "sportKey": "icehockey_liiga", "date": "2026-09-09", "home": "Lukko",        "away": "JYP",     "odds": [2.22, 4.15, 2.78] },
     { "sportKey": "icehockey_liiga", "date": "2026-09-09", "home": "Pelicans",     "away": "KalPa",   "odds": [2.20, 4.00, 2.88] },
     { "sportKey": "icehockey_liiga", "date": "2026-09-09", "home": "Sport",        "away": "TPS",     "odds": [3.00, 3.95, 2.14] },
-    { "sportKey": "icehockey_liiga", "date": "2026-09-09", "home": "Ässät",        "away": "Jokerit", "odds": [2.28, 3.95, 2.75] }
+    { "sportKey": "icehockey_liiga", "date": "2026-09-09", "home": "Ässät",        "away": "Jokerit", "odds": [2.28, 3.95, 2.75] },
+
+    { "sportKey": "soccer_epl", "date": "2026-09-12", "home": "Aston Villa",       "away": "Nottingham Forest",     "odds": [2.17, 3.40, 3.40] },
+    { "sportKey": "soccer_epl", "date": "2026-09-12", "home": "AFC Bournemouth",   "away": "Brentford",             "odds": [2.54, 3.70, 2.58] },
+    { "sportKey": "soccer_epl", "date": "2026-09-12", "home": "Chelsea",           "away": "Hull City",             "odds": [1.22, 6.75, 12.00] },
+    { "sportKey": "soccer_epl", "date": "2026-09-12", "home": "Crystal Palace",    "away": "Ipswich Town",          "odds": [1.87, 3.80, 4.00] },
+    { "sportKey": "soccer_epl", "date": "2026-09-12", "home": "Liverpool",         "away": "Fulham",                "odds": [1.42, 5.00, 6.50] },
+    { "sportKey": "soccer_epl", "date": "2026-09-12", "home": "Tottenham Hotspur", "away": "Everton",               "odds": [1.98, 3.60, 3.70] },
+    { "sportKey": "soccer_epl", "date": "2026-09-12", "home": "Sunderland",        "away": "Arsenal",               "odds": [6.25, 4.00, 1.55] },
+    { "sportKey": "soccer_epl", "date": "2026-09-13", "home": "Coventry City",     "away": "Brighton & Hove Albion","odds": [3.65, 3.65, 1.98] },
+    { "sportKey": "soccer_epl", "date": "2026-09-13", "home": "Manchester United", "away": "Manchester City",       "odds": [3.05, 3.80, 2.15] },
+    { "sportKey": "soccer_epl", "date": "2026-09-14", "home": "Leeds United",      "away": "Newcastle United",      "odds": [2.32, 3.50, 2.98] }
   ]
 }
