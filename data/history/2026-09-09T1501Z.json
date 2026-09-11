@@ -1,0 +1,1078 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-09T15:01:22.909Z",
+  "sport": "football",
+  "source": "live",
+  "providers": [
+    "Veikkaus (kasin syotetty)",
+    "Ristikaksi — Liiga-kausiennakko 2026-27 + toteutuneet tulokset (Elo)",
+    "liiga.fi/api/v2",
+    "RSS-uutissyötteet"
+  ],
+  "leagues": [
+    "Liiga"
+  ],
+  "matches": [
+    {
+      "id": "icehockey_liiga:2026-09-09:JUK-HIF",
+      "league": "Liiga",
+      "kickoff": "2026-09-09T15:30:00Z",
+      "home": {
+        "name": "Jukurit",
+        "short": "JUK",
+        "color": "#1F6FEB"
+      },
+      "away": {
+        "name": "HIFK",
+        "short": "HIF",
+        "color": "#BF3989"
+      },
+      "odds": [
+        {
+          "bookmaker": "Veikkaus",
+          "key": "veikkaus",
+          "market": "1X2",
+          "home": 3.2,
+          "draw": 3.9,
+          "away": 2.07,
+          "commission": 0,
+          "fetched_at": "2026-09-06T09:00:00.000Z",
+          "link": "https://www.veikkaus.fi/fi/vedonlyonti",
+          "manual": true,
+          "note": "Veikkauksella ei ole kerroinrajapintaa — hinnat syötetty käsin kerroinsivulta"
+        }
+      ],
+      "best": {
+        "home": 3.2,
+        "draw": 3.9,
+        "away": 2.07,
+        "home_effective": 3.2,
+        "draw_effective": 3.9,
+        "away_effective": 2.07,
+        "home_book": "Veikkaus",
+        "draw_book": "Veikkaus",
+        "away_book": "Veikkaus"
+      },
+      "market": {
+        "margin": 0.052,
+        "implied": {
+          "home": 0.2971,
+          "draw": 0.2437,
+          "away": 0.4592
+        },
+        "sharp": {
+          "home": 0.2971,
+          "draw": 0.2437,
+          "away": 0.4592
+        },
+        "sharp_source": "mediaani (1 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 2.927,
+        "lambda_away": 1.879,
+        "probs": {
+          "home": 0.3557,
+          "draw": 0.238,
+          "away": 0.4064
+        },
+        "poisson_probs": {
+          "home": 0.5607,
+          "draw": 0.2178,
+          "away": 0.2214
+        },
+        "blend_weight": 0.22222222222222224,
+        "over25": 0.8576,
+        "btts": 0.804,
+        "top_scores": [
+          {
+            "score": "2-1",
+            "p": 0.0661
+          },
+          {
+            "score": "3-1",
+            "p": 0.0645
+          },
+          {
+            "score": "2-2",
+            "p": 0.0621
+          },
+          {
+            "score": "3-2",
+            "p": 0.0606
+          },
+          {
+            "score": "1-1",
+            "p": 0.0474
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (JUK, 3 ottelua) / tämä + viime kausi (HIF, 2 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 56 % → paino markkinaa vastaan 22 % (täysi 40 %). Kohtalaisesti dataa."
+          }
+        ],
+        "home_strength": {
+          "attack": 0.73,
+          "defense": 0.96
+        },
+        "away_strength": {
+          "attack": 0.93,
+          "defense": 1.12
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 3.2,
+            "odds_effective": 3.2,
+            "book": "Veikkaus",
+            "model_prob": 0.3557,
+            "implied_prob": 0.2971,
+            "edge": 0.1382,
+            "flag": "strong",
+            "kelly_fraction": 0.0157,
+            "stake_suggestion": 1.57
+          },
+          {
+            "side": "draw",
+            "odds": 3.9,
+            "odds_effective": 3.9,
+            "book": "Veikkaus",
+            "model_prob": 0.238,
+            "implied_prob": 0.2437,
+            "edge": -0.0718,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.07,
+            "odds_effective": 2.07,
+            "book": "Veikkaus",
+            "model_prob": 0.4064,
+            "implied_prob": 0.4592,
+            "edge": -0.1588,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 13,
+          "played": 3,
+          "form": "LLW",
+          "gf_pg": 1.67,
+          "ga_pg": 2.67,
+          "home_gf_pg": 2.5,
+          "away_gf_pg": 0,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1,
+          "elo": 1372,
+          "elo_change": -8,
+          "elo_rank": 16
+        },
+        "away": {
+          "rank": 11,
+          "played": 2,
+          "form": "WL",
+          "gf_pg": 3,
+          "ga_pg": 4,
+          "home_gf_pg": 5,
+          "away_gf_pg": 1,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.5,
+          "elo": 1492,
+          "elo_change": -8,
+          "elo_rank": 10
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "16-vuotias superlupaus nousi HIFK:n kokoonpanoon – Jokerien pakka sekoitettiin",
+          "url": "https://www.iltalehti.fi/smliiga/a/eabd0c91-72b2-40d4-a299-f0b2aeaa6def?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-09-09T09:30:11.000Z",
+          "event_type": "lineup_change",
+          "team": "Jukurit",
+          "player": null,
+          "confidence": 0.4,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "HIFK:n löytö Ruotsista toi synkät muistot pintaan – ”Masken” Carlsson kertoo, miten sammutti Suomelta Moskovan valot",
+          "url": "https://yle.fi/a/74-20243832?origin=rss",
+          "source": "Yle Urheilu",
+          "published_at": "2026-09-08T12:56:23.000Z",
+          "event_type": null,
+          "team": "HIFK",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Kommentti: Olli Jokinen puhui taas palturia – HIFK:n karu totuus paljastui heti",
+          "url": "https://www.is.fi/sm-liiga/art-2000012257142.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-09-08T05:02:00.000Z",
+          "event_type": null,
+          "team": "HIFK",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "HIFK:n hyökkääjälle pelikielto",
+          "url": "https://www.iltalehti.fi/smliiga/a/e4c6e828-e0d8-4d7f-a861-73882cb0d8b8?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-09-07T03:29:01.000Z",
+          "event_type": "injury",
+          "team": "HIFK",
+          "player": null,
+          "confidence": 0.45,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "SM-liigassa tärähti pelikielto",
+          "url": "https://www.is.fi/sm-liiga/art-2000012256105.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-09-06T20:10:00.000Z",
+          "event_type": "suspension",
+          "team": "HIFK",
+          "player": null,
+          "confidence": 0.5,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        }
+      ]
+    },
+    {
+      "id": "icehockey_liiga:2026-09-09:LUK-JYP",
+      "league": "Liiga",
+      "kickoff": "2026-09-09T15:30:00Z",
+      "home": {
+        "name": "Lukko",
+        "short": "LUK",
+        "color": "#BF3989"
+      },
+      "away": {
+        "name": "JYP",
+        "short": "JYP",
+        "color": "#238636"
+      },
+      "odds": [
+        {
+          "bookmaker": "Veikkaus",
+          "key": "veikkaus",
+          "market": "1X2",
+          "home": 2.22,
+          "draw": 4.15,
+          "away": 2.78,
+          "commission": 0,
+          "fetched_at": "2026-09-06T09:00:00.000Z",
+          "link": "https://www.veikkaus.fi/fi/vedonlyonti",
+          "manual": true,
+          "note": "Veikkauksella ei ole kerroinrajapintaa — hinnat syötetty käsin kerroinsivulta"
+        }
+      ],
+      "best": {
+        "home": 2.22,
+        "draw": 4.15,
+        "away": 2.78,
+        "home_effective": 2.22,
+        "draw_effective": 4.15,
+        "away_effective": 2.78,
+        "home_book": "Veikkaus",
+        "draw_book": "Veikkaus",
+        "away_book": "Veikkaus"
+      },
+      "market": {
+        "margin": 0.0511,
+        "implied": {
+          "home": 0.4285,
+          "draw": 0.2292,
+          "away": 0.3422
+        },
+        "sharp": {
+          "home": 0.4285,
+          "draw": 0.2292,
+          "away": 0.3422
+        },
+        "sharp_source": "mediaani (1 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 3.918,
+        "lambda_away": 2.075,
+        "probs": {
+          "home": 0.4806,
+          "draw": 0.2158,
+          "away": 0.3036
+        },
+        "poisson_probs": {
+          "home": 0.6746,
+          "draw": 0.1658,
+          "away": 0.1596
+        },
+        "blend_weight": 0.21176470588235297,
+        "over25": 0.9365,
+        "btts": 0.8577,
+        "top_scores": [
+          {
+            "score": "3-2",
+            "p": 0.0549
+          },
+          {
+            "score": "4-2",
+            "p": 0.0538
+          },
+          {
+            "score": "3-1",
+            "p": 0.053
+          },
+          {
+            "score": "4-1",
+            "p": 0.0519
+          },
+          {
+            "score": "5-2",
+            "p": 0.0422
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (LUK, 2 ottelua) / tämä + viime kausi (JYP, 1 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 53 % → paino markkinaa vastaan 21 % (täysi 40 %). Kohtalaisesti dataa."
+          }
+        ],
+        "home_strength": {
+          "attack": 1.07,
+          "defense": 0.87
+        },
+        "away_strength": {
+          "attack": 1.13,
+          "defense": 1.02
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.22,
+            "odds_effective": 2.22,
+            "book": "Veikkaus",
+            "model_prob": 0.4806,
+            "implied_prob": 0.4285,
+            "edge": 0.0669,
+            "flag": "strong",
+            "kelly_fraction": 0.0137,
+            "stake_suggestion": 1.37
+          },
+          {
+            "side": "draw",
+            "odds": 4.15,
+            "odds_effective": 4.15,
+            "book": "Veikkaus",
+            "model_prob": 0.2158,
+            "implied_prob": 0.2292,
+            "edge": -0.1044,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.78,
+            "odds_effective": 2.78,
+            "book": "Veikkaus",
+            "model_prob": 0.3036,
+            "implied_prob": 0.3422,
+            "edge": -0.156,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 4,
+          "played": 2,
+          "form": "LW",
+          "gf_pg": 3.5,
+          "ga_pg": 2,
+          "home_gf_pg": 3.5,
+          "away_gf_pg": null,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.5,
+          "elo": 1532,
+          "elo_change": 2,
+          "elo_rank": 6
+        },
+        "away": {
+          "rank": 9,
+          "played": 1,
+          "form": "W",
+          "gf_pg": 4,
+          "ga_pg": 3,
+          "home_gf_pg": null,
+          "away_gf_pg": 4,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 3,
+          "elo": 1601,
+          "elo_change": 11,
+          "elo_rank": 3
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "Tomek Valtoselle riitti: Jokereilla kaikki uusiksi – kova veto tolppien väliin",
+          "url": "https://www.is.fi/sm-liiga/art-2000012262189.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-09-09T09:14:00.000Z",
+          "event_type": "lineup_change",
+          "team": "JYP",
+          "player": null,
+          "confidence": 0.4,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        }
+      ]
+    },
+    {
+      "id": "icehockey_liiga:2026-09-09:PEL-KAL",
+      "league": "Liiga",
+      "kickoff": "2026-09-09T15:30:00Z",
+      "home": {
+        "name": "Pelicans",
+        "short": "PEL",
+        "color": "#0E7490"
+      },
+      "away": {
+        "name": "KalPa",
+        "short": "KAL",
+        "color": "#57606A"
+      },
+      "odds": [
+        {
+          "bookmaker": "Veikkaus",
+          "key": "veikkaus",
+          "market": "1X2",
+          "home": 2.2,
+          "draw": 4,
+          "away": 2.88,
+          "commission": 0,
+          "fetched_at": "2026-09-06T09:00:00.000Z",
+          "link": "https://www.veikkaus.fi/fi/vedonlyonti",
+          "manual": true,
+          "note": "Veikkauksella ei ole kerroinrajapintaa — hinnat syötetty käsin kerroinsivulta"
+        }
+      ],
+      "best": {
+        "home": 2.2,
+        "draw": 4,
+        "away": 2.88,
+        "home_effective": 2.2,
+        "draw_effective": 4,
+        "away_effective": 2.88,
+        "home_book": "Veikkaus",
+        "draw_book": "Veikkaus",
+        "away_book": "Veikkaus"
+      },
+      "market": {
+        "margin": 0.0518,
+        "implied": {
+          "home": 0.4322,
+          "draw": 0.2377,
+          "away": 0.3301
+        },
+        "sharp": {
+          "home": 0.4322,
+          "draw": 0.2377,
+          "away": 0.3301
+        },
+        "sharp_source": "mediaani (1 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 3.354,
+        "lambda_away": 1.79,
+        "probs": {
+          "home": 0.4795,
+          "draw": 0.2266,
+          "away": 0.294
+        },
+        "poisson_probs": {
+          "home": 0.645,
+          "draw": 0.1876,
+          "away": 0.1674
+        },
+        "blend_weight": 0.22222222222222224,
+        "over25": 0.8861,
+        "btts": 0.8054,
+        "top_scores": [
+          {
+            "score": "3-1",
+            "p": 0.0662
+          },
+          {
+            "score": "3-2",
+            "p": 0.0592
+          },
+          {
+            "score": "2-1",
+            "p": 0.0592
+          },
+          {
+            "score": "4-1",
+            "p": 0.0555
+          },
+          {
+            "score": "2-2",
+            "p": 0.053
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (PEL, 2 ottelua) / tämä + viime kausi (KAL, 2 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 56 % → paino markkinaa vastaan 22 % (täysi 40 %). Kohtalaisesti dataa."
+          }
+        ],
+        "home_strength": {
+          "attack": 0.96,
+          "defense": 0.85
+        },
+        "away_strength": {
+          "attack": 0.99,
+          "defense": 0.98
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.2,
+            "odds_effective": 2.2,
+            "book": "Veikkaus",
+            "model_prob": 0.4795,
+            "implied_prob": 0.4322,
+            "edge": 0.0549,
+            "flag": "strong",
+            "kelly_fraction": 0.0114,
+            "stake_suggestion": 1.14
+          },
+          {
+            "side": "draw",
+            "odds": 4,
+            "odds_effective": 4,
+            "book": "Veikkaus",
+            "model_prob": 0.2266,
+            "implied_prob": 0.2377,
+            "edge": -0.0936,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.88,
+            "odds_effective": 2.88,
+            "book": "Veikkaus",
+            "model_prob": 0.294,
+            "implied_prob": 0.3301,
+            "edge": -0.1533,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 2,
+          "played": 2,
+          "form": "WW",
+          "gf_pg": 4,
+          "ga_pg": 2,
+          "home_gf_pg": 6,
+          "away_gf_pg": 2,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 3,
+          "elo": 1464,
+          "elo_change": 24,
+          "elo_rank": 12
+        },
+        "away": {
+          "rank": 10,
+          "played": 2,
+          "form": "LW",
+          "gf_pg": 2.5,
+          "ga_pg": 2.5,
+          "home_gf_pg": 4,
+          "away_gf_pg": 1,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.5,
+          "elo": 1531,
+          "elo_change": -14,
+          "elo_rank": 7
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "Tässä on SM-liigan todellinen mysteerimies – edes kuvaa ei löydy",
+          "url": "https://www.is.fi/sm-liiga/art-2000012259808.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-09-09T08:39:00.000Z",
+          "event_type": null,
+          "team": "Pelicans",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        }
+      ]
+    },
+    {
+      "id": "icehockey_liiga:2026-09-09:SPO-TPS",
+      "league": "Liiga",
+      "kickoff": "2026-09-09T15:30:00Z",
+      "home": {
+        "name": "Sport",
+        "short": "SPO",
+        "color": "#8250DF"
+      },
+      "away": {
+        "name": "TPS",
+        "short": "TPS",
+        "color": "#57606A"
+      },
+      "odds": [
+        {
+          "bookmaker": "Veikkaus",
+          "key": "veikkaus",
+          "market": "1X2",
+          "home": 3,
+          "draw": 3.95,
+          "away": 2.14,
+          "commission": 0,
+          "fetched_at": "2026-09-06T09:00:00.000Z",
+          "link": "https://www.veikkaus.fi/fi/vedonlyonti",
+          "manual": true,
+          "note": "Veikkauksella ei ole kerroinrajapintaa — hinnat syötetty käsin kerroinsivulta"
+        }
+      ],
+      "best": {
+        "home": 3,
+        "draw": 3.95,
+        "away": 2.14,
+        "home_effective": 3,
+        "draw_effective": 3.95,
+        "away_effective": 2.14,
+        "home_book": "Veikkaus",
+        "draw_book": "Veikkaus",
+        "away_book": "Veikkaus"
+      },
+      "market": {
+        "margin": 0.0538,
+        "implied": {
+          "home": 0.3163,
+          "draw": 0.2402,
+          "away": 0.4434
+        },
+        "sharp": {
+          "home": 0.3163,
+          "draw": 0.2402,
+          "away": 0.4434
+        },
+        "sharp_source": "mediaani (1 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 2.35,
+        "lambda_away": 2.812,
+        "probs": {
+          "home": 0.3155,
+          "draw": 0.2373,
+          "away": 0.4472
+        },
+        "poisson_probs": {
+          "home": 0.3129,
+          "draw": 0.2269,
+          "away": 0.4603
+        },
+        "blend_weight": 0.22222222222222224,
+        "over25": 0.888,
+        "btts": 0.8519,
+        "top_scores": [
+          {
+            "score": "2-2",
+            "p": 0.0628
+          },
+          {
+            "score": "2-3",
+            "p": 0.0588
+          },
+          {
+            "score": "1-2",
+            "p": 0.0534
+          },
+          {
+            "score": "1-3",
+            "p": 0.0501
+          },
+          {
+            "score": "3-2",
+            "p": 0.0492
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (SPO, 3 ottelua) / tämä + viime kausi (TPS, 2 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 56 % → paino markkinaa vastaan 22 % (täysi 40 %). Kohtalaisesti dataa."
+          }
+        ],
+        "home_strength": {
+          "attack": 0.75,
+          "defense": 1.3
+        },
+        "away_strength": {
+          "attack": 1.02,
+          "defense": 0.87
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 3,
+            "odds_effective": 3,
+            "book": "Veikkaus",
+            "model_prob": 0.3155,
+            "implied_prob": 0.3163,
+            "edge": -0.0535,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 3.95,
+            "odds_effective": 3.95,
+            "book": "Veikkaus",
+            "model_prob": 0.2373,
+            "implied_prob": 0.2402,
+            "edge": -0.0627,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.14,
+            "odds_effective": 2.14,
+            "book": "Veikkaus",
+            "model_prob": 0.4472,
+            "implied_prob": 0.4434,
+            "edge": -0.043,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 14,
+          "played": 3,
+          "form": "DLL",
+          "gf_pg": 2.33,
+          "ga_pg": 4.67,
+          "home_gf_pg": 4,
+          "away_gf_pg": 1.5,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 0.67,
+          "elo": 1367,
+          "elo_change": -28,
+          "elo_rank": 17
+        },
+        "away": {
+          "rank": 1,
+          "played": 2,
+          "form": "WW",
+          "gf_pg": 4.5,
+          "ga_pg": 1.5,
+          "home_gf_pg": 4.5,
+          "away_gf_pg": null,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 3,
+          "elo": 1463,
+          "elo_change": 38,
+          "elo_rank": 13
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "16-vuotias superlupaus nousi HIFK:n kokoonpanoon – Jokerien pakka sekoitettiin",
+          "url": "https://www.iltalehti.fi/smliiga/a/eabd0c91-72b2-40d4-a299-f0b2aeaa6def?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-09-09T09:30:11.000Z",
+          "event_type": "lineup_change",
+          "team": "TPS",
+          "player": null,
+          "confidence": 0.4,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "HIFK:n hyökkääjälle pelikielto",
+          "url": "https://www.iltalehti.fi/smliiga/a/e4c6e828-e0d8-4d7f-a861-73882cb0d8b8?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-09-07T03:29:01.000Z",
+          "event_type": "injury",
+          "team": "TPS",
+          "player": null,
+          "confidence": 0.45,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "SM-liigassa tärähti pelikielto",
+          "url": "https://www.is.fi/sm-liiga/art-2000012256105.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-09-06T20:10:00.000Z",
+          "event_type": "suspension",
+          "team": "TPS",
+          "player": null,
+          "confidence": 0.5,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        }
+      ]
+    },
+    {
+      "id": "icehockey_liiga:2026-09-09:ÄSS-JOK",
+      "league": "Liiga",
+      "kickoff": "2026-09-09T15:30:00Z",
+      "home": {
+        "name": "Ässät",
+        "short": "ÄSS",
+        "color": "#8250DF"
+      },
+      "away": {
+        "name": "Jokerit",
+        "short": "JOK",
+        "color": "#BF3989"
+      },
+      "odds": [
+        {
+          "bookmaker": "Veikkaus",
+          "key": "veikkaus",
+          "market": "1X2",
+          "home": 2.28,
+          "draw": 3.95,
+          "away": 2.75,
+          "commission": 0,
+          "fetched_at": "2026-09-06T09:00:00.000Z",
+          "link": "https://www.veikkaus.fi/fi/vedonlyonti",
+          "manual": true,
+          "note": "Veikkauksella ei ole kerroinrajapintaa — hinnat syötetty käsin kerroinsivulta"
+        }
+      ],
+      "best": {
+        "home": 2.28,
+        "draw": 3.95,
+        "away": 2.75,
+        "home_effective": 2.28,
+        "draw_effective": 3.95,
+        "away_effective": 2.75,
+        "home_book": "Veikkaus",
+        "draw_book": "Veikkaus",
+        "away_book": "Veikkaus"
+      },
+      "market": {
+        "margin": 0.0554,
+        "implied": {
+          "home": 0.4156,
+          "draw": 0.2399,
+          "away": 0.3445
+        },
+        "sharp": {
+          "home": 0.4156,
+          "draw": 0.2399,
+          "away": 0.3445
+        },
+        "sharp_source": "mediaani (1 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 4.155,
+        "lambda_away": 1.682,
+        "probs": {
+          "home": 0.4694,
+          "draw": 0.2237,
+          "away": 0.307
+        },
+        "poisson_probs": {
+          "home": 0.7652,
+          "draw": 0.1346,
+          "away": 0.1002
+        },
+        "blend_weight": 0.15384615384615385,
+        "over25": 0.9285,
+        "btts": 0.802,
+        "top_scores": [
+          {
+            "score": "4-1",
+            "p": 0.0626
+          },
+          {
+            "score": "3-1",
+            "p": 0.0603
+          },
+          {
+            "score": "4-2",
+            "p": 0.0526
+          },
+          {
+            "score": "5-1",
+            "p": 0.052
+          },
+          {
+            "score": "3-2",
+            "p": 0.0507
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (ÄSS, 2 ottelua) / sarjan keskitaso (JOK, 2 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 38 % → paino markkinaa vastaan 15 % (täysi 40 %). Kohtalaisesti dataa."
+          }
+        ],
+        "home_strength": {
+          "attack": 0.99,
+          "defense": 0.89
+        },
+        "away_strength": {
+          "attack": 0.89,
+          "defense": 1.17
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.28,
+            "odds_effective": 2.28,
+            "book": "Veikkaus",
+            "model_prob": 0.4694,
+            "implied_prob": 0.4156,
+            "edge": 0.0702,
+            "flag": "strong",
+            "kelly_fraction": 0.0137,
+            "stake_suggestion": 1.37
+          },
+          {
+            "side": "draw",
+            "odds": 3.95,
+            "odds_effective": 3.95,
+            "book": "Veikkaus",
+            "model_prob": 0.2237,
+            "implied_prob": 0.2399,
+            "edge": -0.1164,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.75,
+            "odds_effective": 2.75,
+            "book": "Veikkaus",
+            "model_prob": 0.307,
+            "implied_prob": 0.3445,
+            "edge": -0.1558,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 6,
+          "played": 2,
+          "form": "LW",
+          "gf_pg": 3,
+          "ga_pg": 2,
+          "home_gf_pg": 5,
+          "away_gf_pg": 1,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.5,
+          "elo": 1485,
+          "elo_change": 15,
+          "elo_rank": 11
+        },
+        "away": {
+          "rank": 15,
+          "played": 2,
+          "form": "DL",
+          "gf_pg": 3,
+          "ga_pg": 5.5,
+          "home_gf_pg": null,
+          "away_gf_pg": 3,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 0.5,
+          "elo": 1497,
+          "elo_change": -18,
+          "elo_rank": 9
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "SM-liigatuomio: Jokerit hälytys­tilassa – kohta rysähtää",
+          "url": "https://www.is.fi/sm-liiga/art-2000012256660.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-09-08T04:08:00.000Z",
+          "event_type": null,
+          "team": "Jokerit",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        }
+      ]
+    }
+  ]
+}

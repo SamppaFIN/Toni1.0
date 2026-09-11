@@ -392,7 +392,7 @@ const API='/rest/v1';
  * Vanhat kaksitilaiset arvot ovat yha kelvollisia, joten migraatiota ei
  * tarvita: aiemmin jalkapallon valinnut sailyttaa sen.
  */
-let SPORT=localStorage.getItem('bt_sport')||'hockey';
+let SPORT=localStorage.getItem('bt_sport')||'both'; // oletus: molemmat lajit, ks. snapshot.js:sportMode()
 /** Vain jaakiekko - jaakiekkodemon oma koodi kayttaa tata */
 function isHockey(){return SPORT==='hockey'}
 /** Nakyyko jaakiekko lainkaan (myos molemmat-tilassa) */
