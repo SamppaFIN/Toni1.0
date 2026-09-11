@@ -704,9 +704,11 @@ function previewNotes(items, icon, color) {
     .join('');
 }
 
-function previewTeam(team, side) {
-  const elo = side.elo != null ? `lähtö-Elo ${side.elo}` : '';
-  const rank = side.rank != null ? `ennakon sija #${side.rank}` : '';
+function previewTeam(team, side, derived = false) {
+  // Sanamuoto seuraa lahdetta: johdetussa ennakossa luvut ovat MITATTUJA
+  // (sarjataulukko, kauden Elo), kausiennakossa ne ovat arvio kauden alusta.
+  const elo = side.elo != null ? (derived ? `Elo ${side.elo}` : `lähtö-Elo ${side.elo}`) : '';
+  const rank = side.rank != null ? (derived ? `sarjassa #${side.rank}` : `ennakon sija #${side.rank}`) : '';
   const meta = [rank, elo].filter(Boolean).join(' · ');
 
   const moves = [
@@ -735,19 +737,32 @@ function previewSection(match) {
     </div>`;
   }
 
+  const derived = p.basis === 'derived';
+
   const lahde = p.source?.url
     ? `<a href="${esc(p.source.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--c-accent)" onclick="event.stopPropagation()">${esc(p.source.name)} ↗</a>`
     : esc(p.source?.name ?? 'kausiennakko');
 
+  // KAKSI ERI VAITETTA, eika niita saa sekoittaa. Kausiennakko on yhden
+  // toimituksen arvio; johdettu ennakko on mitattu samasta datasta kuin
+  // malli. Jos johdettu osio sanoisi "yhden toimituksen arvio", kortti
+  // valehtelisi lahteestaan — ja koko osion tarkoitus on etta luvun voi
+  // jaljittaa.
+  const footer = derived
+    ? `Johdettu samasta datasta kuin malli: sarjataulukko, kauden Elo, muoto ja otteluun liitetyt uutiset.
+       Nämä <b>eivät ole mallin syöte</b> — malli laskee maaleista. Ne kertovat mikä syötteessä on
+       poikkeavaa, jotta näet milloin numeron takana on jotain mitä numero ei kerro.`
+    : `Ennakko on <b>yhden toimituksen arvio</b>, ei mittaus. Se on lähtöarvo kauden alkuun
+       ja väistyy oikeiden otteluiden tieltä sitä mukaa kun niitä pelataan.`;
+
   return `<div style="padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
     <div style="display:flex;flex-wrap:wrap;gap:12px">
-      ${previewTeam(match.home, p.home)}
-      ${previewTeam(match.away, p.away)}
+      ${previewTeam(match.home, p.home, derived)}
+      ${previewTeam(match.away, p.away, derived)}
     </div>
     <div style="font-size:.56rem;color:var(--c-text-muted);margin-top:8px;line-height:1.5;border-top:1px dashed oklch(1 1 0/0.1);padding-top:6px">
       Lähde: ${lahde}${p.source?.readAt ? ` · luettu ${esc(p.source.readAt)}` : ''}<br>
-      Ennakko on <b>yhden toimituksen arvio</b>, ei mittaus. Se on lähtöarvo kauden alkuun
-      ja väistyy oikeiden otteluiden tieltä sitä mukaa kun niitä pelataan.
+      ${footer}
     </div>
   </div>`;
 }
@@ -1312,7 +1327,12 @@ const SECTIONS = {
   stats: { icon: '📊', label: 'Tunnusluvut', render: statsSection },
   // `available` rajaa napin niihin otteluihin joilla ennakko oikeasti on.
   // Ilman sita jokainen jalkapallokortti saisi napin joka avaa tyhjan osion.
-  preview: { icon: '📋', label: 'Ennakko', render: previewSection, available: (m) => Boolean(m.preview) },
+  preview: {
+    icon: '📋',
+    label: 'Ennakko',
+    render: previewSection,
+    available: (m) => Boolean(m.preview),
+  },
   news: { icon: '📰', label: 'Uutiset', render: newsSection },
   analysis: { icon: '💎', label: 'Analyysi', render: analysisSection },
   calc: { icon: '🔬', label: 'Laskenta', render: calcSection },

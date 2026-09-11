@@ -30,6 +30,7 @@ import { fetchAllFeeds, attachNews, MatchNews } from '../ingest/news-football.js
 import { fetchSeasonResults, normalizeTeam } from '../ingest/results-veikkausliiga.js';
 import { fetchSeasonResultsEspn, hasEspnResults } from '../ingest/results-espn.js';
 import { calculateSeasonElo, STARTING_ELO } from '../analyze/season-elo.js';
+import { buildDerivedPreview } from '../analyze/derived-preview.js';
 import { buildMatchCard, buildSnapshot, writeSnapshot } from './snapshot.js';
 import { MatchCard, MatchPreview, MatchStats, ModelAdjustment, TeamStats, TeamSeasonStats } from '../types-football.js';
 
@@ -591,6 +592,20 @@ export function buildCard(
     }
   }
 
+  // Johdettu ennakko: 📋 Ennakko -osio niille sarjoille joilla ei ole
+  // toimituksen kausiennakkoa (#103). Sama data kuin mallilla, mutta se osa
+  // joka jaa numeron alle piiloon — ja se merkitaan johdetuksi, jottei
+  // kortti vaita sita yhden toimituksen arvioksi.
+  const preview = buildDerivedPreview({
+    homeStats: home.stats,
+    awayStats: away.stats,
+    homeBasis: home.basis,
+    awayBasis: away.basis,
+    homeElo: matchStats.home.elo,
+    awayElo: matchStats.away.elo,
+    sourceName: stats.current.source,
+  });
+
   return buildMatchCard({
     ...base,
     poisson,
@@ -599,6 +614,7 @@ export function buildCard(
     blendWeight: effectiveBlendWeight,
     homeStrength: { attack: round(home.strength.attack, 2), defense: round(home.strength.defense, 2) },
     awayStrength: { attack: round(away.strength.attack, 2), defense: round(away.strength.defense, 2) },
+    ...(preview ? { preview } : {}),
   });
 }
 

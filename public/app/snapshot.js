@@ -30,6 +30,18 @@ const SPORT_KEY = 'bt_sport';
  *
  * Valinta säilyy: kerran tehty asetus voittaa oletuksen.
  */
+// EI MIGRAATIOTA tallennetulle 'hockey'-arvolle, vaikka se olisi houkuttelevaa.
+//
+// Kokeilin sita: kertamigraatio joka vaihtaa tallennetun 'hockey':n
+// 'both':ksi. Testisarja hylkasi sen valittomasti — 12 spekkia jotka
+// asettavat lajin nimenomaisesti (useHockey) alkoivat nahda molemmat lajit.
+// Se ei ollut testien vika vaan oire: tallennettu arvo syntyy VAIN
+// setSport():sta eli kayttajan omasta klikkauksesta, koska vanha oletus ei
+// kirjoittanut mitaan. Migraatio olisi siis ohittanut nimenomaisen valinnan.
+//
+// Oletus koskee uutta kayttajaa; jo tehty valinta on kayttajan oma ja
+// vaihdetaan Admin-valilehdelta.
+
 export function sportMode() {
   try {
     const v = localStorage.getItem(SPORT_KEY);

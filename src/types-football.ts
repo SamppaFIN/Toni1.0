@@ -309,6 +309,18 @@ export interface PreviewSide {
  */
 export interface MatchPreview {
   source: { name: string; url: string | null; readAt: string | null };
+  /**
+   * Mista ennakko on peraisin — ja siksi mita siita saa vaittaa.
+   *
+   * `season-preview`  toimituksen kausiennakko (#103): arvio, ei mittaus.
+   * `derived`         johdettu samasta ottelu- ja uutisdatasta kuin malli:
+   *                   mitattu, mutta EI mallin syote vaan sen rinnalla
+   *                   kulkeva havainto siita mika syotteessa on poikkeavaa.
+   *
+   * Puuttuva arvo tarkoittaa `season-preview`: kentta lisattiin jalkikateen,
+   * eivatka vanhat arkistorivit tieda siita.
+   */
+  basis?: 'season-preview' | 'derived';
   home: PreviewSide;
   away: PreviewSide;
 }
