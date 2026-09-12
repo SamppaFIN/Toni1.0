@@ -89,6 +89,84 @@ export async function useFixtureSnapshot(page: Page): Promise<void> {
 }
 
 /**
+ * Tarjoile snapshot jossa ENSIMMAISELLA ottelulla on kasin syotetty
+ * ottelukonteksti (tiketti #105).
+ *
+ * Konteksti injektoidaan `snapshot-with-elo.json`:iin eika omaan
+ * fikstuuritiedostoon, koska mitattava asia on nimenomaan LISAYS olemassa
+ * olevaan korttiin: pillerit, Ennakko-osio ja kerroinlaskurin kytkimet
+ * ilmestyvat kortille jolla on jo malli, kertoimet ja Elo. Erillinen
+ * fikstuuri eriytyisi siita hiljaa.
+ *
+ * `lambda_base` asetetaan mallin lambdan yli, jotta kytkentojen vaikutus on
+ * ISO ja siten mitattava: pilleri pois -> luku palaa selvasti eri arvoon.
+ */
+export async function useContextFixture(page: Page): Promise<void> {
+  const fixture = fixtureSnapshot() as any;
+  fixture.generated_at = new Date().toISOString();
+  for (const [i, m] of fixture.matches.entries()) {
+    m.kickoff = new Date(Date.now() + (i + 2) * 3600_000).toISOString();
+  }
+
+  const target = fixture.matches.find((m: any) => m.model.lambda_home !== null);
+  if (!target) throw new Error('Fikstuurissa ei ole yhtaan Poisson-mallin ottelua');
+
+  target.context = {
+    source: {
+      name: 'Kierrosennakot ja uutiset — luettu kasin',
+      entered_at: new Date().toISOString(),
+      note: null,
+    },
+    factors: [
+      {
+        id: 'testi-voittoputki',
+        team: 'home',
+        type: 'win_streak',
+        label: 'Neljä voittoa putkeen',
+        detail: 'Muoto WWWW kaikissa kilpailuissa.',
+        delta_home: 0.2,
+        delta_away: 0,
+        confidence: 0.9,
+        sources: [{ name: 'Testilahde', url: 'https://example.test/putki' }],
+      },
+      {
+        id: 'testi-hankinta',
+        team: 'away',
+        type: 'signing',
+        label: 'Uusi hankinta debytoi',
+        detail: 'Seuraennatyksella hankittu hyokkaaja aloittaa ensimmaista kertaa.',
+        delta_home: 0,
+        delta_away: 0.15,
+        confidence: 0.7,
+        sources: [{ name: 'Testilahde', url: 'https://example.test/hankinta' }],
+      },
+      {
+        id: 'testi-h2h',
+        team: null,
+        type: 'h2h',
+        label: 'Kuusi tasapelia perakkain',
+        detail: 'Taustatieto ilman lambda-vaikutusta.',
+        delta_home: 0,
+        delta_away: 0,
+        confidence: 0.8,
+        sources: [{ name: 'Testilahde', url: 'https://example.test/h2h' }],
+      },
+    ],
+    lambda_base: { home: target.model.lambda_home, away: target.model.lambda_away },
+  };
+
+  // HUOM: `bt_football_context_off` EI nollata tassa. addInitScript ajetaan
+  // jokaisessa navigoinnissa, joten nollaus pyyhkisi kayttajan valinnan
+  // sivun paivityksessa — ja juuri sen sailymista yksi testi mittaa.
+  // Jokainen testi saa oman selainkontekstin, joten tila on valmiiksi tyhja.
+  await page.addInitScript(() => localStorage.setItem('bt_football_day_filter', 'all'));
+
+  await page.route('**/data/today.json', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fixture) })
+  );
+}
+
+/**
  * Tarjoile Liigan avauskierros fikstuurina (tiketti #103).
  *
  * Miksi oma fikstuuri eikä `snapshot-with-elo.json`: se on jalkapalloa,

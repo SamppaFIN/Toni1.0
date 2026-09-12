@@ -681,6 +681,111 @@ function previewStrip(match) {
   </div>`;
 }
 
+// ─── Ottelukonteksti: käsin syötetyt pillerit (tiketti #105) ──────────────
+//
+// Kierroksen ennakoista, foorumeilta ja lehdistötilaisuuksista luettu tieto
+// pillereinä: voittoputki, uusi hankinta, loukkaantuminen, otteluruuhka.
+//
+// PILLERI ON KORTILLA EIKÄ VAIN OSIOSSA, koska juuri tämä tieto on se jonka
+// takia kerrointa katsotaan toisella silmällä. Nappi joka lupaa että jossain
+// on jotain ei ole näkymistä.
+//
+// Jokainen pilleri sanoo suuntansa: λ-muutos prosentteina siihen joukkueeseen
+// jonka maaliodotusta se siirtää. Nolla on sallittu — havainto voi olla
+// lukemisen arvoinen vaikkei se muuta mallin lukua.
+
+const CONTEXT_ICONS = {
+  win_streak: '🔥',
+  loss_streak: '🧊',
+  goal_drought: '🥅',
+  defence: '🛡️',
+  signing: '➡️',
+  injury: '🤕',
+  return: '✅',
+  suspension: '🟥',
+  manager: '🎓',
+  congestion: '🗓️',
+  motivation: '🎯',
+  home_form: '🏟️',
+  away_form: '✈️',
+  h2h: '📜',
+  other: '⚪',
+};
+
+function contextIcon(type) {
+  return CONTEXT_ICONS[type] ?? CONTEXT_ICONS.other;
+}
+
+/** Tekijän λ-vaikutus lyhyesti, esim. "TOT −12 %" */
+function contextEffect(match, f) {
+  const parts = [];
+  if (f.delta_home) parts.push(`${match.home.short} ${f.delta_home > 0 ? '+' : '−'}${Math.abs(Math.round(f.delta_home * 100))} %`);
+  if (f.delta_away) parts.push(`${match.away.short} ${f.delta_away > 0 ? '+' : '−'}${Math.abs(Math.round(f.delta_away * 100))} %`);
+  return parts.join(' · ');
+}
+
+/**
+ * Pilleririvi kortille. Poiskytketty tekijä näkyy himmeänä ja yliviivattuna
+ * — se ei katoa, koska katoaminen näyttäisi samalta kuin "tätä ei ollut".
+ */
+function contextPills(match) {
+  const factors = match.context?.factors ?? [];
+  if (!factors.length || !isVisible('preview')) return '';
+
+  const off = calc.disabledContextFor(match.id);
+
+  const items = factors.map((f) => {
+    const disabled = off.includes(f.id);
+    const effect = contextEffect(match, f);
+    const net = (f.delta_home || 0) + (f.delta_away || 0);
+    const tone = disabled ? 'muted' : net > 0 ? 'success' : net < 0 ? 'danger' : 'muted';
+    const who = f.team === 'home' ? match.home.short : f.team === 'away' ? match.away.short : '';
+    const title = `${f.detail || f.label}${effect ? ` — vaikutus: ${effect}` : ' — ei vaikutusta malliin'}. Lähde: ${f.sources.map((x) => x.name).join(', ')}. Käsin syötetty ${(match.context.source.entered_at || '').slice(0, 10)}.`;
+    return `<span class="factor-pill tone-${tone}" style="${disabled ? 'opacity:.4;text-decoration:line-through' : ''}" title="${esc(title)}">${contextIcon(f.type)} ${who ? `<b>${esc(who)}</b> ` : ''}${esc(f.label)}${effect ? ` <span style="opacity:.75">${esc(effect)}</span>` : ''}</span>`;
+  });
+
+  return `<div class="factor-pills" style="margin-top:4px">${items.join('')}</div>`;
+}
+
+/** Osion sisältö: pillerit kokonaisina, lähteet linkkeinä */
+function contextSection(match) {
+  const ctx = match.context;
+  if (!ctx?.factors?.length) return '';
+
+  const off = calc.disabledContextFor(match.id);
+
+  const rows = ctx.factors
+    .map((f) => {
+      const disabled = off.includes(f.id);
+      const effect = contextEffect(match, f);
+      const links = f.sources
+        .map((x) => `<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--c-accent)" onclick="event.stopPropagation()">${esc(x.name)} ↗</a>`)
+        .join(' · ');
+      return `<div style="padding:5px 0;border-bottom:1px dashed oklch(1 1 0/0.1);${disabled ? 'opacity:.45' : ''}">
+        <div style="font-size:.68rem;font-weight:600;display:flex;gap:5px;align-items:baseline">
+          <span style="flex:none">${contextIcon(f.type)}</span>
+          <span>${esc(f.label)}${disabled ? ' <span style="font-weight:400;font-size:.58rem">(pois käytöstä)</span>' : ''}</span>
+          ${effect ? `<span style="margin-left:auto;flex:none;font-size:.6rem;color:var(--c-text-muted)">${esc(effect)}</span>` : ''}
+        </div>
+        ${f.detail ? `<div style="font-size:.62rem;line-height:1.5;color:var(--c-text-muted);margin-top:2px">${esc(f.detail)}</div>` : ''}
+        <div style="font-size:.56rem;color:var(--c-text-muted);margin-top:3px">Lähde: ${links} · varmuus ${Math.round(f.confidence * 100)} %</div>
+      </div>`;
+    })
+    .join('');
+
+  return `<div style="padding:8px;background:oklch(1 1 0/0.04);border-radius:8px;margin-bottom:8px">
+    <div style="font-size:.68rem;font-weight:700;margin-bottom:4px">📋 Ottelukonteksti — käsin syötetty</div>
+    ${rows}
+    <div style="font-size:.56rem;color:var(--c-text-muted);margin-top:8px;line-height:1.5">
+      Nämä havainnot <b>säätävät mallia</b>: prosentti kertoo paljonko kunkin joukkueen maaliodotus siirtyy,
+      ja siirtymä kulkee läpi edgeen ja panossuositukseen. Ne on <b>luettu käsin</b> ennakoista ja uutisista
+      ${ctx.source.entered_at ? `(syötetty ${esc(ctx.source.entered_at.slice(0, 16).replace('T', ' '))} UTC)` : ''} —
+      eivät siis mittauksia vaan lähteistettyjä havaintoja. Ole eri mieltä: yksittäisen tekijän voi kytkeä pois
+      🧮 <b>Kerroinlaskurista</b>, jolloin luvut lasketaan ilman sitä.
+    </div>
+  </div>`;
+}
+
 // ─── Osio: Kausiennakko (tiketti #103) ────────────────────────────────────
 //
 // Ennakon plussat ja miinukset olivat jo snapshotissa, mutta VAIN mallin
@@ -704,11 +809,9 @@ function previewNotes(items, icon, color) {
     .join('');
 }
 
-function previewTeam(team, side, derived = false) {
-  // Sanamuoto seuraa lahdetta: johdetussa ennakossa luvut ovat MITATTUJA
-  // (sarjataulukko, kauden Elo), kausiennakossa ne ovat arvio kauden alusta.
-  const elo = side.elo != null ? (derived ? `Elo ${side.elo}` : `lähtö-Elo ${side.elo}`) : '';
-  const rank = side.rank != null ? (derived ? `sarjassa #${side.rank}` : `ennakon sija #${side.rank}`) : '';
+function previewTeam(team, side) {
+  const elo = side.elo != null ? `lähtö-Elo ${side.elo}` : '';
+  const rank = side.rank != null ? `ennakon sija #${side.rank}` : '';
   const meta = [rank, elo].filter(Boolean).join(' · ');
 
   const moves = [
@@ -729,40 +832,31 @@ function previewTeam(team, side, derived = false) {
 }
 
 function previewSection(match) {
+  const ctx = contextSection(match);
   const p = match.preview;
   if (!p) {
+    // Kasin syotetty konteksti YKSIN riittaa osioksi: se on juuri se tieto
+    // jonka takia osio avataan, eika kausiennakon puuttuminen tee siita tyhjaa.
+    if (ctx) return ctx;
     return `<div style="font-size:.7rem;color:var(--c-text-muted);padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
-      Tälle sarjalle ei ole kausiennakkoa, tai malli ei nojaa siihen — kausiennakkoa
-      käytetään vain kun pelattuja otteluita ei vielä ole.
+      Tälle ottelulle ei ole käsin syötettyä kontekstia eikä sarjalle kausiennakkoa.
+      Kausiennakkoa käytetään vain kun pelattuja otteluita ei vielä ole.
     </div>`;
   }
-
-  const derived = p.basis === 'derived';
 
   const lahde = p.source?.url
     ? `<a href="${esc(p.source.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--c-accent)" onclick="event.stopPropagation()">${esc(p.source.name)} ↗</a>`
     : esc(p.source?.name ?? 'kausiennakko');
 
-  // KAKSI ERI VAITETTA, eika niita saa sekoittaa. Kausiennakko on yhden
-  // toimituksen arvio; johdettu ennakko on mitattu samasta datasta kuin
-  // malli. Jos johdettu osio sanoisi "yhden toimituksen arvio", kortti
-  // valehtelisi lahteestaan — ja koko osion tarkoitus on etta luvun voi
-  // jaljittaa.
-  const footer = derived
-    ? `Johdettu samasta datasta kuin malli: sarjataulukko, kauden Elo, muoto ja otteluun liitetyt uutiset.
-       Nämä <b>eivät ole mallin syöte</b> — malli laskee maaleista. Ne kertovat mikä syötteessä on
-       poikkeavaa, jotta näet milloin numeron takana on jotain mitä numero ei kerro.`
-    : `Ennakko on <b>yhden toimituksen arvio</b>, ei mittaus. Se on lähtöarvo kauden alkuun
-       ja väistyy oikeiden otteluiden tieltä sitä mukaa kun niitä pelataan.`;
-
-  return `<div style="padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
+  return `${ctx}<div style="padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
     <div style="display:flex;flex-wrap:wrap;gap:12px">
-      ${previewTeam(match.home, p.home, derived)}
-      ${previewTeam(match.away, p.away, derived)}
+      ${previewTeam(match.home, p.home)}
+      ${previewTeam(match.away, p.away)}
     </div>
     <div style="font-size:.56rem;color:var(--c-text-muted);margin-top:8px;line-height:1.5;border-top:1px dashed oklch(1 1 0/0.1);padding-top:6px">
       Lähde: ${lahde}${p.source?.readAt ? ` · luettu ${esc(p.source.readAt)}` : ''}<br>
-      ${footer}
+      Ennakko on <b>yhden toimituksen arvio</b>, ei mittaus. Se on lähtöarvo kauden alkuun
+      ja väistyy oikeiden otteluiden tieltä sitä mukaa kun niitä pelataan.
     </div>
   </div>`;
 }
@@ -1227,6 +1321,51 @@ function beforeAfter(label, before, after, format = (v) => pct(v, 1)) {
   </div>`;
 }
 
+/**
+ * Käsin syötetyt pillerit päälle/pois (tiketti #105).
+ *
+ * MIKSI TÄMÄ ON KERROINLASKURISSA EIKÄ ENNAKKO-OSIOSSA: pois kytkeminen on
+ * laskutoimitus, ei näyttöasetus. Se muuttaa λ:aa, edgeä ja panossuositusta,
+ * ja juuri ne luvut ovat tässä osiossa rinnakkain ennen ja jälkeen. Ennakko-
+ * osiossa napin vaikutus näkyisi vasta jossain muualla.
+ *
+ * Valinta tallentuu vain tähän selaimeen eikä muuta snapshotia: cronin
+ * seuraava ajo tuottaa saman kortin samoilla pillereillä, ja käyttäjän oma
+ * eri mieltä olo säilyy sen päällä `id`:n perusteella.
+ */
+function contextToggles(match, disabledIds) {
+  const ctx = match.context;
+  if (!ctx?.factors?.length) return '';
+
+  const rows = ctx.factors
+    .map((f) => {
+      const on = !disabledIds.includes(f.id);
+      const effect = contextEffect(match, f);
+      return `<div class="row" style="font-size:.66rem;padding:4px 0;border-bottom:1px dashed oklch(1 1 0/0.1);${on ? '' : 'opacity:.45'}">
+        <span style="flex:1;min-width:0">
+          ${contextIcon(f.type)} <span style="${on ? '' : 'text-decoration:line-through'}">${esc(f.label)}</span>
+          ${effect ? `<b style="color:${(f.delta_home || 0) + (f.delta_away || 0) > 0 ? 'var(--c-success)' : 'var(--c-danger)'}"> ${esc(effect)}</b>` : '<span style="color:var(--c-text-muted)"> ei λ-vaikutusta</span>'}
+        </span>
+        <button class="btn" style="font-size:.55rem;padding:2px 8px;min-height:24px;border-radius:12px;background:${on ? 'oklch(0.62 0.20 145 / 0.22)' : 'oklch(1 1 0/0.1)'};color:var(--c-text)"
+          title="${on ? 'Kytke pois laskennasta' : 'Ota takaisin laskentaan'}"
+          onclick="event.stopPropagation();window.BTF.toggleContext('${esc(match.id)}','${esc(f.id)}')">${on ? '✓ mukana' : '○ pois'}</button>
+      </div>`;
+    })
+    .join('');
+
+  const offCount = disabledIds.length;
+
+  return `<div style="margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid oklch(1 1 0/0.12)">
+    <div style="font-size:.68rem;font-weight:700;margin-bottom:4px">📋 Ottelukonteksti — käsin syötetty</div>
+    <div style="font-size:.62rem;color:var(--c-text-muted);line-height:1.5;margin-bottom:6px">
+      Nämä ovat jo mukana kortin luvuissa. Jos olet jostain eri mieltä — esimerkiksi ettei pelaajan vaihto
+      nyt vaikuta — kytke se pois, niin λ, edge ja panos lasketaan ilman sitä.
+    </div>
+    ${rows}
+    ${offCount ? `<button class="btn" style="width:100%;margin-top:5px;font-size:.6rem;min-height:28px;background:oklch(1 1 0/0.1);color:var(--c-text)" onclick="event.stopPropagation();window.BTF.enableAllContext('${esc(match.id)}')">↩️ Ota kaikki ${offCount} takaisin</button>` : ''}
+  </div>`;
+}
+
 function factorsSection(match, index) {
   if (match.model.lambda_home === null || match.model.lambda_away === null) {
     return `<div style="font-size:.7rem;color:var(--c-text-muted);padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
@@ -1237,8 +1376,11 @@ function factorsSection(match, index) {
 
   const factors = calc.factorsFor(match.id);
   const bankroll = window.BT?.getBankroll?.() ?? 100;
-  const r = calc.recalculate(match, factors, bankroll);
+  const disabledContext = calc.disabledContextFor(match.id);
+  const r = calc.recalculate(match, factors, bankroll, disabledContext);
   if (!r) return '<div class="empty" style="font-size:.7rem">Laskenta ei onnistunut.</div>';
+
+  const contextBlock = contextToggles(match, disabledContext);
 
   const list = factors.length
     ? factors
@@ -1271,6 +1413,7 @@ function factorsSection(match, index) {
     .join('');
 
   return `<div style="padding:8px;background:oklch(1 1 0/0.04);border-radius:8px">
+    ${contextBlock}
     <div style="font-size:.68rem;font-weight:700;margin-bottom:4px">🧮 Omat tekijät</div>
     <div style="font-size:.62rem;color:var(--c-text-muted);line-height:1.5;margin-bottom:6px">
       Tekijä siirtää odotettua maalimäärää prosentteina — sama yksikkö jota mallin omat uutissäädöt käyttävät.
@@ -1327,12 +1470,7 @@ const SECTIONS = {
   stats: { icon: '📊', label: 'Tunnusluvut', render: statsSection },
   // `available` rajaa napin niihin otteluihin joilla ennakko oikeasti on.
   // Ilman sita jokainen jalkapallokortti saisi napin joka avaa tyhjan osion.
-  preview: {
-    icon: '📋',
-    label: 'Ennakko',
-    render: previewSection,
-    available: (m) => Boolean(m.preview),
-  },
+  preview: { icon: '📋', label: 'Ennakko', render: previewSection, available: (m) => Boolean(m.preview || m.context?.factors?.length) },
   news: { icon: '📰', label: 'Uutiset', render: newsSection },
   analysis: { icon: '💎', label: 'Analyysi', render: analysisSection },
   calc: { icon: '🔬', label: 'Laskenta', render: calcSection },
@@ -1381,6 +1519,18 @@ export function addFactorFromForm(matchId, index) {
 export function removeFactorById(matchId, factorId) {
   calc.removeFactor(matchId, factorId);
   renderAllCards();
+}
+
+export function toggleContextFor(matchId, factorId) {
+  const off = calc.toggleContextFactor(matchId, factorId);
+  renderAllCards();
+  window.BT?.toast?.(off.includes(factorId) ? '📋 Tekijä pois laskennasta' : '📋 Tekijä takaisin laskentaan');
+}
+
+export function enableAllContextFor(matchId) {
+  calc.enableAllContext(matchId);
+  renderAllCards();
+  window.BT?.toast?.('📋 Kaikki ottelukontekstin tekijät takaisin');
 }
 
 export function clearFactorsFor(matchId) {
@@ -1468,6 +1618,7 @@ function matchCard(match, index) {
 
     ${factorPills(match)}
     ${previewStrip(match)}
+    ${contextPills(match)}
     ${valueLine(match)}
 
     ${isVisible('probs')

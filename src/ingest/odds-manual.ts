@@ -27,6 +27,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BookmakerOdds } from '../types-football.js';
 import { normalizeLiigaName } from '../analyze/liiga-priors.js';
+import { normalizeClubName } from './club-name.js';
 
 export const MANUAL_ODDS_FILE = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -60,17 +61,28 @@ export interface ManualOddsFile {
  *
  * Jääkiekolle käytetään Liigan omaa aliaskarttaa (`normalizeLiigaName`),
  * koska juuri siellä nimet eroavat lähteittäin eniten — Veikkaus kirjoittaa
- * "K-Espoo", liiga.fi "Kiekko-Espoo". Muille lajeille riittää välimerkkien
- * ja diakriittien poisto: aggressiivisempi normalisointi voisi yhdistää
- * kaksi eri joukkuetta, mikä on pahempi virhe kuin täsmäämättä jäänyt rivi.
+ * "K-Espoo", liiga.fi "Kiekko-Espoo".
+ *
+ * JALKAPALLOLLE KÄYTETÄÄN SAMAA `normalizeClubName`:a KUIN MUU PUTKI
+ * (tiketti #105). Aiemmin tässä oli kevyempi normalisointi, joka poisti vain
+ * välimerkit ja diakriitit — ja juuri se pudotti kaksi Valioliigan ottelua
+ * hiljaa:
+ *
+ *   The Odds API  "Bournemouth"                 kalenteri  "AFC Bournemouth"
+ *   The Odds API  "Brighton and Hove Albion"    kalenteri  "Brighton & Hove Albion"
+ *
+ * Kumpikaan ei täsmännyt, joten molemmilta korteilta jäi pois sekä Veikkauksen
+ * käsin syötetty hinta että käsin syötetty ottelukonteksti. Mikään ei
+ * huutanut: kortilla oli vain yksi toimisto vähemmän.
+ *
+ * `normalizeClubName` poistaa seuramuodot ja muuntaa `&` → `and`, mutta
+ * jättää EROTTELEVAT sanat ("united", "city", "forest") paikoilleen — riski
+ * kahden eri joukkueen yhdistämisestä on siis sama kuin muualla putkessa,
+ * missä se on ollut käytössä tiketistä #57 asti.
  */
 export function matchKeyFor(sportKey: string, name: string): string {
   if (sportKey.startsWith('icehockey_')) return normalizeLiigaName(name);
-  return String(name ?? '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]+/g, '');
+  return normalizeClubName(name);
 }
 
 /** Ottelun tunniste täsmäytystä varten: sarja + päivä + joukkueet */

@@ -19,7 +19,8 @@ import {
   setMockRound,
   getMockRoundCount,
 } from './snapshot.js';
-import { initCards, setSnapshot, renderAllCards, renderPlacedBets, toggleSection, findMatch, matchIndex, getSnapshot, setDayFilter, getDayFilter, addFactorFromForm, removeFactorById, clearFactorsFor, fetchDay } from './football-cards.js';
+import { initCards, setSnapshot, renderAllCards, renderPlacedBets, toggleSection, findMatch, matchIndex, getSnapshot, setDayFilter, getDayFilter, addFactorFromForm, removeFactorById, clearFactorsFor, toggleContextFor, enableAllContextFor, fetchDay } from './football-cards.js';
+import * as calc from './football-calc.js';
 import * as tracker from './football-tracker.js';
 import * as metrics from './football-metrics.js';
 import { DISPLAY_OPTIONS, getPrefs, togglePref, resetPrefs } from './football-prefs.js';
@@ -230,6 +231,8 @@ window.BTF = {
   addFactor: addFactorFromForm,
   removeFactor: removeFactorById,
   clearFactors: clearFactorsFor,
+  toggleContext: toggleContextFor,
+  enableAllContext: enableAllContextFor,
   setStake,
   confirmBet,
   openBetPopup,
@@ -242,6 +245,10 @@ window.BTF = {
   resetDisplay,
   getPrefs,
   DISPLAY_OPTIONS,
+  // Sama laskentamoduuli jota kortit kayttavat. Viety ulos jotta E2E-testi
+  // voi lukea SAMAN luvun jonka kayttaja nakee -- DOM-tekstin jasentaminen
+  // mittaisi muotoilua, ei laskentaa.
+  calc,
 };
 
 // Demo.html kutsuu tätä kun jalkapallonäkymä on aktiivinen

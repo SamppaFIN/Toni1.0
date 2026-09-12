@@ -1,0 +1,1089 @@
+{
+  "_comment": [
+    "KÄSIN SYÖTETTY OTTELUKONTEKSTI (tiketti #105).",
+    "",
+    "Tämä on se tieto jota malli ei näe: kierrosennakot, lehdistötilaisuudet,",
+    "loukkaantumislistat ja kausiputket. RSS-polku (#29) lukee otsikoita",
+    "avainsanoilla eikä sen varmuus riitä mallin säätämiseen — ja se on",
+    "oikein, koska avainsanaluokittelu ei ymmärrä mitään. Tämä tiedosto",
+    "täyttää sen aukon käsin: jokainen tekijä on luettu, lähteistetty ja",
+    "saa siksi siirtää maaliodotusta.",
+    "",
+    "KENTÄT:",
+    "  id          Pysyvä tunniste. Kerroinlaskuri muistaa pois-kytkennän",
+    "              tällä, joten ÄLÄ uudelleennimeä olemassa olevaa tekijää.",
+    "  team        Ketä havainto koskee (näyttöä varten). null = ottelu.",
+    "  type        win_streak | loss_streak | goal_drought | defence |",
+    "              signing | injury | return | suspension | manager |",
+    "              congestion | motivation | home_form | away_form | h2h | other",
+    "  delta_home  Suhteellinen siirtymä KOTIJOUKKUEEN maaliodotukseen.",
+    "  delta_away  Sama vierasjoukkueelle. Havainto voi koskea toista",
+    "              joukkuetta ja siirtää toisen lukua: 'koti päästää joka",
+    "              ottelussa' nostaa VIERAAN maaliodotusta.",
+    "  confidence  Kuinka varma syöttäjä on. Ei säädä laskentaa, näytetään.",
+    "  sources     PAKOLLINEN. Lähteetön tekija pudotetaan latauksessa.",
+    "",
+    "TÄRKEIN SÄÄNTÖ — ÄLÄ LASKE SAMAA KAHDESTI:",
+    "",
+    "λ-vaikutus annetaan VAIN sille mitä malli ei itse näe. Poisson lukee",
+    "sarjataulukon tehdyt ja päästetyt maalit, joten voittoputki, maalikuivuus,",
+    "nollapeliputki ja sarjasija OVAT JO mallin luvussa. Jos sellaiselle antaa",
+    "vielä λ-siirtymän, sama havainto painaa kahdesti ja edge kasvaa ilman että",
+    "mitään uutta on opittu — pisimmissä kertoimissa rajusti. Näytä ne",
+    "pillereinä delta 0:lla: ne ovat luettavaa kontekstia, eivät uusi syöte.",
+    "",
+    "λ-vaikutus KUULUU näille: injury, return, signing, suspension, manager,",
+    "congestion, motivation (cup-ottelu, CL-matka), eli asiat jotka eivät näy",
+    "sarjataulukossa. `parseFactor` varoittaa lokissa jos taulukosta luettava",
+    "tyyppi saa silti λ-siirtymän.",
+    "",
+    "RAJAT: yksi tekijä ±20 %, kaikki tekijät yhteen puoleen ±35 %. Yli",
+    "menevä luku rajataan varoituksella — ks. src/ingest/context-manual.ts.",
+    "",
+    "JOUKKUENIMET KALENTERIN (ESPN) ASUSSA, täsmälleen kuten",
+    "data/veikkaus-odds-manual.json:issa: 'AFC Bournemouth', ei",
+    "'Bournemouth'; 'Brighton & Hove Albion', ei 'Brighton'. Täsmäytys",
+    "poistaa seuramuodot (AFC, FC) ja muuntaa & → and, mutta ei tunne muita",
+    "aliaksia — kirjoita nimi silti kalenterin asussa.",
+    "",
+    "VANHENTUNEET RIVIT EIVÄT TEE VAHINKOA: mennyt kierros ei täsmää",
+    "yhteenkään tulevaan otteluun ja jää käyttämättä. Tulevan kierroksen",
+    "rivi joka ei täsmää on kirjoitusvirhe, ja `npm run context:check`",
+    "sanoo sen nimeltä."
+  ],
+  "source": {
+    "name": "Kierrosennakot, lehdistötilaisuudet ja loukkaantumislistat — luettu käsin",
+    "entered_at": "2026-09-12T10:30:00.000Z",
+    "note": "Valioliigan kierros 4 (12.–14.9.2026). Lähteinä Sports Mole, Yahoo Sports, Goal, ESPN, Football365, The Football Faithful, Last Word on Sports, Premier League -loukkaantumisseuranta ja seurojen omat ennakot. Lambda-vaikutus annetaan VAIN havainnoille joita malli ei itse nae (loukkaantumiset, paluut, hankinnat, valmentajavaihdos, otteluruuhka); taulukosta luettavat putket ja maalimaarat naytetaan pillereina ilman saatoa."
+  },
+  "events": [
+    {
+      "sportKey": "soccer_epl",
+      "date": "2026-09-12",
+      "home": "AFC Bournemouth",
+      "away": "Brentford",
+      "factors": [
+        {
+          "id": "bou-bre-bou-johtoasemat-hukattu",
+          "team": "home",
+          "type": "motivation",
+          "label": "Johti kaikissa kolmessa — voitti nolla",
+          "detail": "Bournemouth on ollut johdossa jokaisessa kolmessa avausottelussaan eikä ole voittanut yhtäkään (1 tappio, 2 tasapeliä). Kyse ei ole maalinteosta vaan pelin sulkemisesta, mitä maalisummat eivät erittele.",
+          "delta_home": 0,
+          "delta_away": 0.03,
+          "confidence": 0.8,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/bournemouth/preview/bournemouth-vs-brentford-prediction-team-news-lineups_604828.html"
+            }
+          ]
+        },
+        {
+          "id": "bou-bre-bou-hyokkaajat-poissa",
+          "team": "home",
+          "type": "injury",
+          "label": "Neljä poissa, kaksi hyökkäyspäästä",
+          "detail": "Ulkona: Eli Junior Kroupi (jalkaterä), Amine Adli (pohje), Veljko Milosavljevic (polvi), Julian Araujo (reisi). Kroupi ja Adli ovat hyökkäyspään vaihtoehtoja.",
+          "delta_home": -0.08,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Sports Mole — kokoonpanotiedot",
+              "url": "https://www.sportsmole.co.uk/football/bournemouth/injury-news/team-news/bournemouth-vs-brentford-injury-suspension-list-predicted-xis_604829.html"
+            }
+          ]
+        },
+        {
+          "id": "bou-bre-bou-liigacup-4-0",
+          "team": "home",
+          "type": "motivation",
+          "label": "4–0 Liigacupissa",
+          "detail": "Marco Rosen joukkue voitti Lincoln Cityn 4–0 Liigacupissa kesken viikon. Maalihanat aukesivat, mutta vastustaja oli alemmalta tasolta — siksi vaikutus on pieni eikä muodon kääntymisen veroinen.",
+          "delta_home": 0.04,
+          "delta_away": 0,
+          "confidence": 0.6,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://ca.sports.yahoo.com/news/preview-bournemouth-vs-brentford-team-085500204.html"
+            }
+          ]
+        },
+        {
+          "id": "bou-bre-bre-keskikentta-poissa",
+          "team": "away",
+          "type": "injury",
+          "label": "Neljä poissa, Collins epävarma",
+          "detail": "Ulkona: Mathias Jensen, Sepp van den Berg (nivus), Antoni Milambo (polvi), Josh Dasilva (reisi). Nathan Collins (pohje) epävarma — hän on puolustuksen tukipilari.",
+          "delta_home": 0.04,
+          "delta_away": -0.06,
+          "confidence": 0.85,
+          "sources": [
+            {
+              "name": "The Football Faithful — Brentfordin kokoonpano",
+              "url": "https://thefootballfaithful.com/brentford-xi-vs-bournemouth-predicted-lineup-and-team-news-2/"
+            }
+          ]
+        },
+        {
+          "id": "bou-bre-bre-tappioton",
+          "team": "away",
+          "type": "win_streak",
+          "label": "Tappioton, 5. sija",
+          "detail": "Brentford on Valioliigassa tappioton ja viidentenä Keith Andrewsin toisella kaudella. Muoto WDD — putki ei ole mallin syöte, maalit ovat. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.8,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/bournemouth/preview/bournemouth-vs-brentford-prediction-team-news-lineups_604828.html"
+            }
+          ]
+        },
+        {
+          "id": "bou-bre-h2h",
+          "team": null,
+          "type": "h2h",
+          "label": "Bournemouth ei ole koskaan voittanut Brentfordia",
+          "detail": "Kahdeksan Valioliiga-kohtaamista: kolme tasapeliä, viisi Brentfordin voittoa. Molemmat ovat myös kolmen eniten tasapelejä 2026 pelanneen joukkoa (BOU 12, BRE 11). Tämä on taustatieto eikä säädä maaliodotusta.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/bournemouth/preview/bournemouth-vs-brentford-prediction-team-news-lineups_604828.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sportKey": "soccer_epl",
+      "date": "2026-09-12",
+      "home": "Aston Villa",
+      "away": "Nottingham Forest",
+      "factors": [
+        {
+          "id": "avl-nfo-avl-maalikuivuus",
+          "team": "home",
+          "type": "goal_drought",
+          "label": "Ei maalia kolmessa liigaottelussa",
+          "detail": "Villa ei ole voittanut eikä tehnyt maalia Valioliigassa: 0–4 Brightonille, 0–1 Arsenalille ja 0–0 Hull Citylle. Emeryn joukkue on vaarassa olla ensimmäinen englantilaisen neljän ylimmän sarjatason joukkue joka jää maalitta neljässä avausottelussa kahtena peräkkäisenä kautena. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.95,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/aston-villa/preview/aston-villa-vs-nottm-forest-prediction-team-news-lineups_604825.html"
+            }
+          ]
+        },
+        {
+          "id": "avl-nfo-avl-brugge-3-2",
+          "team": "home",
+          "type": "motivation",
+          "label": "Kauden avausmaalit CL:ssä",
+          "detail": "Villan kauden ensimmäiset maalit tulivat kesken viikon: Nicolas Jackson ja John McGinn 3–2-voitossa Club Bruggesta Mestarien liigassa. Maalikuivuus katkesi, vaikkei liigassa.",
+          "delta_home": 0.06,
+          "delta_away": 0,
+          "confidence": 0.8,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/aston-villa/preview/aston-villa-vs-nottm-forest-prediction-team-news-lineups_604825.html"
+            },
+            {
+              "name": "SportsView — Villan ennakoitu avaus",
+              "url": "https://sportsview.co.uk/2026/09/aston-villa-predicted-xi-vs-nottingham-forest-villains-look-to-carry-champions-league-form-into-the-premier-league"
+            }
+          ]
+        },
+        {
+          "id": "avl-nfo-avl-cl-rasitus",
+          "team": "home",
+          "type": "congestion",
+          "label": "Mestarien liiga kesken viikon",
+          "detail": "Villa pelasi CL-ottelun Bruggea vastaan lauantain ja edellisen liigaottelun välissä. Kolme päivää lepoa on kasautuma, ei normaali väli.",
+          "delta_home": -0.03,
+          "delta_away": 0,
+          "confidence": 0.7,
+          "sources": [
+            {
+              "name": "Aston Villa FC — ottelun ennakko",
+              "url": "https://www.avfc.co.uk/news/2026/september/10/prematch-nottingham-forest-fpl-preview"
+            }
+          ]
+        },
+        {
+          "id": "avl-nfo-nfo-savona-sangare",
+          "team": "away",
+          "type": "injury",
+          "label": "Savona ulkona, Sangaré epävarma",
+          "detail": "Nicolo Savona on sivussa polvivamman takia. Ibrahim Sangaré ohitti Spurs-ottelun pohjevaivan vuoksi ja arvioidaan vasta ennen alkua.",
+          "delta_home": 0,
+          "delta_away": -0.05,
+          "confidence": 0.85,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://sports.yahoo.com/articles/preview-aston-villa-vs-nottingham-084600343.html"
+            }
+          ]
+        },
+        {
+          "id": "avl-nfo-nfo-tehottomuus",
+          "team": "away",
+          "type": "goal_drought",
+          "label": "Kaksi maalia kolmessa, 16. sija",
+          "detail": "Forest on kerännyt kaksi pistettä ja tehnyt kaksi maalia kolmessa ottelussa (LDD), viimeksi 0–0 Tottenhamia vastaan. Hyökkäyspään tuotto on ollut sarjan heikoimpia. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.85,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://sports.yahoo.com/articles/preview-aston-villa-vs-nottingham-084600343.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sportKey": "soccer_epl",
+      "date": "2026-09-12",
+      "home": "Chelsea",
+      "away": "Hull City",
+      "factors": [
+        {
+          "id": "che-hul-che-puolustus-vuotaa",
+          "team": "home",
+          "type": "defence",
+          "label": "8 tehtyä, 7 päästettyä",
+          "detail": "Chelsea on sarjan tehokkain hyökkäys (8 maalia, jaettu ykkössija Brightonin kanssa) mutta on päästänyt seitsemän. Alonson ongelma on tasapaino, ei tuotto — ja juuri se nostaa vastustajan maaliodotusta enemmän kuin sarjasija antaisi ymmärtää. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://sports.yahoo.com/articles/chelsea-vs-hull-city-premier-040522227.html"
+            }
+          ]
+        },
+        {
+          "id": "che-hul-che-caicedo-ulos",
+          "team": "home",
+          "type": "injury",
+          "label": "Caicedo ulkona, Henderson ja Emegha sivussa",
+          "detail": "Alonso vahvisti perjantaina ettei Moises Caicedo ole käytettävissä. Jordan Henderson (ranne) ja Emmanuel Emegha (lihas) jatkavat toipumista.",
+          "delta_home": -0.07,
+          "delta_away": 0.03,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/chelsea/preview/chelsea-vs-hull-city-prediction-team-news-lineups_604821.html"
+            },
+            {
+              "name": "Last Word on Sports — ennakoidut avaukset",
+              "url": "https://lastwordonsports.com/football/2026/09/11/chelsea-vs-hull-predicted-lineups-team-news-sep/"
+            }
+          ]
+        },
+        {
+          "id": "che-hul-che-rogers-ennatyshankinta",
+          "team": "home",
+          "type": "signing",
+          "label": "Morgan Rogers — seuraennätys",
+          "detail": "Chelsea rikkoi siirtoennätyksensä Morgan Rogersista, joka pelaa Alonson 3-4-3:ssa vasemmalla. Profiili on huipputasoa mutta epätasainen, ja hän on ollut seurassa vasta muutaman ottelun.",
+          "delta_home": 0.04,
+          "delta_away": 0,
+          "confidence": 0.6,
+          "sources": [
+            {
+              "name": "NBC — kesän 2026 hankintojen arviointi",
+              "url": "https://www.nbcnewyork.com/news/sports/soccer/ranking-premier-league-summer-signings-2026/6542993/"
+            }
+          ]
+        },
+        {
+          "id": "che-hul-hul-nollapeli-putki",
+          "team": "away",
+          "type": "defence",
+          "label": "Ei päästettyä maalia kolmessa",
+          "detail": "Hull ei ole päästänyt yhtäkään maalia kolmessa avausottelussa. Se on huomionarvoista juuri siksi että sama joukkue päästi Mestaruussarjassa neljänneksi eniten maaleja viime kaudella ja pääsi nousukarsintoihin niukasti — puolustus on siis MUUTTUNUT eikä jatkanut. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://sports.yahoo.com/articles/chelsea-vs-hull-city-premier-040522227.html"
+            },
+            {
+              "name": "VAVEL — kierroksen 4 ennakko",
+              "url": "https://www.vavel.com/en/football/2026/09/11/premier-league/1270954-chelsea-vs-hull-city-premier-league-preview-gameweek-4-2026.html"
+            }
+          ]
+        },
+        {
+          "id": "che-hul-hul-jakirovic-kuukauden-valmentaja",
+          "team": "away",
+          "type": "manager",
+          "label": "Jakirović elokuun kuukauden valmentaja",
+          "detail": "Kaksi voittoa ja tasapeli nostivat Sergej Jakirovićin elokuun kuukauden valmentajaksi. Nousija on kolmantena, piste Chelsean edellä.",
+          "delta_home": 0,
+          "delta_away": 0.02,
+          "confidence": 0.85,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://sports.yahoo.com/articles/chelsea-vs-hull-city-premier-040522227.html"
+            }
+          ]
+        },
+        {
+          "id": "che-hul-hul-ryhma-terveena",
+          "team": "away",
+          "type": "return",
+          "label": "Vain kaksi loukkaantunutta",
+          "detail": "Jakirović vahvisti että Hidemasa Morita ja Charlie Hughes ovat ainoat rekisteröidyt pelaajat vaivojen kanssa — muu edustusryhmä on valmis. Nousijalle täysi ryhmä on poikkeuksellinen etu.",
+          "delta_home": 0,
+          "delta_away": 0.03,
+          "confidence": 0.85,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/chelsea/preview/chelsea-vs-hull-city-prediction-team-news-lineups_604821.html"
+            }
+          ]
+        },
+        {
+          "id": "che-hul-h2h-stamford-bridge",
+          "team": null,
+          "type": "h2h",
+          "label": "Hull ei ole voittanut Stamford Bridgellä 18 vierailulla",
+          "detail": "Hull City hakee ensimmäistä sarjavoittoaan Chelsean vieraana — 18 yritystä ilman voittoa. Taustatieto, ei säädä maaliodotusta.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://sports.yahoo.com/articles/chelsea-vs-hull-city-premier-040522227.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sportKey": "soccer_epl",
+      "date": "2026-09-12",
+      "home": "Crystal Palace",
+      "away": "Ipswich Town",
+      "factors": [
+        {
+          "id": "cry-ips-cry-karkikolmikko-poissa",
+          "team": "home",
+          "type": "injury",
+          "label": "Mateta, Sarr ja Riad poissa",
+          "detail": "Jean-Philippe Mateta, Ismaila Sarr ja Chadi Riad ovat kaikki poissa. Mateta ja Sarr ovat Palacen kaksi tärkeintä maalintekijää — tämä on kortin suurin yksittäinen hyökkäysmenetys.",
+          "delta_home": -0.1,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/crystal-palace/preview/crystal-palace-vs-ipswich-prediction-team-news-lineups_604830.html"
+            },
+            {
+              "name": "Last Word on Sports — ennakoidut avaukset",
+              "url": "https://lastwordonsports.com/football/2026/09/11/crystal-palace-vs-ipswich-pl-sept/"
+            }
+          ]
+        },
+        {
+          "id": "cry-ips-cry-liigacup-3-0",
+          "team": "home",
+          "type": "motivation",
+          "label": "3–0 Liigacupissa",
+          "detail": "Pierre Sagen joukkue voitti Middlesbrough'n 3–0 Liigacupissa. Vastustaja oli alemmalta tasolta, joten tämä painaa vähemmän kuin liigatulos.",
+          "delta_home": 0.04,
+          "delta_away": 0,
+          "confidence": 0.6,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://sports.yahoo.com/articles/preview-crystal-palace-vs-ipswich-090600463.html"
+            }
+          ]
+        },
+        {
+          "id": "cry-ips-ips-kolme-poissa",
+          "team": "away",
+          "type": "injury",
+          "label": "Philogene, Matusiwa ja Taylor poissa",
+          "detail": "Jaden Philogene (nilkka), Azor Matusiwa (lihas) ja Jack Taylor (polvi) ovat kaikki sivussa. Philogene on Ipswichin laitahyökkäyksen tärkein ratkaisija.",
+          "delta_home": 0,
+          "delta_away": -0.07,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "The Football Faithful — Ipswichin kokoonpano",
+              "url": "https://thefootballfaithful.com/ipswich-town-xi-vs-crystal-palace-predicted-lineup-and-team-news/"
+            }
+          ]
+        },
+        {
+          "id": "cry-ips-ips-nousija-liverpool-tappio",
+          "team": "away",
+          "type": "away_form",
+          "label": "Nousija ilman pääsarjahistoriaa, 0–2 Liverpoolille",
+          "detail": "Ipswich tuli 0–2-tappiosta Liverpoolille. Mallin voimaluku nojaa sarjan keskitasoon, koska tästä sarjasta ei ole edelliskauden dataa — arvio on tälle joukkueelle selvästi epävarmempi kuin muille. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.7,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://sports.yahoo.com/articles/preview-crystal-palace-vs-ipswich-090600463.html"
+            }
+          ]
+        },
+        {
+          "id": "cry-ips-identtiset-rivit",
+          "team": null,
+          "type": "h2h",
+          "label": "Identtiset rivit, Palace voittanut kolme viimeistä",
+          "detail": "Molemmilla kolme pistettä, neljä tehtyä ja kahdeksan päästettyä maalia kolmesta ottelusta. Palace on silti voittanut kolme viimeistä kohtaamista ja teki tuplan kaudella 2024/25. Taustatieto, ei säädä maaliodotusta.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/crystal-palace/preview/crystal-palace-vs-ipswich-prediction-team-news-lineups_604830.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sportKey": "soccer_epl",
+      "date": "2026-09-12",
+      "home": "Liverpool",
+      "away": "Fulham",
+      "factors": [
+        {
+          "id": "liv-ful-liv-viisi-poissa",
+          "team": "home",
+          "type": "injury",
+          "label": "Viisi poissa, Gakpo epävarma",
+          "detail": "Sivussa: Conor Bradley (polvi), Giovanni Leoni (polvi), Hugo Ekitike (akillesjänne), Joe Gomez (lihas) ja Federico Chiesa (selkä). Cody Gakpo on epävarma lähentäjävaivan takia. Ekitike ja Gakpo ovat hyökkäyspään menetyksiä.",
+          "delta_home": -0.09,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "This Is Anfield — kokoonpanotiedot",
+              "url": "https://www.thisisanfield.com/2026/09/liverpool-vs-fulham-team-news-lineups-tv-info/"
+            },
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/liverpool/preview/liverpool-vs-fulham-prediction-team-news-lineups_604774.html"
+            }
+          ]
+        },
+        {
+          "id": "liv-ful-liv-anfield-tasapelit",
+          "team": "home",
+          "type": "home_form",
+          "label": "Kolme peräkkäistä tasapeliä Anfieldillä",
+          "detail": "Liverpool hakee kauden ensimmäistä kotivoittoaan ja katkaisua kolmen perättäisen Anfield-tasapelin sarjaan. Kotietu ei ole realisoitunut Iraolan alla. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.75,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/liverpool/preview/liverpool-vs-fulham-prediction-team-news-lineups_604774.html"
+            }
+          ]
+        },
+        {
+          "id": "liv-ful-liv-cl-madrid",
+          "team": "home",
+          "type": "congestion",
+          "label": "CL-matka Madridiin kesken viikon",
+          "detail": "Liverpool voitti Atlético Madridin 2–1 vieraissa keskiviikkona. Barcola ja Kerkez poistuivat kentältä krampeissa; kumpikaan ei ole kuntoepäilys, mutta matka ja minuutit ovat.",
+          "delta_home": -0.03,
+          "delta_away": 0,
+          "confidence": 0.7,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://sports.yahoo.com/articles/liverpool-vs-fulham-match-preview-044000236.html"
+            }
+          ]
+        },
+        {
+          "id": "liv-ful-ful-nolla-pistetta",
+          "team": "away",
+          "type": "loss_streak",
+          "label": "Kolme tappiota, nolla pistettä",
+          "detail": "Fulham on jumbosijalla Coventryn rinnalla: tappiot Chelsealle, Sunderlandille ja Crystal Palacelle (2–3 kotona). Seitsemän päästettyä maalia kolmessa ottelussa Álvaro Arbeloan alaisuudessa. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/liverpool/preview/liverpool-vs-fulham-prediction-team-news-lineups_604774.html"
+            }
+          ]
+        },
+        {
+          "id": "liv-ful-ful-esitykset-parempia-kuin-pisteet",
+          "team": "away",
+          "type": "motivation",
+          "label": "Iraola: «ovat olleet todella hyviä»",
+          "detail": "Iraola sanoi viikolla että Fulham on pelannut hyvin ilman että pisteitä on tullut, ja että päästetyt maalit ovat syy pisteettömyyteen. Vastapaino puhtaalle taulukkoluvulle: pisteet aliarvioivat esitykset.",
+          "delta_home": 0,
+          "delta_away": 0.03,
+          "confidence": 0.55,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://sports.yahoo.com/articles/liverpool-vs-fulham-match-preview-044000236.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sportKey": "soccer_epl",
+      "date": "2026-09-12",
+      "home": "Tottenham Hotspur",
+      "away": "Everton",
+      "factors": [
+        {
+          "id": "tot-eve-tot-maaliton-270-min",
+          "team": "home",
+          "type": "goal_drought",
+          "label": "Nolla maalia 270 minuutissa",
+          "detail": "Spurs on ainoa kolmesta joukkueesta joka ei ole tehnyt maalia: 0–3 Brentfordille, 0–2 Newcastlelle, 0–0 Forestille. Ensimmäistä kertaa 52 vuoteen joukkue on jäänyt maalitta kolmessa avausottelussaan, ja neljäs olisi seuran historian ensimmäinen. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.95,
+          "sources": [
+            {
+              "name": "Goal — ottelun ennakko",
+              "url": "https://www.goal.com/en/news/tottenham-hotspur-everton-premier-league-preview/blt141c858a448c4df2"
+            },
+            {
+              "name": "Kyro Sports — Spurs yhä maalitta",
+              "url": "https://kyrosports.com/tottenham-hotspur-remain-goalless-after-three-matches-after-300m-summer-spending-spree/"
+            }
+          ]
+        },
+        {
+          "id": "tot-eve-tot-luovat-pelaajat-poissa",
+          "team": "home",
+          "type": "injury",
+          "label": "Kulusevski, Odobert, Simons ja Mudryk ulkona",
+          "detail": "Dejan Kulusevski, Wilson Odobert ja Xavi Simons ovat kaikki sivussa polvivaivoin. Mykhaylo Mudryk loukkasi nilkkansa uudelleen paluuottelussaan yli 600 päivän tauon jälkeen ja on poissa 6–8 viikkoa. James Maddison on epävarma olkapäävamman takia. Tämä on koko luova osasto kerralla.",
+          "delta_home": -0.1,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Football365 — ottelun ennakko",
+              "url": "https://www.football365.com/match-preview/tottenham-v-everton-prediction-preview-2026-2027"
+            },
+            {
+              "name": "The Football Faithful — Spursin kokoonpano",
+              "url": "https://thefootballfaithful.com/tottenham-hotspur-vs-everton-predicted-lineup-and-team-news-2/"
+            }
+          ]
+        },
+        {
+          "id": "tot-eve-tot-300-miljoonan-rosteri",
+          "team": "home",
+          "type": "signing",
+          "label": "10 uutta pelaajaa, yli 300 M£",
+          "detail": "Spurs käytti kesällä yli 300 miljoonaa puntaa kymmeneen pelaajaan kahden peräkkäisen 17. sijan jälkeen, Tonali kalleimpana. Uusi ryhmä ei ole asettunut De Zerbin peliin — iso hankintamäärä on lyhyellä aikavälillä haitta, ei etu.",
+          "delta_home": -0.04,
+          "delta_away": 0,
+          "confidence": 0.65,
+          "sources": [
+            {
+              "name": "Kyro Sports — 300 M£ ja nolla maalia",
+              "url": "https://kyrosports.com/tottenham-hotspur-remain-goalless-after-three-matches-after-300m-summer-spending-spree/"
+            },
+            {
+              "name": "NBC — kesän 2026 hankintojen arviointi",
+              "url": "https://www.nbcnewyork.com/news/sports/soccer/ranking-premier-league-summer-signings-2026/6542993/"
+            }
+          ]
+        },
+        {
+          "id": "tot-eve-eve-tappioton",
+          "team": "away",
+          "type": "win_streak",
+          "label": "Yksi kahdeksasta tappiottomasta",
+          "detail": "Everton on viidellä pisteellä kahdeksantena ja yksi kahdeksasta joukkueesta jotka eivät ole hävinneet kertaakaan. Viimeksi 2–2 Manchester Unitedia vastaan, ja tämä kaikki huolimatta siirtoikkunan hiljaisuudesta, josta kannattajat ovat raivoissaan. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.85,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://ca.sports.yahoo.com/news/preview-tottenham-vs-everton-team-095000317.html"
+            }
+          ]
+        },
+        {
+          "id": "tot-eve-eve-grealish-avaukseen",
+          "team": "away",
+          "type": "return",
+          "label": "Grealish takaisin avaukseen",
+          "detail": "Jack Grealish palaa kokoonpanoon Brennan Johnsonin tilalle. Vastapainoksi James Garner ei ole täysin pelikunnossa, ja Hayden Hackney pariutuu Harrison Armstrongin kanssa keskelle.",
+          "delta_home": 0,
+          "delta_away": 0.03,
+          "confidence": 0.7,
+          "sources": [
+            {
+              "name": "Football365 — ottelun ennakko",
+              "url": "https://www.football365.com/match-preview/tottenham-v-everton-prediction-preview-2026-2027"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sportKey": "soccer_epl",
+      "date": "2026-09-12",
+      "home": "Sunderland",
+      "away": "Arsenal",
+      "factors": [
+        {
+          "id": "sun-ars-sun-diarra-mundle",
+          "team": "home",
+          "type": "injury",
+          "label": "Diarra 6–8 viikkoa, Mundle koko loppuvuoden",
+          "detail": "Habib Diarra on ulkona 6–8 viikkoa Fulham-ottelussa saamansa reisivamman takia. Laituri Romaine Mundle menetetään loppuvuodeksi 2026 polvileikkauksen jälkeen. Uusia huolia Brentford- tai Hull-otteluista ei tullut.",
+          "delta_home": -0.07,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/arsenal/preview/sunderland-vs-arsenal-prediction-team-news-lineups_604790.html"
+            }
+          ]
+        },
+        {
+          "id": "sun-ars-sun-kaksi-kotivoittoa",
+          "team": "home",
+          "type": "home_form",
+          "label": "Kaksi peräkkäistä kotivoittoa",
+          "detail": "Sunderland tulee kahdesta perättäisestä kotivoitosta Stadium of Lightilla. Nousijan kotipeli on ollut sen ainoa toimiva osa — vieraissa tulos on ollut toinen. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.8,
+          "sources": [
+            {
+              "name": "Yahoo Sports — ottelun ennakko",
+              "url": "https://ca.sports.yahoo.com/news/preview-sunderland-vs-arsenal-team-103500541.html"
+            }
+          ]
+        },
+        {
+          "id": "sun-ars-ars-viisi-voittoa-putkeen",
+          "team": "away",
+          "type": "win_streak",
+          "label": "Viisi voittoa putkeen",
+          "detail": "Arsenal on voittanut viisi peräkkäin ja kaikki kolme liigaotteluaan. Neljä avausvoittoa olisi vasta kuudes kerta seuran historiassa. Putki ei ole mallin syöte — maalit ovat — joten tämä on lisähavainto.",
+          "delta_home": 0,
+          "delta_away": 0.02,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/arsenal/preview/sunderland-vs-arsenal-prediction-team-news-lineups_604790.html"
+            }
+          ]
+        },
+        {
+          "id": "sun-ars-ars-saliba-puolustus",
+          "team": "away",
+          "type": "injury",
+          "label": "Saliba pitkään ulkona, Mosquera ja Timber epävarmoja",
+          "detail": "William Saliba (selkä) on pitkäaikaisesti sivussa. Cristhian Mosquera (lihas) ja Jurriën Timber (nivus) ovat molemmat epävarmoja pohjoisen matkalle. Arsenal on päästänyt vain yhden maalin kolmessa, mutta se luku on saavutettu toisella puolustuksella kuin se joka pelaa tämän.",
+          "delta_home": 0.05,
+          "delta_away": 0,
+          "confidence": 0.85,
+          "sources": [
+            {
+              "name": "Yahoo Sports — Arsenalin kokoonpano",
+              "url": "https://ca.sports.yahoo.com/news/arsenal-xi-vs-sunderland-predicted-044000205.html"
+            }
+          ]
+        },
+        {
+          "id": "sun-ars-ars-karkipelaajat-palaavat",
+          "team": "away",
+          "type": "return",
+          "label": "Havertz, Tzolis, Lewis-Skelly ja Calafiori takaisin",
+          "detail": "Kai Havertz, Christos Tzolis, Myles Lewis-Skelly ja Riccardo Calafiori palaavat kaikki avauskokoonpanoon. Bruno Guimarães oli kesän kärkihankintoja ja on nyt vakiinnuttanut paikkansa.",
+          "delta_home": 0,
+          "delta_away": 0.04,
+          "confidence": 0.75,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/arsenal/preview/sunderland-vs-arsenal-prediction-team-news-lineups_604790.html"
+            },
+            {
+              "name": "NBC — kesän 2026 hankintojen arviointi",
+              "url": "https://www.nbcnewyork.com/news/sports/soccer/ranking-premier-league-summer-signings-2026/6542993/"
+            }
+          ]
+        },
+        {
+          "id": "sun-ars-h2h-2009",
+          "team": null,
+          "type": "h2h",
+          "label": "Arsenal ei ole hävinnyt Sunderlandille sitten 2009",
+          "detail": "17 Valioliiga-ottelun putki ilman tappiota, ja viimeisin kohtaaminen päättyi 3–0 Arsenalille helmikuussa. Taustatieto, ei säädä maaliodotusta.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/arsenal/preview/sunderland-vs-arsenal-prediction-team-news-lineups_604790.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sportKey": "soccer_epl",
+      "date": "2026-09-13",
+      "home": "Coventry City",
+      "away": "Brighton & Hove Albion",
+      "factors": [
+        {
+          "id": "cov-bha-cov-nolla-nolla",
+          "team": "home",
+          "type": "goal_drought",
+          "label": "Nolla pistettä, nolla maalia",
+          "detail": "Coventryn paluu Valioliigaan on ollut surkea: 0–3 Arsenalille, 0–1 Hull Citylle kotona ja 0–1 Manchester Cityssä. Joukkue voi tulla vasta toiseksi Valioliiga-joukkueeksi joka häviää neljä ensimmäistä ottelua tekemättä maalia. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.95,
+          "sources": [
+            {
+              "name": "Sports Mole — Lampardin joukkue välttelee Palacen ennätystä",
+              "url": "https://www.sportsmole.co.uk/football/coventry-city/news/coventry-bidding-to-avoid-matching-palace-feat-in-brighton-showdown_604953.html"
+            },
+            {
+              "name": "Football365 — ottelun ennakko",
+              "url": "https://www.football365.com/match-preview/coventry-city-v-brighton-prediction-preview"
+            }
+          ]
+        },
+        {
+          "id": "cov-bha-cov-nelja-poissa",
+          "team": "home",
+          "type": "injury",
+          "label": "Neljä poissa, Wright niistä tärkein",
+          "detail": "Sidiki Cherif, Luke Woolfenden, Kaine Kesler-Hayden ja Haji Wright ovat kaikki ulkona. Wright on Coventryn hyökkäyksen ratkaisija, ja hänen puuttumisensa selittää maalittomuutta.",
+          "delta_home": -0.07,
+          "delta_away": 0,
+          "confidence": 0.85,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/coventry-city/preview/coventry-vs-brighton-prediction-team-news-lineups_604930.html"
+            }
+          ]
+        },
+        {
+          "id": "cov-bha-bha-seitseman-sivussa",
+          "team": "away",
+          "type": "injury",
+          "label": "Seitsemän sivussa, kärki hajalla",
+          "detail": "Ulkona: Yankuba Minteh (pohje), Kaoru Mitoma (reisi), Jack Hinshelwood, Mats Wieffer (polvi), Stefanos Tzimas (polvi), Evan Ferguson (nilkka) ja Zadok Yohanna. Minteh, Mitoma ja Ferguson ovat kaikki hyökkäyspään avainpelaajia.",
+          "delta_home": 0,
+          "delta_away": -0.1,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/coventry-city/preview/coventry-vs-brighton-prediction-team-news-lineups_604930.html"
+            }
+          ]
+        },
+        {
+          "id": "cov-bha-bha-maalimaara",
+          "team": "away",
+          "type": "win_streak",
+          "label": "8 maalia kolmessa — jaettu sarjakärki",
+          "detail": "Brighton johti Aston Villaa 4–0 jo 31 minuutin kohdalla ja voitti Tromssan samalla lukemalla Konferenssiliigassa. Tappio 3–4 Chelsealle ja 1–1 Leedsiä vastaan kertovat että maaleja syntyy molempiin päihin. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.85,
+          "sources": [
+            {
+              "name": "Football365 — ottelun ennakko",
+              "url": "https://www.football365.com/match-preview/coventry-city-v-brighton-prediction-preview"
+            }
+          ]
+        },
+        {
+          "id": "cov-bha-bha-rutter-azeez-paluu",
+          "team": "away",
+          "type": "return",
+          "label": "Rutter ja Azeez mahdollisesti mukaan",
+          "detail": "Femi Azeez (reisi) ja Georginio Rutter (nilkka) voivat olla mukana, ja Michael Svobodan polvivaiva voi rauhoittua ajoissa ryhmään pääsyä varten. Epävarmaa — siksi pieni vaikutus.",
+          "delta_home": 0,
+          "delta_away": 0.03,
+          "confidence": 0.55,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/coventry-city/preview/coventry-vs-brighton-prediction-team-news-lineups_604930.html"
+            }
+          ]
+        },
+        {
+          "id": "cov-bha-h2h-nousijat",
+          "team": null,
+          "type": "h2h",
+          "label": "Brighton hävinnyt vain kerran 14 nousijaottelussa",
+          "detail": "Brightonin tase nousijoita vastaan on W7 D6 L1 viimeisistä 14 liigaottelusta. Taustatieto, ei säädä maaliodotusta.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/coventry-city/preview/coventry-vs-brighton-prediction-team-news-lineups_604930.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sportKey": "soccer_epl",
+      "date": "2026-09-13",
+      "home": "Manchester United",
+      "away": "Manchester City",
+      "factors": [
+        {
+          "id": "mun-mci-mun-viisi-poissa",
+          "team": "home",
+          "type": "injury",
+          "label": "Viisi poissa, Baleba ja de Ligt mukana",
+          "detail": "Ulkona: Carlos Baleba (nilkka), Matthijs de Ligt (selkä), Manuel Ugarte (polvi), Tom Heaton (takareisi) ja Amad Diallo (nilkka). Baleba oli kesän kärkihankintoja eikä ole päässyt vaikuttamaan; Diallo ei ole pelannut kaudella lainkaan.",
+          "delta_home": -0.09,
+          "delta_away": 0.03,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "ESPN — derbyn ennakko",
+              "url": "https://www.espn.com/soccer/story/_/id/49900345/manchester-united-vs-manchester-city-derby-2026-27-premier-league-tv-channel-how-watch-kickoff-live-stream-referee-injury-predicted-lineups"
+            },
+            {
+              "name": "Sports Mole — ottelun ennakko",
+              "url": "https://www.sportsmole.co.uk/football/man-utd/manchester-derby/preview/man-utd-vs-man-city-prediction-team-news-lineups_604943.html"
+            }
+          ]
+        },
+        {
+          "id": "mun-mci-mun-cl-4-0",
+          "team": "home",
+          "type": "motivation",
+          "label": "4–0 CL:ssä, Shaw'n 300. liigaottelu",
+          "detail": "United murskasi Mestarien liigan tulokkaan Sabah FK:n 4–0 kesken viikon. Luke Shaw puuttui ottelusta kramppien takia mutta saa todennäköisesti pelata 300. Valioliiga-ottelunsa. Vastustaja oli heikko, joten tulos ei kerro derbytasosta.",
+          "delta_home": 0.04,
+          "delta_away": 0,
+          "confidence": 0.6,
+          "sources": [
+            {
+              "name": "ESPN — derbyn ennakko",
+              "url": "https://www.espn.com/soccer/story/_/id/49900345/manchester-united-vs-manchester-city-derby-2026-27-premier-league-tv-channel-how-watch-kickoff-live-stream-referee-injury-predicted-lineups"
+            }
+          ]
+        },
+        {
+          "id": "mun-mci-mun-avauspaivan-tappio",
+          "team": "home",
+          "type": "loss_streak",
+          "label": "11. sija — tappio Hullille, tasapeli Evertonille",
+          "detail": "Avauspäivän tappio nousija Hull Citylle ja 2–2 Evertonia vastaan ovat jättäneet Unitedin yhdenneksitoista. Kotietu on paperilla, tulokset eivät. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.8,
+          "sources": [
+            {
+              "name": "ESPN — derbyn ennakko",
+              "url": "https://www.espn.com/soccer/story/_/id/49900345/manchester-united-vs-manchester-city-derby-2026-27-premier-league-tv-channel-how-watch-kickoff-live-stream-referee-injury-predicted-lineups"
+            }
+          ]
+        },
+        {
+          "id": "mun-mci-mci-3-3-sarjakarki",
+          "team": "away",
+          "type": "win_streak",
+          "label": "3/3 voittoa, sarjakärki",
+          "detail": "Maresca on voittanut kaikki kolme liigaotteluaan ja City on taulukon kärjessä 7–2-maalisuhteella. Putki on lisähavainto, ei mallin syöte. Malli lukee taman jo sarjataulukosta (tehdyt ja paastetyt maalit), joten pilleri EI saada lambdaa — se vain nakyy kortilla.",
+          "delta_home": 0,
+          "delta_away": 0,
+          "confidence": 0.9,
+          "sources": [
+            {
+              "name": "ESPN — derbyn ennakko",
+              "url": "https://www.espn.com/soccer/story/_/id/49900345/manchester-united-vs-manchester-city-derby-2026-27-premier-league-tv-channel-how-watch-kickoff-live-stream-referee-injury-predicted-lineups"
+            }
+          ]
+        },
+        {
+          "id": "mun-mci-mci-doku-oreilly",
+          "team": "away",
+          "type": "injury",
+          "label": "Doku sivussa, O'Reilly epävarma",
+          "detail": "Maresca sanoi Jeremy Dokun tarvitsevan «muutaman päivän lisää». Vuoden 2026 PFA:n nuori pelaaja Nico O'Reilly on mahdollisesti poissa selkävaivan takia — arviot hänen kunnostaan ovat ristiriitaisia lähteiden välillä, mikä näkyy matalampana varmuutena.",
+          "delta_home": 0,
+          "delta_away": -0.06,
+          "confidence": 0.7,
+          "sources": [
+            {
+              "name": "ESPN — derbyn ennakko",
+              "url": "https://www.espn.com/soccer/story/_/id/49900345/manchester-united-vs-manchester-city-derby-2026-27-premier-league-tv-channel-how-watch-kickoff-live-stream-referee-injury-predicted-lineups"
+            },
+            {
+              "name": "Premier League — loukkaantumisseuranta",
+              "url": "https://www.premierleague.com/en/latest-player-injuries"
+            }
+          ]
+        },
+        {
+          "id": "mun-mci-mci-enzo-ennatyshankinta",
+          "team": "away",
+          "type": "signing",
+          "label": "Enzo Fernández — seuraennätys",
+          "detail": "City rikkoi siirtoennätyksensä Enzo Fernándezista, jota pidetään kesän 2026 ikkunan kärkihankintana. Hän on ollut mukana kaikissa kolmessa voitossa.",
+          "delta_home": 0,
+          "delta_away": 0.03,
+          "confidence": 0.6,
+          "sources": [
+            {
+              "name": "NBC — kesän 2026 hankintojen arviointi",
+              "url": "https://www.nbcnewyork.com/news/sports/soccer/ranking-premier-league-summer-signings-2026/6542993/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sportKey": "soccer_epl",
+      "date": "2026-09-14",
+      "home": "Leeds United",
+      "away": "Newcastle United",
+      "factors": [
+        {
+          "id": "lee-new-lee-elland-road",
+          "team": "home",
+          "type": "home_form",
+          "label": "Yksi tappio viidessätoista kotiottelussa",
+          "detail": "Leeds on Elland Roadilla hävinnyt vain kerran viimeisessä viidessätoista ottelussaan. Kotietu on tässä mitattua eikä oletettua.",
+          "delta_home": 0.03,
+          "delta_away": 0,
+          "confidence": 0.85,
+          "sources": [
+            {
+              "name": "RotoWire — ottelun ennakko",
+              "url": "https://www.rotowire.com/soccer/article/leeds-vs-newcastle-prediction-predicted-lineups-team-news-133582"
+            }
+          ]
+        },
+        {
+          "id": "lee-new-lee-kuusi-tappiotonta",
+          "team": "home",
+          "type": "win_streak",
+          "label": "Kuusi ottelua tappiotta",
+          "detail": "Leedsillä on kuuden ottelun tappioton putki kaikissa kilpailuissa. Muoto WDD liigassa.",
+          "delta_home": 0.02,
+          "delta_away": 0,
+          "confidence": 0.8,
+          "sources": [
+            {
+              "name": "Squawka — ottelun ennakko",
+              "url": "https://www.squawka.com/us/news/premier-league/match-preview-leeds-vs-newcastle-14-09-26-premier-league/"
+            }
+          ]
+        },
+        {
+          "id": "lee-new-lee-joseph-rodon",
+          "team": "home",
+          "type": "injury",
+          "label": "Joseph ja Rodon ulkona, Gruev epävarma",
+          "detail": "Hyökkääjä Mateo Joseph (polvi) ja puolustaja Joe Rodon (reisi) ovat poissa, Ilia Gruev (polvi) epävarma. Joseph on Leedsin hyökkäysvaihtoehdoista tärkein menetys.",
+          "delta_home": -0.05,
+          "delta_away": 0.03,
+          "confidence": 0.85,
+          "sources": [
+            {
+              "name": "RotoWire — ottelun ennakko",
+              "url": "https://www.rotowire.com/soccer/article/leeds-vs-newcastle-prediction-predicted-lineups-team-news-133582"
+            }
+          ]
+        },
+        {
+          "id": "lee-new-new-jaissle-putki",
+          "team": "away",
+          "type": "manager",
+          "label": "Jaissle: kuusi tappiotonta, vaikea voittaa",
+          "detail": "Newcastle on uuden valmentajan Matthias Jaisslen alla kuuden ottelun tappiottomassa putkessa ja poikkeuksellisen vaikea voittaa. Valmentajavaihdos on jo ehtinyt näkyä tuloksissa, joten se ei ole enää pelkkä muutosriski.",
+          "delta_home": 0,
+          "delta_away": 0.04,
+          "confidence": 0.8,
+          "sources": [
+            {
+              "name": "RotoWire — ottelun ennakko",
+              "url": "https://www.rotowire.com/soccer/article/leeds-vs-newcastle-prediction-predicted-lineups-team-news-133582"
+            }
+          ]
+        },
+        {
+          "id": "lee-new-new-pitkaaikaiset-poissaolot",
+          "team": "away",
+          "type": "injury",
+          "label": "Burn, Joelinton ja Osula pitkään poissa",
+          "detail": "Puolustaja Dan Burn, keskikenttäpelaaja Joelinton ja hyökkääjä William Osula ovat kaikki pitkäaikaisesti sivussa. Laitapuolustaja Amar Dedić poistui kentältä puoliajalla Millwall-ottelussa, mutta Jaissle sanoi ettei vamma «näytä kovin vakavalta».",
+          "delta_home": 0.03,
+          "delta_away": -0.07,
+          "confidence": 0.85,
+          "sources": [
+            {
+              "name": "Squawka — ottelun ennakko",
+              "url": "https://www.squawka.com/us/news/premier-league/match-preview-leeds-vs-newcastle-14-09-26-premier-league/"
+            },
+            {
+              "name": "RotoWire — ottelun ennakko",
+              "url": "https://www.rotowire.com/soccer/article/leeds-vs-newcastle-prediction-predicted-lineups-team-news-133582"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

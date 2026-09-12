@@ -32,6 +32,7 @@ import { strengthForTeam, matchConfidence, StrengthResult } from '../analyze/str
 import { fetchStatsFor, LeagueStatsPair } from '../ingest/stats.js';
 import { fetchAllFeeds, attachNews, MatchNews } from '../ingest/news-football.js';
 import { fetchEloMapFor, EloLookup, eloFor } from './live-snapshot.js';
+import { contextFor, loadContextFile, totalContextDelta, ContextFile } from '../ingest/context-manual.js';
 import { SideProbs, MarketSide, NewsItem } from '../types-football.js';
 import { FixtureMatch } from './fixtures.js';
 import { TeamSeasonStats } from '../types-football.js';
@@ -250,7 +251,9 @@ export function buildPreviewRow(
   stats: LeagueStatsPair | null,
   elo: EloLookup | null,
   news: MatchNews | null,
-  previousKickoff: { home: string | null; away: string | null }
+  previousKickoff: { home: string | null; away: string | null },
+  /** Kasin syotetty ottelukonteksti (tiketti #105) */
+  contextFile: ContextFile | null = loadContextFile()
 ): MatchPreviewRow | null {
   const sportKey = fixture.sport_key;
   const emptySeason = !stats || !stats.current.teams.length;
@@ -273,6 +276,24 @@ export function buildPreviewRow(
     const da = adj.filter((a) => a.side === 'away').reduce((s, a) => s + a.delta, 0);
     poisson = predictFromLambda(adjustLambda(poisson.lambdaHome, dh), adjustLambda(poisson.lambdaAway, da), config.model.rho);
     if (sportOf(sportKey) === 'hockey') poisson = { ...poisson, probs: applyDrawBoost(poisson.probs) };
+  }
+
+  // Kasin syotetty konteksti (tiketti #105). Sama jarjestys kuin kortilla:
+  // uutissaadot ensin, kasisyotto viimeisena — muuten previews.json ja
+  // today.json antaisivat SAMALLE ottelulle eri lambdan, ja kayttaja nakisi
+  // kaksi eri mallin lukua ilman etta mikaan kertoo kumpi on kumpi.
+  const context = contextFor(
+    { sportKey, kickoff: fixture.kickoff, home: { name: fixture.home }, away: { name: fixture.away } },
+    contextFile
+  );
+  const ctxFactors = context?.factors ?? [];
+  if (ctxFactors.length) {
+    const dh = totalContextDelta(ctxFactors, 'home');
+    const da = totalContextDelta(ctxFactors, 'away');
+    if (dh !== 0 || da !== 0) {
+      poisson = predictFromLambda(adjustLambda(poisson.lambdaHome, dh), adjustLambda(poisson.lambdaAway, da), config.model.rho);
+      if (sportOf(sportKey) === 'hockey') poisson = { ...poisson, probs: applyDrawBoost(poisson.probs) };
+    }
   }
 
   // eloFor() eika suora get(): Elo-kartan avain riippuu sarjasta, ja vain
@@ -318,7 +339,17 @@ export function buildPreviewRow(
       restHome: restDays(fixture.kickoff, previousKickoff.home),
       restAway: restDays(fixture.kickoff, previousKickoff.away),
       news: news?.news ?? [],
-    }),
+    }).concat(
+      // Kasisyotetyt tekijat samaan listaan mutta OMALLA lahdemerkinnallaan:
+      // johdettu havainto ja luettu havainto eivat ole sama asia, ja detail
+      // on se paikka jossa ero sanotaan.
+      ctxFactors.map((f) => ({
+        side: f.team,
+        label: f.label,
+        detail: `${f.detail} (kasin syotetty — ${f.sources.map((x) => x.name).join(', ')})`,
+        leans: null,
+      }))
+    ),
     news: news?.news ?? [],
   };
 }
