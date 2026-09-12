@@ -113,14 +113,57 @@ describe('kasisyoton tasmaytys kalenterin otteluihin', () => {
     expect(events[0].odds[0].away).toBe(12.0);
   });
 
-  // Jalkapallolla EI ole aliaskarttaa (vain valimerkkien poisto), joten
-  // "Bournemouth" ei osu kalenterin "AFC Bournemouthiin". Tama ei ole vika
-  // vaan syy siihen miksi kasisyottotiedostoon kirjoitetaan kalenterin nimet
-  // — ja unmatchedEvents raportoi jokaisen osumattoman rivin.
-  it('ERI KIRJOITUSASU EI OSU — siksi nimet kirjoitetaan kalenterin asussa', () => {
+  // MUUTTUNUT TIKETISSA #105. Aiemmin jalkapallolla oli oma kevyt
+  // normalisointinsa (vain valimerkkien poisto), ja tama testi vahvisti etta
+  // "Bournemouth" EI osu kalenterin "AFC Bournemouthiin" — sita pidettiin
+  // tarkoituksellisena tiukkuutena.
+  //
+  // Kaytannossa se oli hiljainen vika. The Odds API kirjoittaa "Bournemouth"
+  // ja "Brighton and Hove Albion", kalenteri "AFC Bournemouth" ja
+  // "Brighton & Hove Albion" — joten kahdelta Valioliigan ottelulta putosi
+  // seka Veikkauksen hinta etta kasin syotetty ottelukonteksti, eika mikaan
+  // kertonut siita: kortilla oli vain yksi toimisto vahemman.
+  //
+  // Nyt kaytossa on sama `normalizeClubName` kuin muualla putkessa (#57).
+  it('SEURAMUOTO EI ENAA ESTA TASMAYSTA — "Bournemouth" osuu "AFC Bournemouthiin"', () => {
     const events = [asOddsEvent(fx({ home: 'AFC Bournemouth', away: 'Brentford' }))];
-    expect(applyManualOdds(events, file)).toBe(0);
-    expect(events[0].odds).toEqual([]);
+    expect(applyManualOdds(events, file)).toBe(1);
+    expect(events[0].odds[0].home).toBe(2.54);
+  });
+
+  // Sama korjaus toiseen suuntaan: & ja "and" ovat sama sana.
+  it('"&" ja "and" tasmaavat toisiinsa', () => {
+    const ampersand = parseManualOdds({
+      bookmaker: 'Veikkaus',
+      key: 'veikkaus',
+      link: null,
+      source: 'testi',
+      entered_at: NOW.toISOString(),
+      note: null,
+      events: [
+        { sportKey: 'soccer_epl', date: '2026-09-12', home: 'Coventry City', away: 'Brighton & Hove Albion', odds: [3.65, 3.65, 1.98] },
+      ],
+    });
+    const events = [asOddsEvent(fx({ home: 'Coventry City', away: 'Brighton and Hove Albion' }))];
+    expect(applyManualOdds(events, ampersand)).toBe(1);
+  });
+
+  // EROTTELEVAT sanat jaavat paikoilleen: normalisointi ei saa yhdistaa
+  // kahta eri seuraa, mika olisi pahempi virhe kuin tasmaamatta jaanyt rivi.
+  it('kaksi eri joukkuetta EIVAT yhdisty', () => {
+    const wrong = parseManualOdds({
+      bookmaker: 'Veikkaus',
+      key: 'veikkaus',
+      link: null,
+      source: 'testi',
+      entered_at: NOW.toISOString(),
+      note: null,
+      events: [
+        { sportKey: 'soccer_epl', date: '2026-09-12', home: 'Manchester City', away: 'Brentford', odds: [1.5, 4.0, 6.0] },
+      ],
+    });
+    const events = [asOddsEvent(fx({ home: 'Manchester United', away: 'Brentford' }))];
+    expect(applyManualOdds(events, wrong)).toBe(0);
   });
 
   it('vaara paiva ei osu vaikka joukkueet tasmaavat', () => {

@@ -282,6 +282,70 @@ export interface MatchCard {
    * ei "ennakko oli tyhjä" — kortti jättää osion silloin kokonaan pois.
    */
   preview?: MatchPreview;
+  /**
+   * Kasin syotetty ottelukonteksti (tiketti #105).
+   *
+   * Kierroksen ennakoista, foorumeilta ja lehdistotilaisuuksista luetut
+   * havainnot pillereina: voittoputki, uusi hankinta, loukkaantuminen.
+   * Nama SAATAVAT mallia — toisin kuin RSS-polun avainsanaosumat — koska ne
+   * on luettu ja lahteistetty kasin. Puuttuva kentta tarkoittaa "ei
+   * syotettya kontekstia", ei "konteksti oli tyhja".
+   */
+  context?: MatchContext;
+}
+
+/** Mista kasin syotetty konteksti on peraisin ja milloin */
+export interface ContextSource {
+  name: string;
+  /** Milloin tekijat on syotetty — kasin syotetty tieto vanhenee */
+  entered_at: string;
+  note: string | null;
+}
+
+/**
+ * Yksi ottelukontekstin tekija eli "pilleri".
+ *
+ * `delta_home` ja `delta_away` ovat SUHTEELLISIA siirtymia maaliodotukseen,
+ * sama yksikko jota uutissaadot ja kerroinlaskurin omat tekijat kayttavat.
+ * Kumpikin on erikseen, koska havainto voi koskea toista joukkuetta mutta
+ * siirtaa toisen lukua: "koti paastaa joka ottelussa" nostaa VIERAAN
+ * maaliodotusta. `team` kertoo ketä havainto koskee, deltat mihin se osuu.
+ */
+export interface ContextFactor {
+  /** Pysyva tunniste — kerroinlaskuri muistaa pois-kytkennan talla */
+  id: string;
+  /** Kumpaa joukkuetta havainto koskee, null kun se koskee ottelua */
+  team: 'home' | 'away' | null;
+  /** Tekijatyyppi, ks. FACTOR_TYPES (src/ingest/context-manual.ts) */
+  type: string;
+  /** Pillerin teksti, esim. "3 voittoa putkeen" */
+  label: string;
+  /** Mista havainto tulee — kayttajan pitaa voida tarkistaa se */
+  detail: string;
+  delta_home: number;
+  delta_away: number;
+  /** Kuinka varma syottaja on, 0..1 */
+  confidence: number;
+  /** Vahintaan yksi lahde, muuten tekija ei paase tiedostosta lapi */
+  sources: Array<{ name: string; url: string }>;
+}
+
+/**
+ * Ottelun kasin syotetty konteksti.
+ *
+ * `lambda_base` on maaliodotus ENNEN naiden tekijoiden vaikutusta. Se on
+ * tassa yhta tarkeaa kuin tekijat itse: ilman sita selain ei voisi laskea
+ * uudelleen, kun kayttaja kytkee yhden tekijan pois — se osaisi vain lisata,
+ * ei perua. `model.lambda_home` sisaltaa tekijat, tama ei.
+ *
+ * null kun ottelulla ei ole maalimallia (market-only): silloin lambdaa ei ole
+ * olemassa eika sita ole saadetty. Pillerit naytetaan silti, koska ne ovat
+ * luettavaa tietoa myos ilman mallia.
+ */
+export interface MatchContext {
+  source: ContextSource;
+  factors: ContextFactor[];
+  lambda_base: { home: number; away: number } | null;
 }
 
 /** Yhden joukkueen ennakkorivi kortille */

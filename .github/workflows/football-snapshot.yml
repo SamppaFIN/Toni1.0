@@ -34,23 +34,42 @@ jobs:
       contents: write # datan commit mainiin + gh-pages-deploy
 
     env:
-      # Tiketti #100: JALKAPALLO POIS TOISTAISEKSI. Jaakiekkokausi alkoi
-      # 1.9. ja se on nyt ainoa seurattava. Palautus: poista tama rivi,
-      # jolloin config.ts:n oletuslista (4 sarjaa) astuu voimaan.
-      ODDS_FOOTBALL_SPORTS: 'icehockey_liiga'
+      # Tiketti #105: VALIOLIIGA TAKAISIN MUKAAN.
+      #
+      # Tiketissa #100 jalkapallo otettiin pois kun jaakiekkokausi alkoi 1.9.
+      # Nyt Valioliigan kierroksille syotetaan kasin ottelukonteksti
+      # (data/ottelukonteksti-manual.json), ja se saataa mallia — mutta
+      # SAATO ON TYHJA TYO ILMAN HINTOJA. Kortin sisalto on kerroin: ilman
+      # kerroinhakua ottelu jaa ilman edgea ja Kellya, jolloin konteksti
+      # nakyisi pillereina joilla ei ole mihin vaikuttaa.
+      #
+      # Toinen syy: Veikkaus on kasisyoton varassa (#103), eika yhden
+      # toimiston hinta ole hintavertailu. Kerroinhaku tuo 10 muuta
+      # toimistoa JA Pinnaclen sharp-ankkurin, jota ilman blendi nojaa
+      # pelkkaan mediaaniin.
+      #
+      # KVOOTTA: 2 sarjaa x 2 markkinaa x 1 alue x 2 ajoa/vrk x 30 pv
+      #        = 240 krediittia/kk (ilmaistason raja 500).
+      ODDS_FOOTBALL_SPORTS: 'icehockey_liiga,soccer_epl'
+      # Valioliigan kierros venyy perjantaista maanantai-iltaan. 72 tuntia
+      # jattaisi maanantain ottelun pois lauantain ajosta, jolloin juuri sen
+      # ottelun kasin syotetty konteksti ei paatyisi millekaan kortille.
+      SNAPSHOT_HORIZON_HOURS: '96'
       ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
       FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
       API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
       # Kvoottakatto KERROINHAULLE per ajo (ingestFootballOdds lukee taman).
       #
-      # LASKELMA 8 sarjalla (tiketti #65):
-      #   Kerroinhaku  1 kr/sarja x 8 sarjaa x 2 ajoa/vrk x 30 pv = 480 kr/kk
+      # LASKELMA 2 sarjalla (Liiga + Valioliiga, tiketti #105):
+      #   Kerroinhaku  1 kr/sarja/markkina x 2 x 2 = 4 kr/ajo
+      #                4 kr x 2 ajoa/vrk x 30 pv   = 240 kr/kk
       #   Tuloshaku    0 kr -- siirretty ESPN:aan, ks. alla
-      #   Yhteensa                                                 480 / 500
+      #   Yhteensa                                    240 / 500
       #
-      # Katto 12 (ei 8) antaa marginaalin: includeLinks voi nostaa yhden
+      # Katto 12 (ei 4) antaa marginaalin: includeLinks voi nostaa yhden
       # pyynnon hintaa, ja tasan rajalla oleva katto pudottaisi viimeiset
       # sarjat hiljaa pois. Katto suojaa karkaamiselta, ei kirista normaalia.
+      # Se kestaa myos kolmannen sarjan lisaamisen ilman muutosta tahan.
       ODDS_DAILY_CREDIT_BUDGET: '12'
       # CI:ssä ei ole edellisen ajon välimuistia, ja tuore data on tässä koko pointti
       CACHE_DISABLED: '1'
@@ -104,6 +123,22 @@ jobs:
       # kaikessa mita siita johdetaan: paras hinta, kate, edge ja Kelly.
       - name: Lisaa kasin syotetyt kertoimet (Veikkaus)
         run: npm run odds:manual
+        continue-on-error: true
+
+      # Tiketti #105: kasin syotetty ottelukonteksti.
+      #
+      # `snapshot:live` lukee tiedoston jo lennossa, joten tama askel EI
+      # muuta dataa — se on NAKYVA TARKISTUS, tasan samasta syysta kuin
+      # `odds:manual` on erillinen askel kertoimille:
+      #
+      #   Kasisyotetty rivi joka ei tasmaa yhteenkaan otteluun nayttaa tasan
+      #   samalta kuin "tekijoita ei ollut". Kortti on molemmissa tapauksissa
+      #   pelkistetty eika lokiin tule virhetta, joten kirjoitusvirhe
+      #   joukkuenimessa voisi elaa kierroksesta toiseen.
+      #
+      # Ajo on ilmainen: se ei hae mitaan verkosta eika kirjoita mitaan.
+      - name: Tarkista kasin syotetty ottelukonteksti
+        run: npm run context:check
         continue-on-error: true
 
       # Tiketti #45: Valioliigan joukkuetaulukko. Vaatii FOOTBALL_DATA_TOKENin;

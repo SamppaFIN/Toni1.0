@@ -65,6 +65,13 @@ function asTarget(m: MatchCard): ManualOddsTarget & { card: MatchCard } {
  *
  * Tunnusluvut, perustelut ja voimaluvut kannetaan sellaisenaan: ne eivät
  * riipu kertoimista, joten niiden uudelleenlaskenta ei toisi mitään.
+ *
+ * SAMASTA SYYSTA KASIN SYOTETTY KONTEKSTI (#105) KANNETAAN MUKANA. Sen
+ * lambda-vaikutus on jo `m.model.lambda_*`:ssa ja saatamaton lahtoluku
+ * `context.lambda_base`:ssa, joten kumpaakaan ei lasketa uudelleen — mutta
+ * jos kentta putoaisi tassa pois, cronin `odds:manual`-askel riisuisi
+ * pillerit jokaiselta kortilta heti `snapshot:live`:n jalkeen. Kortti
+ * nayttaisi samalta kuin jos kontekstia ei olisi koskaan syotetty.
  */
 export function rebuildCard(m: MatchCard, bankroll = 100): MatchCard {
   const sportKey = sportKeyOf(m.id);
@@ -93,6 +100,7 @@ export function rebuildCard(m: MatchCard, bankroll = 100): MatchCard {
       homeStrength: m.model.home_strength ?? null,
       awayStrength: m.model.away_strength ?? null,
       ...(m.preview ? { preview: m.preview } : {}),
+      ...(m.context ? { context: m.context } : {}),
     });
   }
 
@@ -103,7 +111,10 @@ export function rebuildCard(m: MatchCard, bankroll = 100): MatchCard {
     sportOf(sportKey) === 'hockey' ? priorEloMap() : null
   );
 
-  return buildMatchCard(prior ? { ...base, ...prior } : { ...base, poisson: null, stats: m.stats });
+  return buildMatchCard({
+    ...(prior ? { ...base, ...prior } : { ...base, poisson: null, stats: m.stats }),
+    ...(m.context ? { context: m.context } : {}),
+  });
 }
 
 export interface ApplyResult {

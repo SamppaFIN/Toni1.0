@@ -259,6 +259,8 @@ export interface BuildMatchCardInput {
   awayStrength?: TeamStrengthView | null;
   /** Kausiennakon plussat ja miinukset kortille (tiketti #103) */
   preview?: import('../types-football.js').MatchPreview;
+  /** Kasin syotetty ottelukonteksti pillereina (tiketti #105) */
+  context?: import('../types-football.js').MatchContext;
 }
 
 /** Kokoa yksi ottelukortti. Vaiheen B ingestio kutsuu tätä per ottelu. */
@@ -309,6 +311,7 @@ export function buildMatchCard(input: BuildMatchCardInput): MatchCard {
     stats: input.stats,
     news: input.news ?? [],
     ...(input.preview ? { preview: input.preview } : {}),
+    ...(input.context ? { context: input.context } : {}),
   };
 }
 

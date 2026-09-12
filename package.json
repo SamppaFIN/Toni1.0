@@ -36,7 +36,8 @@
     "results:espn": "npx tsx src/ingest/results-from-espn.ts",
     "odds:manual": "npx tsx src/publish/manual-odds.ts",
     "previews": "npx tsx src/publish/previews.ts",
-    "snapshot:manual": "npx tsx src/publish/manual-snapshot.ts"
+    "snapshot:manual": "npx tsx src/publish/manual-snapshot.ts",
+    "context:check": "npx tsx src/publish/context-check.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0",

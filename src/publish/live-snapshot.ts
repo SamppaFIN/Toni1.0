@@ -26,12 +26,13 @@ import { strengthForTeam, matchConfidence } from '../analyze/strength.js';
 import { predictPoisson, predictFromLambda, adjustLambda, LeagueAverages, DEFAULT_LEAGUE } from '../analyze/poisson.js';
 import { priorFor, previewSource } from '../analyze/liiga-priors.js';
 import { applyManualOdds, loadManualOdds, unmatchedEvents } from '../ingest/odds-manual.js';
+import { contextFor, loadContextFile, totalContextDelta, ContextFile } from '../ingest/context-manual.js';
 import { fetchAllFeeds, attachNews, MatchNews } from '../ingest/news-football.js';
 import { fetchSeasonResults, normalizeTeam } from '../ingest/results-veikkausliiga.js';
 import { fetchSeasonResultsEspn, hasEspnResults } from '../ingest/results-espn.js';
 import { calculateSeasonElo, STARTING_ELO } from '../analyze/season-elo.js';
 import { buildMatchCard, buildSnapshot, writeSnapshot } from './snapshot.js';
-import { MatchCard, MatchPreview, MatchStats, ModelAdjustment, TeamStats, TeamSeasonStats } from '../types-football.js';
+import { MatchCard, MatchContext, MatchPreview, MatchStats, ModelAdjustment, TeamStats, TeamSeasonStats } from '../types-football.js';
 
 /** Kuinka pitkälle eteenpäin otteluita otetaan mukaan */
 const HORIZON_HOURS = Number(process.env.SNAPSHOT_HORIZON_HOURS || 72);
@@ -87,39 +88,13 @@ export function liigaEloProvider(elo: EloLookup): string {
 /**
  * Aggressiivinen nimennormalisointi ESPN-sarjoille (tiketti #57).
  *
- * Kolme lähdettä kirjoittaa saman joukkueen eri tavoin:
- *   The Odds API      "Brighton and Hove Albion"
- *   ESPN              "Brighton & Hove Albion"
- *   football-data.org "Brighton & Hove Albion FC"
- *
- * Veikkausliigalle tämä ratkaistiin käsin ylläpidetyllä kartalla
- * (STATS_TO_ELO_NAME), koska sarjassa on 12 joukkuetta ja nimet ovat
- * epäsäännöllisiä. Isoissa sarjoissa se ei skaalaa — siellä poistetaan
- * seuramuodot ja välimerkit ja verrataan jäljelle jäävää.
- *
- * Riski on päinvastainen kuin kartalla: liian aggressiivinen normalisointi
- * voisi yhdistää kaksi eri joukkuetta. Siksi "united"/"city" ja vastaavat
- * EROTTELEVAT sanat jätetään paikoilleen — vain seuramuodot poistetaan.
+ * Toteutus on siirretty jaettuun moduuliin `ingest/club-name.ts`, koska myos
+ * kasisyottopolut tarvitsevat sen eivatka voi tuoda tata tiedostoa ilman
+ * tuontisykliä (ks. tiketti #105). Vienti sailyy tassa, jotta olemassa
+ * olevat tuonnit ja testit osoittavat edelleen samaan nimeen.
  */
-const DIACRITICS = new RegExp('[' + String.fromCharCode(0x300) + '-' + String.fromCharCode(0x36f) + ']', 'g');
-
-/** Seuramuodot jotka eivat erottele joukkueita toisistaan */
-const CLUB_FORMS = new Set(['afc', 'fc', 'cf', 'sc', 'ac', 'if', 'ifk', 'club']);
-
-export function normalizeClubName(name: string): string {
-  return String(name ?? '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(DIACRITICS, '')
-    .replace(/&/g, ' and ')
-    // Sanoittain eika regexin sanarajoilla: token-vertailu on tassa seka
-    // selkeampi etta turvallisempi. Korvaus ilman sanarajaa silpoisi nimia
-    // keskelta -- "palace" sisaltaa "ac" ja muuttuisi muotoon "pale",
-    // jolloin kaksi eri joukkuetta voisi normalisoitua samaksi.
-    .split(/[^a-z0-9]+/)
-    .filter((t) => t && !CLUB_FORMS.has(t))
-    .join('');
-}
+import { normalizeClubName } from '../ingest/club-name.js';
+export { normalizeClubName };
 
 /**
  * Kauden Elo yhdelle sarjalle. Veikkausliiga käyttää omaa tuloslähdettään
@@ -461,8 +436,18 @@ export function buildCard(
   options: BuildLiveOptions,
   elo: EloLookup | null,
   /** Edellisen kauden alempi sarja nousijan prioria varten (tiketti #68) */
-  lowerSeason: import("../types-football.js").LeagueSeasonStats | null = null
+  lowerSeason: import("../types-football.js").LeagueSeasonStats | null = null,
+  /** Kasin syotetty ottelukonteksti (tiketti #105); null = ei syotettya tietoa */
+  contextFile: ContextFile | null = loadContextFile()
 ): MatchCard {
+  // Konteksti haetaan ENNEN mallihaaroja, koska pillerit kuuluvat kortille
+  // myos market-only-tilassa: "Chelsea ilman Caicedoa" on luettavaa tietoa
+  // vaikka lambdaa ei olisi olemassa saadettavaksi.
+  const context = contextFor(
+    { sportKey: e.sportKey, kickoff: e.kickoff, home: e.home, away: e.away },
+    contextFile
+  );
+
   const base = {
     id: matchId(e),
     league: e.league,
@@ -475,6 +460,7 @@ export function buildCard(
     newsWindow: news?.newsWindow ?? false,
     bankroll: options.bankroll ?? 100,
     blendWeight: config.model.blendWeight,
+    ...(context ? { context } : {}),
   };
 
   // Tilastolahde voi VASTATA mutta olla tyhja. Juuri niin kavi Liigan
@@ -587,6 +573,36 @@ export function buildCard(
       adjustments.push({
         reason: `📰 ${adj.reason}`,
         ...(adj.side === 'home' ? { delta_lambda_home: adj.delta } : { delta_lambda_away: adj.delta }),
+      });
+    }
+  }
+
+  // Kasin syotetyn kontekstin lambda-korjaukset (tiketti #105).
+  //
+  // VIIMEISENA, uutissaatojen jalkeen, ja se on tarkoituksellista: `lambda_base`
+  // on se luku josta selain laskee uudelleen kun kayttaja kytkee pillerin pois.
+  // Jos konteksti sovellettaisiin ennen uutisia, poiskytkenta perusi vahingossa
+  // myos uutissaadon — kayttaja luulisi poistavansa yhden havainnon ja poistaisi
+  // kaksi.
+  if (context?.factors.length) {
+    const dh = totalContextDelta(context.factors, 'home');
+    const da = totalContextDelta(context.factors, 'away');
+    context.lambda_base = { home: round(poisson.lambdaHome, 3), away: round(poisson.lambdaAway, 3) };
+
+    if (dh !== 0 || da !== 0) {
+      poisson = predictFromLambda(
+        adjustLambda(poisson.lambdaHome, dh),
+        adjustLambda(poisson.lambdaAway, da),
+        config.model.rho
+      );
+      if (sportOf(e.sportKey) === 'hockey') poisson = { ...poisson, probs: applyDrawBoost(poisson.probs) };
+    }
+
+    for (const f of context.factors) {
+      adjustments.push({
+        reason: `📋 ${f.label}${f.detail ? ` — ${f.detail}` : ''} (kasin syotetty, ${f.sources.map((s) => s.name).join(', ')})`,
+        ...(f.delta_home ? { delta_lambda_home: f.delta_home } : {}),
+        ...(f.delta_away ? { delta_lambda_away: f.delta_away } : {}),
       });
     }
   }
