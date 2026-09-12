@@ -194,6 +194,82 @@ export function totalDelta(factors, side) {
   return factors.filter((f) => f.side === side).reduce((sum, f) => sum + (Number(f.delta) || 0), 0);
 }
 
+// ─── Käsin syötetyn kontekstin pillerit (tiketti #105) ────────────────────
+//
+// Kortin `context.factors` on PALVELIMEN säätö: se on jo mukana
+// `model.lambda_home`:ssa ja siten siinä edgessä jonka kortti näyttää.
+// Käyttäjä voi silti olla eri mieltä yhdestä havainnosta ("pelaajan vaihto ei
+// nyt vaikuta"), ja silloin se pitää pystyä PERUMAAN — ei vain lisäämään
+// vastakkaista tekijää päälle, mikä jättäisi kaksi virhettä kumoamaan
+// toisensa likimäärin.
+//
+// Peruminen vaatii lähtöluvun jota säätö ei ole koskenut. Se on
+// `context.lambda_base`: λ ennen näiden pillereiden vaikutusta. Ilman sitä
+// selain osaisi vain kasata lisää säätöä jo säädetyn päälle.
+
+/** Sama katto kuin palvelimella (src/ingest/context-manual.ts) */
+export const MAX_SIDE_DELTA = 0.35;
+
+export const CONTEXT_OFF_KEY = 'bt_football_context_off';
+
+export function loadDisabledContext() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CONTEXT_OFF_KEY) || '{}');
+    return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  } catch {
+    return {};
+  }
+}
+
+export function disabledContextFor(matchId) {
+  const all = loadDisabledContext();
+  return Array.isArray(all[matchId]) ? all[matchId] : [];
+}
+
+function saveDisabledContext(all) {
+  try {
+    localStorage.setItem(CONTEXT_OFF_KEY, JSON.stringify(all));
+  } catch {
+    /* privaatti-ikkuna: valinta elää istunnon ajan */
+  }
+}
+
+/** Kytke yksi pilleri päälle tai pois. Palauttaa uuden pois-listan. */
+export function toggleContextFactor(matchId, factorId) {
+  const all = loadDisabledContext();
+  const list = Array.isArray(all[matchId]) ? all[matchId] : [];
+  const next = list.includes(factorId) ? list.filter((id) => id !== factorId) : [...list, factorId];
+  if (next.length) all[matchId] = next;
+  else delete all[matchId];
+  saveDisabledContext(all);
+  return next;
+}
+
+export function enableAllContext(matchId) {
+  const all = loadDisabledContext();
+  delete all[matchId];
+  saveDisabledContext(all);
+}
+
+/** Ne pillerit jotka ovat käytössä — poiskytketyt suodatettu pois */
+export function activeContextFactors(match, disabledIds) {
+  const factors = match?.context?.factors ?? [];
+  const off = disabledIds ?? disabledContextFor(match?.id);
+  return factors.filter((f) => !off.includes(f.id));
+}
+
+/**
+ * Yhden puolen pillereiden yhteisvaikutus, katto mukaan luettuna.
+ *
+ * TÄMÄN FUNKTION VASTINE ON PALVELIMELLA (src/ingest/context-manual.ts:
+ * `totalContextDelta`). Pariteetti on testattu — ks.
+ * src/__tests__/context-manual.test.ts.
+ */
+export function totalContextDelta(factors, side) {
+  const sum = (factors || []).reduce((s, f) => s + (Number(side === 'home' ? f.delta_home : f.delta_away) || 0), 0);
+  return Math.max(-MAX_SIDE_DELTA, Math.min(MAX_SIDE_DELTA, sum));
+}
+
 /**
  * Laske ottelu uudelleen käyttäjän tekijöillä.
  *
@@ -201,11 +277,18 @@ export function totalDelta(factors, side) {
  * λ:aa ei ole olemassa eikä sitä voi säätää. Se on rehellisempää kuin keksiä
  * lähtökohta jota mallilla ei ole.
  */
-export function recalculate(match, factors, bankroll) {
+export function recalculate(match, factors, bankroll, disabledContextIds) {
   if (match.model.lambda_home === null || match.model.lambda_away === null) return null;
 
-  const lambdaHome = adjustLambda(match.model.lambda_home, totalDelta(factors, 'home'));
-  const lambdaAway = adjustLambda(match.model.lambda_away, totalDelta(factors, 'away'));
+  // Lähtöluku: λ ennen käsin syötettyä kontekstia jos sellaista on, muuten
+  // mallin oma λ. Kaksi askelta eikä yksi summa, koska katto koskee VAIN
+  // pillereitä — käyttäjän omaa tekijää ei rajoiteta samalla katolla.
+  const ctx = match.context ?? null;
+  const base = ctx?.lambda_base ?? { home: match.model.lambda_home, away: match.model.lambda_away };
+  const active = ctx ? activeContextFactors(match, disabledContextIds) : [];
+
+  const lambdaHome = adjustLambda(adjustLambda(base.home, totalContextDelta(active, 'home')), totalDelta(factors, 'home'));
+  const lambdaAway = adjustLambda(adjustLambda(base.away, totalContextDelta(active, 'away')), totalDelta(factors, 'away'));
 
   const matrix = scoreMatrix(lambdaHome, lambdaAway);
   const poisson = outcomeProbs(matrix);
@@ -235,6 +318,8 @@ export function recalculate(match, factors, bankroll) {
   return {
     lambdaHome,
     lambdaAway,
+    contextActive: active,
+    contextDisabled: ctx ? (ctx.factors ?? []).filter((f) => !active.includes(f)) : [],
     poisson,
     probs,
     over25: overProb(matrix, 2.5),
