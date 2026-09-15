@@ -53,8 +53,8 @@
   ],
   "source": {
     "name": "Kierrosennakot, lehdistötilaisuudet ja loukkaantumislistat — luettu käsin",
-    "entered_at": "2026-09-12T10:30:00.000Z",
-    "note": "Valioliigan kierros 4 (12.–14.9.2026). Lähteinä Sports Mole, Yahoo Sports, Goal, ESPN, Football365, The Football Faithful, Last Word on Sports, Premier League -loukkaantumisseuranta ja seurojen omat ennakot. Lambda-vaikutus annetaan VAIN havainnoille joita malli ei itse nae (loukkaantumiset, paluut, hankinnat, valmentajavaihdos, otteluruuhka); taulukosta luettavat putket ja maalimaarat naytetaan pillereina ilman saatoa."
+    "entered_at": "2026-09-15T08:35:00.000Z",
+    "note": "Valioliigan kierros 4 (12.–14.9.2026): ks. Sports Mole / Yahoo Sports / Goal / ESPN / Football365 / The Football Faithful / Last Word on Sports / Premier League -loukkaantumisseuranta. LISÄTTY 15.9.2026: jääkiekon Liiga-kierros samalta illalta (Ässät–Sport, Pelicans–Tappara). Nopea haku kiireellä — kattaa vain 2/5 illan ottelusta. KalPa–HPK, TPS–Jukurit ja SaiPa–Kiekko-Espoo EIVÄT saaneet riviä: hakukone löysi vain vanhentuneita osumia (mm. helmikuulta 2026 ja tammikuulta 2024 jotka eivät koske tätä iltaa), eikä rivejä lisätä ilman kelvollista, tämän illan lähdettä. Kattavampi, käsin tarkistettu lähdelista tulossa myöhemmin — tämä on väliaikainen, yleisen konsensuksen taso. Lambda-vaikutus annetaan VAIN havainnoille joita malli ei itse näe (loukkaantumiset, paluut, hankinnat, valmentajavaihdos, otteluruuhka); taulukosta luettavat putket ja maalimäärät näytetään pillereinä ilman säätöä."
   },
   "events": [
     {
@@ -1080,6 +1080,70 @@
             {
               "name": "RotoWire — ottelun ennakko",
               "url": "https://www.rotowire.com/soccer/article/leeds-vs-newcastle-prediction-predicted-lineups-team-news-133582"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sportKey": "icehockey_liiga",
+      "date": "2026-09-15",
+      "home": "Ässät",
+      "away": "Sport",
+      "factors": [
+        {
+          "id": "ass-spo-ass-yhdeksan-loukkaantunutta",
+          "team": "home",
+          "type": "injury",
+          "label": "Yhdeksän pelaajaa loukkaantuneena viikko sitten",
+          "detail": "Etelä-Suomen Sanomien mukaan (7.9.2026) Ässät-joukkueessa oli yhdeksän loukkaantunutta pelaajaa, mm. Heinilä, Noiva, Knihti ja Lipiäinen usean viikon sivussa. Tieto on runsas viikko vanha eikä välttämättä täsmää tarkalleen tämän illan kokoonpanoon — osa on voinut palata, siksi matala luottamus.",
+          "delta_home": -0.09,
+          "delta_away": 0,
+          "confidence": 0.55,
+          "sources": [
+            {
+              "name": "Etelä-Suomen Sanomat — Liigaseuran loukkaantumishuolet kasvavat",
+              "url": "https://www.ess.fi/urheilu/9772541"
+            }
+          ]
+        },
+        {
+          "id": "ass-spo-ass-tiivola-paivittain",
+          "team": "home",
+          "type": "injury",
+          "label": "Kapteeni Tiivola tarkkailussa päivä kerrallaan",
+          "detail": "Kapteeni Peter Tiivola loukkaantui yhteentörmäyksessä Ilves-ottelussa, eikä Ässät ollut 7.9. vielä arvioinut poissaolon kestoa — tilanne oli silloin päivä kerrallaan, ei varmaa poissaoloa. Voi olla pelikunnossa tänä iltana tai ei; siksi hyvin matala luottamus.",
+          "delta_home": -0.03,
+          "delta_away": 0,
+          "confidence": 0.4,
+          "sources": [
+            {
+              "name": "Etelä-Suomen Sanomat — Liigaseuran loukkaantumishuolet kasvavat",
+              "url": "https://www.ess.fi/urheilu/9772541"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sportKey": "icehockey_liiga",
+      "date": "2026-09-15",
+      "home": "Pelicans",
+      "away": "Tappara",
+      "factors": [
+        {
+          "id": "pel-tap-tap-kankaanpera-haapala",
+          "team": "away",
+          "type": "injury",
+          "label": "Kankaanperä ja Haapala loukkaantuneina",
+          "detail": "Tapparan omien sivujen mukaan Markus Kankaanperä ja Henrik Haapala ovat sivussa loukkaantumisten takia illan kokoonpanosta. Sivulla ei ollut näkyvissä julkaisupäivää, joten ajantasaisuus ei ole varmistettu yhtä tarkasti kuin Ässät-lähteellä.",
+          "delta_home": 0.02,
+          "delta_away": -0.05,
+          "confidence": 0.55,
+          "sources": [
+            {
+              "name": "Tappara.fi — Kokoonpano Pelicansia vastaan",
+              "url": "https://www.tappara.fi/liiga/kokoonpano-pelicansia-vastaan/"
             }
           ]
         }
