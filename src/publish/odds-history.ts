@@ -20,7 +20,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
-import { Snapshot, MatchCard, SideProbs, MarketSide, ValueFlagLevel } from '../types-football.js';
+import { Snapshot, MatchCard, SideProbs, MarketSide, ValueFlagLevel, ModelAdjustment } from '../types-football.js';
 import { readResults } from '../ingest/results.js';
 
 /** Yksi havainto: mitä markkina ja malli sanoivat tiettynä hetkenä */
@@ -43,6 +43,44 @@ export interface OddsPoint {
   stake: Partial<Record<MarketSide, number>>;
 }
 
+/**
+ * Mallin selittava perusta avaushavainnosta: menetelma, lambdat, blend-
+ * paino ja tekijat (`adjustments`) jotka siirsivat lukua pois markkina-
+ * ankkurista — uutiset ja kasin syotetty konteksti, molemmat jo koottuna
+ * yhdeksi listaksi live-snapshot.ts:ssa.
+ *
+ * PELKKAA SELITYSTA, EI ARVIOINTIA: model/implied/edge/flag/stake (ks.
+ * OddsPoint) ratkaisevat oliko kohde liputettu ja osuiko se. Tama kenttä
+ * saa siksi paivittya senkin jalkeen kun avaushavainto on muuten jaadytetty
+ * (ks. mergeSnapshots) — se ei vaikuta kertaakaan siihen MITA arvioitiin,
+ * vain siihen MIKSI-selitys nakyy.
+ */
+export interface ModelExtraInfo {
+  method: unknown;
+  lambda_home: unknown;
+  lambda_away: unknown;
+  poisson_probs: unknown;
+  blend_weight: unknown;
+  over25: unknown;
+  btts: unknown;
+  adjustments: ModelAdjustment[];
+}
+
+/**
+ * Avaushavainnon toimistorivit ja tunnusluvut — KERRAN per ottelu, ei per
+ * havainto (tiketti #83). Ks. OddsTimeline.opening.
+ */
+export interface OpeningInfo {
+  books: unknown[];
+  best: unknown;
+  stats: unknown;
+  /** Taydet edge-rivit sellaisenaan — selaimen ei tarvitse rekonstruoida vajaasti */
+  edges: unknown[];
+  home_team: unknown;
+  away_team: unknown;
+  model_extra: ModelExtraInfo | null;
+}
+
 export interface OddsTimeline {
   match_id: string;
   league: string;
@@ -63,16 +101,7 @@ export interface OddsTimeline {
    * Per havainto tallennettuna nama kolminkertaistaisivat tiedoston koon.
    * Avaushavainto riittaa, koska analyysi luetaan siita muutenkin.
    */
-  opening?: {
-    books: unknown[];
-    best: unknown;
-    stats: unknown;
-    /** Taydet edge-rivit sellaisenaan — selaimen ei tarvitse rekonstruoida vajaasti */
-    edges: unknown[];
-    home_team: unknown;
-    away_team: unknown;
-    model_extra: unknown;
-  } | null;
+  opening?: OpeningInfo | null;
   /** Toteutunut tulos jos tiedossa */
   result: { outcome: MarketSide; home_score: number; away_score: number } | null;
 }
@@ -125,7 +154,7 @@ export function pointFrom(match: MatchCard, at: string): OddsPoint | null {
  * Nama ovat kortin renderointia varten eivatka analyysia -- analyysi on jo
  * `points`-sarjassa. Siksi ne otetaan sellaisenaan ilman uudelleenmuotoilua.
  */
-function openingFrom(match: MatchCard): OddsTimeline['opening'] {
+function openingFrom(match: MatchCard): OpeningInfo {
   const m = match as unknown as Record<string, unknown>;
   return {
     books: (m.odds as unknown[]) ?? [],
@@ -143,6 +172,7 @@ function openingFrom(match: MatchCard): OddsTimeline['opening'] {
           blend_weight: match.model.blend_weight,
           over25: match.model.over25,
           btts: match.model.btts,
+          adjustments: match.model.adjustments ?? [],
         }
       : null,
   };
@@ -190,6 +220,16 @@ export function mergeSnapshots(existing: OddsHistoryFile | null, snapshots: Arra
         // Vanhassa tiedostossa ei ole avaustietoja; taydennetaan ne kun
         // ottelu tulee uudelleen vastaan
         timeline.opening = openingFrom(match);
+      } else if (!('adjustments' in (timeline.opening.model_extra ?? {}))) {
+        // Ottelu nahtiin ensimmaisen kerran ennen kuin tekijat (adjustments)
+        // alettiin tallentaa. Taydennetaan VAIN model_extra — pelkkaa
+        // selittavaa metadataa, ei koskaan arvioinnissa kaytettya (ks.
+        // ModelExtraInfo) — kerran, minka jalkeen 'adjustments' in ... on
+        // tosi eika tama haara laukea enaa. Avaushavainnon arviointiin
+        // kaytetyt kentat (model, implied, edge, flag, stake, odds, book,
+        // stats, edges) pysyvat koskemattomina, kuten avaushavainnon
+        // pitaakin — vain se MIKSI-selitys taydentyy, ei se MITA arvioitiin.
+        timeline.opening = { ...timeline.opening, model_extra: openingFrom(match).model_extra };
       }
 
       if (!hasPoint(timeline, at)) timeline.points.push(point);

@@ -24,7 +24,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { MarketSide, SideProbs } from '../types-football.js';
-import { OddsHistoryFile, OddsTimeline } from './odds-history.js';
+import { OddsHistoryFile, OddsTimeline, OddsPoint, ModelExtraInfo } from './odds-history.js';
 import { FixturesFile } from './fixtures.js';
 
 const BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
@@ -66,6 +66,7 @@ export interface PickReview {
   book: string | null;
   edge: number;
   flag: string;
+  /** Suositeltu panos euroina — 0 jos Kelly ei suosittele mitään todellista panosta */
   stake: number;
   won: boolean;
   /** Minuutteja joina kohde oli voimassa oleva lopputulos */
@@ -75,8 +76,8 @@ export interface PickReview {
   /** Viimeinen minuutti jolloin kohde oli voitolla, null jos ei koskaan */
   last_lead_minute: number | null;
   verdict: Verdict;
-  /** Paperitulos: 1 yksikkö panostettuna */
-  profit_units: number;
+  /** Paperitulos euroina JOS suositeltu panos olisi lyöty — 0 kun stake on 0 */
+  profit: number;
 }
 
 export interface MatchReview {
@@ -99,7 +100,15 @@ export interface MatchReview {
   goals: Goal[];
   /** Onko maaliaikajana käytettävissä — ilman sitä verdiktit ovat epäluotettavia */
   has_timeline: boolean;
-  picks: PickReview[];
+  /**
+   * Isoin liputettu edge avaushavainnosta, tai null jos mikään kohde ei
+   * ylittänyt kynnystä. VAIN YKSI: kaksi liputettua kohdetta samassa
+   * ottelussa olisi kaksi eri panossuositusta, mutta järjestelmä ehdottaisi
+   * oikeasti vain sitä isointa — muut ovat sivuvaikutus, eivät suositus.
+   */
+  pick: PickReview | null;
+  /** Mihin mallin luku perustui avaushavainnossa — ks. ModelExtraInfo */
+  model_extra: ModelExtraInfo | null;
 }
 
 export interface RoundReview {
@@ -110,9 +119,15 @@ export interface RoundReview {
     matches: number;
     model_correct: number;
     market_correct: number;
+    /** Montako ottelua sai panossuosituksen (0 tai 1 per ottelu) */
     picks: number;
     picks_won: number;
-    profit_units: number;
+    /** Panostettu yhteensä euroina, jos jokainen suositus olisi lyöty */
+    staked: number;
+    /** Paperitulos euroina — sama periaate */
+    profit: number;
+    /** profit / staked, null kun mitään ei panostettu */
+    roi: number | null;
     /** Liputetut kohteet jotka eivät olleet voitolla kertaakaan */
     never_leading: number;
   };
@@ -192,10 +207,13 @@ export function reviewPick(
   outcome: MarketSide,
   odds: number,
   goals: Goal[],
-  hasTimeline: boolean
-): Pick<PickReview, 'won' | 'minutes_leading' | 'share_leading' | 'last_lead_minute' | 'verdict' | 'profit_units'> {
+  hasTimeline: boolean,
+  /** Varsinainen peliaika minuutteina — jalkapallossa 90, jaakiekossa 60 (tiketti #105) */
+  fullTime = FULL_TIME,
+  /** Minuutti josta lahtien johtoasema lasketaan "loppuvaiheeksi" */
+  lateGame = LATE_GAME
+): Pick<PickReview, 'won' | 'minutes_leading' | 'share_leading' | 'last_lead_minute' | 'verdict'> {
   const won = side === outcome;
-  const profit_units = won ? odds - 1 : -1;
 
   if (!hasTimeline) {
     return {
@@ -206,20 +224,19 @@ export function reviewPick(
       // EI 'oli_voitolla': se olisi väite jota data ei tue. Puuttuva
       // aikajana sanotaan puuttuvaksi.
       verdict: won ? 'osui' : 'ei_tietoa',
-      profit_units,
     };
   }
 
-  const minutes = leadingMinutes(goals);
-  const total = Object.values(minutes).reduce((s, n) => s + n, 0) || FULL_TIME;
+  const minutes = leadingMinutes(goals, fullTime);
+  const total = Object.values(minutes).reduce((s, n) => s + n, 0) || fullTime;
   const leading = minutes[side];
-  const last = lastLeadMinute(goals, side);
+  const last = lastLeadMinute(goals, side, fullTime);
 
   const verdict: Verdict = won
     ? 'osui'
     : leading === 0
       ? 'ei_koskaan_voitolla'
-      : last !== null && last >= LATE_GAME
+      : last !== null && last >= lateGame
         ? 'kaatui_lopussa'
         : 'oli_voitolla';
 
@@ -229,8 +246,53 @@ export function reviewPick(
     share_leading: leading / total,
     last_lead_minute: last,
     verdict,
-    profit_units,
   };
+}
+
+/**
+ * Suurimman liputetun edgen kohde avaushavainnosta, tai null jos mikään
+ * kohde ei ylittänyt kynnystä.
+ *
+ * "Isoin" = numeerisesti suurin edge — strong-lippu vaatii aina suuremman
+ * edgen kuin candidate (ks. snapshot.ts:flagFor), joten lipputaso ja edge
+ * eivät voi koskaan olla eri mieltä. Tasan mennessä ensin löydetty (kiinteä
+ * home/draw/away-järjestys) voittaa, sama periaate kuin argmax()issa alla.
+ *
+ * VAIN YKSI PER OTTELU: jos useampi kohde on liputettu, järjestelmä
+ * suosittelisi oikeasti vain sitä isointa — muut ovat sivuvaikutus.
+ */
+export function biggestFlag(point: OddsPoint): {
+  side: MarketSide;
+  odds: number;
+  book: string | null;
+  edge: number;
+  flag: string;
+  stake: number;
+} | null {
+  let best: { side: MarketSide; odds: number; book: string | null; edge: number; flag: string; stake: number } | null =
+    null;
+
+  for (const side of ['home', 'draw', 'away'] as MarketSide[]) {
+    const flag = point.flag[side];
+    const odds = point.odds[side];
+    if (!flag || flag === 'none' || !odds) continue;
+    const edge = point.edge[side] ?? 0;
+    if (!best || edge > best.edge) {
+      best = { side, odds, book: point.book[side] ?? null, edge, flag, stake: point.stake[side] ?? 0 };
+    }
+  }
+
+  return best;
+}
+
+/**
+ * Paperitulos euroina JOS suositeltu panos olisi lyöty: voitto = panos ×
+ * (kerroin − 1), häviö = −panos. 0 kun panosta ei ollut (Kelly pyöristi
+ * nollaan) — silloin mitään ei olisi oikeasti lyöty.
+ */
+export function stakeProfit(won: boolean, stake: number, odds: number): number {
+  if (stake <= 0) return 0;
+  return won ? stake * (odds - 1) : -stake;
 }
 
 // ─── ESPN: maalit aikoineen ───────────────────────────────────────────────
@@ -369,21 +431,11 @@ export function buildMatchReview(t: OddsTimeline, goals: Goal[] | null): MatchRe
   const hasTimeline = Array.isArray(goals) && goals.length > 0;
   const list = goals ?? [];
 
-  const picks: PickReview[] = [];
-  for (const side of ['home', 'draw', 'away'] as MarketSide[]) {
-    const flag = opening.flag[side];
-    const odds = opening.odds[side];
-    if (!flag || flag === 'none' || !odds) continue;
-
-    picks.push({
-      side,
-      odds,
-      book: opening.book[side] ?? null,
-      edge: opening.edge[side] ?? 0,
-      flag,
-      stake: opening.stake[side] ?? 0,
-      ...reviewPick(side, t.result.outcome, odds, list, hasTimeline),
-    });
+  const best = biggestFlag(opening);
+  let pick: PickReview | null = null;
+  if (best) {
+    const rp = reviewPick(best.side, t.result.outcome, best.odds, list, hasTimeline);
+    pick = { ...best, ...rp, profit: stakeProfit(rp.won, best.stake, best.odds) };
   }
 
   return {
@@ -401,7 +453,8 @@ export function buildMatchReview(t: OddsTimeline, goals: Goal[] | null): MatchRe
     market_correct: argmax(opening.implied) === t.result.outcome,
     goals: list,
     has_timeline: hasTimeline,
-    picks,
+    pick,
+    model_extra: t.opening?.model_extra ?? null,
   };
 }
 
@@ -417,7 +470,9 @@ export function groupRounds(matches: MatchReview[]): RoundReview[] {
 
   return [...byDay.entries()]
     .map(([date, list]) => {
-      const picks = list.flatMap((m) => m.picks);
+      const picks = list.map((m) => m.pick).filter((p): p is PickReview => p !== null);
+      const staked = Number(picks.reduce((s, p) => s + p.stake, 0).toFixed(2));
+      const profit = Number(picks.reduce((s, p) => s + p.profit, 0).toFixed(2));
       return {
         date,
         matches: list.sort((a, b) => a.kickoff.localeCompare(b.kickoff)),
@@ -427,7 +482,9 @@ export function groupRounds(matches: MatchReview[]): RoundReview[] {
           market_correct: list.filter((m) => m.market_correct).length,
           picks: picks.length,
           picks_won: picks.filter((p) => p.won).length,
-          profit_units: Number(picks.reduce((s, p) => s + p.profit_units, 0).toFixed(2)),
+          staked,
+          profit,
+          roi: staked > 0 ? Number((profit / staked).toFixed(4)) : null,
           never_leading: picks.filter((p) => p.verdict === 'ei_koskaan_voitolla').length,
         },
       };
@@ -511,16 +568,18 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
         );
         if (s.picks) {
           console.log(
-            `  liputettuja ${s.picks} · osui ${s.picks_won} · tulos ${s.profit_units >= 0 ? '+' : ''}${s.profit_units} yks · ei kertaakaan voitolla: ${s.never_leading}`
+            `  panossuosituksia ${s.picks} · osui ${s.picks_won} · panostettu ${s.staked.toFixed(2)} € · ` +
+              `tulos ${s.profit >= 0 ? '+' : ''}${s.profit.toFixed(2)} € · ei kertaakaan voitolla: ${s.never_leading}`
           );
         }
         for (const m of round.matches) {
-          for (const p of m.picks) {
-            console.log(
-              `    ${m.home}–${m.away} ${m.score}  ${p.side} @${p.odds}  ${VERDICT_LABEL[p.verdict]}` +
-                (m.has_timeline ? ` (${p.minutes_leading} min voitolla)` : ' (ei aikajanaa)')
-            );
-          }
+          const p = m.pick;
+          if (!p) continue;
+          console.log(
+            `    ${m.home}–${m.away} ${m.score}  ${p.side} @${p.odds}  ${VERDICT_LABEL[p.verdict]}` +
+              (m.has_timeline ? ` (${p.minutes_leading} min voitolla)` : ' (ei aikajanaa)') +
+              `  panos ${p.stake.toFixed(2)} € → ${p.profit >= 0 ? '+' : ''}${p.profit.toFixed(2)} €`
+          );
         }
       }
       console.log(`\n✓ ${out}`);

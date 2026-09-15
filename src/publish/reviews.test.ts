@@ -9,6 +9,8 @@ import {
   leadingMinutes,
   lastLeadMinute,
   reviewPick,
+  stakeProfit,
+  biggestFlag,
   parseMinute,
   parseGoals,
   scoreFromText,
@@ -19,7 +21,7 @@ import {
   Goal,
   MatchReview,
 } from './reviews.js';
-import type { OddsTimeline } from './odds-history.js';
+import type { OddsTimeline, OddsPoint } from './odds-history.js';
 
 const g = (minute: number, side: 'home' | 'away'): Goal => ({ minute, side });
 
@@ -110,15 +112,64 @@ describe('reviewPick — epaonni vs. vaara analyysi', () => {
     expect(r.last_lead_minute).toBeNull();
   });
 
-  it('paperitulos: voitto = kerroin-1, havio = -1', () => {
-    expect(reviewPick('home', 'home', 4, [], false).profit_units).toBe(3);
-    expect(reviewPick('home', 'away', 4, [], false).profit_units).toBe(-1);
-  });
-
   it('share_leading on osuus valilla 0-1', () => {
     const r = reviewPick('home', 'away', 3, [g(5, 'home'), g(50, 'away')], true);
     expect(r.share_leading).toBeGreaterThan(0);
     expect(r.share_leading).toBeLessThanOrEqual(1);
+  });
+
+  it('hyvaksyy oman peliajan ja loppuvaiheen rajan (jaakiekon uudelleenkaytto)', () => {
+    // Koti johtaa minuutista 5 minuuttiin 46 (>= 45 = jaakiekon oma
+    // loppuvaiheraja), sitten vieras tasoittaa ja jaa johtoon lopun ajaksi
+    const r = reviewPick('home', 'away', 3, [g(5, 'home'), g(46, 'away')], true, 60, 45);
+    expect(r.verdict).toBe('kaatui_lopussa');
+  });
+});
+
+describe('stakeProfit — paperitulos jos suositeltu panos olisi lyöty', () => {
+  it('voitto = panos × (kerroin-1)', () => {
+    expect(stakeProfit(true, 10, 2.5)).toBe(15);
+  });
+
+  it('havio = -panos', () => {
+    expect(stakeProfit(false, 10, 2.5)).toBe(-10);
+  });
+
+  it('panos 0 -> tulos 0 riippumatta tuloksesta', () => {
+    expect(stakeProfit(true, 0, 5)).toBe(0);
+    expect(stakeProfit(false, 0, 5)).toBe(0);
+  });
+});
+
+describe('biggestFlag — isoin liputettu kohde avaushavainnosta', () => {
+  const point = (over: Record<string, unknown> = {}): OddsPoint =>
+    ({
+      at: 'T',
+      odds: { home: 1.5, draw: 4, away: 6 },
+      book: { home: 'A', draw: 'B', away: 'C' },
+      model: { home: 0.5, draw: 0.25, away: 0.25 },
+      implied: { home: 0.6, draw: 0.2, away: 0.2 },
+      edge: { home: 0.02, draw: 0.08, away: 0.04 },
+      flag: { home: 'none', draw: 'strong', away: 'candidate' },
+      stake: { home: 0, draw: 3, away: 1 },
+      ...over,
+    }) as unknown as OddsPoint;
+
+  it('valitsee suurimman edgen liputetuista, ei ensimmaisen eika viimeisen', () => {
+    const best = biggestFlag(point())!;
+    expect(best.side).toBe('draw');
+    expect(best.edge).toBe(0.08);
+    expect(best.stake).toBe(3);
+  });
+
+  it('ei liputettuja kohteita -> null', () => {
+    expect(biggestFlag(point({ flag: { home: 'none', draw: 'none', away: 'none' } }))).toBeNull();
+  });
+
+  it('kertoimeton kohde ei kelpaa vaikka olisi liputettu', () => {
+    const best = biggestFlag(point({ odds: { home: 1.5, away: 6 }, flag: { home: 'none', draw: 'strong', away: 'candidate' } }))!;
+    // draw:lla ei ole kerrointa -> away voittaa vaikka pienempi edge
+    expect(best.side).toBe('away');
   });
 });
 
@@ -241,9 +292,9 @@ describe('buildMatchReview', () => {
 
   it('rakentaa arvion liputetusta kohteesta', () => {
     const r = buildMatchReview(timeline(), [g(15, 'home'), g(50, 'home'), g(70, 'home')])!;
-    expect(r.picks).toHaveLength(1);
-    expect(r.picks[0].side).toBe('away');
-    expect(r.picks[0].verdict).toBe('ei_koskaan_voitolla');
+    expect(r.pick?.side).toBe('away');
+    expect(r.pick?.verdict).toBe('ei_koskaan_voitolla');
+    expect(r.pick?.profit).toBe(-2); // panos 2€, havisi -> -2€
     expect(r.score).toBe('3–0');
     expect(r.model_correct).toBe(true); // malli sanoi home 0.5
     expect(r.market_correct).toBe(true);
@@ -260,26 +311,68 @@ describe('buildMatchReview', () => {
   it('liputtamattomat kohteet eivat paady arvioon', () => {
     const t = timeline();
     t.points[0].flag = { home: 'none', draw: 'none', away: 'none' };
-    expect(buildMatchReview(t, [])!.picks).toHaveLength(0);
+    expect(buildMatchReview(t, [])!.pick).toBeNull();
+  });
+
+  it('USEAMPI LIPUTETTU KOHDE: vain isoin edge paatyy arvioon', () => {
+    const t = timeline();
+    // home liputettu mutta pienemmalla edgella kuin away — vain away:n
+    // pitaa nakya arviossa, ei molempia
+    t.points[0].flag = { home: 'candidate', draw: 'none', away: 'strong' };
+    t.points[0].edge = { home: 0.04, away: 0.848 };
+    const r = buildMatchReview(t, [])!;
+    expect(r.pick?.side).toBe('away');
   });
 
   it('arvio luetaan AVAUSHAVAINNOSTA eika viimeisesta', () => {
     const t = timeline();
     t.points.push({ ...t.points[0], at: '2026-08-21T14:00:00.000Z', flag: { home: 'strong' }, odds: { home: 1.24 } });
     const r = buildMatchReview(t, [])!;
-    expect(r.picks.map((p) => p.side)).toEqual(['away']); // avaus, ei sulku
+    expect(r.pick?.side).toBe('away'); // avaus, ei sulku
+  });
+
+  it('model_extra periytyy avaushavainnon opening-kentasta', () => {
+    const t = timeline({
+      opening: {
+        books: [],
+        best: null,
+        stats: null,
+        edges: [],
+        home_team: null,
+        away_team: null,
+        model_extra: {
+          method: 'poisson', lambda_home: 1.4, lambda_away: 0.9, poisson_probs: null,
+          blend_weight: 0.4, over25: null, btts: null, adjustments: [{ reason: 'testi' }],
+        },
+      },
+    });
+    const r = buildMatchReview(t, [])!;
+    expect(r.model_extra?.adjustments).toEqual([{ reason: 'testi' }]);
+  });
+
+  it('ilman opening-kenttaa model_extra on null', () => {
+    const r = buildMatchReview(timeline(), [])!;
+    expect(r.model_extra).toBeNull();
   });
 });
 
 describe('groupRounds', () => {
-  const m = (date: string, correct: boolean): MatchReview =>
+  const m = (date: string, correct: boolean, pick: MatchReview['pick'] = null): MatchReview =>
     ({
       match_id: date + correct,
       kickoff: `${date}T15:00:00.000Z`,
       model_correct: correct,
       market_correct: false,
-      picks: [],
+      pick,
     }) as unknown as MatchReview;
+
+  const pick = (over: Partial<NonNullable<MatchReview['pick']>> = {}): NonNullable<MatchReview['pick']> =>
+    ({
+      side: 'home', odds: 2.5, book: null, edge: 0.05, flag: 'strong', stake: 10,
+      won: true, minutes_leading: 90, share_leading: 1, last_lead_minute: 90,
+      verdict: 'osui', profit: 15,
+      ...over,
+    }) as NonNullable<MatchReview['pick']>;
 
   it('ryhmittelee paivittain, uusin ensin', () => {
     const rounds = groupRounds([m('2026-08-21', true), m('2026-08-23', false), m('2026-08-22', true)]);
@@ -289,6 +382,25 @@ describe('groupRounds', () => {
   it('yhteenveto laskee mallin ja markkinan erikseen', () => {
     const rounds = groupRounds([m('2026-08-21', true), m('2026-08-21', false)]);
     expect(rounds[0].summary).toMatchObject({ matches: 2, model_correct: 1, market_correct: 0 });
+  });
+
+  it('yhteenveto laskee panostetun ja tuoton picks-kentista, EI liputtamattomista otteluista', () => {
+    const rounds = groupRounds([
+      m('2026-08-21', true, pick({ stake: 10, profit: 15, won: true })),
+      m('2026-08-21', true, pick({ stake: 5, profit: -5, won: false })),
+      m('2026-08-21', true, null),
+    ]);
+    expect(rounds[0].summary.picks).toBe(2);
+    expect(rounds[0].summary.picks_won).toBe(1);
+    expect(rounds[0].summary.staked).toBe(15);
+    expect(rounds[0].summary.profit).toBe(10);
+    expect(rounds[0].summary.roi).toBeCloseTo(10 / 15, 4);
+  });
+
+  it('roi on null kun mitaan ei panostettu', () => {
+    const rounds = groupRounds([m('2026-08-21', true, null)]);
+    expect(rounds[0].summary.roi).toBeNull();
+    expect(rounds[0].summary.staked).toBe(0);
   });
 
   it('tyhja syote -> tyhja tulos', () => {

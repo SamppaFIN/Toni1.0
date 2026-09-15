@@ -79,6 +79,47 @@ function claimRow(c) {
   </div>`;
 }
 
+/** Isoin liputettu kohde avaushavainnosta — sama VERDICT_META kuin mallin valinnalla, koska Verdict-arvot ovat samat */
+function pickBlock(r) {
+  const p = r.pick;
+  if (!p) {
+    return `<div style="font-size:.62rem;color:var(--c-text-muted);margin-top:6px">Ei panossuositusta tälle ottelulle.</div>`;
+  }
+  const v = VERDICT_META[p.verdict] ?? VERDICT_META.ei_tietoa;
+  // stake 0 = Kelly pyöristi nollaan — silloin mitään ei olisi oikeasti
+  // lyöty, eikä "0,00 €" saa lukea samalta kuin "ei suositusta lainkaan"
+  const result =
+    p.stake > 0
+      ? `<b style="color:${p.profit >= 0 ? 'var(--c-success)' : 'var(--c-danger)'}">${p.profit >= 0 ? '+' : ''}${p.profit.toFixed(2)} €</b>`
+      : `<span style="color:var(--c-text-muted)">panos pyöristyi nollaan</span>`;
+
+  return `<div style="margin-top:6px;padding:6px 8px;border-radius:6px;background:oklch(1 1 0/0.06);font-size:.64rem">
+    <div style="font-weight:700;margin-bottom:2px">Panossuositus (isoin liputettu kohde)</div>
+    <div>
+      <b>${SIDE_LABELS[p.side]}</b> @ ${p.odds.toFixed(2)}${p.book ? ` <span style="color:var(--c-text-muted)">${esc(p.book)}</span>` : ''}
+      · edge ${(p.edge * 100).toFixed(1)} % · panos ${p.stake.toFixed(2)} €
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:3px">
+      <span>${v.icon}</span>
+      <span style="color:${v.color}">${esc(v.label)}</span>
+      <span style="margin-left:auto">${result}</span>
+    </div>
+    <div style="font-size:.56rem;color:var(--c-text-muted);margin-top:3px">Paperia — ei oikeaa rahaa.</div>
+  </div>`;
+}
+
+/** Kertoimien laskemiseen otetut tekijät — puuttuva/tyhjä lista = ei tallennettuja tekijöitä, osio jätetään silloin pois */
+function factorsBlock(r) {
+  const reasons = r.modelExtra?.adjustments ?? [];
+  if (!reasons.length) return '';
+  return `<div style="margin-top:6px;font-size:.62rem">
+    <div style="font-weight:700;margin-bottom:2px">Kertoimien tekijät</div>
+    <ul style="margin:0;padding-left:16px;color:var(--c-text-muted)">
+      ${reasons.map((a) => `<li>${esc(a.reason)}</li>`).join('')}
+    </ul>
+  </div>`;
+}
+
 export function reviewSection(match) {
   const r = reviewFor(match);
   if (!r) {
@@ -112,6 +153,9 @@ export function reviewSection(match) {
 
     <div style="font-size:.68rem;font-weight:700;margin-bottom:2px">Väitteet</div>
     ${r.claims.length ? r.claims.map(claimRow).join('') : '<div style="font-size:.62rem;color:var(--c-text-muted)">Ei mitattavia väitteitä tälle ottelulle.</div>'}
+
+    ${pickBlock(r)}
+    ${factorsBlock(r)}
 
     <div style="font-size:.58rem;color:var(--c-text-muted);margin-top:6px;line-height:1.5">
       "– ei testattavissa" tarkoittaa ettei tämä ottelu mitannut väitettä (esim. malli ei poikennut markkinasta, tai kyse oli tasapelistä sijavertailussa) — ei arvattua osumaa.

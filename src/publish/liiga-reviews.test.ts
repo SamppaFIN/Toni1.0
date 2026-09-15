@@ -4,6 +4,7 @@ import { describe, it, expect } from 'vitest';
 import { goalMinute, extractGoals, isDisallowedGoal, buildClaims, reviewGame, buildRoundReview } from './liiga-reviews.js';
 import type { SideProbs } from '../types-football.js';
 import type { LiigaApiGame } from '../ingest/stats-liiga.js';
+import type { OddsPoint, ModelExtraInfo } from './odds-history.js';
 
 const REG = 'ENDED_DURING_REGULAR_GAME_TIME';
 const SO = 'ENDED_DURING_WINNING_SHOT_COMPETITION';
@@ -257,6 +258,60 @@ describe('reviewGame', () => {
   });
 });
 
+describe('reviewGame — panossuositus point-parametrista', () => {
+  const point = (over: Record<string, unknown> = {}): OddsPoint =>
+    ({
+      at: 'T',
+      odds: { home: 2.5, draw: 4, away: 6 },
+      book: { home: 'Pinnacle' },
+      model: probs(0.5, 0.25, 0.25),
+      implied: probs(0.4, 0.3, 0.3),
+      edge: { home: 0.08 },
+      flag: { home: 'strong', draw: 'none', away: 'none' },
+      stake: { home: 5 },
+      ...over,
+    }) as unknown as OddsPoint;
+
+  it('point puuttuu (oletus): pick on null, taaksepain yhteensopiva', () => {
+    const g = peli('Tappara', 'Jukurit', [{ s: 600 }], [], 1, 0);
+    const r = reviewGame(g, probs(0.6, 0.2, 0.2), probs(0.55, 0.25, 0.2))!;
+    expect(r.pick).toBeNull();
+  });
+
+  it('rakentaa panossuosituksen isoimmasta liputetusta kohteesta', () => {
+    const g = peli('Tappara', 'Jukurit', [{ s: 600 }], [], 1, 0); // koti voittaa 1-0
+    const r = reviewGame(g, probs(0.6, 0.2, 0.2), probs(0.55, 0.25, 0.2), point())!;
+    expect(r.pick?.side).toBe('home');
+    expect(r.pick?.won).toBe(true);
+    expect(r.pick?.profit).toBe(5 * (2.5 - 1)); // panos 5€, kerroin 2.5
+  });
+
+  it('ei liputettuja kohteita -> pick null vaikka point annettu', () => {
+    const g = peli('Tappara', 'Jukurit', [{ s: 600 }], [], 1, 0);
+    const r = reviewGame(g, probs(0.6, 0.2, 0.2), null, point({ flag: { home: 'none', draw: 'none', away: 'none' } }))!;
+    expect(r.pick).toBeNull();
+  });
+
+  it('havinnyt panossuositus: kaatui_lopussa 45 min rajalla — 60 min peliaika, ei jalkapallon 90', () => {
+    // Koti (liputettu) johtaa 5. minuutista 46. minuuttiin (>=45), sitten vieras tasoittaa ja voittaa
+    const g = peli('HIFK', 'HPK', [{ s: 300 }], [{ s: 2760 }, { s: 3000 }], 1, 2);
+    const r = reviewGame(g, probs(0.55, 0.2, 0.25), null, point())!;
+    expect(r.pick?.side).toBe('home');
+    expect(r.pick?.won).toBe(false);
+    expect(r.pick?.verdict).toBe('kaatui_lopussa');
+  });
+
+  it('modelExtra periytyy sellaisenaan', () => {
+    const g = peli('Tappara', 'Jukurit', [{ s: 600 }], [], 1, 0);
+    const extra: ModelExtraInfo = {
+      method: 'poisson', lambda_home: 1, lambda_away: 1, poisson_probs: null,
+      blend_weight: 0.4, over25: null, btts: null, adjustments: [{ reason: 'testi' }],
+    };
+    const r = reviewGame(g, probs(0.6, 0.2, 0.2), null, null, extra)!;
+    expect(r.modelExtra).toEqual(extra);
+  });
+});
+
 describe('buildRoundReview', () => {
   it('laskee osumat ja vaiteyhteenvedon useasta ottelusta', () => {
     const g1 = peli('Tappara', 'Jukurit', [{ s: 600 }], [], 1, 0);
@@ -289,9 +344,33 @@ describe('buildRoundReview', () => {
     expect(round.summary.neverLeading).toBe(1);
   });
 
+  it('kokoaa panossuositusten summat (staked/profit/roi) otteluiden pick-kentista', () => {
+    const p = (over: Record<string, unknown> = {}): OddsPoint =>
+      ({
+        at: 'T', odds: { home: 2.5, draw: 4, away: 6 }, book: {}, model: probs(0.5, 0.25, 0.25),
+        implied: probs(0.4, 0.3, 0.3), edge: { home: 0.08 }, flag: { home: 'strong', draw: 'none', away: 'none' },
+        stake: { home: 5 }, ...over,
+      }) as unknown as OddsPoint;
+
+    const g1 = peli('Tappara', 'Jukurit', [{ s: 600 }], [], 1, 0); // koti voittaa -> liputettu pick osuu
+    const g2 = peli('Sport', 'HIFK', [], [{ s: 300 }], 0, 1); // vieras voittaa, koti liputettu -> pick havisi
+    const r1 = reviewGame(g1, probs(0.6, 0.2, 0.2), null, p())!;
+    const r2 = reviewGame(g2, probs(0.3, 0.2, 0.5), null, p({ stake: { home: 3 } }))!;
+
+    const round = buildRoundReview([r1, r2], '2026-09-01');
+    expect(round.summary.picks).toBe(2);
+    expect(round.summary.picksWon).toBe(1);
+    expect(round.summary.staked).toBe(8); // 5 + 3
+    expect(round.summary.profit).toBeCloseTo(4.5, 5); // +7.5 (5€ @2.5, voitti) - 3 (havisi)
+    expect(round.summary.roi).toBeCloseTo(4.5 / 8, 4);
+  });
+
   it('tyhja syote -> tyhja yhteenveto, ei kaadu', () => {
     const round = buildRoundReview([], '2026-09-01');
     expect(round.summary.matches).toBe(0);
     expect(round.summary.claims).toEqual({});
+    expect(round.summary.picks).toBe(0);
+    expect(round.summary.staked).toBe(0);
+    expect(round.summary.roi).toBeNull();
   });
 });

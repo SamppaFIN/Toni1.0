@@ -26,7 +26,18 @@
 //   - kotietu: toteutuiko kotivoitto-osuus jota malli odotti
 
 import { MarketSide, SideProbs } from '../types-football.js';
-import { leadingMinutes, lastLeadMinute, HOCKEY_FULL_TIME, type Goal, type Verdict } from './reviews.js';
+import {
+  leadingMinutes,
+  lastLeadMinute,
+  HOCKEY_FULL_TIME,
+  reviewPick,
+  biggestFlag,
+  stakeProfit,
+  type Goal,
+  type Verdict,
+  type PickReview,
+} from './reviews.js';
+import type { OddsPoint, ModelExtraInfo } from './odds-history.js';
 import { regulationScore, type LiigaApiGame } from '../ingest/stats-liiga.js';
 import { effectiveRank, normalizeLiigaName, TEAM_PRIORS } from '../analyze/liiga-priors.js';
 
@@ -74,6 +85,16 @@ export interface LiigaMatchReview {
   verdict: Verdict;
 
   claims: ClaimResult[];
+
+  /**
+   * Isoin liputettu edge avaushavainnosta, tai null jos mikään kohde ei
+   * ylittänyt kynnystä. Kentän SISÄLLÄ nimet ovat snake_case (jaettu
+   * PickReview-tyyppi jalkapallon kanssa, ks. reviews.ts) vaikka tämä rivi
+   * on muuten camelCase — tarkoituksellinen poikkeus, ei unohdus.
+   */
+  pick: PickReview | null;
+  /** Mihin mallin luku perustui avaushavainnossa — ks. ModelExtraInfo */
+  modelExtra: ModelExtraInfo | null;
 }
 
 /** Liiga.fi antaa maaliajan SEKUNTEINA — sama sudenkuoppa kuin ESPN:llä */
@@ -199,7 +220,15 @@ export function buildClaims(
 export function reviewGame(
   game: LiigaApiGame,
   model: SideProbs | null,
-  market: SideProbs | null
+  market: SideProbs | null,
+  /**
+   * Avaushavainnon kertoimet/liput/panokset. Valinnainen ja oletuksena
+   * null, jotta olemassaolevat kutsut (pelkkä malli/markkina, ei
+   * panossuositusta) toimivat muuttumattomina — vain build-skripti antaa
+   * tämän oikeasti (tiketti #105-panos).
+   */
+  point: OddsPoint | null = null,
+  modelExtra: ModelExtraInfo | null = null
 ): LiigaMatchReview | null {
   const home = game.homeTeam?.teamName?.trim();
   const away = game.awayTeam?.teamName?.trim();
@@ -228,6 +257,20 @@ export function reviewGame(
           ? 'kaatui_lopussa'
           : 'oli_voitolla';
 
+  // Panossuositus: sama periaate kuin jalkapallossa (reviews.ts), mutta 60
+  // minuutin peliajalla ja tämän tiedoston omalla "loppuvaihe"-rajalla
+  // (HOCKEY_FULL_TIME * 0.75 = 45 min, sama luku jota yllä oleva verdict jo
+  // käyttää mallin valinnalle — ei uutta suhdetta).
+  let pick: PickReview | null = null;
+  if (point) {
+    const best = biggestFlag(point);
+    if (best) {
+      const hasPickTimeline = goals.length > 0;
+      const rp = reviewPick(best.side, outcome, best.odds, goals, hasPickTimeline, HOCKEY_FULL_TIME, HOCKEY_FULL_TIME * 0.75);
+      pick = { ...best, ...rp, profit: stakeProfit(rp.won, best.stake, best.odds) };
+    }
+  }
+
   return {
     matchId: `icehockey_liiga:${String(game.start ?? '').slice(0, 10)}:${home}-${away}`,
     date: String(game.start ?? '').slice(0, 10),
@@ -247,6 +290,8 @@ export function reviewGame(
     minutesLeading: leading,
     verdict,
     claims: buildClaims(model, market, outcome, home, away),
+    pick,
+    modelExtra,
   };
 }
 
@@ -261,6 +306,15 @@ export interface LiigaRoundReview {
     claims: Record<string, { hit: number; tested: number }>;
     /** Mallin valinta ei ollut voitolla kertaakaan — analyysivirhe, ei epäonni */
     neverLeading: number;
+    /** Montako ottelua sai panossuosituksen (0 tai 1 per ottelu) */
+    picks: number;
+    picksWon: number;
+    /** Panostettu yhteensä euroina, jos jokainen suositus olisi lyöty */
+    staked: number;
+    /** Paperitulos euroina — sama periaate */
+    profit: number;
+    /** profit / staked, null kun mitään ei panostettu */
+    roi: number | null;
   };
 }
 
@@ -276,6 +330,10 @@ export function buildRoundReview(reviews: LiigaMatchReview[], date: string): Lii
     }
   }
 
+  const picks = reviews.map((r) => r.pick).filter((p): p is PickReview => p !== null);
+  const staked = Number(picks.reduce((s, p) => s + p.stake, 0).toFixed(2));
+  const profit = Number(picks.reduce((s, p) => s + p.profit, 0).toFixed(2));
+
   return {
     date,
     matches: reviews,
@@ -285,6 +343,11 @@ export function buildRoundReview(reviews: LiigaMatchReview[], date: string): Lii
       marketCorrect: reviews.filter((r) => r.marketCorrect).length,
       claims,
       neverLeading: reviews.filter((r) => r.verdict === 'ei_koskaan_voitolla').length,
+      picks: picks.length,
+      picksWon: picks.filter((p) => p.won).length,
+      staked,
+      profit,
+      roi: staked > 0 ? Number((profit / staked).toFixed(4)) : null,
     },
   };
 }

@@ -111,6 +111,86 @@ describe('mergeSnapshots — kumulatiivisuus', () => {
   });
 });
 
+// model_extra: tekijat jotka selittavat mallin lukua (jalkiarvion "miksi").
+// PELKKAA SELITYSTA, EI ARVIOINTIA — points[]:n model/implied/edge/flag/
+// stake ratkaisevat mita arvioidaan, eika tama osio kosketa niita ollenkaan.
+describe('mergeSnapshots — model_extra.adjustments (tekijat)', () => {
+  const cardWithAdjustments = (id: string, edges: unknown[], adjustments: unknown[]): MatchCard => {
+    const c = card(id, edges) as unknown as { model: Record<string, unknown> };
+    c.model.adjustments = adjustments;
+    return c as unknown as MatchCard;
+  };
+
+  it('uusi ottelu: avaushavainto sisaltaa mallin adjustments-listan', () => {
+    const out = mergeSnapshots(null, [snap('T', [cardWithAdjustments('m1', [edge('home')], [{ reason: 'testi' }])])]);
+    expect(out[0].opening?.model_extra?.adjustments).toEqual([{ reason: 'testi' }]);
+  });
+
+  it('puuttuva adjustments kortilla -> tyhja lista, ei kaadu', () => {
+    const out = mergeSnapshots(null, [snap('T', [card('m1', [edge('home')])])]);
+    expect(out[0].opening?.model_extra?.adjustments).toEqual([]);
+  });
+
+  // Tuotannon odds-history.json sisaltaa juuri nyt otteluita joiden opening
+  // taytettiin ENNEN kuin adjustments alettiin tallentaa (ei avainta
+  // lainkaan model_extrassa). Ilman tata taydennysta ne eivat saisi
+  // tekijalistaa NÄKYVIIN KOSKAAN, vaikka ottelu ei olisi edes alkanut.
+  const existingWithOldShape = (): OddsHistoryFile => ({
+    schema_version: 1,
+    generated_at: 'T0',
+    matches: [
+      {
+        match_id: 'm1', league: 'Valioliiga', sport_key: 'soccer_epl',
+        kickoff: '2026-08-26T18:00:00.000Z', home: 'Arsenal', away: 'Chelsea',
+        points: [
+          {
+            at: '2026-08-24T08:00:00.000Z', odds: { home: 2.5 }, book: {},
+            model: { home: 0.5, draw: 0.25, away: 0.25 }, implied: { home: 0.5, draw: 0.25, away: 0.25 },
+            edge: {}, flag: {}, stake: {},
+          },
+        ],
+        opening: {
+          books: ['vanha-rivi'], best: 'vanha-paras', stats: 'vanhat-tunnusluvut', edges: ['vanha-edge'],
+          home_team: 'vanha-koti', away_team: 'vanha-vieras',
+          // EI adjustments-avainta — nain tuotannon data nayttaa juuri nyt
+          model_extra: { method: 'poisson', lambda_home: 1.1, lambda_away: 0.9, poisson_probs: null, blend_weight: 0.4, over25: null, btts: null } as never,
+        },
+        result: null,
+      },
+    ],
+  });
+
+  it('VANHA OTTELU: model_extra taydentyy, mutta muu opening ja avaushavainto (points[0]) pysyvat koskemattomina', () => {
+    const out = mergeSnapshots(existingWithOldShape(), [
+      snap('2026-08-24T14:00:00.000Z', [cardWithAdjustments('m1', [edge('home')], [{ reason: 'uusi tekija' }])]),
+    ]);
+
+    expect(out[0].opening?.model_extra?.adjustments).toEqual([{ reason: 'uusi tekija' }]);
+    // Muu opening EI muuttunut
+    expect(out[0].opening?.books).toEqual(['vanha-rivi']);
+    expect(out[0].opening?.best).toBe('vanha-paras');
+    expect(out[0].opening?.edges).toEqual(['vanha-edge']);
+    // Avaushavainto (ensimmainen piste) pysyy koskemattomana — uusi vain liittyy peraan
+    expect(out[0].points[0].at).toBe('2026-08-24T08:00:00.000Z');
+    expect(out[0].points[0].odds.home).toBe(2.5);
+    expect(out[0].points).toHaveLength(2);
+  });
+
+  it('TAYDENNYS TAPAHTUU VAIN KERRAN: kolmas ajo ei enaa muuta jo taydennettya model_extraa', () => {
+    const afterFirstRun = mergeSnapshots(existingWithOldShape(), [
+      snap('2026-08-24T14:00:00.000Z', [cardWithAdjustments('m1', [edge('home')], [{ reason: 'eka tekija' }])]),
+    ]);
+    const existingAfterFirstRun: OddsHistoryFile = { schema_version: 1, generated_at: 'T1', matches: afterFirstRun };
+
+    const afterSecondRun = mergeSnapshots(existingAfterFirstRun, [
+      snap('2026-08-24T20:00:00.000Z', [cardWithAdjustments('m1', [edge('home')], [{ reason: 'toinen tekija' }])]),
+    ]);
+
+    // EI vaihtunut "toinen tekija":ksi — taydennys jaadytyi jo ensimmaisella kerralla
+    expect(afterSecondRun[0].opening?.model_extra?.adjustments).toEqual([{ reason: 'eka tekija' }]);
+  });
+});
+
 describe('attachResults', () => {
   const timeline = (id: string): OddsTimeline =>
     ({ match_id: id, points: [], result: null }) as unknown as OddsTimeline;

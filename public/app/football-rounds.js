@@ -91,16 +91,38 @@ function pickRow(p) {
       ? ''
       : `<span style="color:var(--c-text-muted);font-size:.58rem">${p.minutes_leading} min voitolla</span>`;
 
+  // stake 0 = Kelly pyöristi nollaan (harvinainen, esim. käsin syötetyn
+  // kertoimen kirjoitusvirhe) — silloin mitään ei olisi oikeasti lyöty,
+  // eikä "0,00 €" saa lukea samalta kuin "ei suositusta lainkaan"
+  const result =
+    p.stake > 0
+      ? `<b style="font-variant-numeric:tabular-nums;color:${p.profit >= 0 ? 'var(--c-success)' : 'var(--c-danger)'}">
+           ${p.profit >= 0 ? '+' : ''}${p.profit.toFixed(2)} €
+         </b>`
+      : `<span style="font-size:.56rem;color:var(--c-text-muted)">panos pyöristyi nollaan</span>`;
+
   return `<div style="display:grid;grid-template-columns:auto 1fr auto;gap:7px;align-items:baseline;font-size:.64rem;padding:3px 0">
     <b style="color:${v.color}">${v.icon}</b>
     <span>
       <b>${SIDE[p.side]}</b> @ ${p.odds.toFixed(2)}${p.book ? ` <span style="color:var(--c-text-muted);font-size:.58rem">${esc(p.book)}</span>` : ''}
-      · edge ${(p.edge * 100).toFixed(1)} %
+      · edge ${(p.edge * 100).toFixed(1)} % · panos ${p.stake.toFixed(2)} €
       <br><span style="color:${v.color};font-size:.6rem">${esc(v.label)}</span> ${minutes}
     </span>
-    <b style="font-variant-numeric:tabular-nums;color:${p.profit_units >= 0 ? 'var(--c-success)' : 'var(--c-danger)'}">
-      ${p.profit_units >= 0 ? '+' : ''}${p.profit_units.toFixed(2)}
-    </b>
+    ${result}
+  </div>`;
+}
+
+/** Kertoimien laskemiseen otetut tekijät — puuttuva/tyhjä lista tarkoittaa
+ * "ei tallennettuja tekijöitä", joten osio jätetään silloin kokonaan pois
+ * (ei tyhjää laatikkoa väittämässä ettei mikään vaikuttanut). */
+function factorsBlock(m) {
+  const reasons = m.model_extra?.adjustments ?? [];
+  if (!reasons.length) return '';
+  return `<div style="margin-top:5px;padding-top:5px;border-top:1px dashed oklch(1 1 0/0.08);font-size:.6rem">
+    <b style="color:var(--c-text)">Kertoimien tekijät:</b>
+    <ul style="margin:2px 0 0;padding-left:16px;color:var(--c-text-muted)">
+      ${reasons.map((r) => `<li>${esc(r.reason)}</li>`).join('')}
+    </ul>
   </div>`;
 }
 
@@ -137,14 +159,15 @@ function matchBlock(m) {
       ${pct(m.implied[m.outcome], 0)}
     </div>
     ${goalStrip(m.goals)}
-    ${m.picks.length ? m.picks.map(pickRow).join('') : '<div style="font-size:.58rem;color:var(--c-text-muted);margin-top:3px">Ei liputettuja kohteita.</div>'}
+    ${m.pick ? pickRow(m.pick) : '<div style="font-size:.58rem;color:var(--c-text-muted);margin-top:3px">Ei liputettuja kohteita.</div>'}
+    ${factorsBlock(m)}
   </div>`;
 }
 
 function roundBlock(round) {
   const s = round.summary;
   const open = state.openRound === round.date;
-  const profitColor = s.profit_units >= 0 ? 'var(--c-success)' : 'var(--c-danger)';
+  const profitColor = s.profit >= 0 ? 'var(--c-success)' : 'var(--c-danger)';
 
   // Varoitus nostetaan otsikkotasolle: analyysivirhe on eri asia kuin tappio,
   // eikä sitä saa joutua etsimään otteluiden seasta
@@ -172,11 +195,14 @@ function roundBlock(round) {
     ${
       s.picks
         ? `<div style="font-size:.62rem;color:var(--c-text-muted);margin-top:3px">
-             Liputettuja <b style="color:var(--c-text)">${s.picks}</b> ·
+             Panossuosituksia <b style="color:var(--c-text)">${s.picks}</b> ·
              osui <b style="color:var(--c-text)">${s.picks_won}</b> ·
-             paperitulos <b style="color:${profitColor}">${s.profit_units >= 0 ? '+' : ''}${s.profit_units.toFixed(2)}</b> yks
+             panostettu <b style="color:var(--c-text)">${s.staked.toFixed(2)} €</b> ·
+             tuotto <b style="color:${profitColor}">${s.profit >= 0 ? '+' : ''}${s.profit.toFixed(2)} €</b>${
+               s.roi !== null ? ` <span style="color:${profitColor}">(${s.roi >= 0 ? '+' : ''}${(s.roi * 100).toFixed(1)} %)</span>` : ''
+             }
            </div>`
-        : '<div style="font-size:.62rem;color:var(--c-text-muted);margin-top:3px">Ei liputettuja kohteita tällä kierroksella.</div>'
+        : '<div style="font-size:.62rem;color:var(--c-text-muted);margin-top:3px">Ei panossuosituksia tällä kierroksella.</div>'
     }
 
     ${warning}
@@ -193,11 +219,13 @@ function totals(rounds) {
       market: acc.market + r.summary.market_correct,
       picks: acc.picks + r.summary.picks,
       won: acc.won + r.summary.picks_won,
-      profit: acc.profit + r.summary.profit_units,
+      staked: acc.staked + r.summary.staked,
+      profit: acc.profit + r.summary.profit,
       never: acc.never + r.summary.never_leading,
     }),
-    { matches: 0, model: 0, market: 0, picks: 0, won: 0, profit: 0, never: 0 }
+    { matches: 0, model: 0, market: 0, picks: 0, won: 0, staked: 0, profit: 0, never: 0 }
   );
+  const roi = t.staked > 0 ? t.profit / t.staked : null;
 
   const small = t.matches < 20;
   const modelBetter = t.model > t.market;
@@ -226,9 +254,13 @@ function totals(rounds) {
       ${
         t.picks
           ? `<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px">
-               <span style="color:var(--c-text-muted)">Liputetut kohteet</span>
+               <span style="color:var(--c-text-muted)">Panossuositukset</span>
                <b>${t.won}/${t.picks}</b>
-               <span style="color:${t.profit >= 0 ? 'var(--c-success)' : 'var(--c-danger)'}">${t.profit >= 0 ? '+' : ''}${t.profit.toFixed(2)} yks</span>
+               <span style="color:${t.profit >= 0 ? 'var(--c-success)' : 'var(--c-danger)'}">${t.profit >= 0 ? '+' : ''}${t.profit.toFixed(2)} €${roi !== null ? ` (${roi >= 0 ? '+' : ''}${(roi * 100).toFixed(1)} %)` : ''}</span>
+             </div>
+             <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
+               <span style="color:var(--c-text-muted)">Panostettu yhteensä</span>
+               <b>${t.staked.toFixed(2)} €</b>
              </div>`
           : ''
       }
@@ -246,6 +278,9 @@ function totals(rounds) {
       "Ei kertaakaan voitolla" = kohde ei ollut voimassa oleva lopputulos yhtenäkään minuuttina.
       Se erottaa analyysivirheen huonosta tuurista — jalkapallossa mikään tulos ei ole
       mahdoton ennen loppuvihellystä, joten tämä ei väitä että voitto olisi ollut mahdoton.
+      Panostettu/tuotto on paperia: se laskee mitä olisi käynyt JOS jokainen kierroksen
+      panossuositus (isoin liputettu kohde per ottelu) olisi lyöty järjestelmän omalla
+      ehdottamalla panoksella — ei oikeaa rahaa.
     </div>
   </div>`;
 }

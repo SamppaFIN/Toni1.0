@@ -8,10 +8,10 @@ import { test, expect, Page } from '@playwright/test';
 import { useFootball, useHockey, resetState, useFixtureSnapshot } from '../helpers.js';
 
 function reviews() {
-  const pick = (side: string, odds: number, verdict: string, minutes: number, profit: number) => ({
-    side, odds, book: 'Pinnacle', edge: 0.08, flag: 'strong', stake: 2,
+  const pick = (side: string, odds: number, verdict: string, minutes: number, profit: number, stake = 2) => ({
+    side, odds, book: 'Pinnacle', edge: 0.08, flag: 'strong', stake,
     won: verdict === 'osui', minutes_leading: minutes, share_leading: minutes / 90,
-    last_lead_minute: minutes ? 88 : null, verdict, profit_units: profit,
+    last_lead_minute: minutes ? 88 : null, verdict, profit,
   });
 
   return {
@@ -30,7 +30,8 @@ function reviews() {
             model_correct: false, market_correct: false,
             goals: [{ minute: 5, side: 'home' }, { minute: 88, side: 'away' }],
             has_timeline: true,
-            picks: [pick('home', 4.0, 'kaatui_lopussa', 83, -1)],
+            pick: pick('home', 4.0, 'kaatui_lopussa', 83, -2),
+            model_extra: null,
           },
           {
             match_id: 'b', league: 'Valioliiga', sport_key: 'soccer_epl',
@@ -41,10 +42,14 @@ function reviews() {
             model_correct: true, market_correct: true,
             goals: [{ minute: 15, side: 'home' }, { minute: 50, side: 'home' }, { minute: 70, side: 'home' }],
             has_timeline: true,
-            picks: [pick('away', 21.0, 'ei_koskaan_voitolla', 0, -1)],
+            pick: pick('away', 21.0, 'ei_koskaan_voitolla', 0, -2),
+            model_extra: {
+              method: 'poisson', lambda_home: 1.6, lambda_away: 0.4, poisson_probs: null, blend_weight: 0.4,
+              over25: null, btts: null, adjustments: [{ reason: 'Testitekijä: kotietu korostuu' }],
+            },
           },
         ],
-        summary: { matches: 2, model_correct: 1, market_correct: 1, picks: 2, picks_won: 0, profit_units: -2, never_leading: 1 },
+        summary: { matches: 2, model_correct: 1, market_correct: 1, picks: 2, picks_won: 0, staked: 4, profit: -4, roi: -1, never_leading: 1 },
       },
     ],
   };
@@ -99,6 +104,18 @@ test.describe('Menneet kierrokset', () => {
     await openHistory(page);
     await expect(page.locator('#rounds-content')).toContainText('21.00', { timeout: 10000 });
     await expect(page.locator('#rounds-content')).toContainText('83 min voitolla');
+  });
+
+  test('vain yksi panossuositus per ottelu, paperitulos euroina', async ({ page }) => {
+    await openHistory(page);
+    const content = page.locator('#rounds-content');
+    await expect(content).toContainText('panos 2.00 €', { timeout: 10000 });
+    await expect(content).toContainText('-2.00 €');
+  });
+
+  test('kertoimien tekijät nakyvat ottelun alla', async ({ page }) => {
+    await openHistory(page);
+    await expect(page.locator('#rounds-content')).toContainText('Testitekijä: kotietu korostuu', { timeout: 10000 });
   });
 
   test('LIIAN PIENI OTOS sanotaan varoituksena', async ({ page }) => {

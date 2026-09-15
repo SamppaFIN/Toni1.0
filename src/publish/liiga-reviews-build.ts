@@ -75,8 +75,12 @@ export async function buildLiigaReviews(publicDir: string, now = new Date()): Pr
     if (!game) continue;
     liitetty++;
 
-    const opening = t.points[0];
-    const review = reviewGame(game, opening.model, opening.implied);
+    // Nimetty firstPoint eika opening: t.opening (avaushavainnon toimisto-
+    // rivit/model_extra) on eri kentta kuin t.points[0] (tama havainto), ja
+    // molempia tarvitaan samassa kutsussa panossuosituksen ja tekijoiden
+    // vuoksi.
+    const firstPoint = t.points[0];
+    const review = reviewGame(game, firstPoint.model, firstPoint.implied, firstPoint, t.opening?.model_extra ?? null);
     // matchId korvataan kerroinhistorian omalla tunnisteella: se on sama
     // muoto jota kortti kayttaa (today.json:in match.id), jolloin selain voi
     // liittaa arvion kortille suoralla merkkijonovertailulla eika tarvitse
@@ -120,6 +124,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
         );
         for (const [claim, r] of Object.entries(s.claims)) {
           console.log(`  ${claim.padEnd(20)} ${r.hit}/${r.tested}`);
+        }
+        if (s.picks) {
+          console.log(
+            `  panossuosituksia ${s.picks} · osui ${s.picksWon} · panostettu ${s.staked.toFixed(2)} € · ` +
+              `tulos ${s.profit >= 0 ? '+' : ''}${s.profit.toFixed(2)} €`
+          );
         }
       }
       console.log(`\nKirjoitettu: ${out}`);
