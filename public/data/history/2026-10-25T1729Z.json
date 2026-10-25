@@ -1,0 +1,2188 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-25T17:29:11.033Z",
+  "sport": "football",
+  "source": "live",
+  "providers": [
+    "The Odds API",
+    "Ristikaksi — Liiga-kausiennakko 2026-27 + toteutuneet tulokset (Elo)",
+    "liiga.fi/api/v2",
+    "RSS-uutissyötteet"
+  ],
+  "leagues": [
+    "Liiga"
+  ],
+  "matches": [
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 4.5,
+            "over": 1.6,
+            "under": 2.15,
+            "commission": 0,
+            "fetched_at": "2026-10-25T17:28:50Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383280848-kalpa-vaasan-sport"
+          },
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 5,
+            "over": 1.95,
+            "under": 1.83,
+            "commission": 0,
+            "fetched_at": "2026-10-25T17:28:58Z",
+            "link": "https://www.coolbet.com/en/sports/match/6371911"
+          }
+        ],
+        "edges": [
+          {
+            "line": 4.5,
+            "side": "over",
+            "odds": 1.6,
+            "odds_effective": 1.6,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383280848-kalpa-vaasan-sport",
+            "model_prob": 0.5391,
+            "implied_prob": 0.5733,
+            "edge": -0.1374,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 4.5,
+            "side": "under",
+            "odds": 2.15,
+            "odds_effective": 2.15,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383280848-kalpa-vaasan-sport",
+            "model_prob": 0.4609,
+            "implied_prob": 0.4267,
+            "edge": -0.0091,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5,
+            "side": "over",
+            "odds": 1.95,
+            "odds_effective": 1.95,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6371911",
+            "model_prob": 0.3629,
+            "implied_prob": 0.4841,
+            "edge": -0.2923,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5,
+            "side": "under",
+            "odds": 1.83,
+            "odds_effective": 1.83,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6371911",
+            "model_prob": 0.6371,
+            "implied_prob": 0.5159,
+            "edge": 0.1659,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-10-27:KAL-SPO",
+      "league": "Liiga",
+      "kickoff": "2026-10-27T16:30:00.000Z",
+      "home": {
+        "name": "KalPa",
+        "short": "KAL",
+        "color": "#57606A"
+      },
+      "away": {
+        "name": "Sport",
+        "short": "SPO",
+        "color": "#8250DF"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 2.02,
+          "draw": 4.1,
+          "away": 3.09,
+          "commission": 0,
+          "fetched_at": "2026-10-25T17:28:50Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383280848-kalpa-vaasan-sport"
+        },
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 1.94,
+          "draw": 3.9,
+          "away": 3.4,
+          "commission": 0,
+          "fetched_at": "2026-10-25T17:28:34Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028022367"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 2.01,
+          "draw": 4,
+          "away": 3.55,
+          "commission": 0,
+          "fetched_at": "2026-10-25T17:28:58Z",
+          "link": "https://www.coolbet.com/en/sports/match/6371911"
+        }
+      ],
+      "best": {
+        "home": 2.02,
+        "draw": 4.1,
+        "away": 3.55,
+        "home_effective": 2.02,
+        "draw_effective": 4.1,
+        "away_effective": 3.55,
+        "home_book": "1xBet",
+        "draw_book": "1xBet",
+        "away_book": "Coolbet"
+      },
+      "market": {
+        "margin": 0.0206,
+        "implied": {
+          "home": 0.4835,
+          "draw": 0.2406,
+          "away": 0.276
+        },
+        "sharp": {
+          "home": 0.4835,
+          "draw": 0.2406,
+          "away": 0.276
+        },
+        "sharp_source": "mediaani (3 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 3.15,
+        "lambda_away": 1.749,
+        "probs": {
+          "home": 0.5243,
+          "draw": 0.2284,
+          "away": 0.2473
+        },
+        "poisson_probs": {
+          "home": 0.621,
+          "draw": 0.1995,
+          "away": 0.1794
+        },
+        "blend_weight": 0.29677419354838713,
+        "over25": 0.8658,
+        "btts": 0.7925,
+        "top_scores": [
+          {
+            "score": "3-1",
+            "p": 0.0683
+          },
+          {
+            "score": "2-1",
+            "p": 0.065
+          },
+          {
+            "score": "3-2",
+            "p": 0.0597
+          },
+          {
+            "score": "2-2",
+            "p": 0.0569
+          },
+          {
+            "score": "4-1",
+            "p": 0.0538
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (KAL, 15 ottelua) / tämä + viime kausi (SPO, 16 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 74 % → paino markkinaa vastaan 30 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 1.04,
+          "defense": 1.01
+        },
+        "away_strength": {
+          "attack": 0.75,
+          "defense": 1.15
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.02,
+            "odds_effective": 2.02,
+            "book": "1xBet",
+            "model_prob": 0.5243,
+            "implied_prob": 0.4835,
+            "edge": 0.0591,
+            "flag": "strong",
+            "kelly_fraction": 0.0145,
+            "stake_suggestion": 1.45
+          },
+          {
+            "side": "draw",
+            "odds": 4.1,
+            "odds_effective": 4.1,
+            "book": "1xBet",
+            "model_prob": 0.2284,
+            "implied_prob": 0.2406,
+            "edge": -0.0636,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 3.55,
+            "odds_effective": 3.55,
+            "book": "Coolbet",
+            "model_prob": 0.2473,
+            "implied_prob": 0.276,
+            "edge": -0.1221,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 14,
+          "played": 15,
+          "form": "LLWLW",
+          "gf_pg": 2.47,
+          "ga_pg": 2.4,
+          "home_gf_pg": 2.75,
+          "away_gf_pg": 2.14,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.27,
+          "elo": 1512,
+          "elo_change": -33,
+          "elo_rank": 7
+        },
+        "away": {
+          "rank": 15,
+          "played": 16,
+          "form": "WWLLL",
+          "gf_pg": 1.81,
+          "ga_pg": 2.75,
+          "home_gf_pg": 1.9,
+          "away_gf_pg": 1.67,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.19,
+          "elo": 1372,
+          "elo_change": -23,
+          "elo_rank": 17
+        },
+        "h2h": []
+      },
+      "news": []
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 5.5,
+            "over": 2.2,
+            "under": 1.63,
+            "commission": 0,
+            "fetched_at": "2026-10-25T17:28:50Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625150-hifk-ilves"
+          }
+        ],
+        "edges": [
+          {
+            "line": 5.5,
+            "side": "over",
+            "odds": 2.2,
+            "odds_effective": 2.2,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625150-hifk-ilves",
+            "model_prob": 0.4718,
+            "implied_prob": 0.4256,
+            "edge": 0.0379,
+            "flag": "candidate",
+            "kelly_fraction": 0.0079,
+            "stake_suggestion": 0.79
+          },
+          {
+            "line": 5.5,
+            "side": "under",
+            "odds": 1.63,
+            "odds_effective": 1.63,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625150-hifk-ilves",
+            "model_prob": 0.5282,
+            "implied_prob": 0.5744,
+            "edge": -0.139,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-10-28:HIF-ILV",
+      "league": "Liiga",
+      "kickoff": "2026-10-28T16:30:00.000Z",
+      "home": {
+        "name": "HIFK",
+        "short": "HIF",
+        "color": "#BF3989"
+      },
+      "away": {
+        "name": "Ilves",
+        "short": "ILV",
+        "color": "#238636"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 2.66,
+          "draw": 4.1,
+          "away": 2.26,
+          "commission": 0,
+          "fetched_at": "2026-10-25T17:28:50Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625150-hifk-ilves"
+        }
+      ],
+      "best": {
+        "home": 2.66,
+        "draw": 4.1,
+        "away": 2.26,
+        "home_effective": 2.66,
+        "draw_effective": 4.1,
+        "away_effective": 2.26,
+        "home_book": "1xBet",
+        "draw_book": "1xBet",
+        "away_book": "1xBet"
+      },
+      "market": {
+        "margin": 0.0623,
+        "implied": {
+          "home": 0.3539,
+          "draw": 0.2296,
+          "away": 0.4165
+        },
+        "sharp": {
+          "home": 0.3539,
+          "draw": 0.2296,
+          "away": 0.4165
+        },
+        "sharp_source": "mediaani (1 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 2.515,
+        "lambda_away": 3.004,
+        "probs": {
+          "home": 0.3423,
+          "draw": 0.2262,
+          "away": 0.4315
+        },
+        "poisson_probs": {
+          "home": 0.3153,
+          "draw": 0.2183,
+          "away": 0.4663
+        },
+        "blend_weight": 0.30000000000000004,
+        "over25": 0.9124,
+        "btts": 0.8748,
+        "top_scores": [
+          {
+            "score": "2-3",
+            "p": 0.0576
+          },
+          {
+            "score": "2-2",
+            "p": 0.0575
+          },
+          {
+            "score": "3-3",
+            "p": 0.0483
+          },
+          {
+            "score": "3-2",
+            "p": 0.0482
+          },
+          {
+            "score": "1-3",
+            "p": 0.0458
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (HIF, 16 ottelua) / tämä + viime kausi (ILV, 17 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 75 % → paino markkinaa vastaan 30 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 1.09,
+          "defense": 1.17
+        },
+        "away_strength": {
+          "attack": 1.1,
+          "defense": 0.87
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.66,
+            "odds_effective": 2.66,
+            "book": "1xBet",
+            "model_prob": 0.3423,
+            "implied_prob": 0.3539,
+            "edge": -0.0895,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.1,
+            "odds_effective": 4.1,
+            "book": "1xBet",
+            "model_prob": 0.2262,
+            "implied_prob": 0.2296,
+            "edge": -0.0726,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.26,
+            "odds_effective": 2.26,
+            "book": "1xBet",
+            "model_prob": 0.4315,
+            "implied_prob": 0.4165,
+            "edge": -0.0248,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 12,
+          "played": 16,
+          "form": "DLDWW",
+          "gf_pg": 2.81,
+          "ga_pg": 2.94,
+          "home_gf_pg": 3.71,
+          "away_gf_pg": 2.11,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.31,
+          "elo": 1502,
+          "elo_change": 2,
+          "elo_rank": 8
+        },
+        "away": {
+          "rank": 3,
+          "played": 17,
+          "form": "LDLWD",
+          "gf_pg": 2.71,
+          "ga_pg": 2.06,
+          "home_gf_pg": 3.29,
+          "away_gf_pg": 2.3,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.88,
+          "elo": 1589,
+          "elo_change": -16,
+          "elo_rank": 3
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "HIFK:ssa meneillään täysin poikkeuksellinen esitys – tämä vetää jo sanattomaksi",
+          "url": "https://www.is.fi/sm-liiga/art-2000012364507.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-10-25T06:59:00.000Z",
+          "event_type": null,
+          "team": "HIFK",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Kommentti: Nyt heräsi kiusallinen kysymys Olli Jokisesta",
+          "url": "https://www.is.fi/sm-liiga/art-2000012364920.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-10-24T17:01:00.000Z",
+          "event_type": null,
+          "team": "HIFK",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Jokerit lisäsi KooKoon ahdinkoa – TPS:n tähtipelaaja puri itselleen ulosajon, vastustaja vahvisti MTV:lle",
+          "url": "https://yle.fi/a/74-20253174?origin=rss",
+          "source": "Yle Urheilu",
+          "published_at": "2026-10-24T16:49:22.000Z",
+          "event_type": "suspension",
+          "team": "HIFK",
+          "player": null,
+          "confidence": 0.5,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "SM-liigatähden törkykommentti vastustajasta tallentui tuomarin kypäräkameraan: ”Mieti mitä puhut”",
+          "url": "https://www.iltalehti.fi/smliiga/a/1b79ef20-efaf-49b0-a381-8bf8ac428c3b?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-10-24T11:47:56.000Z",
+          "event_type": null,
+          "team": "HIFK",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Jouko Myrrältä paljastus HIFK:sta ja Tapparasta",
+          "url": "https://www.is.fi/sm-liiga/art-2000012362638.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-10-24T10:33:00.000Z",
+          "event_type": null,
+          "team": "HIFK",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        }
+      ]
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 4.5,
+            "over": 1.66,
+            "under": 2.15,
+            "commission": 0,
+            "fetched_at": "2026-10-25T17:28:50Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625118-oulun-karpat-hpk"
+          }
+        ],
+        "edges": [
+          {
+            "line": 4.5,
+            "side": "over",
+            "odds": 1.66,
+            "odds_effective": 1.66,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625118-oulun-karpat-hpk",
+            "model_prob": 0.6178,
+            "implied_prob": 0.5643,
+            "edge": 0.0255,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 4.5,
+            "side": "under",
+            "odds": 2.15,
+            "odds_effective": 2.15,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625118-oulun-karpat-hpk",
+            "model_prob": 0.3822,
+            "implied_prob": 0.4357,
+            "edge": -0.1783,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-10-28:KÄR-HPK",
+      "league": "Liiga",
+      "kickoff": "2026-10-28T16:30:00.000Z",
+      "home": {
+        "name": "Kärpät",
+        "short": "KÄR",
+        "color": "#57606A"
+      },
+      "away": {
+        "name": "HPK",
+        "short": "HPK",
+        "color": "#9E6A03"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 1.75,
+          "draw": 4.33,
+          "away": 3.86,
+          "commission": 0,
+          "fetched_at": "2026-10-25T17:28:50Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625118-oulun-karpat-hpk"
+        }
+      ],
+      "best": {
+        "home": 1.75,
+        "draw": 4.33,
+        "away": 3.86,
+        "home_effective": 1.75,
+        "draw_effective": 4.33,
+        "away_effective": 3.86,
+        "home_book": "1xBet",
+        "draw_book": "1xBet",
+        "away_book": "1xBet"
+      },
+      "market": {
+        "margin": 0.0614,
+        "implied": {
+          "home": 0.5384,
+          "draw": 0.2176,
+          "away": 0.2441
+        },
+        "sharp": {
+          "home": 0.5384,
+          "draw": 0.2176,
+          "away": 0.2441
+        },
+        "sharp_source": "mediaani (1 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 3.228,
+        "lambda_away": 2.132,
+        "probs": {
+          "home": 0.5467,
+          "draw": 0.2138,
+          "away": 0.2396
+        },
+        "poisson_probs": {
+          "home": 0.5658,
+          "draw": 0.205,
+          "away": 0.2292
+        },
+        "blend_weight": 0.30303030303030304,
+        "over25": 0.9019,
+        "btts": 0.8478,
+        "top_scores": [
+          {
+            "score": "3-2",
+            "p": 0.0603
+          },
+          {
+            "score": "3-1",
+            "p": 0.0565
+          },
+          {
+            "score": "2-2",
+            "p": 0.056
+          },
+          {
+            "score": "2-1",
+            "p": 0.0526
+          },
+          {
+            "score": "4-2",
+            "p": 0.0486
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (KÄR, 18 ottelua) / tämä + viime kausi (HPK, 17 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 76 % → paino markkinaa vastaan 30 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 1.06,
+          "defense": 1.07
+        },
+        "away_strength": {
+          "attack": 0.85,
+          "defense": 1.15
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 1.75,
+            "odds_effective": 1.75,
+            "book": "1xBet",
+            "model_prob": 0.5467,
+            "implied_prob": 0.5384,
+            "edge": -0.0433,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.33,
+            "odds_effective": 4.33,
+            "book": "1xBet",
+            "model_prob": 0.2138,
+            "implied_prob": 0.2176,
+            "edge": -0.0742,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 3.86,
+            "odds_effective": 3.86,
+            "book": "1xBet",
+            "model_prob": 0.2396,
+            "implied_prob": 0.2441,
+            "edge": -0.0751,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 6,
+          "played": 18,
+          "form": "DDDWL",
+          "gf_pg": 2.61,
+          "ga_pg": 2.56,
+          "home_gf_pg": 3.56,
+          "away_gf_pg": 1.67,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.67,
+          "elo": 1544,
+          "elo_change": -16,
+          "elo_rank": 6
+        },
+        "away": {
+          "rank": 13,
+          "played": 17,
+          "form": "LWLLL",
+          "gf_pg": 2.06,
+          "ga_pg": 2.94,
+          "home_gf_pg": 2.3,
+          "away_gf_pg": 1.71,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.24,
+          "elo": 1421,
+          "elo_change": -34,
+          "elo_rank": 15
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "Liiga­joukkueelta melkoinen hankinta – Entinen NHL-pelaaja Suomeen",
+          "url": "https://www.iltalehti.fi/smliiga/a/c721f529-8df2-4405-ba58-e3a2d1c8d538?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-10-24T18:00:54.000Z",
+          "event_type": "transfer",
+          "team": "HPK",
+          "player": null,
+          "confidence": 0.4,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "HPK:lta iso ilmoitus: entinen NHL-hyökkääjä tulee SM-liigaan",
+          "url": "https://www.is.fi/sm-liiga/art-2000012364974.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-10-24T17:51:00.000Z",
+          "event_type": null,
+          "team": "HPK",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        }
+      ]
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 5.5,
+            "over": 1.94,
+            "under": 1.81,
+            "commission": 0,
+            "fetched_at": "2026-10-25T17:28:50Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625144-jyp-jyvaskyla-tappara"
+          }
+        ],
+        "edges": [
+          {
+            "line": 5.5,
+            "side": "over",
+            "odds": 1.94,
+            "odds_effective": 1.94,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625144-jyp-jyvaskyla-tappara",
+            "model_prob": 0.4941,
+            "implied_prob": 0.4827,
+            "edge": -0.0414,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5.5,
+            "side": "under",
+            "odds": 1.81,
+            "odds_effective": 1.81,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625144-jyp-jyvaskyla-tappara",
+            "model_prob": 0.5059,
+            "implied_prob": 0.5173,
+            "edge": -0.0844,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-10-28:JYP-TAP",
+      "league": "Liiga",
+      "kickoff": "2026-10-28T16:30:00.000Z",
+      "home": {
+        "name": "JYP",
+        "short": "JYP",
+        "color": "#238636"
+      },
+      "away": {
+        "name": "Tappara",
+        "short": "TAP",
+        "color": "#9E6A03"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 2.36,
+          "draw": 4.15,
+          "away": 2.49,
+          "commission": 0,
+          "fetched_at": "2026-10-25T17:28:50Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625144-jyp-jyvaskyla-tappara"
+        }
+      ],
+      "best": {
+        "home": 2.36,
+        "draw": 4.15,
+        "away": 2.49,
+        "home_effective": 2.36,
+        "draw_effective": 4.15,
+        "away_effective": 2.49,
+        "home_book": "1xBet",
+        "draw_book": "1xBet",
+        "away_book": "1xBet"
+      },
+      "market": {
+        "margin": 0.0663,
+        "implied": {
+          "home": 0.3974,
+          "draw": 0.226,
+          "away": 0.3766
+        },
+        "sharp": {
+          "home": 0.3974,
+          "draw": 0.226,
+          "away": 0.3766
+        },
+        "sharp_source": "mediaani (1 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 2.94,
+        "lambda_away": 2.711,
+        "probs": {
+          "home": 0.4057,
+          "draw": 0.2239,
+          "away": 0.3704
+        },
+        "poisson_probs": {
+          "home": 0.4258,
+          "draw": 0.2187,
+          "away": 0.3555
+        },
+        "blend_weight": 0.29333333333333333,
+        "over25": 0.9201,
+        "btts": 0.8853,
+        "top_scores": [
+          {
+            "score": "2-2",
+            "p": 0.0561
+          },
+          {
+            "score": "3-2",
+            "p": 0.055
+          },
+          {
+            "score": "2-3",
+            "p": 0.0507
+          },
+          {
+            "score": "3-3",
+            "p": 0.0497
+          },
+          {
+            "score": "2-1",
+            "p": 0.0414
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (JYP, 14 ottelua) / tämä + viime kausi (TAP, 16 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 73 % → paino markkinaa vastaan 29 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 1.23,
+          "defense": 1.02
+        },
+        "away_strength": {
+          "attack": 1.14,
+          "defense": 0.9
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.36,
+            "odds_effective": 2.36,
+            "book": "1xBet",
+            "model_prob": 0.4057,
+            "implied_prob": 0.3974,
+            "edge": -0.0425,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.15,
+            "odds_effective": 4.15,
+            "book": "1xBet",
+            "model_prob": 0.2239,
+            "implied_prob": 0.226,
+            "edge": -0.0708,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.49,
+            "odds_effective": 2.49,
+            "book": "1xBet",
+            "model_prob": 0.3704,
+            "implied_prob": 0.3766,
+            "edge": -0.0777,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 5,
+          "played": 14,
+          "form": "LDDWW",
+          "gf_pg": 3.07,
+          "ga_pg": 2.43,
+          "home_gf_pg": 3.25,
+          "away_gf_pg": 3,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 2.14,
+          "elo": 1614,
+          "elo_change": 24,
+          "elo_rank": 1
+        },
+        "away": {
+          "rank": 9,
+          "played": 16,
+          "form": "LLDWD",
+          "gf_pg": 2.63,
+          "ga_pg": 2.19,
+          "home_gf_pg": 2.57,
+          "away_gf_pg": 2.67,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.5,
+          "elo": 1577,
+          "elo_change": -43,
+          "elo_rank": 4
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "SM-liigan sensaatiojoukkueelle karu uutinen",
+          "url": "https://www.is.fi/sm-liiga/art-2000012364473.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-10-24T10:12:00.000Z",
+          "event_type": null,
+          "team": "Tappara",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Tapparalle kova takaisku: Kultakypärää kantanut sentteri sivuun",
+          "url": "https://www.iltalehti.fi/smliiga/a/3e94374c-8a8b-440c-a8b7-2f6b99c96b81?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-10-24T09:41:43.000Z",
+          "event_type": "injury",
+          "team": "Tappara",
+          "player": null,
+          "confidence": 0.45,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "Kuohuttava tilanne SM-liigassa: pelaajat vaativat kovaa tuomiota – sääntö on selkeä",
+          "url": "https://www.is.fi/nhl/art-2000012361050.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-10-22T18:04:00.000Z",
+          "event_type": null,
+          "team": "JYP",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        }
+      ]
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 4.5,
+            "over": 1.88,
+            "under": 1.87,
+            "commission": 0,
+            "fetched_at": "2026-10-25T17:28:50Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625152-mikkelin-jukurit-lukko"
+          }
+        ],
+        "edges": [
+          {
+            "line": 4.5,
+            "side": "over",
+            "odds": 1.88,
+            "odds_effective": 1.88,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625152-mikkelin-jukurit-lukko",
+            "model_prob": 0.3754,
+            "implied_prob": 0.4987,
+            "edge": -0.2943,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 4.5,
+            "side": "under",
+            "odds": 1.87,
+            "odds_effective": 1.87,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625152-mikkelin-jukurit-lukko",
+            "model_prob": 0.6246,
+            "implied_prob": 0.5013,
+            "edge": 0.1681,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-10-28:JUK-LUK",
+      "league": "Liiga",
+      "kickoff": "2026-10-28T16:30:00.000Z",
+      "home": {
+        "name": "Jukurit",
+        "short": "JUK",
+        "color": "#1F6FEB"
+      },
+      "away": {
+        "name": "Lukko",
+        "short": "LUK",
+        "color": "#BF3989"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 3.37,
+          "draw": 4,
+          "away": 1.94,
+          "commission": 0,
+          "fetched_at": "2026-10-25T17:28:50Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625152-mikkelin-jukurit-lukko"
+        }
+      ],
+      "best": {
+        "home": 3.37,
+        "draw": 4,
+        "away": 1.94,
+        "home_effective": 3.37,
+        "draw_effective": 4,
+        "away_effective": 1.94,
+        "home_book": "1xBet",
+        "draw_book": "1xBet",
+        "away_book": "1xBet"
+      },
+      "market": {
+        "margin": 0.0622,
+        "implied": {
+          "home": 0.2794,
+          "draw": 0.2354,
+          "away": 0.4853
+        },
+        "sharp": {
+          "home": 0.2794,
+          "draw": 0.2354,
+          "away": 0.4853
+        },
+        "sharp_source": "mediaani (1 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 1.905,
+        "lambda_away": 2.118,
+        "probs": {
+          "home": 0.2944,
+          "draw": 0.2446,
+          "away": 0.461
+        },
+        "poisson_probs": {
+          "home": 0.3289,
+          "draw": 0.2658,
+          "away": 0.4053
+        },
+        "blend_weight": 0.30303030303030304,
+        "over25": 0.7651,
+        "btts": 0.7524,
+        "top_scores": [
+          {
+            "score": "1-2",
+            "p": 0.0765
+          },
+          {
+            "score": "1-1",
+            "p": 0.0759
+          },
+          {
+            "score": "2-2",
+            "p": 0.0729
+          },
+          {
+            "score": "2-1",
+            "p": 0.0688
+          },
+          {
+            "score": "1-3",
+            "p": 0.054
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (JUK, 18 ottelua) / tämä + viime kausi (LUK, 17 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 76 % → paino markkinaa vastaan 30 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 0.89,
+          "defense": 0.86
+        },
+        "away_strength": {
+          "attack": 1.07,
+          "defense": 0.81
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 3.37,
+            "odds_effective": 3.37,
+            "book": "1xBet",
+            "model_prob": 0.2944,
+            "implied_prob": 0.2794,
+            "edge": -0.0079,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4,
+            "odds_effective": 4,
+            "book": "1xBet",
+            "model_prob": 0.2446,
+            "implied_prob": 0.2354,
+            "edge": -0.0216,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 1.94,
+            "odds_effective": 1.94,
+            "book": "1xBet",
+            "model_prob": 0.461,
+            "implied_prob": 0.4853,
+            "edge": -0.1057,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 4,
+          "played": 18,
+          "form": "DWWLD",
+          "gf_pg": 2.22,
+          "ga_pg": 1.94,
+          "home_gf_pg": 1.7,
+          "away_gf_pg": 2.88,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.78,
+          "elo": 1459,
+          "elo_change": 79,
+          "elo_rank": 12
+        },
+        "away": {
+          "rank": 1,
+          "played": 17,
+          "form": "WWDWW",
+          "gf_pg": 2.59,
+          "ga_pg": 1.82,
+          "home_gf_pg": 2.44,
+          "away_gf_pg": 2.75,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 2.06,
+          "elo": 1601,
+          "elo_change": 71,
+          "elo_rank": 2
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "Turussa tapahtui jotain, mitä SM-liigan erotuomaripomo ei ollut koskaan nähnyt",
+          "url": "https://www.iltalehti.fi/smliiga/a/33a4b8af-2313-4ddb-95e7-1eed366ce3d3?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-10-25T06:37:35.000Z",
+          "event_type": null,
+          "team": "Lukko",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "SM-liigapelaajaa purtiin kesken pelin – Nyt puhuu uhri: ”Tyhmä juttu”",
+          "url": "https://www.iltalehti.fi/smliiga/a/b81e97fb-a927-427f-8de9-659da64d02bd?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-10-24T18:42:37.000Z",
+          "event_type": "suspension",
+          "team": "Lukko",
+          "player": null,
+          "confidence": 0.5,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "”Kynnestä meni hammas läpi” – Nyt puhuu TPS:n supertähden puremaksi joutunut Seppälä Maikkarille",
+          "url": "https://www.iltalehti.fi/smliiga/a/ca4461aa-588d-4ca6-8ef4-0acfa3317bbe?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-10-24T16:00:31.000Z",
+          "event_type": "suspension",
+          "team": "Lukko",
+          "player": null,
+          "confidence": 0.5,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "Täpötäysi areena pettyi rajusti Turussa – Saku Koivun suuri ilta jäi ilman huipennusta",
+          "url": "https://www.iltalehti.fi/smliiga/a/0715c230-e62d-4dda-833d-55d8de19f1bd?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-10-24T13:34:27.000Z",
+          "event_type": null,
+          "team": "Lukko",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        }
+      ]
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 5.5,
+            "over": 2.1,
+            "under": 1.69,
+            "commission": 0,
+            "fetched_at": "2026-10-25T17:28:50Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625114-kiekko-espoo-tps"
+          }
+        ],
+        "edges": [
+          {
+            "line": 5.5,
+            "side": "over",
+            "odds": 2.1,
+            "odds_effective": 2.1,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625114-kiekko-espoo-tps",
+            "model_prob": 0.0529,
+            "implied_prob": 0.4459,
+            "edge": -0.8888,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5.5,
+            "side": "under",
+            "odds": 1.69,
+            "odds_effective": 1.69,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625114-kiekko-espoo-tps",
+            "model_prob": 0.9471,
+            "implied_prob": 0.5541,
+            "edge": 0.6005,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-10-28:KIE-TPS",
+      "league": "Liiga",
+      "kickoff": "2026-10-28T16:30:00.000Z",
+      "home": {
+        "name": "Kiekko-Espoo",
+        "short": "KIE",
+        "color": "#0E7490"
+      },
+      "away": {
+        "name": "TPS",
+        "short": "TPS",
+        "color": "#57606A"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 2.28,
+          "draw": 4.1,
+          "away": 2.61,
+          "commission": 0,
+          "fetched_at": "2026-10-25T17:28:50Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625114-kiekko-espoo-tps"
+        }
+      ],
+      "best": {
+        "home": 2.28,
+        "draw": 4.1,
+        "away": 2.61,
+        "home_effective": 2.28,
+        "draw_effective": 4.1,
+        "away_effective": 2.61,
+        "home_book": "1xBet",
+        "draw_book": "1xBet",
+        "away_book": "1xBet"
+      },
+      "market": {
+        "margin": 0.0656,
+        "implied": {
+          "home": 0.4116,
+          "draw": 0.2289,
+          "away": 0.3595
+        },
+        "sharp": {
+          "home": 0.4116,
+          "draw": 0.2289,
+          "away": 0.3595
+        },
+        "sharp_source": "mediaani (1 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 1.443,
+        "lambda_away": 1.209,
+        "probs": {
+          "home": 0.4071,
+          "draw": 0.2443,
+          "away": 0.3486
+        },
+        "poisson_probs": {
+          "home": 0.3799,
+          "draw": 0.3388,
+          "away": 0.2813
+        },
+        "blend_weight": 0.13999999999999999,
+        "over25": 0.4946,
+        "btts": 0.542,
+        "top_scores": [
+          {
+            "score": "1-1",
+            "p": 0.1292
+          },
+          {
+            "score": "1-0",
+            "p": 0.0956
+          },
+          {
+            "score": "2-1",
+            "p": 0.0888
+          },
+          {
+            "score": "0-1",
+            "p": 0.0791
+          },
+          {
+            "score": "0-0",
+            "p": 0.0766
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Kausiennakko (Ristikaksi — Liiga-kausiennakko 2026-27): KIE #15 vs TPS #14. Ei pelattuja otteluita — luku on ennakon lähtöarvo, ei mittaus."
+          },
+          {
+            "reason": "KIE — + Ykkösmaalivahti Rimpinen (eliittiä), useita \"omia poikia\" – tuo sydäntä ja ryhtiä  ·  − Kapeahko rosteri (etenkin hyökkäys), kliinisten viimeistelijöiden puute, ei varaa loukkaantumisille"
+          },
+          {
+            "reason": "TPS — + Keskikaista (Haudum, Paajanen, Määttä), terävä kärki (Wernblom, Ikonen, Bryggman), lupaavia hankintoja  ·  − Ei huippumaalivahtia, hyökkäyksen laajuus (laiturit) heikko, pelillinen ailahtelu, valmennuksen otteen säilyminen epävarmaa"
+          }
+        ],
+        "home_strength": {
+          "attack": 0.87,
+          "defense": 1.14
+        },
+        "away_strength": {
+          "attack": 0.89,
+          "defense": 1.11
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.28,
+            "odds_effective": 2.28,
+            "book": "1xBet",
+            "model_prob": 0.4071,
+            "implied_prob": 0.4116,
+            "edge": -0.0718,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.1,
+            "odds_effective": 4.1,
+            "book": "1xBet",
+            "model_prob": 0.2443,
+            "implied_prob": 0.2289,
+            "edge": 0.0016,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.61,
+            "odds_effective": 2.61,
+            "book": "1xBet",
+            "model_prob": 0.3486,
+            "implied_prob": 0.3595,
+            "edge": -0.0902,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 14,
+          "played": 0,
+          "form": "",
+          "gf_pg": 0,
+          "ga_pg": 0,
+          "home_gf_pg": null,
+          "away_gf_pg": null,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": null,
+          "elo": 1450,
+          "elo_change": 40,
+          "elo_rank": 14,
+          "elo_provisional": true
+        },
+        "away": {
+          "rank": 10,
+          "played": 0,
+          "form": "",
+          "gf_pg": 0,
+          "ga_pg": 0,
+          "home_gf_pg": null,
+          "away_gf_pg": null,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": null,
+          "elo": 1486,
+          "elo_change": 61,
+          "elo_rank": 10,
+          "elo_provisional": true
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "Turussa tapahtui jotain, mitä SM-liigan erotuomaripomo ei ollut koskaan nähnyt",
+          "url": "https://www.iltalehti.fi/smliiga/a/33a4b8af-2313-4ddb-95e7-1eed366ce3d3?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-10-25T06:37:35.000Z",
+          "event_type": null,
+          "team": "TPS",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "SM-liigan kurinpito jyrähti: Kiekko-Espoon ja Linus Öbergin selitys ei kelvannut",
+          "url": "https://www.is.fi/sm-liiga/art-2000012365049.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-10-24T19:59:00.000Z",
+          "event_type": null,
+          "team": "Kiekko-Espoo",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "SM-liigapelaajaa purtiin kesken pelin – Nyt puhuu uhri: ”Tyhmä juttu”",
+          "url": "https://www.iltalehti.fi/smliiga/a/b81e97fb-a927-427f-8de9-659da64d02bd?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-10-24T18:42:37.000Z",
+          "event_type": "suspension",
+          "team": "TPS",
+          "player": null,
+          "confidence": 0.5,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "Jokerit lisäsi KooKoon ahdinkoa – TPS:n tähtipelaaja puri itselleen ulosajon, vastustaja vahvisti MTV:lle",
+          "url": "https://yle.fi/a/74-20253174?origin=rss",
+          "source": "Yle Urheilu",
+          "published_at": "2026-10-24T16:49:22.000Z",
+          "event_type": "suspension",
+          "team": "TPS",
+          "player": null,
+          "confidence": 0.5,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "Saku Koivu koki Turussa jotain ainutlaatuista – liikuttui kyyneliin",
+          "url": "https://www.is.fi/jaakiekko/art-2000012364839.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-10-24T16:37:00.000Z",
+          "event_type": null,
+          "team": "TPS",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        }
+      ],
+      "preview": {
+        "source": {
+          "name": "Ristikaksi — Liiga-kausiennakko 2026-27",
+          "url": "https://www.ristikaksi.com/urheilusarjat/liiga-kausiennakko-2026-27",
+          "readAt": "2026-09-01"
+        },
+        "home": {
+          "rank": 15,
+          "elo": 1410,
+          "strengths": [
+            "Ykkösmaalivahti Rimpinen (eliittiä)",
+            "useita \"omia poikia\" – tuo sydäntä ja ryhtiä"
+          ],
+          "weaknesses": [
+            "Kapeahko rosteri (etenkin hyökkäys)",
+            "kliinisten viimeistelijöiden puute",
+            "ei varaa loukkaantumisille"
+          ],
+          "arrivals": [
+            "Jere Sallinen",
+            "Ville Lajunen",
+            "Connor Corcoran"
+          ],
+          "departures": [
+            "Cameron Hillis",
+            "Kasper Kulonummi",
+            "Santeri Virtanen"
+          ]
+        },
+        "away": {
+          "rank": 14,
+          "elo": 1425,
+          "strengths": [
+            "Keskikaista (Haudum, Paajanen, Määttä)",
+            "terävä kärki (Wernblom, Ikonen, Bryggman)",
+            "lupaavia hankintoja"
+          ],
+          "weaknesses": [
+            "Ei huippumaalivahtia",
+            "hyökkäyksen laajuus (laiturit) heikko",
+            "pelillinen ailahtelu",
+            "valmennuksen otteen säilyminen epävarmaa"
+          ],
+          "departures": [
+            "Mitja Jokinen"
+          ]
+        }
+      }
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 5.5,
+            "over": 1.99,
+            "under": 1.77,
+            "commission": 0,
+            "fetched_at": "2026-10-25T17:28:50Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625120-kookoo-kouvola-assat"
+          }
+        ],
+        "edges": [
+          {
+            "line": 5.5,
+            "side": "over",
+            "odds": 1.99,
+            "odds_effective": 1.99,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625120-kookoo-kouvola-assat",
+            "model_prob": 0.5045,
+            "implied_prob": 0.4707,
+            "edge": 0.0039,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5.5,
+            "side": "under",
+            "odds": 1.77,
+            "odds_effective": 1.77,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625120-kookoo-kouvola-assat",
+            "model_prob": 0.4955,
+            "implied_prob": 0.5293,
+            "edge": -0.1229,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-10-28:KOO-ÄSS",
+      "league": "Liiga",
+      "kickoff": "2026-10-28T16:30:00.000Z",
+      "home": {
+        "name": "KooKoo",
+        "short": "KOO",
+        "color": "#1F6FEB"
+      },
+      "away": {
+        "name": "Ässät",
+        "short": "ÄSS",
+        "color": "#8250DF"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 3.13,
+          "draw": 4.25,
+          "away": 1.97,
+          "commission": 0,
+          "fetched_at": "2026-10-25T17:28:50Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625120-kookoo-kouvola-assat"
+        }
+      ],
+      "best": {
+        "home": 3.13,
+        "draw": 4.25,
+        "away": 1.97,
+        "home_effective": 3.13,
+        "draw_effective": 4.25,
+        "away_effective": 1.97,
+        "home_book": "1xBet",
+        "draw_book": "1xBet",
+        "away_book": "1xBet"
+      },
+      "market": {
+        "margin": 0.0624,
+        "implied": {
+          "home": 0.3007,
+          "draw": 0.2215,
+          "away": 0.4778
+        },
+        "sharp": {
+          "home": 0.3007,
+          "draw": 0.2215,
+          "away": 0.4778
+        },
+        "sharp_source": "mediaani (1 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 2.505,
+        "lambda_away": 3.212,
+        "probs": {
+          "home": 0.2969,
+          "draw": 0.218,
+          "away": 0.485
+        },
+        "poisson_probs": {
+          "home": 0.2882,
+          "draw": 0.2101,
+          "away": 0.5017
+        },
+        "blend_weight": 0.30303030303030304,
+        "over25": 0.9236,
+        "btts": 0.8824,
+        "top_scores": [
+          {
+            "score": "2-3",
+            "p": 0.0574
+          },
+          {
+            "score": "2-2",
+            "p": 0.0536
+          },
+          {
+            "score": "3-3",
+            "p": 0.0479
+          },
+          {
+            "score": "2-4",
+            "p": 0.0461
+          },
+          {
+            "score": "1-3",
+            "p": 0.0458
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (KOO, 17 ottelua) / tämä + viime kausi (ÄSS, 17 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 76 % → paino markkinaa vastaan 30 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 1.01,
+          "defense": 1.49
+        },
+        "away_strength": {
+          "attack": 0.93,
+          "defense": 0.94
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 3.13,
+            "odds_effective": 3.13,
+            "book": "1xBet",
+            "model_prob": 0.2969,
+            "implied_prob": 0.3007,
+            "edge": -0.0707,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.25,
+            "odds_effective": 4.25,
+            "book": "1xBet",
+            "model_prob": 0.218,
+            "implied_prob": 0.2215,
+            "edge": -0.0735,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 1.97,
+            "odds_effective": 1.97,
+            "book": "1xBet",
+            "model_prob": 0.485,
+            "implied_prob": 0.4778,
+            "edge": -0.0446,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 17,
+          "played": 17,
+          "form": "LDDLL",
+          "gf_pg": 2.24,
+          "ga_pg": 4.12,
+          "home_gf_pg": 2.75,
+          "away_gf_pg": 1.78,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 0.41,
+          "elo": 1399,
+          "elo_change": -176,
+          "elo_rank": 16
+        },
+        "away": {
+          "rank": 7,
+          "played": 17,
+          "form": "WWLLL",
+          "gf_pg": 2.18,
+          "ga_pg": 2.24,
+          "home_gf_pg": 2.38,
+          "away_gf_pg": 2,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.65,
+          "elo": 1488,
+          "elo_change": 18,
+          "elo_rank": 9
+        },
+        "h2h": []
+      },
+      "news": []
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 4.5,
+            "over": 1.7,
+            "under": 2.09,
+            "commission": 0,
+            "fetched_at": "2026-10-25T17:28:50Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625116-pelicans-saipa"
+          }
+        ],
+        "edges": [
+          {
+            "line": 4.5,
+            "side": "over",
+            "odds": 1.7,
+            "odds_effective": 1.7,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625116-pelicans-saipa",
+            "model_prob": 0.4585,
+            "implied_prob": 0.5515,
+            "edge": -0.2206,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 4.5,
+            "side": "under",
+            "odds": 2.09,
+            "odds_effective": 2.09,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625116-pelicans-saipa",
+            "model_prob": 0.5415,
+            "implied_prob": 0.4485,
+            "edge": 0.1318,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-10-28:PEL-SAI",
+      "league": "Liiga",
+      "kickoff": "2026-10-28T16:30:00.000Z",
+      "home": {
+        "name": "Pelicans",
+        "short": "PEL",
+        "color": "#0E7490"
+      },
+      "away": {
+        "name": "SaiPa",
+        "short": "SAI",
+        "color": "#8250DF"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 2.27,
+          "draw": 3.98,
+          "away": 2.69,
+          "commission": 0,
+          "fetched_at": "2026-10-25T17:28:50Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/383625116-pelicans-saipa"
+        }
+      ],
+      "best": {
+        "home": 2.27,
+        "draw": 3.98,
+        "away": 2.69,
+        "home_effective": 2.27,
+        "draw_effective": 3.98,
+        "away_effective": 2.69,
+        "home_book": "1xBet",
+        "draw_book": "1xBet",
+        "away_book": "1xBet"
+      },
+      "market": {
+        "margin": 0.0635,
+        "implied": {
+          "home": 0.4142,
+          "draw": 0.2362,
+          "away": 0.3495
+        },
+        "sharp": {
+          "home": 0.4142,
+          "draw": 0.2362,
+          "away": 0.3495
+        },
+        "sharp_source": "mediaani (1 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 1.866,
+        "lambda_away": 2.589,
+        "probs": {
+          "home": 0.3684,
+          "draw": 0.2371,
+          "away": 0.3945
+        },
+        "poisson_probs": {
+          "home": 0.2579,
+          "draw": 0.2391,
+          "away": 0.503
+        },
+        "blend_weight": 0.29333333333333333,
+        "over25": 0.821,
+        "btts": 0.7845,
+        "top_scores": [
+          {
+            "score": "1-2",
+            "p": 0.0728
+          },
+          {
+            "score": "2-2",
+            "p": 0.0679
+          },
+          {
+            "score": "1-3",
+            "p": 0.0628
+          },
+          {
+            "score": "1-1",
+            "p": 0.059
+          },
+          {
+            "score": "2-3",
+            "p": 0.0586
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (PEL, 14 ottelua) / tämä + viime kausi (SAI, 16 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 73 % → paino markkinaa vastaan 29 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 0.93,
+          "defense": 0.94
+        },
+        "away_strength": {
+          "attack": 1.18,
+          "defense": 0.76
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.27,
+            "odds_effective": 2.27,
+            "book": "1xBet",
+            "model_prob": 0.3684,
+            "implied_prob": 0.4142,
+            "edge": -0.1637,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 3.98,
+            "odds_effective": 3.98,
+            "book": "1xBet",
+            "model_prob": 0.2371,
+            "implied_prob": 0.2362,
+            "edge": -0.0563,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.69,
+            "odds_effective": 2.69,
+            "book": "1xBet",
+            "model_prob": 0.3945,
+            "implied_prob": 0.3495,
+            "edge": 0.0612,
+            "flag": "strong",
+            "kelly_fraction": 0.0091,
+            "stake_suggestion": 0.91
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 11,
+          "played": 14,
+          "form": "DLLWD",
+          "gf_pg": 2.36,
+          "ga_pg": 2.29,
+          "home_gf_pg": 2.5,
+          "away_gf_pg": 2.17,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.5,
+          "elo": 1460,
+          "elo_change": 20,
+          "elo_rank": 11
+        },
+        "away": {
+          "rank": 2,
+          "played": 16,
+          "form": "WWDWW",
+          "gf_pg": 2.88,
+          "ga_pg": 1.63,
+          "home_gf_pg": 2.33,
+          "away_gf_pg": 3.57,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 2.13,
+          "elo": 1573,
+          "elo_change": 88,
+          "elo_rank": 5
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "Tapparalle kova takaisku: Kultakypärää kantanut sentteri sivuun",
+          "url": "https://www.iltalehti.fi/smliiga/a/3e94374c-8a8b-440c-a8b7-2f6b99c96b81?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-10-24T09:41:43.000Z",
+          "event_type": "injury",
+          "team": "Pelicans",
+          "player": null,
+          "confidence": 0.45,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        }
+      ]
+    }
+  ]
+}
