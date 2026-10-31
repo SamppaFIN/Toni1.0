@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-31T14:21:43.703Z",
+  "generated_at": "2026-10-31T18:20:45.099Z",
   "sport": "football",
   "source": "live",
   "providers": [
@@ -11,8 +11,8 @@
     "RSS-uutissyötteet"
   ],
   "leagues": [
-    "Liiga",
-    "Valioliiga"
+    "Valioliiga",
+    "Liiga"
   ],
   "matches": [
     {
@@ -21,4505 +21,21 @@
           {
             "bookmaker": "1xBet",
             "key": "onexbet",
-            "line": 5.5,
-            "over": 1.96,
-            "under": 1.79,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:15Z",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366500-kookoo-kouvola-hifk"
-          },
-          {
-            "bookmaker": "Coolbet",
-            "key": "coolbet",
-            "line": 5.5,
-            "over": 1.86,
-            "under": 1.95,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:43Z",
-            "link": "https://www.coolbet.com/en/sports/match/6394335"
-          }
-        ],
-        "edges": [
-          {
-            "line": 5.5,
-            "side": "over",
-            "odds": 1.96,
-            "odds_effective": 1.96,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366500-kookoo-kouvola-hifk",
-            "model_prob": 0.649,
-            "implied_prob": 0.4987,
-            "edge": 0.272,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          },
-          {
-            "line": 5.5,
-            "side": "under",
-            "odds": 1.95,
-            "odds_effective": 1.95,
-            "book": "Coolbet",
-            "link": "https://www.coolbet.com/en/sports/match/6394335",
-            "model_prob": 0.351,
-            "implied_prob": 0.5013,
-            "edge": -0.3155,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ]
-      },
-      "id": "icehockey_liiga:2026-10-31:KOO-HIF",
-      "league": "Liiga",
-      "kickoff": "2026-10-31T15:00:00.000Z",
-      "home": {
-        "name": "KooKoo",
-        "short": "KOO",
-        "color": "#1F6FEB"
-      },
-      "away": {
-        "name": "HIFK",
-        "short": "HIF",
-        "color": "#BF3989"
-      },
-      "odds": [
-        {
-          "bookmaker": "1xBet",
-          "key": "onexbet",
-          "market": "1X2",
-          "home": 2.72,
-          "draw": 4.15,
-          "away": 2.2,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
-          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366500-kookoo-kouvola-hifk"
-        },
-        {
-          "bookmaker": "Unibet (SE)",
-          "key": "unibet_se",
-          "market": "1X2",
-          "home": 2.8,
-          "draw": 3.9,
-          "away": 2.23,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
-          "link": "https://www.unibet.se/betting/sports/event/1028022286"
-        },
-        {
-          "bookmaker": "Coolbet",
-          "key": "coolbet",
-          "market": "1X2",
-          "home": 2.85,
-          "draw": 4.2,
-          "away": 2.27,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:43Z",
-          "link": "https://www.coolbet.com/en/sports/match/6394335"
-        }
-      ],
-      "best": {
-        "home": 2.85,
-        "draw": 4.2,
-        "away": 2.27,
-        "home_effective": 2.85,
-        "draw_effective": 4.2,
-        "away_effective": 2.27,
-        "home_book": "Coolbet",
-        "draw_book": "Coolbet",
-        "away_book": "Coolbet"
-      },
-      "market": {
-        "margin": 0.0295,
-        "implied": {
-          "home": 0.3409,
-          "draw": 0.2314,
-          "away": 0.4277
-        },
-        "sharp": {
-          "home": 0.3409,
-          "draw": 0.2314,
-          "away": 0.4277
-        },
-        "sharp_source": "mediaani (3 toimistoa)"
-      },
-      "model": {
-        "method": "poisson+sharp-blend",
-        "lambda_home": 3.085,
-        "lambda_away": 3.58,
-        "probs": {
-          "home": 0.3381,
-          "draw": 0.2214,
-          "away": 0.4405
-        },
-        "poisson_probs": {
-          "home": 0.3316,
-          "draw": 0.1987,
-          "away": 0.4697
-        },
-        "blend_weight": 0.3058823529411765,
-        "over25": 0.9613,
-        "btts": 0.9279,
-        "top_scores": [
-          {
-            "score": "3-3",
-            "p": 0.0485
-          },
-          {
-            "score": "2-3",
-            "p": 0.0471
-          },
-          {
-            "score": "3-4",
-            "p": 0.0434
-          },
-          {
-            "score": "2-4",
-            "p": 0.0422
-          },
-          {
-            "score": "3-2",
-            "p": 0.0406
-          }
-        ],
-        "adjustments": [
-          {
-            "reason": "Voimat: tämä + viime kausi (KOO, 19 ottelua) / tämä + viime kausi (HIF, 18 ottelua)"
-          },
-          {
-            "reason": "Mallin luottamus 76 % → paino markkinaa vastaan 31 % (täysi 40 %). Kausidataa riittävästi."
-          }
-        ],
-        "home_strength": {
-          "attack": 1.01,
-          "defense": 1.46
-        },
-        "away_strength": {
-          "attack": 1.06,
-          "defense": 1.13
-        }
-      },
-      "analysis": {
-        "edges": [
-          {
-            "side": "home",
-            "odds": 2.85,
-            "odds_effective": 2.85,
-            "book": "Coolbet",
-            "model_prob": 0.3381,
-            "implied_prob": 0.3409,
-            "edge": -0.0364,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "draw",
-            "odds": 4.2,
-            "odds_effective": 4.2,
-            "book": "Coolbet",
-            "model_prob": 0.2214,
-            "implied_prob": 0.2314,
-            "edge": -0.0701,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "away",
-            "odds": 2.27,
-            "odds_effective": 2.27,
-            "book": "Coolbet",
-            "model_prob": 0.4405,
-            "implied_prob": 0.4277,
-            "edge": -0.0001,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ],
-        "news_window": false,
-        "bankroll_basis": 100
-      },
-      "stats": {
-        "home": {
-          "rank": 17,
-          "played": 19,
-          "form": "DLLWL",
-          "gf_pg": 2.32,
-          "ga_pg": 4,
-          "home_gf_pg": 3,
-          "away_gf_pg": 1.7,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 0.53,
-          "elo": 1409,
-          "elo_change": -166,
-          "elo_rank": 15
-        },
-        "away": {
-          "rank": 13,
-          "played": 18,
-          "form": "DWWWL",
-          "gf_pg": 2.72,
-          "ga_pg": 2.83,
-          "home_gf_pg": 3.5,
-          "away_gf_pg": 2.1,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.33,
-          "elo": 1503,
-          "elo_change": 3,
-          "elo_rank": 8
-        },
-        "h2h": []
-      },
-      "news": [
-        {
-          "title": "SM-liigan kriisijoukkue hankki kanadalaisjärkäleen",
-          "url": "https://www.is.fi/sm-liiga/art-2000012374463.html",
-          "source": "IS jääkiekko",
-          "published_at": "2026-10-29T08:27:00.000Z",
-          "event_type": null,
-          "team": "KooKoo",
-          "player": null,
-          "confidence": null,
-          "impact": null
-        },
-        {
-          "title": "HIFK:hon yhdistetty Tommi Niemelä latasi kovaa tekstiä – ”Törkeää”",
-          "url": "https://www.is.fi/sm-liiga/art-2000012371859.html",
-          "source": "IS jääkiekko",
-          "published_at": "2026-10-28T19:54:00.000Z",
-          "event_type": "manager_change",
-          "team": "HIFK",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        }
-      ]
-    },
-    {
-      "totals": {
-        "books": [
-          {
-            "bookmaker": "1xBet",
-            "key": "onexbet",
-            "line": 4.5,
-            "over": 1.73,
-            "under": 2.04,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:15Z",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366502-ilves-kalpa"
-          },
-          {
-            "bookmaker": "Coolbet",
-            "key": "coolbet",
-            "line": 5,
-            "over": 2.03,
-            "under": 1.8,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:43Z",
-            "link": "https://www.coolbet.com/en/sports/match/6394318"
-          }
-        ],
-        "edges": [
-          {
-            "line": 4.5,
-            "side": "over",
-            "odds": 1.73,
-            "odds_effective": 1.73,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366502-ilves-kalpa",
-            "model_prob": 0.5312,
-            "implied_prob": 0.5411,
-            "edge": -0.081,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 4.5,
-            "side": "under",
-            "odds": 2.04,
-            "odds_effective": 2.04,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366502-ilves-kalpa",
-            "model_prob": 0.4688,
-            "implied_prob": 0.4589,
-            "edge": -0.0437,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 5,
-            "side": "over",
-            "odds": 2.03,
-            "odds_effective": 2.03,
-            "book": "Coolbet",
-            "link": "https://www.coolbet.com/en/sports/match/6394318",
-            "model_prob": 0.3558,
-            "implied_prob": 0.47,
-            "edge": -0.2778,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 5,
-            "side": "under",
-            "odds": 1.8,
-            "odds_effective": 1.8,
-            "book": "Coolbet",
-            "link": "https://www.coolbet.com/en/sports/match/6394318",
-            "model_prob": 0.6442,
-            "implied_prob": 0.53,
-            "edge": 0.1596,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          }
-        ]
-      },
-      "id": "icehockey_liiga:2026-10-31:ILV-KAL",
-      "league": "Liiga",
-      "kickoff": "2026-10-31T15:00:00.000Z",
-      "home": {
-        "name": "Ilves",
-        "short": "ILV",
-        "color": "#238636"
-      },
-      "away": {
-        "name": "KalPa",
-        "short": "KAL",
-        "color": "#57606A"
-      },
-      "odds": [
-        {
-          "bookmaker": "1xBet",
-          "key": "onexbet",
-          "market": "1X2",
-          "home": 1.88,
-          "draw": 4.1,
-          "away": 3.5,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
-          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366502-ilves-kalpa"
-        },
-        {
-          "bookmaker": "Unibet (SE)",
-          "key": "unibet_se",
-          "market": "1X2",
-          "home": 1.83,
-          "draw": 3.8,
-          "away": 3.9,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
-          "link": "https://www.unibet.se/betting/sports/event/1028022339"
-        },
-        {
-          "bookmaker": "Coolbet",
-          "key": "coolbet",
-          "market": "1X2",
-          "home": 1.95,
-          "draw": 4,
-          "away": 3.75,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:43Z",
-          "link": "https://www.coolbet.com/en/sports/match/6394318"
-        }
-      ],
-      "best": {
-        "home": 1.95,
-        "draw": 4.1,
-        "away": 3.9,
-        "home_effective": 1.95,
-        "draw_effective": 4.1,
-        "away_effective": 3.9,
-        "home_book": "Coolbet",
-        "draw_book": "1xBet",
-        "away_book": "Unibet (SE)"
-      },
-      "market": {
-        "margin": 0.0131,
-        "implied": {
-          "home": 0.4996,
-          "draw": 0.2421,
-          "away": 0.2583
-        },
-        "sharp": {
-          "home": 0.4996,
-          "draw": 0.2421,
-          "away": 0.2583
-        },
-        "sharp_source": "mediaani (3 toimistoa)"
-      },
-      "model": {
-        "method": "poisson+sharp-blend",
-        "lambda_home": 2.701,
-        "lambda_away": 2.147,
-        "probs": {
-          "home": 0.4919,
-          "draw": 0.2394,
-          "away": 0.2687
-        },
-        "poisson_probs": {
-          "home": 0.4743,
-          "draw": 0.233,
-          "away": 0.2927
-        },
-        "blend_weight": 0.30303030303030304,
-        "over25": 0.8616,
-        "btts": 0.8259,
-        "top_scores": [
-          {
-            "score": "2-2",
-            "p": 0.0661
-          },
-          {
-            "score": "2-1",
-            "p": 0.0616
-          },
-          {
-            "score": "3-2",
-            "p": 0.0595
-          },
-          {
-            "score": "3-1",
-            "p": 0.0554
-          },
-          {
-            "score": "1-2",
-            "p": 0.049
-          }
-        ],
-        "adjustments": [
-          {
-            "reason": "Voimat: tämä + viime kausi (ILV, 19 ottelua) / tämä + viime kausi (KAL, 17 ottelua)"
-          },
-          {
-            "reason": "Mallin luottamus 76 % → paino markkinaa vastaan 30 % (täysi 40 %). Kausidataa riittävästi."
-          }
-        ],
-        "home_strength": {
-          "attack": 1.04,
-          "defense": 0.84
-        },
-        "away_strength": {
-          "attack": 1.09,
-          "defense": 0.97
-        }
-      },
-      "analysis": {
-        "edges": [
-          {
-            "side": "home",
-            "odds": 1.95,
-            "odds_effective": 1.95,
-            "book": "Coolbet",
-            "model_prob": 0.4919,
-            "implied_prob": 0.4996,
-            "edge": -0.0408,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "draw",
-            "odds": 4.1,
-            "odds_effective": 4.1,
-            "book": "1xBet",
-            "model_prob": 0.2394,
-            "implied_prob": 0.2421,
-            "edge": -0.0185,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "away",
-            "odds": 3.9,
-            "odds_effective": 3.9,
-            "book": "Unibet (SE)",
-            "model_prob": 0.2687,
-            "implied_prob": 0.2583,
-            "edge": 0.0479,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ],
-        "news_window": false,
-        "bankroll_basis": 100
-      },
-      "stats": {
-        "home": {
-          "rank": 3,
-          "played": 19,
-          "form": "LWDLD",
-          "gf_pg": 2.53,
-          "ga_pg": 2,
-          "home_gf_pg": 3.29,
-          "away_gf_pg": 2.08,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.79,
-          "elo": 1581,
-          "elo_change": -24,
-          "elo_rank": 4
-        },
-        "away": {
-          "rank": 11,
-          "played": 17,
-          "form": "WLWWW",
-          "gf_pg": 2.71,
-          "ga_pg": 2.29,
-          "home_gf_pg": 3.1,
-          "away_gf_pg": 2.14,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.47,
-          "elo": 1532,
-          "elo_change": -13,
-          "elo_rank": 6
-        },
-        "h2h": []
-      },
-      "news": []
-    },
-    {
-      "totals": {
-        "books": [
-          {
-            "bookmaker": "1xBet",
-            "key": "onexbet",
-            "line": 5.5,
-            "over": 1.84,
-            "under": 1.91,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:15Z",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366494-jyp-jyvaskyla-jokerit"
-          },
-          {
-            "bookmaker": "Coolbet",
-            "key": "coolbet",
-            "line": 5.5,
-            "over": 1.89,
-            "under": 1.92,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:43Z",
-            "link": "https://www.coolbet.com/en/sports/match/6394326"
-          }
-        ],
-        "edges": [
-          {
-            "line": 5.5,
-            "side": "over",
-            "odds": 1.89,
-            "odds_effective": 1.89,
-            "book": "Coolbet",
-            "link": "https://www.coolbet.com/en/sports/match/6394326",
-            "model_prob": 0.5934,
-            "implied_prob": 0.5039,
-            "edge": 0.1216,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          },
-          {
-            "line": 5.5,
-            "side": "under",
-            "odds": 1.92,
-            "odds_effective": 1.92,
-            "book": "Coolbet",
-            "link": "https://www.coolbet.com/en/sports/match/6394326",
-            "model_prob": 0.4066,
-            "implied_prob": 0.4961,
-            "edge": -0.2194,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ]
-      },
-      "id": "icehockey_liiga:2026-10-31:JYP-JOK",
-      "league": "Liiga",
-      "kickoff": "2026-10-31T15:00:00.000Z",
-      "home": {
-        "name": "JYP",
-        "short": "JYP",
-        "color": "#238636"
-      },
-      "away": {
-        "name": "Jokerit",
-        "short": "JOK",
-        "color": "#BF3989"
-      },
-      "odds": [
-        {
-          "bookmaker": "1xBet",
-          "key": "onexbet",
-          "market": "1X2",
-          "home": 1.92,
-          "draw": 4.3,
-          "away": 3.23,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
-          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366494-jyp-jyvaskyla-jokerit"
-        },
-        {
-          "bookmaker": "Unibet (SE)",
-          "key": "unibet_se",
-          "market": "1X2",
-          "home": 1.87,
-          "draw": 4.1,
-          "away": 3.5,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
-          "link": "https://www.unibet.se/betting/sports/event/1028022341"
-        },
-        {
-          "bookmaker": "Coolbet",
-          "key": "coolbet",
-          "market": "1X2",
-          "home": 1.85,
-          "draw": 4.4,
-          "away": 3.85,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:43Z",
-          "link": "https://www.coolbet.com/en/sports/match/6394326"
-        }
-      ],
-      "best": {
-        "home": 1.92,
-        "draw": 4.4,
-        "away": 3.85,
-        "home_effective": 1.92,
-        "draw_effective": 4.4,
-        "away_effective": 3.85,
-        "home_book": "1xBet",
-        "draw_book": "Coolbet",
-        "away_book": "Coolbet"
-      },
-      "market": {
-        "margin": 0.0078,
-        "implied": {
-          "home": 0.5065,
-          "draw": 0.223,
-          "away": 0.2706
-        },
-        "sharp": {
-          "home": 0.5065,
-          "draw": 0.223,
-          "away": 0.2706
-        },
-        "sharp_source": "mediaani (3 toimistoa)"
-      },
-      "model": {
-        "method": "poisson+sharp-blend",
-        "lambda_home": 4.107,
-        "lambda_away": 2.209,
-        "probs": {
-          "home": 0.5551,
-          "draw": 0.2054,
-          "away": 0.2395
-        },
-        "poisson_probs": {
-          "home": 0.6768,
-          "draw": 0.1614,
-          "away": 0.1619
-        },
-        "blend_weight": 0.28571428571428575,
-        "over25": 0.9495,
-        "btts": 0.876,
-        "top_scores": [
-          {
-            "score": "4-2",
-            "p": 0.0536
-          },
-          {
-            "score": "3-2",
-            "p": 0.0522
-          },
-          {
-            "score": "4-1",
-            "p": 0.0485
-          },
-          {
-            "score": "3-1",
-            "p": 0.0473
-          },
-          {
-            "score": "5-2",
-            "p": 0.044
-          }
-        ],
-        "adjustments": [
-          {
-            "reason": "Voimat: tämä + viime kausi (JYP, 16 ottelua) / sarjan keskitaso (JOK, 17 ottelua)"
-          },
-          {
-            "reason": "Mallin luottamus 71 % → paino markkinaa vastaan 29 % (täysi 40 %). Kausidataa riittävästi."
-          }
-        ],
-        "home_strength": {
-          "attack": 1.29,
-          "defense": 1.08
-        },
-        "away_strength": {
-          "attack": 0.88,
-          "defense": 1.19
-        }
-      },
-      "analysis": {
-        "edges": [
-          {
-            "side": "home",
-            "odds": 1.92,
-            "odds_effective": 1.92,
-            "book": "1xBet",
-            "model_prob": 0.5551,
-            "implied_prob": 0.5065,
-            "edge": 0.0658,
-            "flag": "strong",
-            "kelly_fraction": 0.0179,
-            "stake_suggestion": 1.79
-          },
-          {
-            "side": "draw",
-            "odds": 4.4,
-            "odds_effective": 4.4,
-            "book": "Coolbet",
-            "model_prob": 0.2054,
-            "implied_prob": 0.223,
-            "edge": -0.0962,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "away",
-            "odds": 3.85,
-            "odds_effective": 3.85,
-            "book": "Coolbet",
-            "model_prob": 0.2395,
-            "implied_prob": 0.2706,
-            "edge": -0.0779,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ],
-        "news_window": false,
-        "bankroll_basis": 100
-      },
-      "stats": {
-        "home": {
-          "rank": 4,
-          "played": 16,
-          "form": "DWWLW",
-          "gf_pg": 3.31,
-          "ga_pg": 2.69,
-          "home_gf_pg": 3.4,
-          "away_gf_pg": 3.27,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 2.06,
-          "elo": 1613,
-          "elo_change": 23,
-          "elo_rank": 1
-        },
-        "away": {
-          "rank": 16,
-          "played": 17,
-          "form": "LLDWL",
-          "gf_pg": 2.12,
-          "ga_pg": 3.18,
-          "home_gf_pg": 1.63,
-          "away_gf_pg": 2.56,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 0.82,
-          "elo": 1442,
-          "elo_change": -73,
-          "elo_rank": 14
-        },
-        "h2h": []
-      },
-      "news": [
-        {
-          "title": "Nyt on paha tilanne – Jokerit ryhtyi toimiin",
-          "url": "https://www.iltalehti.fi/smliiga/a/fa611e76-5c83-489c-8c74-618be3dd215c?utm_source=rss",
-          "source": "Iltalehti jääkiekko",
-          "published_at": "2026-10-31T12:01:15.000Z",
-          "event_type": "manager_change",
-          "team": "JYP",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        },
-        {
-          "title": "Jokerit on pahassa ahdingossa – nyt tehtiin kova ratkaisu",
-          "url": "https://www.is.fi/sm-liiga/art-2000012379709.html",
-          "source": "IS jääkiekko",
-          "published_at": "2026-10-31T11:12:00.000Z",
-          "event_type": null,
-          "team": "Jokerit",
-          "player": null,
-          "confidence": null,
-          "impact": null
-        },
-        {
-          "title": "Jokerien pää­valmentajalta karu summaus: ”Olen tosi pettynyt”",
-          "url": "https://www.iltalehti.fi/smliiga/a/761cd0fe-122d-4c53-9479-4fd70c9bfa82?utm_source=rss",
-          "source": "Iltalehti jääkiekko",
-          "published_at": "2026-10-30T20:50:14.000Z",
-          "event_type": "manager_change",
-          "team": "JYP",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        }
-      ]
-    },
-    {
-      "totals": {
-        "books": [
-          {
-            "bookmaker": "1xBet",
-            "key": "onexbet",
-            "line": 4.5,
-            "over": 1.89,
-            "under": 1.86,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:15Z",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/384701568-oulun-karpat-mikkelin-jukurit"
-          },
-          {
-            "bookmaker": "Coolbet",
-            "key": "coolbet",
-            "line": 4.5,
-            "over": 1.84,
-            "under": 1.98,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:43Z",
-            "link": "https://www.coolbet.com/en/sports/match/6394327"
-          }
-        ],
-        "edges": [
-          {
-            "line": 4.5,
-            "side": "over",
-            "odds": 1.89,
-            "odds_effective": 1.89,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/384701568-oulun-karpat-mikkelin-jukurit",
-            "model_prob": 0.47,
-            "implied_prob": 0.5116,
-            "edge": -0.1116,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 4.5,
-            "side": "under",
-            "odds": 1.98,
-            "odds_effective": 1.98,
-            "book": "Coolbet",
-            "link": "https://www.coolbet.com/en/sports/match/6394327",
-            "model_prob": 0.53,
-            "implied_prob": 0.4884,
-            "edge": 0.0493,
-            "flag": "candidate",
-            "kelly_fraction": 0.0126,
-            "stake_suggestion": 1.26
-          }
-        ]
-      },
-      "id": "icehockey_liiga:2026-10-31:KÄR-JUK",
-      "league": "Liiga",
-      "kickoff": "2026-10-31T15:00:00.000Z",
-      "home": {
-        "name": "Kärpät",
-        "short": "KÄR",
-        "color": "#57606A"
-      },
-      "away": {
-        "name": "Jukurit",
-        "short": "JUK",
-        "color": "#1F6FEB"
-      },
-      "odds": [
-        {
-          "bookmaker": "1xBet",
-          "key": "onexbet",
-          "market": "1X2",
-          "home": 1.99,
-          "draw": 3.98,
-          "away": 3.23,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
-          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/384701568-oulun-karpat-mikkelin-jukurit"
-        },
-        {
-          "bookmaker": "Unibet (SE)",
-          "key": "unibet_se",
-          "market": "1X2",
-          "home": 2.02,
-          "draw": 3.7,
-          "away": 3.4,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
-          "link": "https://www.unibet.se/betting/sports/event/1028022288"
-        },
-        {
-          "bookmaker": "Coolbet",
-          "key": "coolbet",
-          "market": "1X2",
-          "home": 2.08,
-          "draw": 3.85,
-          "away": 3.45,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:43Z",
-          "link": "https://www.coolbet.com/en/sports/match/6394327"
-        }
-      ],
-      "best": {
-        "home": 2.08,
-        "draw": 3.98,
-        "away": 3.45,
-        "home_effective": 2.08,
-        "draw_effective": 3.98,
-        "away_effective": 3.45,
-        "home_book": "Coolbet",
-        "draw_book": "1xBet",
-        "away_book": "Coolbet"
-      },
-      "market": {
-        "margin": 0.0219,
-        "implied": {
-          "home": 0.467,
-          "draw": 0.2519,
-          "away": 0.2811
-        },
-        "sharp": {
-          "home": 0.467,
-          "draw": 0.2519,
-          "away": 0.2811
-        },
-        "sharp_source": "mediaani (3 toimistoa)"
-      },
-      "model": {
-        "method": "poisson+sharp-blend",
-        "lambda_home": 2.385,
-        "lambda_away": 2.13,
-        "probs": {
-          "home": 0.4523,
-          "draw": 0.2507,
-          "away": 0.297
-        },
-        "poisson_probs": {
-          "home": 0.4194,
-          "draw": 0.248,
-          "away": 0.3326
-        },
-        "blend_weight": 0.3085714285714286,
-        "over25": 0.8279,
-        "btts": 0.8027,
-        "top_scores": [
-          {
-            "score": "2-2",
-            "p": 0.0707
-          },
-          {
-            "score": "2-1",
-            "p": 0.0664
-          },
-          {
-            "score": "1-2",
-            "p": 0.0593
-          },
-          {
-            "score": "1-1",
-            "p": 0.0585
-          },
-          {
-            "score": "3-2",
-            "p": 0.0562
-          }
-        ],
-        "adjustments": [
-          {
-            "reason": "Voimat: tämä + viime kausi (KÄR, 19 ottelua) / tämä + viime kausi (JUK, 19 ottelua)"
-          },
-          {
-            "reason": "Mallin luottamus 77 % → paino markkinaa vastaan 31 % (täysi 40 %). Kausidataa riittävästi."
-          }
-        ],
-        "home_strength": {
-          "attack": 1.03,
-          "defense": 1.02
-        },
-        "away_strength": {
-          "attack": 0.9,
-          "defense": 0.86
-        }
-      },
-      "analysis": {
-        "edges": [
-          {
-            "side": "home",
-            "odds": 2.08,
-            "odds_effective": 2.08,
-            "book": "Coolbet",
-            "model_prob": 0.4523,
-            "implied_prob": 0.467,
-            "edge": -0.0592,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "draw",
-            "odds": 3.98,
-            "odds_effective": 3.98,
-            "book": "1xBet",
-            "model_prob": 0.2507,
-            "implied_prob": 0.2519,
-            "edge": -0.0022,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "away",
-            "odds": 3.45,
-            "odds_effective": 3.45,
-            "book": "Coolbet",
-            "model_prob": 0.297,
-            "implied_prob": 0.2811,
-            "edge": 0.0247,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ],
-        "news_window": false,
-        "bankroll_basis": 100
-      },
-      "stats": {
-        "home": {
-          "rank": 6,
-          "played": 19,
-          "form": "DDWLW",
-          "gf_pg": 2.53,
-          "ga_pg": 2.42,
-          "home_gf_pg": 3.3,
-          "away_gf_pg": 1.67,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.74,
-          "elo": 1549,
-          "elo_change": -11,
-          "elo_rank": 5
-        },
-        "away": {
-          "rank": 5,
-          "played": 19,
-          "form": "WWLDD",
-          "gf_pg": 2.26,
-          "ga_pg": 2,
-          "home_gf_pg": 1.82,
-          "away_gf_pg": 2.88,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.74,
-          "elo": 1462,
-          "elo_change": 82,
-          "elo_rank": 13
-        },
-        "h2h": []
-      },
-      "news": []
-    },
-    {
-      "totals": {
-        "books": [
-          {
-            "bookmaker": "1xBet",
-            "key": "onexbet",
-            "line": 4.5,
-            "over": 1.78,
-            "under": 1.98,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:15Z",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366496-pelicans-kiekko-espoo"
-          },
-          {
-            "bookmaker": "Coolbet",
-            "key": "coolbet",
-            "line": 4.5,
-            "over": 1.85,
-            "under": 1.92,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:43Z",
-            "link": "https://www.coolbet.com/en/sports/match/6394329"
-          }
-        ],
-        "edges": [
-          {
-            "line": 4.5,
-            "side": "over",
-            "odds": 1.85,
-            "odds_effective": 1.85,
-            "book": "Coolbet",
-            "link": "https://www.coolbet.com/en/sports/match/6394329",
-            "model_prob": 0.1342,
-            "implied_prob": 0.517,
-            "edge": -0.7517,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 4.5,
-            "side": "under",
-            "odds": 1.98,
-            "odds_effective": 1.98,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366496-pelicans-kiekko-espoo",
-            "model_prob": 0.8658,
-            "implied_prob": 0.483,
-            "edge": 0.7143,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          }
-        ]
-      },
-      "id": "icehockey_liiga:2026-10-31:PEL-KIE",
-      "league": "Liiga",
-      "kickoff": "2026-10-31T15:00:00.000Z",
-      "home": {
-        "name": "Pelicans",
-        "short": "PEL",
-        "color": "#0E7490"
-      },
-      "away": {
-        "name": "Kiekko-Espoo",
-        "short": "KIE",
-        "color": "#0E7490"
-      },
-      "odds": [
-        {
-          "bookmaker": "1xBet",
-          "key": "onexbet",
-          "market": "1X2",
-          "home": 2.49,
-          "draw": 3.94,
-          "away": 2.43,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
-          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366496-pelicans-kiekko-espoo"
-        },
-        {
-          "bookmaker": "Unibet (SE)",
-          "key": "unibet_se",
-          "market": "1X2",
-          "home": 2.63,
-          "draw": 3.9,
-          "away": 2.32,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
-          "link": "https://www.unibet.se/betting/sports/event/1028022290"
-        },
-        {
-          "bookmaker": "Coolbet",
-          "key": "coolbet",
-          "market": "1X2",
-          "home": 2.65,
-          "draw": 3.75,
-          "away": 2.6,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:43Z",
-          "link": "https://www.coolbet.com/en/sports/match/6394329"
-        }
-      ],
-      "best": {
-        "home": 2.65,
-        "draw": 3.94,
-        "away": 2.6,
-        "home_effective": 2.65,
-        "draw_effective": 3.94,
-        "away_effective": 2.6,
-        "home_book": "Coolbet",
-        "draw_book": "1xBet",
-        "away_book": "Coolbet"
-      },
-      "market": {
-        "margin": 0.0158,
-        "implied": {
-          "home": 0.3695,
-          "draw": 0.2419,
-          "away": 0.3885
-        },
-        "sharp": {
-          "home": 0.3695,
-          "draw": 0.2419,
-          "away": 0.3885
-        },
-        "sharp_source": "mediaani (3 toimistoa)"
-      },
-      "model": {
-        "method": "poisson+sharp-blend",
-        "lambda_home": 1.549,
-        "lambda_away": 1.131,
-        "probs": {
-          "home": 0.3769,
-          "draw": 0.2544,
-          "away": 0.3688
-        },
-        "poisson_probs": {
-          "home": 0.4218,
-          "draw": 0.3309,
-          "away": 0.2473
-        },
-        "blend_weight": 0.13999999999999999,
-        "over25": 0.5016,
-        "btts": 0.5395,
-        "top_scores": [
-          {
-            "score": "1-1",
-            "p": 0.1261
-          },
-          {
-            "score": "1-0",
-            "p": 0.1001
-          },
-          {
-            "score": "2-1",
-            "p": 0.093
-          },
-          {
-            "score": "2-0",
-            "p": 0.0822
-          },
-          {
-            "score": "0-0",
-            "p": 0.0745
-          }
-        ],
-        "adjustments": [
-          {
-            "reason": "Kausiennakko (Ristikaksi — Liiga-kausiennakko 2026-27): PEL #13 vs KIE #15. Ei pelattuja otteluita — luku on ennakon lähtöarvo, ei mittaus."
-          },
-          {
-            "reason": "PEL — + Tiivis viisikkopuolustus, vaikeasti murrettava, vahva alivoima, laadukas ykkösmaalivahti Bartosak  ·  − Tehottomuus hyökkäyspäässä, tasapaksu materiaali, ratkaisijoiden puute"
-          },
-          {
-            "reason": "KIE — + Ykkösmaalivahti Rimpinen (eliittiä), useita \"omia poikia\" – tuo sydäntä ja ryhtiä  ·  − Kapeahko rosteri (etenkin hyökkäys), kliinisten viimeistelijöiden puute, ei varaa loukkaantumisille"
-          }
-        ],
-        "home_strength": {
-          "attack": 0.91,
-          "defense": 1.09
-        },
-        "away_strength": {
-          "attack": 0.87,
-          "defense": 1.14
-        }
-      },
-      "analysis": {
-        "edges": [
-          {
-            "side": "home",
-            "odds": 2.65,
-            "odds_effective": 2.65,
-            "book": "Coolbet",
-            "model_prob": 0.3769,
-            "implied_prob": 0.3695,
-            "edge": -0.0012,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "draw",
-            "odds": 3.94,
-            "odds_effective": 3.94,
-            "book": "1xBet",
-            "model_prob": 0.2544,
-            "implied_prob": 0.2419,
-            "edge": 0.0023,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "away",
-            "odds": 2.6,
-            "odds_effective": 2.6,
-            "book": "Coolbet",
-            "model_prob": 0.3688,
-            "implied_prob": 0.3885,
-            "edge": -0.0411,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ],
-        "news_window": false,
-        "bankroll_basis": 100
-      },
-      "stats": {
-        "home": {
-          "rank": 11,
-          "played": 0,
-          "form": "",
-          "gf_pg": 0,
-          "ga_pg": 0,
-          "home_gf_pg": null,
-          "away_gf_pg": null,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": null,
-          "elo": 1475,
-          "elo_change": 35,
-          "elo_rank": 11,
-          "elo_provisional": true
-        },
-        "away": {
-          "rank": 12,
-          "played": 0,
-          "form": "",
-          "gf_pg": 0,
-          "ga_pg": 0,
-          "home_gf_pg": null,
-          "away_gf_pg": null,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": null,
-          "elo": 1468,
-          "elo_change": 58,
-          "elo_rank": 12,
-          "elo_provisional": true
-        },
-        "h2h": []
-      },
-      "news": [
-        {
-          "title": "Espoon tapahtumat menivät ihon alle – ”Kannattaisi tulla Jyrki-sedälle sanomaan”",
-          "url": "https://www.is.fi/sm-liiga/art-2000012373869.html",
-          "source": "IS jääkiekko",
-          "published_at": "2026-10-28T20:22:00.000Z",
-          "event_type": "manager_change",
-          "team": "Kiekko-Espoo",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        }
-      ],
-      "preview": {
-        "source": {
-          "name": "Ristikaksi — Liiga-kausiennakko 2026-27",
-          "url": "https://www.ristikaksi.com/urheilusarjat/liiga-kausiennakko-2026-27",
-          "readAt": "2026-09-01"
-        },
-        "home": {
-          "rank": 13,
-          "elo": 1440,
-          "strengths": [
-            "Tiivis viisikkopuolustus",
-            "vaikeasti murrettava",
-            "vahva alivoima",
-            "laadukas ykkösmaalivahti Bartosak"
-          ],
-          "weaknesses": [
-            "Tehottomuus hyökkäyspäässä",
-            "tasapaksu materiaali",
-            "ratkaisijoiden puute"
-          ],
-          "arrivals": [
-            "Aaro Chrons"
-          ],
-          "departures": [
-            "Sakke Hamalainen"
-          ]
-        },
-        "away": {
-          "rank": 15,
-          "elo": 1410,
-          "strengths": [
-            "Ykkösmaalivahti Rimpinen (eliittiä)",
-            "useita \"omia poikia\" – tuo sydäntä ja ryhtiä"
-          ],
-          "weaknesses": [
-            "Kapeahko rosteri (etenkin hyökkäys)",
-            "kliinisten viimeistelijöiden puute",
-            "ei varaa loukkaantumisille"
-          ],
-          "arrivals": [
-            "Jere Sallinen",
-            "Ville Lajunen",
-            "Connor Corcoran"
-          ],
-          "departures": [
-            "Cameron Hillis",
-            "Kasper Kulonummi",
-            "Santeri Virtanen"
-          ]
-        }
-      }
-    },
-    {
-      "totals": {
-        "books": [
-          {
-            "bookmaker": "1xBet",
-            "key": "onexbet",
-            "line": 4.5,
-            "over": 1.64,
-            "under": 2.18,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:15Z",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366498-vaasan-sport-assat"
-          },
-          {
-            "bookmaker": "Coolbet",
-            "key": "coolbet",
-            "line": 5,
-            "over": 2.03,
-            "under": 1.8,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:43Z",
-            "link": "https://www.coolbet.com/en/sports/match/6394317"
-          }
-        ],
-        "edges": [
-          {
-            "line": 4.5,
-            "side": "over",
-            "odds": 1.64,
-            "odds_effective": 1.64,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366498-vaasan-sport-assat",
-            "model_prob": 0.4699,
-            "implied_prob": 0.5707,
-            "edge": -0.2293,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 4.5,
-            "side": "under",
-            "odds": 2.18,
-            "odds_effective": 2.18,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366498-vaasan-sport-assat",
-            "model_prob": 0.5301,
-            "implied_prob": 0.4293,
-            "edge": 0.1556,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          },
-          {
-            "line": 5,
-            "side": "over",
-            "odds": 2.03,
-            "odds_effective": 2.03,
-            "book": "Coolbet",
-            "link": "https://www.coolbet.com/en/sports/match/6394317",
-            "model_prob": 0.2985,
-            "implied_prob": 0.47,
-            "edge": -0.394,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 5,
-            "side": "under",
-            "odds": 1.8,
-            "odds_effective": 1.8,
-            "book": "Coolbet",
-            "link": "https://www.coolbet.com/en/sports/match/6394317",
-            "model_prob": 0.7015,
-            "implied_prob": 0.53,
-            "edge": 0.2626,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          }
-        ]
-      },
-      "id": "icehockey_liiga:2026-10-31:SPO-ÄSS",
-      "league": "Liiga",
-      "kickoff": "2026-10-31T15:00:00.000Z",
-      "home": {
-        "name": "Sport",
-        "short": "SPO",
-        "color": "#8250DF"
-      },
-      "away": {
-        "name": "Ässät",
-        "short": "ÄSS",
-        "color": "#8250DF"
-      },
-      "odds": [
-        {
-          "bookmaker": "1xBet",
-          "key": "onexbet",
-          "market": "1X2",
-          "home": 2.58,
-          "draw": 4.05,
-          "away": 2.32,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
-          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385366498-vaasan-sport-assat"
-        },
-        {
-          "bookmaker": "Unibet (SE)",
-          "key": "unibet_se",
-          "market": "1X2",
-          "home": 2.65,
-          "draw": 4,
-          "away": 2.3,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
-          "link": "https://www.unibet.se/betting/sports/event/1028022293"
-        },
-        {
-          "bookmaker": "Coolbet",
-          "key": "coolbet",
-          "market": "1X2",
-          "home": 2.8,
-          "draw": 3.9,
-          "away": 2.4,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:43Z",
-          "link": "https://www.coolbet.com/en/sports/match/6394317"
-        }
-      ],
-      "best": {
-        "home": 2.8,
-        "draw": 4.05,
-        "away": 2.4,
-        "home_effective": 2.8,
-        "draw_effective": 4.05,
-        "away_effective": 2.4,
-        "home_book": "Coolbet",
-        "draw_book": "1xBet",
-        "away_book": "Coolbet"
-      },
-      "market": {
-        "margin": 0.0207,
-        "implied": {
-          "home": 0.357,
-          "draw": 0.2365,
-          "away": 0.4065
-        },
-        "sharp": {
-          "home": 0.357,
-          "draw": 0.2365,
-          "away": 0.4065
-        },
-        "sharp_source": "mediaani (3 toimistoa)"
-      },
-      "model": {
-        "method": "poisson+sharp-blend",
-        "lambda_home": 1.937,
-        "lambda_away": 2.578,
-        "probs": {
-          "home": 0.3312,
-          "draw": 0.2376,
-          "away": 0.4313
-        },
-        "poisson_probs": {
-          "home": 0.2718,
-          "draw": 0.24,
-          "away": 0.4882
-        },
-        "blend_weight": 0.30303030303030304,
-        "over25": 0.8278,
-        "btts": 0.7935,
-        "top_scores": [
-          {
-            "score": "1-2",
-            "p": 0.0706
-          },
-          {
-            "score": "2-2",
-            "p": 0.0683
-          },
-          {
-            "score": "1-3",
-            "p": 0.0606
-          },
-          {
-            "score": "2-3",
-            "p": 0.0587
-          },
-          {
-            "score": "1-1",
-            "p": 0.0575
-          }
-        ],
-        "adjustments": [
-          {
-            "reason": "Voimat: tämä + viime kausi (SPO, 17 ottelua) / tämä + viime kausi (ÄSS, 19 ottelua)"
-          },
-          {
-            "reason": "Mallin luottamus 76 % → paino markkinaa vastaan 30 % (täysi 40 %). Kausidataa riittävästi."
-          }
-        ],
-        "home_strength": {
-          "attack": 0.74,
-          "defense": 1.18
-        },
-        "away_strength": {
-          "attack": 0.94,
-          "defense": 0.97
-        }
-      },
-      "analysis": {
-        "edges": [
-          {
-            "side": "home",
-            "odds": 2.8,
-            "odds_effective": 2.8,
-            "book": "Coolbet",
-            "model_prob": 0.3312,
-            "implied_prob": 0.357,
-            "edge": -0.0726,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "draw",
-            "odds": 4.05,
-            "odds_effective": 4.05,
-            "book": "1xBet",
-            "model_prob": 0.2376,
-            "implied_prob": 0.2365,
-            "edge": -0.0377,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "away",
-            "odds": 2.4,
-            "odds_effective": 2.4,
-            "book": "Coolbet",
-            "model_prob": 0.4313,
-            "implied_prob": 0.4065,
-            "edge": 0.0351,
-            "flag": "candidate",
-            "kelly_fraction": 0.0063,
-            "stake_suggestion": 0.63
-          }
-        ],
-        "news_window": false,
-        "bankroll_basis": 100
-      },
-      "stats": {
-        "home": {
-          "rank": 15,
-          "played": 17,
-          "form": "WLLLL",
-          "gf_pg": 1.82,
-          "ga_pg": 2.88,
-          "home_gf_pg": 1.9,
-          "away_gf_pg": 1.71,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.12,
-          "elo": 1363,
-          "elo_change": -32,
-          "elo_rank": 17
-        },
-        "away": {
-          "rank": 8,
-          "played": 19,
-          "form": "LLLLW",
-          "gf_pg": 2.26,
-          "ga_pg": 2.37,
-          "home_gf_pg": 2.44,
-          "away_gf_pg": 2.1,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.63,
-          "elo": 1481,
-          "elo_change": 11,
-          "elo_rank": 10
-        },
-        "h2h": []
-      },
-      "news": []
-    },
-    {
-      "totals": {
-        "books": [
-          {
-            "bookmaker": "1xBet",
-            "key": "onexbet",
-            "line": 2.5,
-            "over": 1.93,
-            "under": 2.01,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843752-bournemouth-leeds-united"
-          },
-          {
-            "bookmaker": "Betsson",
-            "key": "betsson",
             "line": 2.5,
             "over": 1.84,
-            "under": 1.99,
+            "under": 2.11,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:05Z",
-            "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-_n_UaFtgs0a1EMkOyLGW9w&eti=0&fs=true"
-          },
-          {
-            "bookmaker": "Coolbet",
-            "key": "coolbet",
-            "line": 2.5,
-            "over": 1.85,
-            "under": 2.03,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:27Z",
-            "link": "https://www.coolbet.com/en/sports/match/6354864"
-          },
-          {
-            "bookmaker": "Marathon Bet",
-            "key": "marathonbet",
-            "line": 2.5,
-            "over": 1.87,
-            "under": 1.95,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:26Z",
-            "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/bournemouth-vs-leeds-united"
-          },
-          {
-            "bookmaker": "Matchbook",
-            "key": "matchbook",
-            "line": 2.5,
-            "over": 1.92,
-            "under": 2.06,
-            "commission": 0.015,
-            "fetched_at": "2026-10-31T14:21:25Z",
-            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630017126500023/"
-          },
-          {
-            "bookmaker": "Nordic Bet",
-            "key": "nordicbet",
-            "line": 2.5,
-            "over": 1.82,
-            "under": 1.98,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
-            "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/bournemouth-leeds"
-          },
-          {
-            "bookmaker": "Pinnacle",
-            "key": "pinnacle",
-            "line": 2.5,
-            "over": 1.86,
-            "under": 2.05,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:23Z",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/leeds-united-vs-bournemouth/1638686119/"
-          },
-          {
-            "bookmaker": "Unibet (SE)",
-            "key": "unibet_se",
-            "line": 2.5,
-            "over": 1.88,
-            "under": 1.94,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:01Z",
-            "link": "https://www.unibet.se/betting/sports/event/1028072820"
-          },
-          {
-            "bookmaker": "William Hill",
-            "key": "williamhill",
-            "line": 2.5,
-            "over": 1.83,
-            "under": 1.91,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:20:37Z",
-            "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574910/bournemouth-vs-leeds"
-          }
-        ],
-        "edges": [
-          {
-            "line": 2.5,
-            "side": "over",
-            "odds": 1.93,
-            "odds_effective": 1.93,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843752-bournemouth-leeds-united",
-            "model_prob": 0.4441,
-            "implied_prob": 0.5151,
-            "edge": -0.1429,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 2.5,
-            "side": "under",
-            "odds": 2.05,
-            "odds_effective": 2.05,
-            "book": "Pinnacle",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/leeds-united-vs-bournemouth/1638686119/",
-            "model_prob": 0.5559,
-            "implied_prob": 0.4849,
-            "edge": 0.1397,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          }
-        ]
-      },
-      "id": "soccer_epl:2026-10-31:BOU-LEE",
-      "league": "Valioliiga",
-      "kickoff": "2026-10-31T15:00:00.000Z",
-      "home": {
-        "name": "Bournemouth",
-        "short": "BOU",
-        "color": "#BF3989"
-      },
-      "away": {
-        "name": "Leeds United",
-        "short": "LEE",
-        "color": "#1F6FEB"
-      },
-      "odds": [
-        {
-          "bookmaker": "William Hill",
-          "key": "williamhill",
-          "market": "1X2",
-          "home": 2.05,
-          "draw": 3.3,
-          "away": 3.6,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:20:37Z",
-          "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574910/bournemouth-vs-leeds"
-        },
-        {
-          "bookmaker": "1xBet",
-          "key": "onexbet",
-          "market": "1X2",
-          "home": 2.12,
-          "draw": 3.6,
-          "away": 3.78,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
-          "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843752-bournemouth-leeds-united"
-        },
-        {
-          "bookmaker": "Marathon Bet",
-          "key": "marathonbet",
-          "market": "1X2",
-          "home": 2.06,
-          "draw": 3.5,
-          "away": 3.68,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:26Z",
-          "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/bournemouth-vs-leeds-united"
-        },
-        {
-          "bookmaker": "Betfair",
-          "key": "betfair_ex_eu",
-          "market": "1X2",
-          "home": 2.12,
-          "draw": 3.6,
-          "away": 3.95,
-          "commission": 0.05,
-          "fetched_at": "2026-10-31T14:21:23Z",
-          "link": "https://www.betfair.com/exchange/plus/football/market/1.264060683"
-        },
-        {
-          "bookmaker": "Pinnacle",
-          "key": "pinnacle",
-          "market": "1X2",
-          "home": 2.08,
-          "draw": 3.48,
-          "away": 3.9,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:23Z",
-          "link": "https://www.pinnacle.com/en/soccer/england-premier-league/leeds-united-vs-bournemouth/1638686119/"
-        },
-        {
-          "bookmaker": "Unibet (SE)",
-          "key": "unibet_se",
-          "market": "1X2",
-          "home": 2.07,
-          "draw": 3.55,
-          "away": 3.85,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:01Z",
-          "link": "https://www.unibet.se/betting/sports/event/1028072820"
-        },
-        {
-          "bookmaker": "Nordic Bet",
-          "key": "nordicbet",
-          "market": "1X2",
-          "home": 2.05,
-          "draw": 3.45,
-          "away": 3.65,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
-          "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/bournemouth-leeds"
-        },
-        {
-          "bookmaker": "Betsson",
-          "key": "betsson",
-          "market": "1X2",
-          "home": 2.05,
-          "draw": 3.47,
-          "away": 3.63,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:05Z",
-          "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-_n_UaFtgs0a1EMkOyLGW9w&eti=0&fs=true"
-        },
-        {
-          "bookmaker": "Matchbook",
-          "key": "matchbook",
-          "market": "1X2",
-          "home": 2.12,
-          "draw": 3.55,
-          "away": 3.95,
-          "commission": 0.015,
-          "fetched_at": "2026-10-31T14:21:25Z",
-          "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630017126500023/"
-        },
-        {
-          "bookmaker": "Coolbet",
-          "key": "coolbet",
-          "market": "1X2",
-          "home": 2.09,
-          "draw": 3.55,
-          "away": 3.84,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:27Z",
-          "link": "https://www.coolbet.com/en/sports/match/6354864"
-        }
-      ],
-      "best": {
-        "home": 2.12,
-        "draw": 3.6,
-        "away": 3.95,
-        "home_effective": 2.12,
-        "draw_effective": 3.6,
-        "away_effective": 3.9057500000000003,
-        "home_book": "1xBet",
-        "draw_book": "1xBet",
-        "away_book": "Matchbook"
-      },
-      "market": {
-        "margin": 0.0055,
-        "implied": {
-          "home": 0.4669,
-          "draw": 0.2757,
-          "away": 0.2574
-        },
-        "sharp": {
-          "home": 0.4693,
-          "draw": 0.2805,
-          "away": 0.2503
-        },
-        "sharp_source": "Pinnacle"
-      },
-      "model": {
-        "method": "poisson+sharp-blend",
-        "lambda_home": 1.246,
-        "lambda_away": 1.207,
-        "probs": {
-          "home": 0.4418,
-          "draw": 0.2819,
-          "away": 0.2762
-        },
-        "poisson_probs": {
-          "home": 0.3665,
-          "draw": 0.286,
-          "away": 0.3476
-        },
-        "blend_weight": 0.26666666666666666,
-        "over25": 0.4441,
-        "btts": 0.5058,
-        "top_scores": [
-          {
-            "score": "1-1",
-            "p": 0.1359
-          },
-          {
-            "score": "1-0",
-            "p": 0.1007
-          },
-          {
-            "score": "0-1",
-            "p": 0.0974
-          },
-          {
-            "score": "0-0",
-            "p": 0.0925
-          },
-          {
-            "score": "2-1",
-            "p": 0.0806
-          }
-        ],
-        "adjustments": [
-          {
-            "reason": "Voimat: tämä + viime kausi (BOU, 8 ottelua) / tämä + viime kausi (LEE, 8 ottelua)"
-          },
-          {
-            "reason": "Mallin luottamus 67 % → paino markkinaa vastaan 27 % (täysi 40 %). Kohtalaisesti dataa."
-          }
-        ],
-        "home_strength": {
-          "attack": 1.08,
-          "defense": 1.11
-        },
-        "away_strength": {
-          "attack": 0.87,
-          "defense": 0.76
-        }
-      },
-      "analysis": {
-        "edges": [
-          {
-            "side": "home",
-            "odds": 2.12,
-            "odds_effective": 2.12,
-            "book": "1xBet",
-            "model_prob": 0.4418,
-            "implied_prob": 0.4669,
-            "edge": -0.0634,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "draw",
-            "odds": 3.6,
-            "odds_effective": 3.6,
-            "book": "1xBet",
-            "model_prob": 0.2819,
-            "implied_prob": 0.2757,
-            "edge": 0.0148,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "away",
-            "odds": 3.95,
-            "odds_effective": 3.9058,
-            "book": "Matchbook",
-            "model_prob": 0.2762,
-            "implied_prob": 0.2574,
-            "edge": 0.0788,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ],
-        "news_window": false,
-        "bankroll_basis": 100
-      },
-      "stats": {
-        "home": {
-          "rank": 13,
-          "played": 8,
-          "form": "WWLLD",
-          "gf_pg": 1.5,
-          "ga_pg": 1.63,
-          "home_gf_pg": 1.25,
-          "away_gf_pg": 1.75,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.13,
-          "elo": null,
-          "elo_change": null,
-          "elo_rank": null
-        },
-        "away": {
-          "rank": 7,
-          "played": 8,
-          "form": "DDLDW",
-          "gf_pg": 1.13,
-          "ga_pg": 0.75,
-          "home_gf_pg": 1.5,
-          "away_gf_pg": 0.75,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.38,
-          "elo": null,
-          "elo_change": null,
-          "elo_rank": null
-        },
-        "h2h": []
-      },
-      "news": [
-        {
-          "title": "Manchester City v Brighton, Bournemouth v Leeds, and more: clockwatch - live",
-          "url": "https://www.theguardian.com/football/live/2026/oct/31/manchester-city-v-brighton-bournemouth-v-leeds-and-more-clockwatch-live",
-          "source": "The Guardian",
-          "published_at": "2026-10-31T14:07:10.000Z",
-          "event_type": null,
-          "team": "Bournemouth",
-          "player": null,
-          "confidence": null,
-          "impact": null
-        },
-        {
-          "title": "Calvert-Lewin set for new Leeds deal",
-          "url": "https://www.bbc.co.uk/sport/football/articles/c6x2w1epxx8yo?at_medium=RSS&at_campaign=rss",
-          "source": "BBC Sport",
-          "published_at": "2026-10-30T10:26:53.000Z",
-          "event_type": null,
-          "team": "Leeds United",
-          "player": null,
-          "confidence": null,
-          "impact": null
-        },
-        {
-          "title": "Carrick says there are 'no issues' with captain Fernandes",
-          "url": "https://www.bbc.co.uk/sport/football/videos/cqj34pjxp7xdo?at_medium=RSS&at_campaign=rss",
-          "source": "BBC Sport",
-          "published_at": "2026-10-30T09:58:41.000Z",
-          "event_type": "manager_change",
-          "team": "Bournemouth",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        },
-        {
-          "title": "Premier League: 10 things to look out for this weekend",
-          "url": "https://www.theguardian.com/football/2026/oct/30/premier-league-10-things-to-look-out-for-this-weekend",
-          "source": "The Guardian",
-          "published_at": "2026-10-30T00:01:38.000Z",
-          "event_type": "lineup_change",
-          "team": "Bournemouth",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        },
-        {
-          "title": "Carrick keeps Fernandes as captain and says he needs no assurances on United future",
-          "url": "https://www.theguardian.com/football/2026/oct/29/michael-carrick-keeps-bruno-fernandes-captain-assurances-future-manchester-united",
-          "source": "The Guardian",
-          "published_at": "2026-10-29T14:50:16.000Z",
-          "event_type": "manager_change",
-          "team": "Bournemouth",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        }
-      ]
-    },
-    {
-      "totals": {
-        "books": [
-          {
-            "bookmaker": "1xBet",
-            "key": "onexbet",
-            "line": 2.5,
-            "over": 1.74,
-            "under": 2.27,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843282-brentford-nottingham-forest"
-          },
-          {
-            "bookmaker": "Betsson",
-            "key": "betsson",
-            "line": 2.5,
-            "over": 1.73,
-            "under": 2.13,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:05Z",
-            "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-Y2Y1DjN4HUqLImEUxnr6Aw&eti=0&fs=true"
-          },
-          {
-            "bookmaker": "Coolbet",
-            "key": "coolbet",
-            "line": 2.5,
-            "over": 1.73,
-            "under": 2.19,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:27Z",
-            "link": "https://www.coolbet.com/en/sports/match/6354867"
-          },
-          {
-            "bookmaker": "Marathon Bet",
-            "key": "marathonbet",
-            "line": 2.5,
-            "over": 1.69,
-            "under": 2.2,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:26Z",
-            "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/brentford-vs-nottingham-forest"
-          },
-          {
-            "bookmaker": "Nordic Bet",
-            "key": "nordicbet",
-            "line": 2.5,
-            "over": 1.72,
-            "under": 2.12,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
-            "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/brentford-nottingham-forest"
-          },
-          {
-            "bookmaker": "Unibet (SE)",
-            "key": "unibet_se",
-            "line": 2.5,
-            "over": 1.67,
-            "under": 2.23,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:01Z",
-            "link": "https://www.unibet.se/betting/sports/event/1028072817"
-          },
-          {
-            "bookmaker": "William Hill",
-            "key": "williamhill",
-            "line": 2.5,
-            "over": 1.7,
-            "under": 2.05,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:20:37Z",
-            "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574911/brentford-vs-nottingham-forest"
-          },
-          {
-            "bookmaker": "Pinnacle",
-            "key": "pinnacle",
-            "line": 2.75,
-            "over": 1.95,
-            "under": 1.95,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:23Z",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/nottingham-forest-vs-brentford/1638686115/"
-          }
-        ],
-        "edges": [
-          {
-            "line": 2.5,
-            "side": "over",
-            "odds": 1.74,
-            "odds_effective": 1.74,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843282-brentford-nottingham-forest",
-            "model_prob": 0.442,
-            "implied_prob": 0.5661,
-            "edge": -0.2309,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 2.5,
-            "side": "under",
-            "odds": 2.27,
-            "odds_effective": 2.27,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843282-brentford-nottingham-forest",
-            "model_prob": 0.558,
-            "implied_prob": 0.4339,
-            "edge": 0.2666,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          },
-          {
-            "line": 2.75,
-            "side": "over",
-            "odds": 1.95,
-            "odds_effective": 1.95,
-            "book": "Pinnacle",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/nottingham-forest-vs-brentford/1638686115/",
-            "model_prob": 0.442,
-            "implied_prob": 0.5,
-            "edge": -0.1381,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 2.75,
-            "side": "under",
-            "odds": 1.95,
-            "odds_effective": 1.95,
-            "book": "Pinnacle",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/nottingham-forest-vs-brentford/1638686115/",
-            "model_prob": 0.558,
-            "implied_prob": 0.5,
-            "edge": 0.0881,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          }
-        ]
-      },
-      "id": "soccer_epl:2026-10-31:BRE-NOT",
-      "league": "Valioliiga",
-      "kickoff": "2026-10-31T15:00:00.000Z",
-      "home": {
-        "name": "Brentford",
-        "short": "BRE",
-        "color": "#BF3989"
-      },
-      "away": {
-        "name": "Nottingham Forest",
-        "short": "NOT",
-        "color": "#DA3633"
-      },
-      "odds": [
-        {
-          "bookmaker": "1xBet",
-          "key": "onexbet",
-          "market": "1X2",
-          "home": 2.19,
-          "draw": 3.77,
-          "away": 3.4,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
-          "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843282-brentford-nottingham-forest"
-        },
-        {
-          "bookmaker": "William Hill",
-          "key": "williamhill",
-          "market": "1X2",
-          "home": 2.05,
-          "draw": 3.5,
-          "away": 3.3,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:20:37Z",
-          "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574911/brentford-vs-nottingham-forest"
-        },
-        {
-          "bookmaker": "Marathon Bet",
-          "key": "marathonbet",
-          "market": "1X2",
-          "home": 2.13,
-          "draw": 3.68,
-          "away": 3.32,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:26Z",
-          "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/brentford-vs-nottingham-forest"
-        },
-        {
-          "bookmaker": "Betfair",
-          "key": "betfair_ex_eu",
-          "market": "1X2",
-          "home": 2.16,
-          "draw": 3.75,
-          "away": 3.65,
-          "commission": 0.05,
-          "fetched_at": "2026-10-31T14:21:23Z",
-          "link": "https://www.betfair.com/exchange/plus/football/market/1.264060077"
-        },
-        {
-          "bookmaker": "Pinnacle",
-          "key": "pinnacle",
-          "market": "1X2",
-          "home": 2.14,
-          "draw": 3.64,
-          "away": 3.52,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:23Z",
-          "link": "https://www.pinnacle.com/en/soccer/england-premier-league/nottingham-forest-vs-brentford/1638686115/"
-        },
-        {
-          "bookmaker": "Unibet (SE)",
-          "key": "unibet_se",
-          "market": "1X2",
-          "home": 2.17,
-          "draw": 3.7,
-          "away": 3.45,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:01Z",
-          "link": "https://www.unibet.se/betting/sports/event/1028072817"
-        },
-        {
-          "bookmaker": "Nordic Bet",
-          "key": "nordicbet",
-          "market": "1X2",
-          "home": 2.08,
-          "draw": 3.55,
-          "away": 3.45,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
-          "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/brentford-nottingham-forest"
-        },
-        {
-          "bookmaker": "Betsson",
-          "key": "betsson",
-          "market": "1X2",
-          "home": 2.07,
-          "draw": 3.58,
-          "away": 3.45,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:05Z",
-          "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-Y2Y1DjN4HUqLImEUxnr6Aw&eti=0&fs=true"
-        },
-        {
-          "bookmaker": "Matchbook",
-          "key": "matchbook",
-          "market": "1X2",
-          "home": 2.16,
-          "draw": 3.75,
-          "away": 3.65,
-          "commission": 0.015,
-          "fetched_at": "2026-10-31T14:21:25Z",
-          "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630007180800023/"
-        },
-        {
-          "bookmaker": "Coolbet",
-          "key": "coolbet",
-          "market": "1X2",
-          "home": 2.12,
-          "draw": 3.74,
-          "away": 3.55,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:27Z",
-          "link": "https://www.coolbet.com/en/sports/match/6354867"
-        }
-      ],
-      "best": {
-        "home": 2.19,
-        "draw": 3.77,
-        "away": 3.65,
-        "home_effective": 2.19,
-        "draw_effective": 3.77,
-        "away_effective": 3.6102499999999997,
-        "home_book": "1xBet",
-        "draw_book": "1xBet",
-        "away_book": "Matchbook"
-      },
-      "market": {
-        "margin": -0.0011,
-        "implied": {
-          "home": 0.4571,
-          "draw": 0.266,
-          "away": 0.277
-        },
-        "sharp": {
-          "home": 0.4554,
-          "draw": 0.2677,
-          "away": 0.2769
-        },
-        "sharp_source": "Pinnacle"
-      },
-      "model": {
-        "method": "poisson+sharp-blend",
-        "lambda_home": 1.655,
-        "lambda_away": 0.79,
-        "probs": {
-          "home": 0.4871,
-          "draw": 0.2642,
-          "away": 0.2487
-        },
-        "poisson_probs": {
-          "home": 0.5744,
-          "draw": 0.2543,
-          "away": 0.1713
-        },
-        "blend_weight": 0.26666666666666666,
-        "over25": 0.442,
-        "btts": 0.4474,
-        "top_scores": [
-          {
-            "score": "1-0",
-            "p": 0.1379
-          },
-          {
-            "score": "1-1",
-            "p": 0.119
-          },
-          {
-            "score": "2-0",
-            "p": 0.1188
-          },
-          {
-            "score": "2-1",
-            "p": 0.0938
-          },
-          {
-            "score": "0-0",
-            "p": 0.0924
-          }
-        ],
-        "adjustments": [
-          {
-            "reason": "Voimat: tämä + viime kausi (BRE, 8 ottelua) / tämä + viime kausi (NOT, 8 ottelua)"
-          },
-          {
-            "reason": "Mallin luottamus 67 % → paino markkinaa vastaan 27 % (täysi 40 %). Kohtalaisesti dataa."
-          }
-        ],
-        "home_strength": {
-          "attack": 1.17,
-          "defense": 0.89
-        },
-        "away_strength": {
-          "attack": 0.71,
-          "defense": 0.94
-        }
-      },
-      "analysis": {
-        "edges": [
-          {
-            "side": "home",
-            "odds": 2.19,
-            "odds_effective": 2.19,
-            "book": "1xBet",
-            "model_prob": 0.4871,
-            "implied_prob": 0.4571,
-            "edge": 0.0667,
-            "flag": "strong",
-            "kelly_fraction": 0.014,
-            "stake_suggestion": 1.4
-          },
-          {
-            "side": "draw",
-            "odds": 3.77,
-            "odds_effective": 3.77,
-            "book": "1xBet",
-            "model_prob": 0.2642,
-            "implied_prob": 0.266,
-            "edge": -0.004,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "away",
-            "odds": 3.65,
-            "odds_effective": 3.6103,
-            "book": "Matchbook",
-            "model_prob": 0.2487,
-            "implied_prob": 0.277,
-            "edge": -0.1021,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ],
-        "news_window": false,
-        "bankroll_basis": 100
-      },
-      "stats": {
-        "home": {
-          "rank": 6,
-          "played": 8,
-          "form": "DLDWD",
-          "gf_pg": 1.75,
-          "ga_pg": 1.13,
-          "home_gf_pg": 2,
-          "away_gf_pg": 1.5,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.38,
-          "elo": null,
-          "elo_change": null,
-          "elo_rank": null
-        },
-        "away": {
-          "rank": 18,
-          "played": 8,
-          "form": "DLLLW",
-          "gf_pg": 0.75,
-          "ga_pg": 1.25,
-          "home_gf_pg": 0,
-          "away_gf_pg": 1.5,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 0.75,
-          "elo": null,
-          "elo_change": null,
-          "elo_rank": null
-        },
-        "h2h": []
-      },
-      "news": [
-        {
-          "title": "Forest Green launch £2m lawsuit over Savage approach",
-          "url": "https://www.bbc.co.uk/sport/football/articles/cq4g148z2xp2o?at_medium=RSS&at_campaign=rss",
-          "source": "BBC Sport",
-          "published_at": "2026-10-30T12:18:28.000Z",
-          "event_type": "manager_change",
-          "team": "Nottingham Forest",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        }
-      ]
-    },
-    {
-      "totals": {
-        "books": [
-          {
-            "bookmaker": "Betsson",
-            "key": "betsson",
-            "line": 2.5,
-            "over": 1.51,
-            "under": 2.6,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:05Z",
-            "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-3aELvkTsv02l_BDK3uGSxw&eti=0&fs=true"
-          },
-          {
-            "bookmaker": "Nordic Bet",
-            "key": "nordicbet",
-            "line": 2.5,
-            "over": 1.5,
-            "under": 2.58,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
-            "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/manchester-city-brighton"
-          },
-          {
-            "bookmaker": "William Hill",
-            "key": "williamhill",
-            "line": 2.5,
-            "over": 1.44,
-            "under": 2.5,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:20:37Z",
-            "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574912/man-city-vs-brighton"
-          },
-          {
-            "bookmaker": "Coolbet",
-            "key": "coolbet",
-            "line": 3,
-            "over": 1.77,
-            "under": 2.13,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:27Z",
-            "link": "https://www.coolbet.com/en/sports/match/6354893"
-          },
-          {
-            "bookmaker": "Pinnacle",
-            "key": "pinnacle",
-            "line": 3.25,
-            "over": 2.13,
-            "under": 1.81,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:23Z",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/brighton-vs-manchester-city/1638676646/"
-          },
-          {
-            "bookmaker": "1xBet",
-            "key": "onexbet",
-            "line": 3.5,
-            "over": 2.3,
-            "under": 1.72,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843272-manchester-city-brighton-&-hove-albion"
-          },
-          {
-            "bookmaker": "Marathon Bet",
-            "key": "marathonbet",
-            "line": 3.5,
-            "over": 2.21,
-            "under": 1.68,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:26Z",
-            "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/manchester-city-vs-brighton-hove-albion"
-          },
-          {
-            "bookmaker": "Matchbook",
-            "key": "matchbook",
-            "line": 3.5,
-            "over": 2.42,
-            "under": 1.69,
-            "commission": 0.015,
-            "fetched_at": "2026-10-31T14:21:25Z",
-            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630061435300023/"
-          },
-          {
-            "bookmaker": "Unibet (SE)",
-            "key": "unibet_se",
-            "line": 3.5,
-            "over": 2.3,
-            "under": 1.64,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:01Z",
-            "link": "https://www.unibet.se/betting/sports/event/1028072838"
-          }
-        ],
-        "edges": [
-          {
-            "line": 2.5,
-            "side": "over",
-            "odds": 1.51,
-            "odds_effective": 1.51,
-            "book": "Betsson",
-            "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-3aELvkTsv02l_BDK3uGSxw&eti=0&fs=true",
-            "model_prob": 0.6633,
-            "implied_prob": 0.6326,
-            "edge": 0.0016,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 2.5,
-            "side": "under",
-            "odds": 2.6,
-            "odds_effective": 2.6,
-            "book": "Betsson",
-            "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-3aELvkTsv02l_BDK3uGSxw&eti=0&fs=true",
-            "model_prob": 0.3367,
-            "implied_prob": 0.3674,
-            "edge": -0.1245,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 3,
-            "side": "over",
-            "odds": 1.77,
-            "odds_effective": 1.77,
-            "book": "Coolbet",
-            "link": "https://www.coolbet.com/en/sports/match/6354893",
-            "model_prob": 0.445,
-            "implied_prob": 0.5462,
-            "edge": -0.2123,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 3,
-            "side": "under",
-            "odds": 2.13,
-            "odds_effective": 2.13,
-            "book": "Coolbet",
-            "link": "https://www.coolbet.com/en/sports/match/6354893",
-            "model_prob": 0.555,
-            "implied_prob": 0.4538,
-            "edge": 0.1821,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          },
-          {
-            "line": 3.25,
-            "side": "over",
-            "odds": 2.13,
-            "odds_effective": 2.13,
-            "book": "Pinnacle",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/brighton-vs-manchester-city/1638676646/",
-            "model_prob": 0.445,
-            "implied_prob": 0.4594,
-            "edge": -0.0521,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 3.25,
-            "side": "under",
-            "odds": 1.81,
-            "odds_effective": 1.81,
-            "book": "Pinnacle",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/brighton-vs-manchester-city/1638676646/",
-            "model_prob": 0.555,
-            "implied_prob": 0.5406,
-            "edge": 0.0045,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 3.5,
-            "side": "over",
-            "odds": 2.42,
-            "odds_effective": 2.3987,
-            "book": "Matchbook",
-            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630061435300023/",
-            "model_prob": 0.445,
-            "implied_prob": 0.4155,
-            "edge": 0.0675,
-            "flag": "strong",
-            "kelly_fraction": 0.0121,
-            "stake_suggestion": 1.21
-          },
-          {
-            "line": 3.5,
-            "side": "under",
-            "odds": 1.72,
-            "odds_effective": 1.72,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843272-manchester-city-brighton-&-hove-albion",
-            "model_prob": 0.555,
-            "implied_prob": 0.5845,
-            "edge": -0.0455,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ]
-      },
-      "id": "soccer_epl:2026-10-31:MAN-BRI",
-      "league": "Valioliiga",
-      "kickoff": "2026-10-31T15:00:00.000Z",
-      "home": {
-        "name": "Manchester City",
-        "short": "MAN",
-        "color": "#57606A"
-      },
-      "away": {
-        "name": "Brighton and Hove Albion",
-        "short": "BRI",
-        "color": "#9E6A03"
-      },
-      "odds": [
-        {
-          "bookmaker": "1xBet",
-          "key": "onexbet",
-          "market": "1X2",
-          "home": 1.79,
-          "draw": 4.37,
-          "away": 4.4,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
-          "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843272-manchester-city-brighton-&-hove-albion"
-        },
-        {
-          "bookmaker": "William Hill",
-          "key": "williamhill",
-          "market": "1X2",
-          "home": 1.7,
-          "draw": 4,
-          "away": 4.2,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:20:37Z",
-          "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574912/man-city-vs-brighton"
-        },
-        {
-          "bookmaker": "Marathon Bet",
-          "key": "marathonbet",
-          "market": "1X2",
-          "home": 1.8,
-          "draw": 4.2,
-          "away": 4.2,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:26Z",
-          "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/manchester-city-vs-brighton-hove-albion"
-        },
-        {
-          "bookmaker": "Betfair",
-          "key": "betfair_ex_eu",
-          "market": "1X2",
-          "home": 1.78,
-          "draw": 4.3,
-          "away": 4.7,
-          "commission": 0.05,
-          "fetched_at": "2026-10-31T14:21:23Z",
-          "link": "https://www.betfair.com/exchange/plus/football/market/1.264059460"
-        },
-        {
-          "bookmaker": "Pinnacle",
-          "key": "pinnacle",
-          "market": "1X2",
-          "home": 1.76,
-          "draw": 4.21,
-          "away": 4.44,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:23Z",
-          "link": "https://www.pinnacle.com/en/soccer/england-premier-league/brighton-vs-manchester-city/1638676646/"
-        },
-        {
-          "bookmaker": "Unibet (SE)",
-          "key": "unibet_se",
-          "market": "1X2",
-          "home": 1.8,
-          "draw": 4.1,
-          "away": 4.5,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:01Z",
-          "link": "https://www.unibet.se/betting/sports/event/1028072838"
-        },
-        {
-          "bookmaker": "Betsson",
-          "key": "betsson",
-          "market": "1X2",
-          "home": 1.7,
-          "draw": 4.22,
-          "away": 4.41,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:05Z",
-          "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-3aELvkTsv02l_BDK3uGSxw&eti=0&fs=true"
-        },
-        {
-          "bookmaker": "Nordic Bet",
-          "key": "nordicbet",
-          "market": "1X2",
-          "home": 1.7,
-          "draw": 4.25,
-          "away": 4.4,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
-          "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/manchester-city-brighton"
-        },
-        {
-          "bookmaker": "Matchbook",
-          "key": "matchbook",
-          "market": "1X2",
-          "home": 1.78,
-          "draw": 4.3,
-          "away": 4.7,
-          "commission": 0.015,
-          "fetched_at": "2026-10-31T14:21:25Z",
-          "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630061435300023/"
-        },
-        {
-          "bookmaker": "Coolbet",
-          "key": "coolbet",
-          "market": "1X2",
-          "home": 1.75,
-          "draw": 4.27,
-          "away": 4.65,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:27Z",
-          "link": "https://www.coolbet.com/en/sports/match/6354893"
-        }
-      ],
-      "best": {
-        "home": 1.8,
-        "draw": 4.37,
-        "away": 4.65,
-        "home_effective": 1.8,
-        "draw_effective": 4.37,
-        "away_effective": 4.65,
-        "home_book": "Marathon Bet",
-        "draw_book": "1xBet",
-        "away_book": "Coolbet"
-      },
-      "market": {
-        "margin": -0.0006,
-        "implied": {
-          "home": 0.5534,
-          "draw": 0.2301,
-          "away": 0.2165
-        },
-        "sharp": {
-          "home": 0.5511,
-          "draw": 0.2304,
-          "away": 0.2185
-        },
-        "sharp_source": "Pinnacle"
-      },
-      "model": {
-        "method": "poisson+sharp-blend",
-        "lambda_home": 1.833,
-        "lambda_away": 1.583,
-        "probs": {
-          "home": 0.5201,
-          "draw": 0.2313,
-          "away": 0.2486
-        },
-        "poisson_probs": {
-          "home": 0.4348,
-          "draw": 0.2337,
-          "away": 0.3315
-        },
-        "blend_weight": 0.26666666666666666,
-        "over25": 0.6633,
-        "btts": 0.6723,
-        "top_scores": [
-          {
-            "score": "1-1",
-            "p": 0.1001
-          },
-          {
-            "score": "2-1",
-            "p": 0.0873
-          },
-          {
-            "score": "1-2",
-            "p": 0.0755
-          },
-          {
-            "score": "2-2",
-            "p": 0.0691
-          },
-          {
-            "score": "1-0",
-            "p": 0.0554
-          }
-        ],
-        "adjustments": [
-          {
-            "reason": "Voimat: tämä + viime kausi (MAN, 8 ottelua) / tämä + viime kausi (BRI, 8 ottelua)"
-          },
-          {
-            "reason": "Mallin luottamus 67 % → paino markkinaa vastaan 27 % (täysi 40 %). Kohtalaisesti dataa."
-          }
-        ],
-        "home_strength": {
-          "attack": 1.61,
-          "defense": 0.79
-        },
-        "away_strength": {
-          "attack": 1.61,
-          "defense": 0.75
-        }
-      },
-      "analysis": {
-        "edges": [
-          {
-            "side": "home",
-            "odds": 1.8,
-            "odds_effective": 1.8,
-            "book": "Marathon Bet",
-            "model_prob": 0.5201,
-            "implied_prob": 0.5534,
-            "edge": -0.0638,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "draw",
-            "odds": 4.37,
-            "odds_effective": 4.37,
-            "book": "1xBet",
-            "model_prob": 0.2313,
-            "implied_prob": 0.2301,
-            "edge": 0.0108,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "away",
-            "odds": 4.65,
-            "odds_effective": 4.65,
-            "book": "Coolbet",
-            "model_prob": 0.2486,
-            "implied_prob": 0.2165,
-            "edge": 0.156,
-            "flag": "strong",
-            "kelly_fraction": 0.0107,
-            "stake_suggestion": 1.07
-          }
-        ],
-        "news_window": false,
-        "bankroll_basis": 100
-      },
-      "stats": {
-        "home": {
-          "rank": 1,
-          "played": 8,
-          "form": "LWWWW",
-          "gf_pg": 2.5,
-          "ga_pg": 1.13,
-          "home_gf_pg": 2.75,
-          "away_gf_pg": 2.25,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 2.63,
-          "elo": null,
-          "elo_change": null,
-          "elo_rank": null
-        },
-        "away": {
-          "rank": 3,
-          "played": 8,
-          "form": "LWWWW",
-          "gf_pg": 2.88,
-          "ga_pg": 0.88,
-          "home_gf_pg": 3.25,
-          "away_gf_pg": 2.5,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 2,
-          "elo": null,
-          "elo_change": null,
-          "elo_rank": null
-        },
-        "h2h": []
-      },
-      "news": [
-        {
-          "title": "Chelsea v Manchester United: Premier League – live",
-          "url": "https://www.theguardian.com/football/live/2026/oct/31/chelsea-v-manchester-united-premier-league-live",
-          "source": "The Guardian",
-          "published_at": "2026-10-31T14:07:18.000Z",
-          "event_type": "manager_change",
-          "team": "Manchester City",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        },
-        {
-          "title": "Manchester City v Brighton, Bournemouth v Leeds, and more: clockwatch - live",
-          "url": "https://www.theguardian.com/football/live/2026/oct/31/manchester-city-v-brighton-bournemouth-v-leeds-and-more-clockwatch-live",
-          "source": "The Guardian",
-          "published_at": "2026-10-31T14:07:10.000Z",
-          "event_type": null,
-          "team": "Manchester City",
-          "player": null,
-          "confidence": null,
-          "impact": null
-        },
-        {
-          "title": "Jamie Carragher apologises to Aston Villa for ‘clumsy and wrong’ comments",
-          "url": "https://www.theguardian.com/football/2026/oct/30/aston-villa-to-take-legal-action-against-jamie-carragher-for-unacceptable-insults",
-          "source": "The Guardian",
-          "published_at": "2026-10-31T13:56:14.000Z",
-          "event_type": null,
-          "team": "Manchester City",
-          "player": null,
-          "confidence": null,
-          "impact": null
-        },
-        {
-          "title": "Carragher apologises to Villa for 'wrong' language",
-          "url": "https://www.bbc.co.uk/sport/football/articles/cqj6jp63k87zo?at_medium=RSS&at_campaign=rss",
-          "source": "BBC Sport",
-          "published_at": "2026-10-31T13:51:00.000Z",
-          "event_type": "manager_change",
-          "team": "Manchester City",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        },
-        {
-          "title": "IL seuraa: Tähtitopparin järjetön temppu kruunasi Manchester Unitedin romahduksen",
-          "url": "https://www.iltalehti.fi/valioliiga/a/61ee4818-cb86-4a25-86e1-89cb63641d91?utm_source=rss",
-          "source": "Iltalehti jalkapallo",
-          "published_at": "2026-10-31T11:57:53.000Z",
-          "event_type": "manager_change",
-          "team": "Manchester City",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        }
-      ]
-    },
-    {
-      "totals": {
-        "books": [
-          {
-            "bookmaker": "1xBet",
-            "key": "onexbet",
-            "line": 2.5,
-            "over": 1.96,
-            "under": 1.98,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843274-coventry-city-sunderland"
-          },
-          {
-            "bookmaker": "Betsson",
-            "key": "betsson",
-            "line": 2.5,
-            "over": 1.84,
-            "under": 1.99,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:05Z",
-            "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-NgDmMqfMVk2UAtaK9Iivyg&eti=0&fs=true"
-          },
-          {
-            "bookmaker": "Coolbet",
-            "key": "coolbet",
-            "line": 2.5,
-            "over": 1.91,
-            "under": 1.95,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:27Z",
-            "link": "https://www.coolbet.com/en/sports/match/6354899"
-          },
-          {
-            "bookmaker": "Marathon Bet",
-            "key": "marathonbet",
-            "line": 2.5,
-            "over": 1.9,
-            "under": 1.92,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:26Z",
-            "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/coventry-city-vs-sunderland"
-          },
-          {
-            "bookmaker": "Matchbook",
-            "key": "matchbook",
-            "line": 2.5,
-            "over": 1.95,
-            "under": 2.04,
-            "commission": 0.015,
-            "fetched_at": "2026-10-31T14:21:25Z",
-            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630013268700023/"
-          },
-          {
-            "bookmaker": "Nordic Bet",
-            "key": "nordicbet",
-            "line": 2.5,
-            "over": 1.88,
-            "under": 1.92,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
-            "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/coventry-sunderland"
-          },
-          {
-            "bookmaker": "Pinnacle",
-            "key": "pinnacle",
-            "line": 2.5,
-            "over": 1.89,
-            "under": 2.01,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:23Z",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/sunderland-vs-coventry-city/1638676650/"
-          },
-          {
-            "bookmaker": "Unibet (SE)",
-            "key": "unibet_se",
-            "line": 2.5,
-            "over": 1.96,
-            "under": 1.85,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:01Z",
-            "link": "https://www.unibet.se/betting/sports/event/1028072826"
-          },
-          {
-            "bookmaker": "William Hill",
-            "key": "williamhill",
-            "line": 2.5,
-            "over": 1.85,
-            "under": 1.85,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:20:37Z",
-            "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574914/coventry-vs-sunderland"
-          }
-        ],
-        "edges": [
-          {
-            "line": 2.5,
-            "side": "over",
-            "odds": 1.96,
-            "odds_effective": 1.96,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843274-coventry-city-sunderland",
-            "model_prob": 0.4495,
-            "implied_prob": 0.51,
-            "edge": -0.119,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 2.5,
-            "side": "under",
-            "odds": 2.04,
-            "odds_effective": 2.0244,
-            "book": "Matchbook",
-            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630013268700023/",
-            "model_prob": 0.5505,
-            "implied_prob": 0.49,
-            "edge": 0.1144,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          }
-        ]
-      },
-      "id": "soccer_epl:2026-10-31:COV-SUN",
-      "league": "Valioliiga",
-      "kickoff": "2026-10-31T15:00:00.000Z",
-      "home": {
-        "name": "Coventry City",
-        "short": "COV",
-        "color": "#9E6A03"
-      },
-      "away": {
-        "name": "Sunderland",
-        "short": "SUN",
-        "color": "#1F6FEB"
-      },
-      "odds": [
-        {
-          "bookmaker": "1xBet",
-          "key": "onexbet",
-          "market": "1X2",
-          "home": 3.17,
-          "draw": 3.45,
-          "away": 2.44,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
-          "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843274-coventry-city-sunderland"
-        },
-        {
-          "bookmaker": "William Hill",
-          "key": "williamhill",
-          "market": "1X2",
-          "home": 2.8,
-          "draw": 3.4,
-          "away": 2.4,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:20:37Z",
-          "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574914/coventry-vs-sunderland"
-        },
-        {
-          "bookmaker": "Marathon Bet",
-          "key": "marathonbet",
-          "market": "1X2",
-          "home": 3.08,
-          "draw": 3.36,
-          "away": 2.38,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:26Z",
-          "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/coventry-city-vs-sunderland"
-        },
-        {
-          "bookmaker": "Betfair",
-          "key": "betfair_ex_eu",
-          "market": "1X2",
-          "home": 3.1,
-          "draw": 3.45,
-          "away": 2.54,
-          "commission": 0.05,
-          "fetched_at": "2026-10-31T14:21:23Z",
-          "link": "https://www.betfair.com/exchange/plus/football/market/1.264058547"
-        },
-        {
-          "bookmaker": "Pinnacle",
-          "key": "pinnacle",
-          "market": "1X2",
-          "home": 3.04,
-          "draw": 3.38,
-          "away": 2.5,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:23Z",
-          "link": "https://www.pinnacle.com/en/soccer/england-premier-league/sunderland-vs-coventry-city/1638676650/"
-        },
-        {
-          "bookmaker": "Unibet (SE)",
-          "key": "unibet_se",
-          "market": "1X2",
-          "home": 3.15,
-          "draw": 3.25,
-          "away": 2.5,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:01Z",
-          "link": "https://www.unibet.se/betting/sports/event/1028072826"
-        },
-        {
-          "bookmaker": "Betsson",
-          "key": "betsson",
-          "market": "1X2",
-          "home": 2.95,
-          "draw": 3.29,
-          "away": 2.44,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:05Z",
-          "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-NgDmMqfMVk2UAtaK9Iivyg&eti=0&fs=true"
-        },
-        {
-          "bookmaker": "Nordic Bet",
-          "key": "nordicbet",
-          "market": "1X2",
-          "home": 2.95,
-          "draw": 3.3,
-          "away": 2.45,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
-          "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/coventry-sunderland"
-        },
-        {
-          "bookmaker": "Matchbook",
-          "key": "matchbook",
-          "market": "1X2",
-          "home": 3.1,
-          "draw": 3.45,
-          "away": 2.56,
-          "commission": 0.015,
-          "fetched_at": "2026-10-31T14:21:25Z",
-          "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630013268700023/"
-        },
-        {
-          "bookmaker": "Coolbet",
-          "key": "coolbet",
-          "market": "1X2",
-          "home": 3.03,
-          "draw": 3.44,
-          "away": 2.5,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:27Z",
-          "link": "https://www.coolbet.com/en/sports/match/6354899"
-        }
-      ],
-      "best": {
-        "home": 3.17,
-        "draw": 3.45,
-        "away": 2.56,
-        "home_effective": 3.17,
-        "draw_effective": 3.45,
-        "away_effective": 2.5366,
-        "home_book": "1xBet",
-        "draw_book": "1xBet",
-        "away_book": "Matchbook"
-      },
-      "market": {
-        "margin": -0.0005,
-        "implied": {
-          "home": 0.3213,
-          "draw": 0.2884,
-          "away": 0.3903
-        },
-        "sharp": {
-          "home": 0.321,
-          "draw": 0.2887,
-          "away": 0.3903
-        },
-        "sharp_source": "Pinnacle"
-      },
-      "model": {
-        "method": "poisson+sharp-blend",
-        "lambda_home": 1.532,
-        "lambda_away": 0.942,
-        "probs": {
-          "home": 0.3635,
-          "draw": 0.2843,
-          "away": 0.3523
-        },
-        "poisson_probs": {
-          "home": 0.5045,
-          "draw": 0.2695,
-          "away": 0.226
-        },
-        "blend_weight": 0.23157894736842108,
-        "over25": 0.4495,
-        "btts": 0.4843,
-        "top_scores": [
-          {
-            "score": "1-1",
-            "p": 0.1276
-          },
-          {
-            "score": "1-0",
-            "p": 0.123
-          },
-          {
-            "score": "2-0",
-            "p": 0.0989
-          },
-          {
-            "score": "2-1",
-            "p": 0.0931
-          },
-          {
-            "score": "0-0",
-            "p": 0.0903
-          }
-        ],
-        "adjustments": [
-          {
-            "reason": "Voimat: sarjan keskitaso (COV, 8 ottelua) / tämä + viime kausi (SUN, 8 ottelua)"
-          },
-          {
-            "reason": "Mallin luottamus 58 % → paino markkinaa vastaan 23 % (täysi 40 %). Kohtalaisesti dataa."
-          }
-        ],
-        "home_strength": {
-          "attack": 0.9,
-          "defense": 1.12
-        },
-        "away_strength": {
-          "attack": 0.67,
-          "defense": 1.12
-        }
-      },
-      "analysis": {
-        "edges": [
-          {
-            "side": "home",
-            "odds": 3.17,
-            "odds_effective": 3.17,
-            "book": "1xBet",
-            "model_prob": 0.3635,
-            "implied_prob": 0.3213,
-            "edge": 0.1523,
-            "flag": "strong",
-            "kelly_fraction": 0.0175,
-            "stake_suggestion": 1.75
-          },
-          {
-            "side": "draw",
-            "odds": 3.45,
-            "odds_effective": 3.45,
-            "book": "1xBet",
-            "model_prob": 0.2843,
-            "implied_prob": 0.2884,
-            "edge": -0.0192,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "away",
-            "odds": 2.56,
-            "odds_effective": 2.5366,
-            "book": "Matchbook",
-            "model_prob": 0.3523,
-            "implied_prob": 0.3903,
-            "edge": -0.1064,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ],
-        "news_window": false,
-        "bankroll_basis": 100
-      },
-      "stats": {
-        "home": {
-          "rank": 19,
-          "played": 8,
-          "form": "LLWWL",
-          "gf_pg": 0.75,
-          "ga_pg": 1.88,
-          "home_gf_pg": 1,
-          "away_gf_pg": 0.5,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 0.75,
-          "elo": null,
-          "elo_change": null,
-          "elo_rank": null
-        },
-        "away": {
-          "rank": 20,
-          "played": 8,
-          "form": "DLLLL",
-          "gf_pg": 0.75,
-          "ga_pg": 1.75,
-          "home_gf_pg": 0.25,
-          "away_gf_pg": 1.25,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 0.63,
-          "elo": null,
-          "elo_change": null,
-          "elo_rank": null
-        },
-        "h2h": []
-      },
-      "news": [
-        {
-          "title": "‘There’s a new chapter to write’: Le Bris upbeat as Sunderland eye Coventry reunion",
-          "url": "https://www.theguardian.com/football/2026/oct/30/regis-le-bris-sunderland-coventry-reunion",
-          "source": "The Guardian",
-          "published_at": "2026-10-30T14:56:32.000Z",
-          "event_type": "manager_change",
-          "team": "Coventry City",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        }
-      ]
-    },
-    {
-      "totals": {
-        "books": [
-          {
-            "bookmaker": "1xBet",
-            "key": "onexbet",
-            "line": 2.5,
-            "over": 1.94,
-            "under": 2,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843756-hull-city-ipswich-town"
-          },
-          {
-            "bookmaker": "Betsson",
-            "key": "betsson",
-            "line": 2.5,
-            "over": 1.91,
-            "under": 1.91,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:05Z",
-            "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-rm66R1maZ0ixeqrFFO8JFg&eti=0&fs=true"
-          },
-          {
-            "bookmaker": "Coolbet",
-            "key": "coolbet",
-            "line": 2.5,
-            "over": 1.93,
-            "under": 1.93,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:27Z",
-            "link": "https://www.coolbet.com/en/sports/match/6354848"
-          },
-          {
-            "bookmaker": "Marathon Bet",
-            "key": "marathonbet",
-            "line": 2.5,
-            "over": 1.88,
-            "under": 1.94,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:26Z",
-            "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/hull-city-vs-ipswich-town"
-          },
-          {
-            "bookmaker": "Matchbook",
-            "key": "matchbook",
-            "line": 2.5,
-            "over": 1.99,
-            "under": 1.98,
-            "commission": 0.015,
-            "fetched_at": "2026-10-31T14:21:25Z",
-            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34629991609500023/"
-          },
-          {
-            "bookmaker": "Nordic Bet",
-            "key": "nordicbet",
-            "line": 2.5,
-            "over": 1.9,
-            "under": 1.9,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
-            "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/hull-ipswich"
-          },
-          {
-            "bookmaker": "Pinnacle",
-            "key": "pinnacle",
-            "line": 2.5,
-            "over": 1.97,
-            "under": 1.93,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:23Z",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/ipswich-town-vs-hull-city/1638676647/"
-          },
-          {
-            "bookmaker": "Unibet (SE)",
-            "key": "unibet_se",
-            "line": 2.5,
-            "over": 1.88,
-            "under": 1.93,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:01Z",
-            "link": "https://www.unibet.se/betting/sports/event/1028072832"
-          },
-          {
-            "bookmaker": "William Hill",
-            "key": "williamhill",
-            "line": 2.5,
-            "over": 1.91,
-            "under": 1.85,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:20:37Z",
-            "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574913/hull-vs-ipswich"
-          }
-        ],
-        "edges": [
-          {
-            "line": 2.5,
-            "side": "over",
-            "odds": 1.99,
-            "odds_effective": 1.9752,
-            "book": "Matchbook",
-            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34629991609500023/",
-            "model_prob": 0.5462,
-            "implied_prob": 0.5013,
-            "edge": 0.0788,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          },
-          {
-            "line": 2.5,
-            "side": "under",
-            "odds": 2,
-            "odds_effective": 2,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843756-hull-city-ipswich-town",
-            "model_prob": 0.4538,
-            "implied_prob": 0.4987,
-            "edge": -0.0924,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ]
-      },
-      "id": "soccer_epl:2026-10-31:HUL-IPS",
-      "league": "Valioliiga",
-      "kickoff": "2026-10-31T15:00:00.000Z",
-      "home": {
-        "name": "Hull City",
-        "short": "HUL",
-        "color": "#BF3989"
-      },
-      "away": {
-        "name": "Ipswich Town",
-        "short": "IPS",
-        "color": "#57606A"
-      },
-      "odds": [
-        {
-          "bookmaker": "William Hill",
-          "key": "williamhill",
-          "market": "1X2",
-          "home": 2.8,
-          "draw": 3.3,
-          "away": 2.4,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:20:37Z",
-          "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574913/hull-vs-ipswich"
-        },
-        {
-          "bookmaker": "1xBet",
-          "key": "onexbet",
-          "market": "1X2",
-          "home": 2.99,
-          "draw": 3.47,
-          "away": 2.55,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
-          "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843756-hull-city-ipswich-town"
-        },
-        {
-          "bookmaker": "Marathon Bet",
-          "key": "marathonbet",
-          "market": "1X2",
-          "home": 2.91,
-          "draw": 3.38,
-          "away": 2.48,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:26Z",
-          "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/hull-city-vs-ipswich-town"
-        },
-        {
-          "bookmaker": "Betfair",
-          "key": "betfair_ex_eu",
-          "market": "1X2",
-          "home": 3.1,
-          "draw": 3.6,
-          "away": 2.48,
-          "commission": 0.05,
-          "fetched_at": "2026-10-31T14:21:23Z",
-          "link": "https://www.betfair.com/exchange/plus/football/market/1.264060821"
-        },
-        {
-          "bookmaker": "Pinnacle",
-          "key": "pinnacle",
-          "market": "1X2",
-          "home": 2.91,
-          "draw": 3.46,
-          "away": 2.55,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:23Z",
-          "link": "https://www.pinnacle.com/en/soccer/england-premier-league/ipswich-town-vs-hull-city/1638676647/"
-        },
-        {
-          "bookmaker": "Unibet (SE)",
-          "key": "unibet_se",
-          "market": "1X2",
-          "home": 2.95,
-          "draw": 3.45,
-          "away": 2.55,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:01Z",
-          "link": "https://www.unibet.se/betting/sports/event/1028072832"
-        },
-        {
-          "bookmaker": "Betsson",
-          "key": "betsson",
-          "market": "1X2",
-          "home": 3,
-          "draw": 3.29,
-          "away": 2.41,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:05Z",
-          "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-rm66R1maZ0ixeqrFFO8JFg&eti=0&fs=true"
-        },
-        {
-          "bookmaker": "Nordic Bet",
-          "key": "nordicbet",
-          "market": "1X2",
-          "home": 3,
-          "draw": 3.35,
-          "away": 2.38,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
-          "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/hull-ipswich"
-        },
-        {
-          "bookmaker": "Matchbook",
-          "key": "matchbook",
-          "market": "1X2",
-          "home": 3.1,
-          "draw": 3.6,
-          "away": 2.5,
-          "commission": 0.015,
-          "fetched_at": "2026-10-31T14:21:25Z",
-          "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34629991609500023/"
-        },
-        {
-          "bookmaker": "Coolbet",
-          "key": "coolbet",
-          "market": "1X2",
-          "home": 3.01,
-          "draw": 3.53,
-          "away": 2.47,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:27Z",
-          "link": "https://www.coolbet.com/en/sports/match/6354848"
-        }
-      ],
-      "best": {
-        "home": 3.1,
-        "draw": 3.6,
-        "away": 2.55,
-        "home_effective": 3.0685000000000002,
-        "draw_effective": 3.561,
-        "away_effective": 2.55,
-        "home_book": "Matchbook",
-        "draw_book": "Matchbook",
-        "away_book": "1xBet"
-      },
-      "market": {
-        "margin": -0.0011,
-        "implied": {
-          "home": 0.3272,
-          "draw": 0.2826,
-          "away": 0.3902
-        },
-        "sharp": {
-          "home": 0.3353,
-          "draw": 0.282,
-          "away": 0.3827
-        },
-        "sharp_source": "Pinnacle"
-      },
-      "model": {
-        "method": "poisson+sharp-blend",
-        "lambda_home": 1.589,
-        "lambda_away": 1.278,
-        "probs": {
-          "home": 0.3597,
-          "draw": 0.2764,
-          "away": 0.3639
-        },
-        "poisson_probs": {
-          "home": 0.4407,
-          "draw": 0.2576,
-          "away": 0.3016
-        },
-        "blend_weight": 0.23157894736842108,
-        "over25": 0.5462,
-        "btts": 0.5798,
-        "top_scores": [
-          {
-            "score": "1-1",
-            "p": 0.1213
-          },
-          {
-            "score": "2-1",
-            "p": 0.0918
-          },
-          {
-            "score": "1-0",
-            "p": 0.0846
-          },
-          {
-            "score": "1-2",
-            "p": 0.0738
-          },
-          {
-            "score": "2-0",
-            "p": 0.0718
-          }
-        ],
-        "adjustments": [
-          {
-            "reason": "Voimat: sarjan keskitaso (HUL, 8 ottelua) / sarjan keskitaso (IPS, 8 ottelua)"
-          },
-          {
-            "reason": "Mallin luottamus 58 % → paino markkinaa vastaan 23 % (täysi 40 %). Kohtalaisesti dataa."
-          }
-        ],
-        "home_strength": {
-          "attack": 0.91,
-          "defense": 1
-        },
-        "away_strength": {
-          "attack": 1.02,
-          "defense": 1.16
-        }
-      },
-      "analysis": {
-        "edges": [
-          {
-            "side": "home",
-            "odds": 3.1,
-            "odds_effective": 3.0685,
-            "book": "Matchbook",
-            "model_prob": 0.3597,
-            "implied_prob": 0.3272,
-            "edge": 0.1037,
-            "flag": "strong",
-            "kelly_fraction": 0.0125,
-            "stake_suggestion": 1.25
-          },
-          {
-            "side": "draw",
-            "odds": 3.6,
-            "odds_effective": 3.561,
-            "book": "Matchbook",
-            "model_prob": 0.2764,
-            "implied_prob": 0.2826,
-            "edge": -0.0157,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "away",
-            "odds": 2.55,
-            "odds_effective": 2.55,
-            "book": "1xBet",
-            "model_prob": 0.3639,
-            "implied_prob": 0.3902,
-            "edge": -0.0721,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ],
-        "news_window": false,
-        "bankroll_basis": 100
-      },
-      "stats": {
-        "home": {
-          "rank": 10,
-          "played": 8,
-          "form": "DLDLD",
-          "gf_pg": 1.13,
-          "ga_pg": 1,
-          "home_gf_pg": 1.25,
-          "away_gf_pg": 1,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.25,
-          "elo": null,
-          "elo_change": null,
-          "elo_rank": null
-        },
-        "away": {
-          "rank": 12,
-          "played": 8,
-          "form": "DLWLW",
-          "gf_pg": 1.5,
-          "ga_pg": 2,
-          "home_gf_pg": 1.25,
-          "away_gf_pg": 1.75,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.25,
-          "elo": null,
-          "elo_change": null,
-          "elo_rank": null
-        },
-        "h2h": []
-      },
-      "news": []
-    },
-    {
-      "totals": {
-        "books": [
-          {
-            "bookmaker": "1xBet",
-            "key": "onexbet",
-            "line": 2.5,
-            "over": 1.76,
-            "under": 2.23,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843792-tottenham-hotspur-crystal-palace"
-          },
-          {
-            "bookmaker": "Betsson",
-            "key": "betsson",
-            "line": 2.5,
-            "over": 1.69,
-            "under": 2.19,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:05Z",
-            "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-NtN2yekG1UaPQqAupCb88w&eti=0&fs=true"
-          },
-          {
-            "bookmaker": "Coolbet",
-            "key": "coolbet",
-            "line": 2.5,
-            "over": 1.73,
-            "under": 2.19,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:27Z",
-            "link": "https://www.coolbet.com/en/sports/match/6354853"
-          },
-          {
-            "bookmaker": "Marathon Bet",
-            "key": "marathonbet",
-            "line": 2.5,
-            "over": 1.71,
-            "under": 2.16,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:26Z",
-            "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/tottenham-hotspur-vs-crystal-palace"
-          },
-          {
-            "bookmaker": "Matchbook",
-            "key": "matchbook",
-            "line": 2.5,
-            "over": 1.76,
-            "under": 2.28,
-            "commission": 0.015,
-            "fetched_at": "2026-10-31T14:21:25Z",
-            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34629972637500023/"
-          },
-          {
-            "bookmaker": "Nordic Bet",
-            "key": "nordicbet",
-            "line": 2.5,
-            "over": 1.68,
-            "under": 2.18,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
-            "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/tottenham-crystal-palace"
-          },
-          {
-            "bookmaker": "Unibet (SE)",
-            "key": "unibet_se",
-            "line": 2.5,
-            "over": 1.7,
-            "under": 2.18,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:01Z",
-            "link": "https://www.unibet.se/betting/sports/event/1028072840"
-          },
-          {
-            "bookmaker": "William Hill",
-            "key": "williamhill",
-            "line": 2.5,
-            "over": 1.67,
-            "under": 2.15,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:20:37Z",
-            "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574924/tottenham-vs-crystal-palace"
-          },
-          {
-            "bookmaker": "Pinnacle",
-            "key": "pinnacle",
-            "line": 2.75,
-            "over": 1.94,
-            "under": 1.96,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:23Z",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/crystal-palace-vs-tottenham-hotspur/1638686118/"
-          }
-        ],
-        "edges": [
-          {
-            "line": 2.5,
-            "side": "over",
-            "odds": 1.76,
-            "odds_effective": 1.76,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843792-tottenham-hotspur-crystal-palace",
-            "model_prob": 0.5131,
-            "implied_prob": 0.5644,
-            "edge": -0.097,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 2.5,
-            "side": "under",
-            "odds": 2.28,
-            "odds_effective": 2.2608,
-            "book": "Matchbook",
-            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34629972637500023/",
-            "model_prob": 0.4869,
-            "implied_prob": 0.4356,
-            "edge": 0.1008,
-            "flag": "strong",
-            "kelly_fraction": 0.02,
-            "stake_suggestion": 2
-          },
-          {
-            "line": 2.75,
-            "side": "over",
-            "odds": 1.94,
-            "odds_effective": 1.94,
-            "book": "Pinnacle",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/crystal-palace-vs-tottenham-hotspur/1638686118/",
-            "model_prob": 0.5131,
-            "implied_prob": 0.5026,
-            "edge": -0.0046,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "line": 2.75,
-            "side": "under",
-            "odds": 1.96,
-            "odds_effective": 1.96,
-            "book": "Pinnacle",
-            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/crystal-palace-vs-tottenham-hotspur/1638686118/",
-            "model_prob": 0.4869,
-            "implied_prob": 0.4974,
-            "edge": -0.0456,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ]
-      },
-      "id": "soccer_epl:2026-10-31:TOT-CRY",
-      "league": "Valioliiga",
-      "kickoff": "2026-10-31T17:30:00.000Z",
-      "home": {
-        "name": "Tottenham Hotspur",
-        "short": "TOT",
-        "color": "#57606A"
-      },
-      "away": {
-        "name": "Crystal Palace",
-        "short": "CRY",
-        "color": "#DA3633"
-      },
-      "odds": [
-        {
-          "bookmaker": "William Hill",
-          "key": "williamhill",
-          "market": "1X2",
-          "home": 1.67,
-          "draw": 3.9,
-          "away": 4.8,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:20:37Z",
-          "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574924/tottenham-vs-crystal-palace"
-        },
-        {
-          "bookmaker": "1xBet",
-          "key": "onexbet",
-          "market": "1X2",
-          "home": 1.71,
-          "draw": 4.22,
-          "away": 5.18,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
-          "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843792-tottenham-hotspur-crystal-palace"
-        },
-        {
-          "bookmaker": "Marathon Bet",
-          "key": "marathonbet",
-          "market": "1X2",
-          "home": 1.68,
-          "draw": 4.15,
-          "away": 5.1,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:26Z",
-          "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/tottenham-hotspur-vs-crystal-palace"
-        },
-        {
-          "bookmaker": "Betfair",
-          "key": "betfair_ex_eu",
-          "market": "1X2",
-          "home": 1.7,
-          "draw": 4.3,
-          "away": 5.4,
-          "commission": 0.05,
-          "fetched_at": "2026-10-31T14:21:23Z",
-          "link": "https://www.betfair.com/exchange/plus/football/market/1.264060964"
-        },
-        {
-          "bookmaker": "Pinnacle",
-          "key": "pinnacle",
-          "market": "1X2",
-          "home": 1.68,
-          "draw": 4.16,
-          "away": 5.07,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:23Z",
-          "link": "https://www.pinnacle.com/en/soccer/england-premier-league/crystal-palace-vs-tottenham-hotspur/1638686118/"
-        },
-        {
-          "bookmaker": "Unibet (SE)",
-          "key": "unibet_se",
-          "market": "1X2",
-          "home": 1.67,
-          "draw": 4.25,
-          "away": 5.3,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:01Z",
-          "link": "https://www.unibet.se/betting/sports/event/1028072840"
-        },
-        {
-          "bookmaker": "Betsson",
-          "key": "betsson",
-          "market": "1X2",
-          "home": 1.65,
-          "draw": 4.06,
-          "away": 4.96,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:05Z",
-          "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-NtN2yekG1UaPQqAupCb88w&eti=0&fs=true"
-        },
-        {
-          "bookmaker": "Nordic Bet",
-          "key": "nordicbet",
-          "market": "1X2",
-          "home": 1.65,
-          "draw": 4.1,
-          "away": 5,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
-          "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/tottenham-crystal-palace"
-        },
-        {
-          "bookmaker": "Matchbook",
-          "key": "matchbook",
-          "market": "1X2",
-          "home": 1.7,
-          "draw": 4.3,
-          "away": 5.4,
-          "commission": 0.015,
-          "fetched_at": "2026-10-31T14:21:25Z",
-          "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34629972637500023/"
-        },
-        {
-          "bookmaker": "Coolbet",
-          "key": "coolbet",
-          "market": "1X2",
-          "home": 1.67,
-          "draw": 4.27,
-          "away": 5.32,
-          "commission": 0,
-          "fetched_at": "2026-10-31T14:21:27Z",
-          "link": "https://www.coolbet.com/en/sports/match/6354853"
-        }
-      ],
-      "best": {
-        "home": 1.71,
-        "draw": 4.27,
-        "away": 5.4,
-        "home_effective": 1.71,
-        "draw_effective": 4.27,
-        "away_effective": 5.3340000000000005,
-        "home_book": "1xBet",
-        "draw_book": "Coolbet",
-        "away_book": "Matchbook"
-      },
-      "market": {
-        "margin": 0.0065,
-        "implied": {
-          "home": 0.5772,
-          "draw": 0.2326,
-          "away": 0.1902
-        },
-        "sharp": {
-          "home": 0.5763,
-          "draw": 0.2327,
-          "away": 0.191
-        },
-        "sharp_source": "Pinnacle"
-      },
-      "model": {
-        "method": "poisson+sharp-blend",
-        "lambda_home": 1.729,
-        "lambda_away": 0.999,
-        "probs": {
-          "home": 0.5665,
-          "draw": 0.237,
-          "away": 0.1965
-        },
-        "poisson_probs": {
-          "home": 0.5394,
-          "draw": 0.2487,
-          "away": 0.2118
-        },
-        "blend_weight": 0.26666666666666666,
-        "over25": 0.5131,
-        "btts": 0.5252,
-        "top_scores": [
-          {
-            "score": "1-1",
-            "p": 0.1185
-          },
-          {
-            "score": "1-0",
-            "p": 0.1074
-          },
-          {
-            "score": "2-0",
-            "p": 0.0977
-          },
-          {
-            "score": "2-1",
-            "p": 0.0976
-          },
-          {
-            "score": "0-0",
-            "p": 0.071
-          }
-        ],
-        "adjustments": [
-          {
-            "reason": "Voimat: tämä + viime kausi (TOT, 8 ottelua) / tämä + viime kausi (CRY, 8 ottelua)"
-          },
-          {
-            "reason": "Mallin luottamus 67 % → paino markkinaa vastaan 27 % (täysi 40 %). Kohtalaisesti dataa."
-          }
-        ],
-        "home_strength": {
-          "attack": 0.81,
-          "defense": 0.97
-        },
-        "away_strength": {
-          "attack": 0.82,
-          "defense": 1.4
-        }
-      },
-      "analysis": {
-        "edges": [
-          {
-            "side": "home",
-            "odds": 1.71,
-            "odds_effective": 1.71,
-            "book": "1xBet",
-            "model_prob": 0.5665,
-            "implied_prob": 0.5772,
-            "edge": -0.0313,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "draw",
-            "odds": 4.27,
-            "odds_effective": 4.27,
-            "book": "Coolbet",
-            "model_prob": 0.237,
-            "implied_prob": 0.2326,
-            "edge": 0.012,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          },
-          {
-            "side": "away",
-            "odds": 5.4,
-            "odds_effective": 5.334,
-            "book": "Matchbook",
-            "model_prob": 0.1965,
-            "implied_prob": 0.1902,
-            "edge": 0.0481,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
-          }
-        ],
-        "news_window": false,
-        "bankroll_basis": 100
-      },
-      "stats": {
-        "home": {
-          "rank": 14,
-          "played": 8,
-          "form": "WWDLD",
-          "gf_pg": 1,
-          "ga_pg": 1.25,
-          "home_gf_pg": 1.25,
-          "away_gf_pg": 0.75,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 1.13,
-          "elo": null,
-          "elo_change": null,
-          "elo_rank": null
-        },
-        "away": {
-          "rank": 17,
-          "played": 8,
-          "form": "LLWDL",
-          "gf_pg": 1.13,
-          "ga_pg": 2.38,
-          "home_gf_pg": 1.5,
-          "away_gf_pg": 0.75,
-          "xg_pg": null,
-          "rest_days": null,
-          "ppg": 0.88,
-          "elo": null,
-          "elo_change": null,
-          "elo_rank": null
-        },
-        "h2h": []
-      },
-      "news": [
-        {
-          "title": "Chelsea v Manchester United: Premier League – live",
-          "url": "https://www.theguardian.com/football/live/2026/oct/31/chelsea-v-manchester-united-premier-league-live",
-          "source": "The Guardian",
-          "published_at": "2026-10-31T14:07:18.000Z",
-          "event_type": "manager_change",
-          "team": "Crystal Palace",
-          "player": null,
-          "confidence": 0.4,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        },
-        {
-          "title": "Spurs' Maddison fit to face Palace - De Zerbi",
-          "url": "https://www.bbc.co.uk/sport/football/articles/cke8rp00m87lo?at_medium=RSS&at_campaign=rss",
-          "source": "BBC Sport",
-          "published_at": "2026-10-30T15:49:28.000Z",
-          "event_type": "injury",
-          "team": "Tottenham Hotspur",
-          "player": null,
-          "confidence": 0.45,
-          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        }
-      ]
-    },
-    {
-      "totals": {
-        "books": [
-          {
-            "bookmaker": "1xBet",
-            "key": "onexbet",
-            "line": 2.5,
-            "over": 1.83,
-            "under": 2.14,
-            "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
+            "fetched_at": "2026-10-31T18:20:39Z",
             "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843262-aston-villa-fulham"
           },
           {
             "bookmaker": "Betsson",
             "key": "betsson",
             "line": 2.5,
-            "over": 1.83,
-            "under": 2,
+            "over": 1.79,
+            "under": 2.04,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:05Z",
+            "fetched_at": "2026-10-31T18:20:20Z",
             "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-bIJAGo5RJEaIV-sOsNBN5Q&eti=0&fs=true"
           },
           {
@@ -4529,27 +45,27 @@
             "over": 1.81,
             "under": 2.07,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:27Z",
+            "fetched_at": "2026-10-31T18:20:42Z",
             "link": "https://www.coolbet.com/en/sports/match/6354891"
           },
           {
             "bookmaker": "Marathon Bet",
             "key": "marathonbet",
             "line": 2.5,
-            "over": 1.77,
-            "under": 2.07,
+            "over": 1.79,
+            "under": 2.05,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:26Z",
+            "fetched_at": "2026-10-31T18:20:04Z",
             "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/aston-villa-vs-fulham"
           },
           {
             "bookmaker": "Nordic Bet",
             "key": "nordicbet",
             "line": 2.5,
-            "over": 1.82,
-            "under": 1.98,
+            "over": 1.78,
+            "under": 2.02,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
+            "fetched_at": "2026-10-31T18:20:18Z",
             "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/aston-villa-fulham"
           },
           {
@@ -4557,9 +73,9 @@
             "key": "unibet_se",
             "line": 2.5,
             "over": 1.78,
-            "under": 2.06,
+            "under": 2.07,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:01Z",
+            "fetched_at": "2026-10-31T18:20:40Z",
             "link": "https://www.unibet.se/betting/sports/event/1028072807"
           },
           {
@@ -4569,17 +85,17 @@
             "over": 1.75,
             "under": 2,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:20:37Z",
+            "fetched_at": "2026-10-31T18:19:54Z",
             "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574925/aston-villa-vs-fulham"
           },
           {
             "bookmaker": "Pinnacle",
             "key": "pinnacle",
             "line": 2.75,
-            "over": 2.05,
-            "under": 1.87,
+            "over": 2.03,
+            "under": 1.88,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:23Z",
+            "fetched_at": "2026-10-31T18:20:39Z",
             "link": "https://www.pinnacle.com/en/soccer/england-premier-league/fulham-vs-aston-villa/1638676649/"
           }
         ],
@@ -4587,13 +103,13 @@
           {
             "line": 2.5,
             "side": "over",
-            "odds": 1.83,
-            "odds_effective": 1.83,
+            "odds": 1.84,
+            "odds_effective": 1.84,
             "book": "1xBet",
             "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843262-aston-villa-fulham",
-            "model_prob": 0.4127,
-            "implied_prob": 0.539,
-            "edge": -0.2447,
+            "model_prob": 0.4157,
+            "implied_prob": 0.5342,
+            "edge": -0.235,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -4601,13 +117,13 @@
           {
             "line": 2.5,
             "side": "under",
-            "odds": 2.14,
-            "odds_effective": 2.14,
+            "odds": 2.11,
+            "odds_effective": 2.11,
             "book": "1xBet",
             "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843262-aston-villa-fulham",
-            "model_prob": 0.5873,
-            "implied_prob": 0.461,
-            "edge": 0.2568,
+            "model_prob": 0.5843,
+            "implied_prob": 0.4658,
+            "edge": 0.2328,
             "flag": "strong",
             "kelly_fraction": 0.02,
             "stake_suggestion": 2
@@ -4615,13 +131,13 @@
           {
             "line": 2.75,
             "side": "over",
-            "odds": 2.05,
-            "odds_effective": 2.05,
+            "odds": 2.03,
+            "odds_effective": 2.03,
             "book": "Pinnacle",
             "link": "https://www.pinnacle.com/en/soccer/england-premier-league/fulham-vs-aston-villa/1638676649/",
-            "model_prob": 0.4127,
-            "implied_prob": 0.477,
-            "edge": -0.1539,
+            "model_prob": 0.4157,
+            "implied_prob": 0.4808,
+            "edge": -0.156,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -4629,13 +145,13 @@
           {
             "line": 2.75,
             "side": "under",
-            "odds": 1.87,
-            "odds_effective": 1.87,
+            "odds": 1.88,
+            "odds_effective": 1.88,
             "book": "Pinnacle",
             "link": "https://www.pinnacle.com/en/soccer/england-premier-league/fulham-vs-aston-villa/1638676649/",
-            "model_prob": 0.5873,
-            "implied_prob": 0.523,
-            "edge": 0.0982,
+            "model_prob": 0.5843,
+            "implied_prob": 0.5192,
+            "edge": 0.0984,
             "flag": "strong",
             "kelly_fraction": 0.02,
             "stake_suggestion": 2
@@ -4660,175 +176,175 @@
           "bookmaker": "1xBet",
           "key": "onexbet",
           "market": "1X2",
-          "home": 2.23,
-          "draw": 3.65,
-          "away": 3.41,
+          "home": 2.09,
+          "draw": 3.72,
+          "away": 3.74,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
+          "fetched_at": "2026-10-31T18:20:39Z",
           "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843262-aston-villa-fulham"
         },
         {
           "bookmaker": "William Hill",
           "key": "williamhill",
           "market": "1X2",
-          "home": 2.15,
+          "home": 2.05,
           "draw": 3.4,
-          "away": 3.25,
+          "away": 3.5,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:20:37Z",
+          "fetched_at": "2026-10-31T18:19:54Z",
           "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574925/aston-villa-vs-fulham"
         },
         {
           "bookmaker": "Betfair",
           "key": "betfair_ex_eu",
           "market": "1X2",
-          "home": 2.16,
-          "draw": 3.65,
-          "away": 3.7,
+          "home": 2.08,
+          "draw": 3.7,
+          "away": 3.9,
           "commission": 0.05,
-          "fetched_at": "2026-10-31T14:21:23Z",
+          "fetched_at": "2026-10-31T18:20:40Z",
           "link": "https://www.betfair.com/exchange/plus/football/market/1.264059939"
         },
         {
           "bookmaker": "Pinnacle",
           "key": "pinnacle",
           "market": "1X2",
-          "home": 2.18,
-          "draw": 3.58,
-          "away": 3.49,
+          "home": 2.03,
+          "draw": 3.69,
+          "away": 3.82,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:23Z",
+          "fetched_at": "2026-10-31T18:20:39Z",
           "link": "https://www.pinnacle.com/en/soccer/england-premier-league/fulham-vs-aston-villa/1638676649/"
         },
         {
           "bookmaker": "Unibet (SE)",
           "key": "unibet_se",
           "market": "1X2",
-          "home": 2.05,
-          "draw": 3.8,
-          "away": 3.7,
+          "home": 2,
+          "draw": 3.65,
+          "away": 4,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:01Z",
+          "fetched_at": "2026-10-31T18:20:40Z",
           "link": "https://www.unibet.se/betting/sports/event/1028072807"
         },
         {
           "bookmaker": "Nordic Bet",
           "key": "nordicbet",
           "market": "1X2",
-          "home": 2.12,
-          "draw": 3.4,
-          "away": 3.45,
+          "home": 2.02,
+          "draw": 3.5,
+          "away": 3.7,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
+          "fetched_at": "2026-10-31T18:20:18Z",
           "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/aston-villa-fulham"
         },
         {
           "bookmaker": "Betsson",
           "key": "betsson",
           "market": "1X2",
-          "home": 2.12,
-          "draw": 3.44,
-          "away": 3.45,
+          "home": 2.02,
+          "draw": 3.51,
+          "away": 3.67,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:05Z",
+          "fetched_at": "2026-10-31T18:20:20Z",
           "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-bIJAGo5RJEaIV-sOsNBN5Q&eti=0&fs=true"
         },
         {
           "bookmaker": "Marathon Bet",
           "key": "marathonbet",
           "market": "1X2",
-          "home": 2.17,
-          "draw": 3.55,
-          "away": 3.32,
+          "home": 2.03,
+          "draw": 3.62,
+          "away": 3.64,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:26Z",
+          "fetched_at": "2026-10-31T18:20:04Z",
           "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/aston-villa-vs-fulham"
         },
         {
           "bookmaker": "Matchbook",
           "key": "matchbook",
           "market": "1X2",
-          "home": 2.16,
-          "draw": 3.65,
-          "away": 3.7,
+          "home": 2.08,
+          "draw": 3.7,
+          "away": 3.9,
           "commission": 0.015,
-          "fetched_at": "2026-10-31T14:21:25Z",
+          "fetched_at": "2026-10-31T18:20:39Z",
           "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630058417200023/"
         },
         {
           "bookmaker": "Coolbet",
           "key": "coolbet",
           "market": "1X2",
-          "home": 2.12,
-          "draw": 3.64,
-          "away": 3.64,
+          "home": 2.05,
+          "draw": 3.65,
+          "away": 3.85,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:27Z",
+          "fetched_at": "2026-10-31T18:20:42Z",
           "link": "https://www.coolbet.com/en/sports/match/6354891"
         }
       ],
       "best": {
-        "home": 2.23,
-        "draw": 3.8,
-        "away": 3.7,
-        "home_effective": 2.23,
-        "draw_effective": 3.8,
-        "away_effective": 3.7,
+        "home": 2.09,
+        "draw": 3.72,
+        "away": 4,
+        "home_effective": 2.09,
+        "draw_effective": 3.72,
+        "away_effective": 4,
         "home_book": "1xBet",
-        "draw_book": "Unibet (SE)",
+        "draw_book": "1xBet",
         "away_book": "Unibet (SE)"
       },
       "market": {
-        "margin": -0.0181,
+        "margin": -0.0027,
         "implied": {
-          "home": 0.4502,
-          "draw": 0.2734,
-          "away": 0.2764
+          "home": 0.4751,
+          "draw": 0.2685,
+          "away": 0.2565
         },
         "sharp": {
-          "home": 0.4477,
-          "draw": 0.2726,
-          "away": 0.2797
+          "home": 0.4804,
+          "draw": 0.2643,
+          "away": 0.2553
         },
         "sharp_source": "Pinnacle"
       },
       "model": {
         "method": "poisson+sharp-blend",
-        "lambda_home": 1.298,
-        "lambda_away": 1.035,
+        "lambda_home": 1.323,
+        "lambda_away": 1.022,
         "probs": {
-          "home": 0.4399,
-          "draw": 0.2776,
-          "away": 0.2825
+          "home": 0.4666,
+          "draw": 0.271,
+          "away": 0.2624
         },
         "poisson_probs": {
-          "home": 0.4185,
-          "draw": 0.2912,
-          "away": 0.2902
+          "home": 0.4288,
+          "draw": 0.2894,
+          "away": 0.2818
         },
         "blend_weight": 0.26666666666666666,
-        "over25": 0.4127,
-        "btts": 0.4753,
+        "over25": 0.4157,
+        "btts": 0.476,
         "top_scores": [
           {
             "score": "1-1",
-            "p": 0.1368
+            "p": 0.1361
           },
           {
             "score": "1-0",
-            "p": 0.1193
+            "p": 0.1204
           },
           {
             "score": "0-0",
-            "p": 0.1035
+            "p": 0.1024
           },
           {
             "score": "0-1",
-            "p": 0.0939
+            "p": 0.0915
           },
           {
             "score": "2-1",
-            "p": 0.0846
+            "p": 0.0857
           }
         ],
         "adjustments": [
@@ -4840,7 +356,7 @@
           }
         ],
         "home_strength": {
-          "attack": 0.91,
+          "attack": 0.92,
           "defense": 1.03
         },
         "away_strength": {
@@ -4852,36 +368,36 @@
         "edges": [
           {
             "side": "home",
-            "odds": 2.23,
-            "odds_effective": 2.23,
+            "odds": 2.09,
+            "odds_effective": 2.09,
             "book": "1xBet",
-            "model_prob": 0.4399,
-            "implied_prob": 0.4502,
-            "edge": -0.019,
+            "model_prob": 0.4666,
+            "implied_prob": 0.4751,
+            "edge": -0.0248,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
           },
           {
             "side": "draw",
-            "odds": 3.8,
-            "odds_effective": 3.8,
-            "book": "Unibet (SE)",
-            "model_prob": 0.2776,
-            "implied_prob": 0.2734,
-            "edge": 0.0549,
+            "odds": 3.72,
+            "odds_effective": 3.72,
+            "book": "1xBet",
+            "model_prob": 0.271,
+            "implied_prob": 0.2685,
+            "edge": 0.0081,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
           },
           {
             "side": "away",
-            "odds": 3.7,
-            "odds_effective": 3.7,
+            "odds": 4,
+            "odds_effective": 4,
             "book": "Unibet (SE)",
-            "model_prob": 0.2825,
-            "implied_prob": 0.2764,
-            "edge": 0.0453,
+            "model_prob": 0.2624,
+            "implied_prob": 0.2565,
+            "edge": 0.0496,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -4892,7 +408,7 @@
       },
       "stats": {
         "home": {
-          "rank": 9,
+          "rank": 11,
           "played": 8,
           "form": "WWDWL",
           "gf_pg": 1.13,
@@ -4907,7 +423,7 @@
           "elo_rank": null
         },
         "away": {
-          "rank": 15,
+          "rank": 16,
           "played": 8,
           "form": "WWLDD",
           "gf_pg": 1,
@@ -4924,6 +440,17 @@
         "h2h": []
       },
       "news": [
+        {
+          "title": "Manchester City hävisi taas, ManUn kohupelaajalla karsea päivä – Aston Villa oikeustoimiin tv-asiantuntijan takia",
+          "url": "https://yle.fi/a/74-20254410?origin=rss",
+          "source": "Yle Urheilu",
+          "published_at": "2026-10-31T17:34:02.000Z",
+          "event_type": null,
+          "team": "Aston Villa",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
         {
           "title": "Jamie Carragher apologises to Aston Villa for ‘clumsy and wrong’ comments",
           "url": "https://www.theguardian.com/football/2026/oct/30/aston-villa-to-take-legal-action-against-jamie-carragher-for-unacceptable-insults",
@@ -4955,24 +482,34 @@
             "bookmaker": "1xBet",
             "key": "onexbet",
             "line": 4.5,
-            "over": 1.65,
-            "under": 2.17,
+            "over": 1.74,
+            "under": 2.03,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:15Z",
+            "fetched_at": "2026-10-31T18:20:10Z",
             "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385400554-tappara-hpk"
+          },
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 5,
+            "over": 2.05,
+            "under": 1.75,
+            "commission": 0,
+            "fetched_at": "2026-10-31T18:19:47Z",
+            "link": "https://www.coolbet.com/en/sports/match/6400088"
           }
         ],
         "edges": [
           {
             "line": 4.5,
             "side": "over",
-            "odds": 1.65,
-            "odds_effective": 1.65,
+            "odds": 1.74,
+            "odds_effective": 1.74,
             "book": "1xBet",
             "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385400554-tappara-hpk",
-            "model_prob": 0.5856,
-            "implied_prob": 0.5681,
-            "edge": -0.0338,
+            "model_prob": 0.5911,
+            "implied_prob": 0.5385,
+            "edge": 0.0285,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -4980,13 +517,41 @@
           {
             "line": 4.5,
             "side": "under",
-            "odds": 2.17,
-            "odds_effective": 2.17,
+            "odds": 2.03,
+            "odds_effective": 2.03,
             "book": "1xBet",
             "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385400554-tappara-hpk",
-            "model_prob": 0.4144,
-            "implied_prob": 0.4319,
-            "edge": -0.1007,
+            "model_prob": 0.4089,
+            "implied_prob": 0.4615,
+            "edge": -0.1699,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5,
+            "side": "over",
+            "odds": 2.05,
+            "odds_effective": 2.05,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6400088",
+            "model_prob": 0.4146,
+            "implied_prob": 0.4605,
+            "edge": -0.1501,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5,
+            "side": "under",
+            "odds": 1.75,
+            "odds_effective": 1.75,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6400088",
+            "model_prob": 0.5854,
+            "implied_prob": 0.5395,
+            "edge": 0.0245,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -5011,11 +576,11 @@
           "bookmaker": "1xBet",
           "key": "onexbet",
           "market": "1X2",
-          "home": 1.66,
-          "draw": 4.45,
-          "away": 4.24,
+          "home": 1.73,
+          "draw": 4.25,
+          "away": 4,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
+          "fetched_at": "2026-10-31T18:20:10Z",
           "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/385400554-tappara-hpk"
         },
         {
@@ -5026,72 +591,83 @@
           "draw": 4.6,
           "away": 4.5,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:15Z",
+          "fetched_at": "2026-10-31T18:20:11Z",
           "link": "https://www.unibet.se/betting/sports/event/1028022296"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 1.75,
+          "draw": 4.2,
+          "away": 4.75,
+          "commission": 0,
+          "fetched_at": "2026-10-31T18:19:47Z",
+          "link": "https://www.coolbet.com/en/sports/match/6400088"
         }
       ],
       "best": {
-        "home": 1.66,
+        "home": 1.75,
         "draw": 4.6,
-        "away": 4.5,
-        "home_effective": 1.66,
+        "away": 4.75,
+        "home_effective": 1.75,
         "draw_effective": 4.6,
-        "away_effective": 4.5,
-        "home_book": "1xBet",
+        "away_effective": 4.75,
+        "home_book": "Coolbet",
         "draw_book": "Unibet (SE)",
-        "away_book": "Unibet (SE)"
+        "away_book": "Coolbet"
       },
       "market": {
-        "margin": 0.042,
+        "margin": -0.0007,
         "implied": {
-          "home": 0.5761,
-          "draw": 0.2082,
-          "away": 0.2157
+          "home": 0.5653,
+          "draw": 0.2233,
+          "away": 0.2114
         },
         "sharp": {
-          "home": 0.5761,
-          "draw": 0.2082,
-          "away": 0.2157
+          "home": 0.5653,
+          "draw": 0.2233,
+          "away": 0.2114
         },
-        "sharp_source": "mediaani (2 toimistoa)"
+        "sharp_source": "mediaani (3 toimistoa)"
       },
       "model": {
         "method": "poisson+sharp-blend",
         "lambda_home": 3.499,
-        "lambda_away": 1.676,
+        "lambda_away": 1.708,
         "probs": {
-          "home": 0.6097,
-          "draw": 0.1975,
-          "away": 0.1928
+          "home": 0.6005,
+          "draw": 0.2085,
+          "away": 0.1911
         },
         "poisson_probs": {
-          "home": 0.6859,
-          "draw": 0.1733,
-          "away": 0.1408
+          "home": 0.6803,
+          "draw": 0.1748,
+          "away": 0.1449
         },
         "blend_weight": 0.3058823529411765,
-        "over25": 0.8882,
-        "btts": 0.7898,
+        "over25": 0.8907,
+        "btts": 0.7955,
         "top_scores": [
           {
             "score": "3-1",
-            "p": 0.0684
+            "p": 0.0675
           },
           {
             "score": "4-1",
-            "p": 0.0598
+            "p": 0.059
           },
           {
             "score": "2-1",
-            "p": 0.0586
+            "p": 0.0578
           },
           {
             "score": "3-2",
-            "p": 0.0573
+            "p": 0.0576
           },
           {
             "score": "4-2",
-            "p": 0.0501
+            "p": 0.0504
           }
         ],
         "adjustments": [
@@ -5103,48 +679,48 @@
           }
         ],
         "home_strength": {
-          "attack": 1.16,
+          "attack": 1.17,
           "defense": 0.91
         },
         "away_strength": {
           "attack": 0.8,
-          "defense": 1.13
+          "defense": 1.14
         }
       },
       "analysis": {
         "edges": [
           {
             "side": "home",
-            "odds": 1.66,
-            "odds_effective": 1.66,
-            "book": "1xBet",
-            "model_prob": 0.6097,
-            "implied_prob": 0.5761,
-            "edge": 0.0121,
-            "flag": "none",
-            "kelly_fraction": 0,
-            "stake_suggestion": 0
+            "odds": 1.75,
+            "odds_effective": 1.75,
+            "book": "Coolbet",
+            "model_prob": 0.6005,
+            "implied_prob": 0.5653,
+            "edge": 0.0509,
+            "flag": "strong",
+            "kelly_fraction": 0.017,
+            "stake_suggestion": 1.7
           },
           {
             "side": "draw",
             "odds": 4.6,
             "odds_effective": 4.6,
             "book": "Unibet (SE)",
-            "model_prob": 0.1975,
-            "implied_prob": 0.2082,
-            "edge": -0.0915,
+            "model_prob": 0.2085,
+            "implied_prob": 0.2233,
+            "edge": -0.0409,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
           },
           {
             "side": "away",
-            "odds": 4.5,
-            "odds_effective": 4.5,
-            "book": "Unibet (SE)",
-            "model_prob": 0.1928,
-            "implied_prob": 0.2157,
-            "edge": -0.1324,
+            "odds": 4.75,
+            "odds_effective": 4.75,
+            "book": "Coolbet",
+            "model_prob": 0.1911,
+            "implied_prob": 0.2114,
+            "edge": -0.0923,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -5182,7 +758,7 @@
           "ppg": 1.11,
           "elo": 1397,
           "elo_change": -58,
-          "elo_rank": 16
+          "elo_rank": 15
         },
         "h2h": []
       },
@@ -5221,7 +797,7 @@
             "over": 1.96,
             "under": 1.99,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
+            "fetched_at": "2026-10-31T18:20:39Z",
             "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843278-liverpool-arsenal"
           },
           {
@@ -5231,7 +807,7 @@
             "over": 1.89,
             "under": 1.94,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:05Z",
+            "fetched_at": "2026-10-31T18:20:20Z",
             "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-xHVYzz4nnESQqWJUB3jOsQ&eti=0&fs=true"
           },
           {
@@ -5241,7 +817,7 @@
             "over": 1.88,
             "under": 1.99,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:27Z",
+            "fetched_at": "2026-10-31T18:20:42Z",
             "link": "https://www.coolbet.com/en/sports/match/6354602"
           },
           {
@@ -5251,17 +827,17 @@
             "over": 1.9,
             "under": 1.93,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:26Z",
+            "fetched_at": "2026-10-31T18:20:04Z",
             "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/liverpool-vs-arsenal"
           },
           {
             "bookmaker": "Matchbook",
             "key": "matchbook",
             "line": 2.5,
-            "over": 1.96,
-            "under": 2.02,
+            "over": 1.98,
+            "under": 2,
             "commission": 0.015,
-            "fetched_at": "2026-10-31T14:21:25Z",
+            "fetched_at": "2026-10-31T18:20:39Z",
             "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34629652585500023/"
           },
           {
@@ -5271,7 +847,7 @@
             "over": 1.88,
             "under": 1.92,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
+            "fetched_at": "2026-10-31T18:20:18Z",
             "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/liverpool-arsenal"
           },
           {
@@ -5281,7 +857,7 @@
             "over": 1.89,
             "under": 2,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:23Z",
+            "fetched_at": "2026-10-31T18:20:39Z",
             "link": "https://www.pinnacle.com/en/soccer/england-premier-league/arsenal-vs-liverpool/1638388732/"
           },
           {
@@ -5291,7 +867,7 @@
             "over": 1.87,
             "under": 1.95,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:01Z",
+            "fetched_at": "2026-10-31T18:20:40Z",
             "link": "https://www.unibet.se/betting/sports/event/1028072829"
           },
           {
@@ -5301,7 +877,7 @@
             "over": 1.8,
             "under": 1.95,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:20:37Z",
+            "fetched_at": "2026-10-31T18:19:54Z",
             "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574700/liverpool-vs-arsenal"
           }
         ],
@@ -5309,13 +885,13 @@
           {
             "line": 2.5,
             "side": "over",
-            "odds": 1.96,
-            "odds_effective": 1.96,
-            "book": "1xBet",
-            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843278-liverpool-arsenal",
-            "model_prob": 0.3591,
-            "implied_prob": 0.5075,
-            "edge": -0.2962,
+            "odds": 1.98,
+            "odds_effective": 1.9653,
+            "book": "Matchbook",
+            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34629652585500023/",
+            "model_prob": 0.3589,
+            "implied_prob": 0.5025,
+            "edge": -0.2946,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -5323,13 +899,13 @@
           {
             "line": 2.5,
             "side": "under",
-            "odds": 2.02,
-            "odds_effective": 2.0047,
-            "book": "Matchbook",
-            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34629652585500023/",
-            "model_prob": 0.6409,
-            "implied_prob": 0.4925,
-            "edge": 0.2848,
+            "odds": 2,
+            "odds_effective": 2,
+            "book": "Pinnacle",
+            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/arsenal-vs-liverpool/1638388732/",
+            "model_prob": 0.6411,
+            "implied_prob": 0.4975,
+            "edge": 0.2822,
             "flag": "strong",
             "kelly_fraction": 0.02,
             "stake_suggestion": 2
@@ -5358,7 +934,7 @@
           "draw": 3.3,
           "away": 2.38,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:20:37Z",
+          "fetched_at": "2026-10-31T18:19:54Z",
           "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574700/liverpool-vs-arsenal"
         },
         {
@@ -5369,7 +945,7 @@
           "draw": 3.54,
           "away": 2.44,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
+          "fetched_at": "2026-10-31T18:20:39Z",
           "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843278-liverpool-arsenal"
         },
         {
@@ -5380,7 +956,7 @@
           "draw": 3.5,
           "away": 2.58,
           "commission": 0.05,
-          "fetched_at": "2026-10-31T14:21:23Z",
+          "fetched_at": "2026-10-31T18:20:40Z",
           "link": "https://www.betfair.com/exchange/plus/football/market/1.264047430"
         },
         {
@@ -5391,7 +967,7 @@
           "draw": 3.48,
           "away": 2.4,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:26Z",
+          "fetched_at": "2026-10-31T18:20:04Z",
           "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/liverpool-vs-arsenal"
         },
         {
@@ -5402,7 +978,7 @@
           "draw": 3.44,
           "away": 2.49,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:23Z",
+          "fetched_at": "2026-10-31T18:20:39Z",
           "link": "https://www.pinnacle.com/en/soccer/england-premier-league/arsenal-vs-liverpool/1638388732/"
         },
         {
@@ -5413,29 +989,29 @@
           "draw": 3.5,
           "away": 2.5,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:01Z",
+          "fetched_at": "2026-10-31T18:20:40Z",
           "link": "https://www.unibet.se/betting/sports/event/1028072829"
         },
         {
           "bookmaker": "Nordic Bet",
           "key": "nordicbet",
           "market": "1X2",
-          "home": 2.9,
+          "home": 2.88,
           "draw": 3.35,
-          "away": 2.45,
+          "away": 2.48,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
+          "fetched_at": "2026-10-31T18:20:18Z",
           "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/liverpool-arsenal"
         },
         {
           "bookmaker": "Betsson",
           "key": "betsson",
           "market": "1X2",
-          "home": 2.9,
+          "home": 2.87,
           "draw": 3.33,
-          "away": 2.46,
+          "away": 2.48,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:05Z",
+          "fetched_at": "2026-10-31T18:20:20Z",
           "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-xHVYzz4nnESQqWJUB3jOsQ&eti=0&fs=true"
         },
         {
@@ -5446,7 +1022,7 @@
           "draw": 3.47,
           "away": 2.53,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:27Z",
+          "fetched_at": "2026-10-31T18:20:42Z",
           "link": "https://www.coolbet.com/en/sports/match/6354602"
         },
         {
@@ -5457,7 +1033,7 @@
           "draw": 3.5,
           "away": 2.58,
           "commission": 0.015,
-          "fetched_at": "2026-10-31T14:21:25Z",
+          "fetched_at": "2026-10-31T18:20:39Z",
           "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34629652585500023/"
         }
       ],
@@ -5475,9 +1051,9 @@
       "market": {
         "margin": -0.0037,
         "implied": {
-          "home": 0.3289,
-          "draw": 0.2828,
-          "away": 0.3883
+          "home": 0.3301,
+          "draw": 0.2824,
+          "away": 0.3875
         },
         "sharp": {
           "home": 0.3302,
@@ -5488,41 +1064,41 @@
       },
       "model": {
         "method": "poisson+sharp-blend",
-        "lambda_home": 0.853,
-        "lambda_away": 1.279,
+        "lambda_home": 0.87,
+        "lambda_away": 1.262,
         "probs": {
-          "home": 0.3067,
-          "draw": 0.2865,
-          "away": 0.4068
+          "home": 0.3087,
+          "draw": 0.2869,
+          "away": 0.4045
         },
         "poisson_probs": {
-          "home": 0.242,
-          "draw": 0.3008,
-          "away": 0.4572
+          "home": 0.2495,
+          "draw": 0.3023,
+          "away": 0.4482
         },
         "blend_weight": 0.26666666666666666,
-        "over25": 0.3591,
-        "btts": 0.4207,
+        "over25": 0.3589,
+        "btts": 0.423,
         "top_scores": [
           {
             "score": "0-1",
-            "p": 0.1452
+            "p": 0.1432
           },
           {
             "score": "1-1",
-            "p": 0.1359
+            "p": 0.1367
           },
           {
             "score": "0-0",
-            "p": 0.125
-          },
-          {
-            "score": "0-2",
-            "p": 0.097
+            "p": 0.1251
           },
           {
             "score": "1-0",
-            "p": 0.0947
+            "p": 0.0967
+          },
+          {
+            "score": "0-2",
+            "p": 0.0945
           }
         ],
         "adjustments": [
@@ -5534,11 +1110,11 @@
           }
         ],
         "home_strength": {
-          "attack": 1.06,
-          "defense": 0.84
+          "attack": 1.07,
+          "defense": 0.85
         },
         "away_strength": {
-          "attack": 1.21,
+          "attack": 1.22,
           "defense": 0.53
         }
       },
@@ -5549,9 +1125,9 @@
             "odds": 3.1,
             "odds_effective": 3.1,
             "book": "1xBet",
-            "model_prob": 0.3067,
-            "implied_prob": 0.3289,
-            "edge": -0.0492,
+            "model_prob": 0.3087,
+            "implied_prob": 0.3301,
+            "edge": -0.043,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -5561,9 +1137,9 @@
             "odds": 3.54,
             "odds_effective": 3.54,
             "book": "1xBet",
-            "model_prob": 0.2865,
-            "implied_prob": 0.2828,
-            "edge": 0.0142,
+            "model_prob": 0.2869,
+            "implied_prob": 0.2824,
+            "edge": 0.0156,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -5573,9 +1149,9 @@
             "odds": 2.58,
             "odds_effective": 2.5563,
             "book": "Matchbook",
-            "model_prob": 0.4068,
-            "implied_prob": 0.3883,
-            "edge": 0.0399,
+            "model_prob": 0.4045,
+            "implied_prob": 0.3875,
+            "edge": 0.034,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -5586,7 +1162,7 @@
       },
       "stats": {
         "home": {
-          "rank": 4,
+          "rank": 5,
           "played": 8,
           "form": "WWLWD",
           "gf_pg": 1.38,
@@ -5630,15 +1206,15 @@
           "impact": null
         },
         {
-          "title": "Man Utd target Barcelona's Lopez - Saturday's gossip",
-          "url": "https://www.bbc.co.uk/sport/football/articles/ck3r52vn758xo?at_medium=RSS&at_campaign=rss",
-          "source": "BBC Sport",
-          "published_at": "2026-10-30T23:08:16.000Z",
-          "event_type": null,
-          "team": "Arsenal",
+          "title": "Xabi Alonso rules out January loan move for Chelsea winger Estêvão Willian",
+          "url": "https://www.theguardian.com/football/2026/oct/30/xabi-alonso-rules-out-january-loan-move-estevao-willian-chelsea-manchester-united-premier-league",
+          "source": "The Guardian",
+          "published_at": "2026-10-30T22:30:26.000Z",
+          "event_type": "injury",
+          "team": "Liverpool",
           "player": null,
-          "confidence": null,
-          "impact": null
+          "confidence": 0.45,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
         },
         {
           "title": "Arteta can take inspiration from George Graham to expunge painful Anfield memories",
@@ -5685,7 +1261,7 @@
             "over": 1.77,
             "under": 2.22,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
+            "fetched_at": "2026-10-31T18:20:39Z",
             "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843748-newcastle-united-everton"
           },
           {
@@ -5695,7 +1271,7 @@
             "over": 1.71,
             "under": 2.16,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:05Z",
+            "fetched_at": "2026-10-31T18:20:20Z",
             "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-EPOjWW6Ly02tAWutCm-3sA&eti=0&fs=true"
           },
           {
@@ -5705,7 +1281,7 @@
             "over": 1.73,
             "under": 2.19,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:27Z",
+            "fetched_at": "2026-10-31T18:20:42Z",
             "link": "https://www.coolbet.com/en/sports/match/6354879"
           },
           {
@@ -5715,17 +1291,17 @@
             "over": 1.72,
             "under": 2.15,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:26Z",
+            "fetched_at": "2026-10-31T18:20:04Z",
             "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/newcastle-united-vs-everton"
           },
           {
             "bookmaker": "Matchbook",
             "key": "matchbook",
             "line": 2.5,
-            "over": 1.76,
-            "under": 2.24,
+            "over": 1.77,
+            "under": 2.26,
             "commission": 0.015,
-            "fetched_at": "2026-10-31T14:21:25Z",
+            "fetched_at": "2026-10-31T18:20:39Z",
             "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630062919200023/"
           },
           {
@@ -5735,7 +1311,7 @@
             "over": 1.7,
             "under": 2.15,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:24Z",
+            "fetched_at": "2026-10-31T18:20:18Z",
             "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/newcastle-everton"
           },
           {
@@ -5745,7 +1321,7 @@
             "over": 1.74,
             "under": 2.12,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:01Z",
+            "fetched_at": "2026-10-31T18:20:40Z",
             "link": "https://www.unibet.se/betting/sports/event/1028072835"
           },
           {
@@ -5755,17 +1331,17 @@
             "over": 1.67,
             "under": 2.15,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:20:37Z",
+            "fetched_at": "2026-10-31T18:19:54Z",
             "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574926/newcastle-vs-everton"
           },
           {
             "bookmaker": "Pinnacle",
             "key": "pinnacle",
             "line": 2.75,
-            "over": 1.92,
-            "under": 1.97,
+            "over": 1.93,
+            "under": 1.96,
             "commission": 0,
-            "fetched_at": "2026-10-31T14:21:23Z",
+            "fetched_at": "2026-10-31T18:20:39Z",
             "link": "https://www.pinnacle.com/en/soccer/england-premier-league/everton-vs-newcastle-united/1638676652/"
           }
         ],
@@ -5777,9 +1353,9 @@
             "odds_effective": 1.77,
             "book": "1xBet",
             "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843748-newcastle-united-everton",
-            "model_prob": 0.4755,
-            "implied_prob": 0.5586,
-            "edge": -0.1583,
+            "model_prob": 0.4785,
+            "implied_prob": 0.5608,
+            "edge": -0.1531,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -5787,13 +1363,13 @@
           {
             "line": 2.5,
             "side": "under",
-            "odds": 2.24,
-            "odds_effective": 2.2214,
+            "odds": 2.26,
+            "odds_effective": 2.2411,
             "book": "Matchbook",
             "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630062919200023/",
-            "model_prob": 0.5245,
-            "implied_prob": 0.4414,
-            "edge": 0.165,
+            "model_prob": 0.5215,
+            "implied_prob": 0.4392,
+            "edge": 0.1688,
             "flag": "strong",
             "kelly_fraction": 0.02,
             "stake_suggestion": 2
@@ -5801,13 +1377,13 @@
           {
             "line": 2.75,
             "side": "over",
-            "odds": 1.92,
-            "odds_effective": 1.92,
+            "odds": 1.93,
+            "odds_effective": 1.93,
             "book": "Pinnacle",
             "link": "https://www.pinnacle.com/en/soccer/england-premier-league/everton-vs-newcastle-united/1638676652/",
-            "model_prob": 0.4755,
-            "implied_prob": 0.5064,
-            "edge": -0.0869,
+            "model_prob": 0.4785,
+            "implied_prob": 0.5039,
+            "edge": -0.0765,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -5815,16 +1391,16 @@
           {
             "line": 2.75,
             "side": "under",
-            "odds": 1.97,
-            "odds_effective": 1.97,
+            "odds": 1.96,
+            "odds_effective": 1.96,
             "book": "Pinnacle",
             "link": "https://www.pinnacle.com/en/soccer/england-premier-league/everton-vs-newcastle-united/1638676652/",
-            "model_prob": 0.5245,
-            "implied_prob": 0.4936,
-            "edge": 0.0332,
-            "flag": "candidate",
-            "kelly_fraction": 0.0085,
-            "stake_suggestion": 0.85
+            "model_prob": 0.5215,
+            "implied_prob": 0.4961,
+            "edge": 0.0222,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
           }
         ]
       },
@@ -5850,7 +1426,7 @@
           "draw": 3.75,
           "away": 3.05,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
+          "fetched_at": "2026-10-31T18:20:39Z",
           "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843748-newcastle-united-everton"
         },
         {
@@ -5861,7 +1437,7 @@
           "draw": 3.5,
           "away": 2.9,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:20:37Z",
+          "fetched_at": "2026-10-31T18:19:54Z",
           "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574926/newcastle-vs-everton"
         },
         {
@@ -5872,7 +1448,7 @@
           "draw": 3.65,
           "away": 2.97,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:26Z",
+          "fetched_at": "2026-10-31T18:20:04Z",
           "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/newcastle-united-vs-everton"
         },
         {
@@ -5883,7 +1459,7 @@
           "draw": 3.6,
           "away": 3.05,
           "commission": 0.05,
-          "fetched_at": "2026-10-31T14:21:23Z",
+          "fetched_at": "2026-10-31T18:20:40Z",
           "link": "https://www.betfair.com/exchange/plus/football/market/1.264059801"
         },
         {
@@ -5894,7 +1470,7 @@
           "draw": 3.56,
           "away": 2.93,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:23Z",
+          "fetched_at": "2026-10-31T18:20:39Z",
           "link": "https://www.pinnacle.com/en/soccer/england-premier-league/everton-vs-newcastle-united/1638676652/"
         },
         {
@@ -5905,7 +1481,7 @@
           "draw": 3.65,
           "away": 3,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:01Z",
+          "fetched_at": "2026-10-31T18:20:40Z",
           "link": "https://www.unibet.se/betting/sports/event/1028072835"
         },
         {
@@ -5916,7 +1492,7 @@
           "draw": 3.45,
           "away": 2.88,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:24Z",
+          "fetched_at": "2026-10-31T18:20:18Z",
           "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/newcastle-everton"
         },
         {
@@ -5927,7 +1503,7 @@
           "draw": 3.47,
           "away": 2.87,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:05Z",
+          "fetched_at": "2026-10-31T18:20:20Z",
           "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-EPOjWW6Ly02tAWutCm-3sA&eti=0&fs=true"
         },
         {
@@ -5938,7 +1514,7 @@
           "draw": 3.57,
           "away": 3.04,
           "commission": 0,
-          "fetched_at": "2026-10-31T14:21:27Z",
+          "fetched_at": "2026-10-31T18:20:42Z",
           "link": "https://www.coolbet.com/en/sports/match/6354879"
         },
         {
@@ -5949,7 +1525,7 @@
           "draw": 3.6,
           "away": 3.05,
           "commission": 0.015,
-          "fetched_at": "2026-10-31T14:21:25Z",
+          "fetched_at": "2026-10-31T18:20:39Z",
           "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630062919200023/"
         }
       ],
@@ -5980,41 +1556,41 @@
       },
       "model": {
         "method": "poisson+sharp-blend",
-        "lambda_home": 1.399,
-        "lambda_away": 1.177,
+        "lambda_home": 1.427,
+        "lambda_away": 1.161,
         "probs": {
-          "home": 0.4024,
-          "draw": 0.2728,
-          "away": 0.3247
+          "home": 0.4053,
+          "draw": 0.2724,
+          "away": 0.3223
         },
         "poisson_probs": {
-          "home": 0.4143,
-          "draw": 0.2759,
-          "away": 0.3098
+          "home": 0.425,
+          "draw": 0.2743,
+          "away": 0.3007
         },
         "blend_weight": 0.26666666666666666,
-        "over25": 0.4755,
-        "btts": 0.5273,
+        "over25": 0.4785,
+        "btts": 0.5282,
         "top_scores": [
           {
             "score": "1-1",
-            "p": 0.1315
+            "p": 0.1308
           },
           {
             "score": "1-0",
-            "p": 0.1002
+            "p": 0.101
           },
           {
             "score": "2-1",
-            "p": 0.0876
-          },
-          {
-            "score": "0-1",
-            "p": 0.0832
+            "p": 0.0888
           },
           {
             "score": "0-0",
-            "p": 0.0823
+            "p": 0.0814
+          },
+          {
+            "score": "0-1",
+            "p": 0.0811
           }
         ],
         "adjustments": [
@@ -6026,7 +1602,7 @@
           }
         ],
         "home_strength": {
-          "attack": 1.05,
+          "attack": 1.06,
           "defense": 1.17
         },
         "away_strength": {
@@ -6041,9 +1617,9 @@
             "odds": 2.5,
             "odds_effective": 2.4775,
             "book": "Matchbook",
-            "model_prob": 0.4024,
+            "model_prob": 0.4053,
             "implied_prob": 0.4009,
-            "edge": -0.0031,
+            "edge": 0.0041,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -6053,9 +1629,9 @@
             "odds": 3.75,
             "odds_effective": 3.75,
             "book": "1xBet",
-            "model_prob": 0.2728,
+            "model_prob": 0.2724,
             "implied_prob": 0.2731,
-            "edge": 0.023,
+            "edge": 0.0215,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -6065,9 +1641,9 @@
             "odds": 3.05,
             "odds_effective": 3.05,
             "book": "1xBet",
-            "model_prob": 0.3247,
+            "model_prob": 0.3223,
             "implied_prob": 0.326,
-            "edge": -0.0097,
+            "edge": -0.017,
             "flag": "none",
             "kelly_fraction": 0,
             "stake_suggestion": 0
@@ -6078,7 +1654,7 @@
       },
       "stats": {
         "home": {
-          "rank": 8,
+          "rank": 10,
           "played": 8,
           "form": "WLLWL",
           "gf_pg": 1.5,
@@ -6093,7 +1669,7 @@
           "elo_rank": null
         },
         "away": {
-          "rank": 11,
+          "rank": 13,
           "played": 8,
           "form": "LLDWD",
           "gf_pg": 1,
@@ -6110,6 +1686,17 @@
         "h2h": []
       },
       "news": [
+        {
+          "title": "Manchester United miss chance to close on WSL top three in drab draw at Everton",
+          "url": "https://www.theguardian.com/football/2026/oct/31/everton-manchester-united-wsl-match-report",
+          "source": "The Guardian",
+          "published_at": "2026-10-31T14:59:15.000Z",
+          "event_type": null,
+          "team": "Everton",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
         {
           "title": "Shearer discusses scoring record, MOTD & a brush with Cardiff",
           "url": "https://www.bbc.co.uk/sport/football/articles/cwkg5l822k3no?at_medium=RSS&at_campaign=rss",
@@ -6153,17 +1740,6 @@
           "player": null,
           "confidence": 0.4,
           "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
-        },
-        {
-          "title": "Britain's first £100m man facing defining moment",
-          "url": "https://www.bbc.co.uk/sport/football/articles/cmzxj2e2e5p2o?at_medium=RSS&at_campaign=rss",
-          "source": "BBC Sport",
-          "published_at": "2026-10-30T13:42:15.000Z",
-          "event_type": null,
-          "team": "Everton",
-          "player": null,
-          "confidence": null,
-          "impact": null
         }
       ]
     }
