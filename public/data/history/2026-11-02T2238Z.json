@@ -1,0 +1,508 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-02T22:38:26.066Z",
+  "sport": "football",
+  "source": "live",
+  "providers": [
+    "The Odds API",
+    "football-data.org",
+    "RSS-uutissyötteet"
+  ],
+  "leagues": [
+    "Valioliiga"
+  ],
+  "matches": [
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 2.5,
+            "over": 1.81,
+            "under": 2.15,
+            "commission": 0,
+            "fetched_at": "2026-11-02T22:37:02Z",
+            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/383263524-everton-coventry-city"
+          },
+          {
+            "bookmaker": "Betsson",
+            "key": "betsson",
+            "line": 2.5,
+            "over": 1.71,
+            "under": 2.16,
+            "commission": 0,
+            "fetched_at": "2026-11-02T22:37:30Z",
+            "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-aQ78Kf9MsECm7GWuwO9Ldg&eti=0&fs=true"
+          },
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 2.5,
+            "over": 1.73,
+            "under": 2.19,
+            "commission": 0,
+            "fetched_at": "2026-11-02T22:38:22Z",
+            "link": "https://www.coolbet.com/en/sports/match/6395312"
+          },
+          {
+            "bookmaker": "Marathon Bet",
+            "key": "marathonbet",
+            "line": 2.5,
+            "over": 1.76,
+            "under": 2.09,
+            "commission": 0,
+            "fetched_at": "2026-11-02T22:37:35Z",
+            "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/everton-vs-coventry-city"
+          },
+          {
+            "bookmaker": "Matchbook",
+            "key": "matchbook",
+            "line": 2.5,
+            "over": 1.78,
+            "under": 2.26,
+            "commission": 0.015,
+            "fetched_at": "2026-11-02T22:37:54Z",
+            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34690293357800023/"
+          },
+          {
+            "bookmaker": "Nordic Bet",
+            "key": "nordicbet",
+            "line": 2.5,
+            "over": 1.7,
+            "under": 2.15,
+            "commission": 0,
+            "fetched_at": "2026-11-02T22:38:23Z",
+            "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/everton-coventry"
+          },
+          {
+            "bookmaker": "Unibet (SE)",
+            "key": "unibet_se",
+            "line": 2.5,
+            "over": 1.75,
+            "under": 2.1,
+            "commission": 0,
+            "fetched_at": "2026-11-02T22:38:21Z",
+            "link": "https://www.unibet.se/betting/sports/event/1028072850"
+          },
+          {
+            "bookmaker": "William Hill",
+            "key": "williamhill",
+            "line": 2.5,
+            "over": 1.7,
+            "under": 2.1,
+            "commission": 0,
+            "fetched_at": "2026-11-02T22:37:56Z",
+            "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41656250/everton-vs-coventry"
+          },
+          {
+            "bookmaker": "Pinnacle",
+            "key": "pinnacle",
+            "line": 2.75,
+            "over": 1.93,
+            "under": 1.95,
+            "commission": 0,
+            "fetched_at": "2026-11-02T22:38:21Z",
+            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/coventry-city-vs-everton/1639210947/"
+          }
+        ],
+        "edges": [
+          {
+            "line": 2.5,
+            "side": "over",
+            "odds": 1.81,
+            "odds_effective": 1.81,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/383263524-everton-coventry-city",
+            "model_prob": 0.4114,
+            "implied_prob": 0.5553,
+            "edge": -0.2554,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 2.5,
+            "side": "under",
+            "odds": 2.26,
+            "odds_effective": 2.2411,
+            "book": "Matchbook",
+            "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34690293357800023/",
+            "model_prob": 0.5886,
+            "implied_prob": 0.4447,
+            "edge": 0.3191,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          },
+          {
+            "line": 2.75,
+            "side": "over",
+            "odds": 1.93,
+            "odds_effective": 1.93,
+            "book": "Pinnacle",
+            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/coventry-city-vs-everton/1639210947/",
+            "model_prob": 0.4114,
+            "implied_prob": 0.5026,
+            "edge": -0.206,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 2.75,
+            "side": "under",
+            "odds": 1.95,
+            "odds_effective": 1.95,
+            "book": "Pinnacle",
+            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/coventry-city-vs-everton/1639210947/",
+            "model_prob": 0.5886,
+            "implied_prob": 0.4974,
+            "edge": 0.1478,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          }
+        ]
+      },
+      "id": "soccer_epl:2026-11-06:EVE-COV",
+      "league": "Valioliiga",
+      "kickoff": "2026-11-06T20:00:00.000Z",
+      "home": {
+        "name": "Everton",
+        "short": "EVE",
+        "color": "#0E7490"
+      },
+      "away": {
+        "name": "Coventry City",
+        "short": "COV",
+        "color": "#9E6A03"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 1.75,
+          "draw": 4.16,
+          "away": 4.93,
+          "commission": 0,
+          "fetched_at": "2026-11-02T22:37:02Z",
+          "link": "https://1xbet.com/en/line/football/88637-england-premier-league/383263524-everton-coventry-city"
+        },
+        {
+          "bookmaker": "Betfair",
+          "key": "betfair_ex_eu",
+          "market": "1X2",
+          "home": 1.77,
+          "draw": 4,
+          "away": 5,
+          "commission": 0.05,
+          "fetched_at": "2026-11-02T22:38:21Z",
+          "link": "https://www.betfair.com/exchange/plus/football/market/1.264450150"
+        },
+        {
+          "bookmaker": "William Hill",
+          "key": "williamhill",
+          "market": "1X2",
+          "home": 1.7,
+          "draw": 3.8,
+          "away": 4.6,
+          "commission": 0,
+          "fetched_at": "2026-11-02T22:37:56Z",
+          "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41656250/everton-vs-coventry"
+        },
+        {
+          "bookmaker": "Marathon Bet",
+          "key": "marathonbet",
+          "market": "1X2",
+          "home": 1.7,
+          "draw": 4.05,
+          "away": 4.8,
+          "commission": 0,
+          "fetched_at": "2026-11-02T22:37:35Z",
+          "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/everton-vs-coventry-city"
+        },
+        {
+          "bookmaker": "Pinnacle",
+          "key": "pinnacle",
+          "market": "1X2",
+          "home": 1.74,
+          "draw": 4.05,
+          "away": 4.75,
+          "commission": 0,
+          "fetched_at": "2026-11-02T22:38:21Z",
+          "link": "https://www.pinnacle.com/en/soccer/england-premier-league/coventry-city-vs-everton/1639210947/"
+        },
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 1.76,
+          "draw": 4,
+          "away": 4.9,
+          "commission": 0,
+          "fetched_at": "2026-11-02T22:38:21Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028072850"
+        },
+        {
+          "bookmaker": "Nordic Bet",
+          "key": "nordicbet",
+          "market": "1X2",
+          "home": 1.7,
+          "draw": 3.95,
+          "away": 4.75,
+          "commission": 0,
+          "fetched_at": "2026-11-02T22:38:23Z",
+          "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/everton-coventry"
+        },
+        {
+          "bookmaker": "Betsson",
+          "key": "betsson",
+          "market": "1X2",
+          "home": 1.7,
+          "draw": 3.95,
+          "away": 4.75,
+          "commission": 0,
+          "fetched_at": "2026-11-02T22:37:30Z",
+          "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-aQ78Kf9MsECm7GWuwO9Ldg&eti=0&fs=true"
+        },
+        {
+          "bookmaker": "Matchbook",
+          "key": "matchbook",
+          "market": "1X2",
+          "home": 1.76,
+          "draw": 4,
+          "away": 5.1,
+          "commission": 0.015,
+          "fetched_at": "2026-11-02T22:37:54Z",
+          "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34690293357800023/"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 1.74,
+          "draw": 3.95,
+          "away": 4.75,
+          "commission": 0,
+          "fetched_at": "2026-11-02T22:38:22Z",
+          "link": "https://www.coolbet.com/en/sports/match/6395312"
+        }
+      ],
+      "best": {
+        "home": 1.76,
+        "draw": 4.16,
+        "away": 5.1,
+        "home_effective": 1.76,
+        "draw_effective": 4.16,
+        "away_effective": 5.0385,
+        "home_book": "Unibet (SE)",
+        "draw_book": "1xBet",
+        "away_book": "Matchbook"
+      },
+      "market": {
+        "margin": 0.007,
+        "implied": {
+          "home": 0.5579,
+          "draw": 0.2422,
+          "away": 0.2
+        },
+        "sharp": {
+          "home": 0.5568,
+          "draw": 0.2392,
+          "away": 0.204
+        },
+        "sharp_source": "Pinnacle"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 1.372,
+        "lambda_away": 0.956,
+        "probs": {
+          "home": 0.5332,
+          "draw": 0.2506,
+          "away": 0.2162
+        },
+        "poisson_probs": {
+          "home": 0.4582,
+          "draw": 0.2867,
+          "away": 0.2551
+        },
+        "blend_weight": 0.24,
+        "over25": 0.4114,
+        "btts": 0.4658,
+        "top_scores": [
+          {
+            "score": "1-1",
+            "p": 0.1343
+          },
+          {
+            "score": "1-0",
+            "p": 0.1274
+          },
+          {
+            "score": "0-0",
+            "p": 0.1039
+          },
+          {
+            "score": "2-0",
+            "p": 0.0918
+          },
+          {
+            "score": "2-1",
+            "p": 0.0877
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (EVE, 9 ottelua) / sarjan keskitaso (COV, 9 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 60 % → paino markkinaa vastaan 24 % (täysi 40 %). Kohtalaisesti dataa."
+          }
+        ],
+        "home_strength": {
+          "attack": 0.82,
+          "defense": 0.84
+        },
+        "away_strength": {
+          "attack": 0.95,
+          "defense": 1.12
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 1.76,
+            "odds_effective": 1.76,
+            "book": "Unibet (SE)",
+            "model_prob": 0.5332,
+            "implied_prob": 0.5579,
+            "edge": -0.0616,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.16,
+            "odds_effective": 4.16,
+            "book": "1xBet",
+            "model_prob": 0.2506,
+            "implied_prob": 0.2422,
+            "edge": 0.0425,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 5.1,
+            "odds_effective": 5.0385,
+            "book": "Matchbook",
+            "model_prob": 0.2162,
+            "implied_prob": 0.2,
+            "edge": 0.0893,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 7,
+          "played": 9,
+          "form": "WLLDW",
+          "gf_pg": 1,
+          "ga_pg": 1,
+          "home_gf_pg": 1.25,
+          "away_gf_pg": 0.8,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.44,
+          "elo": null,
+          "elo_change": null,
+          "elo_rank": null
+        },
+        "away": {
+          "rank": 16,
+          "played": 9,
+          "form": "WLLWW",
+          "gf_pg": 1,
+          "ga_pg": 1.78,
+          "home_gf_pg": 1.4,
+          "away_gf_pg": 0.5,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1,
+          "elo": null,
+          "elo_change": null,
+          "elo_rank": null
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "Who produced the kind of performance Moyes loves? - player ratings",
+          "url": "https://www.bbc.co.uk/sport/football/articles/cmglwjxx45gjo?at_medium=RSS&at_campaign=rss",
+          "source": "BBC Sport",
+          "published_at": "2026-11-02T22:08:43.000Z",
+          "event_type": null,
+          "team": "Everton",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Newcastle unrest grows as Barry and Everton give Jaissle another headache",
+          "url": "https://www.theguardian.com/football/2026/nov/02/newcastle-everton-premier-league-match-report",
+          "source": "The Guardian",
+          "published_at": "2026-11-02T22:04:11.000Z",
+          "event_type": "lineup_change",
+          "team": "Everton",
+          "player": null,
+          "confidence": 0.4,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "No Grealish, no problem - the rise of Everton's youngsters",
+          "url": "https://www.bbc.co.uk/sport/football/articles/cm70pv70jwrjo?at_medium=RSS&at_campaign=rss",
+          "source": "BBC Sport",
+          "published_at": "2026-11-02T07:19:35.000Z",
+          "event_type": null,
+          "team": "Everton",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Boy, 14, hands himself in to police over Bradley Lowery video",
+          "url": "https://www.bbc.co.uk/sport/football/articles/c6z7x52w0r0zo?at_medium=RSS&at_campaign=rss",
+          "source": "BBC Sport",
+          "published_at": "2026-11-01T20:15:52.000Z",
+          "event_type": null,
+          "team": "Coventry City",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Boy hands himself into police after Bradley Lowery taunt in Sunderland match",
+          "url": "https://www.theguardian.com/football/2026/nov/01/police-bradley-lowery-taunt-coventry-sunderland-premier-league",
+          "source": "The Guardian",
+          "published_at": "2026-11-01T18:20:53.000Z",
+          "event_type": null,
+          "team": "Coventry City",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        }
+      ]
+    }
+  ]
+}
