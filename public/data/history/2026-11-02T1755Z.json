@@ -1,0 +1,515 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-02T17:55:20.414Z",
+  "sport": "football",
+  "source": "live",
+  "providers": [
+    "The Odds API",
+    "football-data.org",
+    "RSS-uutissyötteet"
+  ],
+  "leagues": [
+    "Valioliiga"
+  ],
+  "matches": [
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 2.5,
+            "over": 1.77,
+            "under": 2.22,
+            "commission": 0,
+            "fetched_at": "2026-11-02T17:55:13Z",
+            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843748-newcastle-united-everton"
+          },
+          {
+            "bookmaker": "Betsson",
+            "key": "betsson",
+            "line": 2.5,
+            "over": 1.69,
+            "under": 2.2,
+            "commission": 0,
+            "fetched_at": "2026-11-02T17:55:13Z",
+            "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-EPOjWW6Ly02tAWutCm-3sA&eti=0&fs=true"
+          },
+          {
+            "bookmaker": "Marathon Bet",
+            "key": "marathonbet",
+            "line": 2.5,
+            "over": 1.72,
+            "under": 2.15,
+            "commission": 0,
+            "fetched_at": "2026-11-02T17:54:28Z",
+            "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/newcastle-united-vs-everton"
+          },
+          {
+            "bookmaker": "Nordic Bet",
+            "key": "nordicbet",
+            "line": 2.5,
+            "over": 1.68,
+            "under": 2.18,
+            "commission": 0,
+            "fetched_at": "2026-11-02T17:55:13Z",
+            "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/newcastle-everton"
+          },
+          {
+            "bookmaker": "Unibet (SE)",
+            "key": "unibet_se",
+            "line": 2.5,
+            "over": 1.66,
+            "under": 2.25,
+            "commission": 0,
+            "fetched_at": "2026-11-02T17:55:13Z",
+            "link": "https://www.unibet.se/betting/sports/event/1028072835"
+          },
+          {
+            "bookmaker": "William Hill",
+            "key": "williamhill",
+            "line": 2.5,
+            "over": 1.67,
+            "under": 2.15,
+            "commission": 0,
+            "fetched_at": "2026-11-02T17:54:25Z",
+            "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574926/newcastle-vs-everton"
+          },
+          {
+            "bookmaker": "Pinnacle",
+            "key": "pinnacle",
+            "line": 2.75,
+            "over": 1.87,
+            "under": 2.04,
+            "commission": 0,
+            "fetched_at": "2026-11-02T17:55:12Z",
+            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/everton-vs-newcastle-united/1638676652/"
+          },
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 3,
+            "over": 2.15,
+            "under": 1.76,
+            "commission": 0,
+            "fetched_at": "2026-11-02T17:54:24Z",
+            "link": "https://www.coolbet.com/en/sports/match/6354879"
+          }
+        ],
+        "edges": [
+          {
+            "line": 2.5,
+            "side": "over",
+            "odds": 1.77,
+            "odds_effective": 1.77,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843748-newcastle-united-everton",
+            "model_prob": 0.4846,
+            "implied_prob": 0.5597,
+            "edge": -0.1423,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 2.5,
+            "side": "under",
+            "odds": 2.25,
+            "odds_effective": 2.25,
+            "book": "Unibet (SE)",
+            "link": "https://www.unibet.se/betting/sports/event/1028072835",
+            "model_prob": 0.5154,
+            "implied_prob": 0.4403,
+            "edge": 0.1597,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          },
+          {
+            "line": 2.75,
+            "side": "over",
+            "odds": 1.87,
+            "odds_effective": 1.87,
+            "book": "Pinnacle",
+            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/everton-vs-newcastle-united/1638676652/",
+            "model_prob": 0.4846,
+            "implied_prob": 0.5217,
+            "edge": -0.0938,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 2.75,
+            "side": "under",
+            "odds": 2.04,
+            "odds_effective": 2.04,
+            "book": "Pinnacle",
+            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/everton-vs-newcastle-united/1638676652/",
+            "model_prob": 0.5154,
+            "implied_prob": 0.4783,
+            "edge": 0.0515,
+            "flag": "strong",
+            "kelly_fraction": 0.0124,
+            "stake_suggestion": 1.24
+          },
+          {
+            "line": 3,
+            "side": "over",
+            "odds": 2.15,
+            "odds_effective": 2.15,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6354879",
+            "model_prob": 0.2666,
+            "implied_prob": 0.4501,
+            "edge": -0.4268,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 3,
+            "side": "under",
+            "odds": 1.76,
+            "odds_effective": 1.76,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6354879",
+            "model_prob": 0.7334,
+            "implied_prob": 0.5499,
+            "edge": 0.2908,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          }
+        ]
+      },
+      "id": "soccer_epl:2026-11-02:NEW-EVE",
+      "league": "Valioliiga",
+      "kickoff": "2026-11-02T20:00:00.000Z",
+      "home": {
+        "name": "Newcastle United",
+        "short": "NEW",
+        "color": "#9E6A03"
+      },
+      "away": {
+        "name": "Everton",
+        "short": "EVE",
+        "color": "#0E7490"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 2.2,
+          "draw": 3.69,
+          "away": 3.43,
+          "commission": 0,
+          "fetched_at": "2026-11-02T17:55:13Z",
+          "link": "https://1xbet.com/en/line/football/88637-england-premier-league/380843748-newcastle-united-everton"
+        },
+        {
+          "bookmaker": "William Hill",
+          "key": "williamhill",
+          "market": "1X2",
+          "home": 2.15,
+          "draw": 3.4,
+          "away": 3.2,
+          "commission": 0,
+          "fetched_at": "2026-11-02T17:54:25Z",
+          "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41574926/newcastle-vs-everton"
+        },
+        {
+          "bookmaker": "Marathon Bet",
+          "key": "marathonbet",
+          "market": "1X2",
+          "home": 2.17,
+          "draw": 3.64,
+          "away": 3.38,
+          "commission": 0,
+          "fetched_at": "2026-11-02T17:54:28Z",
+          "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/newcastle-united-vs-everton"
+        },
+        {
+          "bookmaker": "Betfair",
+          "key": "betfair_ex_eu",
+          "market": "1X2",
+          "home": 2.28,
+          "draw": 3.7,
+          "away": 3.35,
+          "commission": 0.05,
+          "fetched_at": "2026-11-02T17:55:14Z",
+          "link": "https://www.betfair.com/exchange/plus/football/market/1.264059801"
+        },
+        {
+          "bookmaker": "Pinnacle",
+          "key": "pinnacle",
+          "market": "1X2",
+          "home": 2.23,
+          "draw": 3.64,
+          "away": 3.31,
+          "commission": 0,
+          "fetched_at": "2026-11-02T17:55:12Z",
+          "link": "https://www.pinnacle.com/en/soccer/england-premier-league/everton-vs-newcastle-united/1638676652/"
+        },
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 2.16,
+          "draw": 3.75,
+          "away": 3.45,
+          "commission": 0,
+          "fetched_at": "2026-11-02T17:55:13Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028072835"
+        },
+        {
+          "bookmaker": "Nordic Bet",
+          "key": "nordicbet",
+          "market": "1X2",
+          "home": 2.18,
+          "draw": 3.45,
+          "away": 3.25,
+          "commission": 0,
+          "fetched_at": "2026-11-02T17:55:13Z",
+          "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/newcastle-everton"
+        },
+        {
+          "bookmaker": "Betsson",
+          "key": "betsson",
+          "market": "1X2",
+          "home": 2.19,
+          "draw": 3.48,
+          "away": 3.25,
+          "commission": 0,
+          "fetched_at": "2026-11-02T17:55:13Z",
+          "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-EPOjWW6Ly02tAWutCm-3sA&eti=0&fs=true"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 2.25,
+          "draw": 3.66,
+          "away": 3.3,
+          "commission": 0,
+          "fetched_at": "2026-11-02T17:54:24Z",
+          "link": "https://www.coolbet.com/en/sports/match/6354879"
+        },
+        {
+          "bookmaker": "Matchbook",
+          "key": "matchbook",
+          "market": "1X2",
+          "home": 2.28,
+          "draw": 3.7,
+          "away": 3.4,
+          "commission": 0.015,
+          "fetched_at": "2026-11-02T17:55:12Z",
+          "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34630062919200023/"
+        }
+      ],
+      "best": {
+        "home": 2.28,
+        "draw": 3.75,
+        "away": 3.45,
+        "home_effective": 2.2607999999999997,
+        "draw_effective": 3.75,
+        "away_effective": 3.45,
+        "home_book": "Matchbook",
+        "draw_book": "Unibet (SE)",
+        "away_book": "Unibet (SE)"
+      },
+      "market": {
+        "margin": -0.0012,
+        "implied": {
+          "home": 0.4379,
+          "draw": 0.269,
+          "away": 0.2931
+        },
+        "sharp": {
+          "home": 0.4374,
+          "draw": 0.268,
+          "away": 0.2947
+        },
+        "sharp_source": "Pinnacle"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 1.442,
+        "lambda_away": 1.17,
+        "probs": {
+          "home": 0.4346,
+          "draw": 0.2692,
+          "away": 0.2962
+        },
+        "poisson_probs": {
+          "home": 0.4268,
+          "draw": 0.2727,
+          "away": 0.3004
+        },
+        "blend_weight": 0.26666666666666666,
+        "over25": 0.4846,
+        "btts": 0.5328,
+        "top_scores": [
+          {
+            "score": "1-1",
+            "p": 0.13
+          },
+          {
+            "score": "1-0",
+            "p": 0.0996
+          },
+          {
+            "score": "2-1",
+            "p": 0.0893
+          },
+          {
+            "score": "0-1",
+            "p": 0.0797
+          },
+          {
+            "score": "0-0",
+            "p": 0.0796
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (NEW, 8 ottelua) / tämä + viime kausi (EVE, 8 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 67 % → paino markkinaa vastaan 27 % (täysi 40 %). Kohtalaisesti dataa."
+          }
+        ],
+        "home_strength": {
+          "attack": 1.07,
+          "defense": 1.19
+        },
+        "away_strength": {
+          "attack": 0.82,
+          "defense": 0.89
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.28,
+            "odds_effective": 2.2608,
+            "book": "Matchbook",
+            "model_prob": 0.4346,
+            "implied_prob": 0.4379,
+            "edge": -0.0175,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 3.75,
+            "odds_effective": 3.75,
+            "book": "Unibet (SE)",
+            "model_prob": 0.2692,
+            "implied_prob": 0.269,
+            "edge": 0.0095,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 3.45,
+            "odds_effective": 3.45,
+            "book": "Unibet (SE)",
+            "model_prob": 0.2962,
+            "implied_prob": 0.2931,
+            "edge": 0.0219,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 12,
+          "played": 8,
+          "form": "WLLWL",
+          "gf_pg": 1.5,
+          "ga_pg": 1.75,
+          "home_gf_pg": 1.5,
+          "away_gf_pg": 1.5,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.38,
+          "elo": null,
+          "elo_change": null,
+          "elo_rank": null
+        },
+        "away": {
+          "rank": 14,
+          "played": 8,
+          "form": "LLDWD",
+          "gf_pg": 1,
+          "ga_pg": 1.13,
+          "home_gf_pg": 1.25,
+          "away_gf_pg": 0.75,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.25,
+          "elo": null,
+          "elo_change": null,
+          "elo_rank": null
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "Jack Grealish left out of Everton squad again for Premier League trip to Newcastle",
+          "url": "https://www.theguardian.com/football/2026/nov/02/jack-grealish-left-out-everton-squad-newcastle-premier-league-david-moyes",
+          "source": "The Guardian",
+          "published_at": "2026-11-02T14:58:22.000Z",
+          "event_type": null,
+          "team": "Newcastle United",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Folarin Balogun takes a first, tiny step toward moving on from a calamitous summer",
+          "url": "https://www.theguardian.com/football/2026/nov/02/folarin-balogun-monaco-first-goal",
+          "source": "The Guardian",
+          "published_at": "2026-11-02T11:38:59.000Z",
+          "event_type": "suspension",
+          "team": "Everton",
+          "player": null,
+          "confidence": 0.5,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "No Grealish, no problem - the rise of Everton's youngsters",
+          "url": "https://www.bbc.co.uk/sport/football/articles/cm70pv70jwrjo?at_medium=RSS&at_campaign=rss",
+          "source": "BBC Sport",
+          "published_at": "2026-11-02T07:19:35.000Z",
+          "event_type": null,
+          "team": "Everton",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Edellisen kerran 124 vuotta sitten – Pelataanko ensi kauden Manchesterin derby divarissa?",
+          "url": "https://www.iltalehti.fi/valioliiga/a/61ee4818-cb86-4a25-86e1-89cb63641d91?utm_source=rss",
+          "source": "Iltalehti jalkapallo",
+          "published_at": "2026-10-31T11:57:53.000Z",
+          "event_type": "manager_change",
+          "team": "Newcastle United",
+          "player": null,
+          "confidence": 0.4,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        }
+      ]
+    }
+  ]
+}
