@@ -1,19 +1,11 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-07T14:48:18.127Z",
+  "generated_at": "2026-11-07T18:35:06.079Z",
   "range": {
     "from": "2026-10-17",
     "to": "2026-12-12"
   },
   "days": [
-    {
-      "date": "2026-10-17",
-      "matches": 1,
-      "with_odds": 0,
-      "leagues": [
-        "Liiga"
-      ]
-    },
     {
       "date": "2026-10-20",
       "matches": 6,
@@ -128,8 +120,8 @@
     },
     {
       "date": "2026-11-11",
-      "matches": 6,
-      "with_odds": 0,
+      "matches": 7,
+      "with_odds": 5,
       "leagues": [
         "Liiga"
       ]
@@ -301,23 +293,17 @@
       "leagues": [
         "Liiga"
       ]
+    },
+    {
+      "date": "2026-12-12",
+      "matches": 6,
+      "with_odds": 0,
+      "leagues": [
+        "Liiga"
+      ]
     }
   ],
   "matches": [
-    {
-      "espn_id": "liiga-2701390",
-      "match_id": null,
-      "date": "2026-10-17",
-      "kickoff": "2026-10-17T15:30:00.000Z",
-      "sport_key": "icehockey_liiga",
-      "league": "Liiga",
-      "home": "Jukurit",
-      "away": "Tappara",
-      "status": "finished",
-      "home_score": 3,
-      "away_score": 2,
-      "has_odds": false
-    },
     {
       "espn_id": "liiga-2701396",
       "match_id": null,
@@ -971,7 +957,7 @@
       "league": "Valioliiga",
       "home": "Arsenal",
       "away": "Hull City",
-      "status": "upcoming",
+      "status": "finished",
       "home_score": null,
       "away_score": null,
       "has_odds": true
@@ -985,7 +971,7 @@
       "league": "Valioliiga",
       "home": "Fulham",
       "away": "Newcastle United",
-      "status": "upcoming",
+      "status": "finished",
       "home_score": null,
       "away_score": null,
       "has_odds": true
@@ -999,7 +985,7 @@
       "league": "Valioliiga",
       "home": "Nottingham Forest",
       "away": "Manchester City",
-      "status": "upcoming",
+      "status": "finished",
       "home_score": null,
       "away_score": null,
       "has_odds": true
@@ -1090,7 +1076,7 @@
     },
     {
       "espn_id": "liiga-2701443",
-      "match_id": null,
+      "match_id": "icehockey_liiga:2026-11-11:HIF-JOK",
       "date": "2026-11-11",
       "kickoff": "2026-11-11T16:30:00.000Z",
       "sport_key": "icehockey_liiga",
@@ -1100,11 +1086,11 @@
       "status": "upcoming",
       "home_score": null,
       "away_score": null,
-      "has_odds": false
+      "has_odds": true
     },
     {
       "espn_id": "liiga-2701439",
-      "match_id": null,
+      "match_id": "icehockey_liiga:2026-11-11:ILV-PEL",
       "date": "2026-11-11",
       "kickoff": "2026-11-11T16:30:00.000Z",
       "sport_key": "icehockey_liiga",
@@ -1114,11 +1100,11 @@
       "status": "upcoming",
       "home_score": null,
       "away_score": null,
-      "has_odds": false
+      "has_odds": true
     },
     {
       "espn_id": "liiga-2701438",
-      "match_id": null,
+      "match_id": "icehockey_liiga:2026-11-11:JUK-ÄSS",
       "date": "2026-11-11",
       "kickoff": "2026-11-11T16:30:00.000Z",
       "sport_key": "icehockey_liiga",
@@ -1128,11 +1114,11 @@
       "status": "upcoming",
       "home_score": null,
       "away_score": null,
-      "has_odds": false
+      "has_odds": true
     },
     {
       "espn_id": "liiga-2701440",
-      "match_id": null,
+      "match_id": "icehockey_liiga:2026-11-11:JYP-KÄR",
       "date": "2026-11-11",
       "kickoff": "2026-11-11T16:30:00.000Z",
       "sport_key": "icehockey_liiga",
@@ -1142,7 +1128,7 @@
       "status": "upcoming",
       "home_score": null,
       "away_score": null,
-      "has_odds": false
+      "has_odds": true
     },
     {
       "espn_id": "liiga-2701441",
@@ -1157,6 +1143,20 @@
       "home_score": null,
       "away_score": null,
       "has_odds": false
+    },
+    {
+      "espn_id": "icehockey_liiga:2026-11-11:KIE-SPO",
+      "match_id": "icehockey_liiga:2026-11-11:KIE-SPO",
+      "date": "2026-11-11",
+      "kickoff": "2026-11-11T16:30:00.000Z",
+      "sport_key": "icehockey_liiga",
+      "league": "Liiga",
+      "home": "Kiekko-Espoo",
+      "away": "Sport",
+      "status": "upcoming",
+      "home_score": null,
+      "away_score": null,
+      "has_odds": true
     },
     {
       "espn_id": "liiga-2701442",
@@ -2427,6 +2427,90 @@
       "league": "Liiga",
       "home": "TPS",
       "away": "Tappara",
+      "status": "upcoming",
+      "home_score": null,
+      "away_score": null,
+      "has_odds": false
+    },
+    {
+      "espn_id": "liiga-2701538",
+      "match_id": null,
+      "date": "2026-12-12",
+      "kickoff": "2026-12-12T15:00:00.000Z",
+      "sport_key": "icehockey_liiga",
+      "league": "Liiga",
+      "home": "Ässät",
+      "away": "Tappara",
+      "status": "upcoming",
+      "home_score": null,
+      "away_score": null,
+      "has_odds": false
+    },
+    {
+      "espn_id": "liiga-2701532",
+      "match_id": null,
+      "date": "2026-12-12",
+      "kickoff": "2026-12-12T15:00:00.000Z",
+      "sport_key": "icehockey_liiga",
+      "league": "Liiga",
+      "home": "HPK",
+      "away": "JYP",
+      "status": "upcoming",
+      "home_score": null,
+      "away_score": null,
+      "has_odds": false
+    },
+    {
+      "espn_id": "liiga-2701534",
+      "match_id": null,
+      "date": "2026-12-12",
+      "kickoff": "2026-12-12T15:00:00.000Z",
+      "sport_key": "icehockey_liiga",
+      "league": "Liiga",
+      "home": "K-Espoo",
+      "away": "Lukko",
+      "status": "upcoming",
+      "home_score": null,
+      "away_score": null,
+      "has_odds": false
+    },
+    {
+      "espn_id": "liiga-2701533",
+      "match_id": null,
+      "date": "2026-12-12",
+      "kickoff": "2026-12-12T15:00:00.000Z",
+      "sport_key": "icehockey_liiga",
+      "league": "Liiga",
+      "home": "KalPa",
+      "away": "Jokerit",
+      "status": "upcoming",
+      "home_score": null,
+      "away_score": null,
+      "has_odds": false
+    },
+    {
+      "espn_id": "liiga-2701535",
+      "match_id": null,
+      "date": "2026-12-12",
+      "kickoff": "2026-12-12T15:00:00.000Z",
+      "sport_key": "icehockey_liiga",
+      "league": "Liiga",
+      "home": "KooKoo",
+      "away": "Ilves",
+      "status": "upcoming",
+      "home_score": null,
+      "away_score": null,
+      "has_odds": false
+    },
+    {
+      "espn_id": "liiga-2701536",
+      "match_id": null,
+      "date": "2026-12-12",
+      "kickoff": "2026-12-12T16:00:00.000Z",
+      "sport_key": "icehockey_liiga",
+      "league": "Liiga",
+      "home": "Kärpät",
+      "away": "HIFK",
       "status": "upcoming",
       "home_score": null,
       "away_score": null,
