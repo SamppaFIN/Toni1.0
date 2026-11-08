@@ -1,0 +1,2223 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-08T14:49:25.398Z",
+  "sport": "football",
+  "source": "live",
+  "providers": [
+    "The Odds API",
+    "Ristikaksi — Liiga-kausiennakko 2026-27 + toteutuneet tulokset (Elo)",
+    "liiga.fi/api/v2",
+    "football-data.org",
+    "RSS-uutissyötteet"
+  ],
+  "leagues": [
+    "Valioliiga",
+    "Liiga"
+  ],
+  "matches": [
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "Betsson",
+            "key": "betsson",
+            "line": 2.5,
+            "over": 1.54,
+            "under": 2.51,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:49:22Z",
+            "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-J9W6E5Yhe0S0dS0nXM8ZSQ&eti=0&fs=true"
+          },
+          {
+            "bookmaker": "Nordic Bet",
+            "key": "nordicbet",
+            "line": 2.5,
+            "over": 1.55,
+            "under": 2.5,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:49:24Z",
+            "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/manchester-united-aston-villa"
+          },
+          {
+            "bookmaker": "Unibet (SE)",
+            "key": "unibet_se",
+            "line": 2.5,
+            "over": 1.51,
+            "under": 2.6,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:49:22Z",
+            "link": "https://www.unibet.se/betting/sports/event/1028072859"
+          },
+          {
+            "bookmaker": "William Hill",
+            "key": "williamhill",
+            "line": 2.5,
+            "over": 1.5,
+            "under": 2.5,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:49:03Z",
+            "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41656271/man-utd-vs-aston-villa"
+          },
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 3,
+            "over": 1.82,
+            "under": 2.06,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:25Z",
+            "link": "https://www.coolbet.com/en/sports/match/6395520"
+          },
+          {
+            "bookmaker": "Pinnacle",
+            "key": "pinnacle",
+            "line": 3,
+            "over": 1.91,
+            "under": 2,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:49:21Z",
+            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/aston-villa-vs-manchester-united/1639201955/"
+          },
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 3.5,
+            "over": 2.42,
+            "under": 1.66,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:49:03Z",
+            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/383264542-manchester-united-aston-villa"
+          },
+          {
+            "bookmaker": "Marathon Bet",
+            "key": "marathonbet",
+            "line": 3.5,
+            "over": 2.35,
+            "under": 1.61,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:49:09Z",
+            "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/manchester-united-vs-aston-villa"
+          }
+        ],
+        "edges": [
+          {
+            "line": 2.5,
+            "side": "over",
+            "odds": 1.55,
+            "odds_effective": 1.55,
+            "book": "Nordic Bet",
+            "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/manchester-united-aston-villa",
+            "model_prob": 0.5313,
+            "implied_prob": 0.6265,
+            "edge": -0.1766,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 2.5,
+            "side": "under",
+            "odds": 2.6,
+            "odds_effective": 2.6,
+            "book": "Unibet (SE)",
+            "link": "https://www.unibet.se/betting/sports/event/1028072859",
+            "model_prob": 0.4687,
+            "implied_prob": 0.3735,
+            "edge": 0.2187,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          },
+          {
+            "line": 3,
+            "side": "over",
+            "odds": 1.91,
+            "odds_effective": 1.91,
+            "book": "Pinnacle",
+            "link": "https://www.pinnacle.com/en/soccer/england-premier-league/aston-villa-vs-manchester-united/1639201955/",
+            "model_prob": 0.3087,
+            "implied_prob": 0.5189,
+            "edge": -0.4104,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 3,
+            "side": "under",
+            "odds": 2.06,
+            "odds_effective": 2.06,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6395520",
+            "model_prob": 0.6913,
+            "implied_prob": 0.4811,
+            "edge": 0.4241,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          },
+          {
+            "line": 3.5,
+            "side": "over",
+            "odds": 2.42,
+            "odds_effective": 2.42,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/383264542-manchester-united-aston-villa",
+            "model_prob": 0.3087,
+            "implied_prob": 0.4069,
+            "edge": -0.2529,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 3.5,
+            "side": "under",
+            "odds": 1.66,
+            "odds_effective": 1.66,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/88637-england-premier-league/383264542-manchester-united-aston-villa",
+            "model_prob": 0.6913,
+            "implied_prob": 0.5931,
+            "edge": 0.1475,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          }
+        ]
+      },
+      "id": "soccer_epl:2026-11-08:MAN-AST",
+      "league": "Valioliiga",
+      "kickoff": "2026-11-08T16:30:00.000Z",
+      "home": {
+        "name": "Manchester United",
+        "short": "MAN",
+        "color": "#57606A"
+      },
+      "away": {
+        "name": "Aston Villa",
+        "short": "AST",
+        "color": "#57606A"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 2.21,
+          "draw": 4.01,
+          "away": 3.19,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:03Z",
+          "link": "https://1xbet.com/en/line/football/88637-england-premier-league/383264542-manchester-united-aston-villa"
+        },
+        {
+          "bookmaker": "William Hill",
+          "key": "williamhill",
+          "market": "1X2",
+          "home": 2.15,
+          "draw": 3.6,
+          "away": 3,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:03Z",
+          "link": "https://sports.williamhill.com/betting/en-gb/football/OB_EV41656271/man-utd-vs-aston-villa"
+        },
+        {
+          "bookmaker": "Betfair",
+          "key": "betfair_ex_eu",
+          "market": "1X2",
+          "home": 2.26,
+          "draw": 3.9,
+          "away": 3.25,
+          "commission": 0.05,
+          "fetched_at": "2026-11-08T14:49:22Z",
+          "link": "https://www.betfair.com/exchange/plus/football/market/1.264453792"
+        },
+        {
+          "bookmaker": "Marathon Bet",
+          "key": "marathonbet",
+          "market": "1X2",
+          "home": 2.17,
+          "draw": 3.95,
+          "away": 3.14,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:09Z",
+          "link": "https://www.marathonbet.com/en/betting/event/football/england-premier-league/manchester-united-vs-aston-villa"
+        },
+        {
+          "bookmaker": "Pinnacle",
+          "key": "pinnacle",
+          "market": "1X2",
+          "home": 2.25,
+          "draw": 3.77,
+          "away": 3.17,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:21Z",
+          "link": "https://www.pinnacle.com/en/soccer/england-premier-league/aston-villa-vs-manchester-united/1639201955/"
+        },
+        {
+          "bookmaker": "Nordic Bet",
+          "key": "nordicbet",
+          "market": "1X2",
+          "home": 2.18,
+          "draw": 3.65,
+          "away": 3.1,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:24Z",
+          "link": "https://www.nordicbet.com/en/sportsbook/football/england/england-premier-league/manchester-united-aston-villa"
+        },
+        {
+          "bookmaker": "Betsson",
+          "key": "betsson",
+          "market": "1X2",
+          "home": 2.19,
+          "draw": 3.66,
+          "away": 3.1,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:22Z",
+          "link": "https://www.betsson.com/en/sportsbook/football/england/england-premier-league?tab=liveAndUpcoming&eventId=f-J9W6E5Yhe0S0dS0nXM8ZSQ&eti=0&fs=true"
+        },
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 2.18,
+          "draw": 3.95,
+          "away": 3.25,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:22Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028072859"
+        },
+        {
+          "bookmaker": "Matchbook",
+          "key": "matchbook",
+          "market": "1X2",
+          "home": 2.24,
+          "draw": 3.95,
+          "away": 3.25,
+          "commission": 0.015,
+          "fetched_at": "2026-11-08T14:49:22Z",
+          "link": "https://www.matchbook.com/events/soccer/england/english-premier-league/34690488110000023/"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 2.18,
+          "draw": 3.85,
+          "away": 3.3,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:25Z",
+          "link": "https://www.coolbet.com/en/sports/match/6395520"
+        }
+      ],
+      "best": {
+        "home": 2.25,
+        "draw": 4.01,
+        "away": 3.3,
+        "home_effective": 2.25,
+        "draw_effective": 4.01,
+        "away_effective": 3.3,
+        "home_book": "Pinnacle",
+        "draw_book": "1xBet",
+        "away_book": "Coolbet"
+      },
+      "market": {
+        "margin": -0.0031,
+        "implied": {
+          "home": 0.4405,
+          "draw": 0.254,
+          "away": 0.3055
+        },
+        "sharp": {
+          "home": 0.4335,
+          "draw": 0.2587,
+          "away": 0.3077
+        },
+        "sharp_source": "Pinnacle"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 1.563,
+        "lambda_away": 1.24,
+        "probs": {
+          "home": 0.436,
+          "draw": 0.2593,
+          "away": 0.3047
+        },
+        "poisson_probs": {
+          "home": 0.4426,
+          "draw": 0.2607,
+          "away": 0.2967
+        },
+        "blend_weight": 0.272,
+        "over25": 0.5313,
+        "btts": 0.5676,
+        "top_scores": [
+          {
+            "score": "1-1",
+            "p": 0.1234
+          },
+          {
+            "score": "2-1",
+            "p": 0.0918
+          },
+          {
+            "score": "1-0",
+            "p": 0.0889
+          },
+          {
+            "score": "2-0",
+            "p": 0.0741
+          },
+          {
+            "score": "1-2",
+            "p": 0.0728
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (MAN, 9 ottelua) / tämä + viime kausi (AST, 9 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 68 % → paino markkinaa vastaan 27 % (täysi 40 %). Kohtalaisesti dataa."
+          }
+        ],
+        "home_strength": {
+          "attack": 1,
+          "defense": 1.14
+        },
+        "away_strength": {
+          "attack": 0.93,
+          "defense": 1.03
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.25,
+            "odds_effective": 2.25,
+            "book": "Pinnacle",
+            "model_prob": 0.436,
+            "implied_prob": 0.4405,
+            "edge": -0.019,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.01,
+            "odds_effective": 4.01,
+            "book": "1xBet",
+            "model_prob": 0.2593,
+            "implied_prob": 0.254,
+            "edge": 0.0398,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 3.3,
+            "odds_effective": 3.3,
+            "book": "Coolbet",
+            "model_prob": 0.3047,
+            "implied_prob": 0.3055,
+            "edge": 0.0055,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 18,
+          "played": 9,
+          "form": "LLDDD",
+          "gf_pg": 1.11,
+          "ga_pg": 1.67,
+          "home_gf_pg": 1.5,
+          "away_gf_pg": 0.8,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 0.78,
+          "elo": null,
+          "elo_change": null,
+          "elo_rank": null
+        },
+        "away": {
+          "rank": 12,
+          "played": 9,
+          "form": "DWWDW",
+          "gf_pg": 1.11,
+          "ga_pg": 1.44,
+          "home_gf_pg": 1.2,
+          "away_gf_pg": 1,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.33,
+          "elo": null,
+          "elo_change": null,
+          "elo_rank": null
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "Forest win over Man City 'a turning point' - Murphy",
+          "url": "https://www.bbc.co.uk/sport/football/videos/c893zr4rlzp1o?at_medium=RSS&at_campaign=rss",
+          "source": "BBC Sport",
+          "published_at": "2026-11-08T00:00:14.000Z",
+          "event_type": null,
+          "team": "Manchester United",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "'Bruno's as good as ever' - Carrick backs Man Utd captain",
+          "url": "https://www.bbc.co.uk/sport/football/articles/ckj0l542v7pvo?at_medium=RSS&at_campaign=rss",
+          "source": "BBC Sport",
+          "published_at": "2026-11-07T22:44:20.000Z",
+          "event_type": "manager_change",
+          "team": "Manchester United",
+          "player": null,
+          "confidence": 0.4,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "Enzo Maresca rues Manchester City’s lack of desire after defeat at Nottingham Forest",
+          "url": "https://www.theguardian.com/football/2026/nov/07/enzo-maresca-nottingham-forest-manchester-city-premier-league",
+          "source": "The Guardian",
+          "published_at": "2026-11-07T21:17:41.000Z",
+          "event_type": null,
+          "team": "Manchester United",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Maresca's dream start turns into nightmare as title hopes hit",
+          "url": "https://www.bbc.co.uk/sport/football/articles/cm93z0l03n8vo?at_medium=RSS&at_campaign=rss",
+          "source": "BBC Sport",
+          "published_at": "2026-11-07T20:54:12.000Z",
+          "event_type": null,
+          "team": "Manchester United",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        },
+        {
+          "title": "Delap double inspires Forest to stunning win over Man City",
+          "url": "https://www.bbc.co.uk/sport/football/videos/crp3gewxj77eo?at_medium=RSS&at_campaign=rss",
+          "source": "BBC Sport",
+          "published_at": "2026-11-07T20:02:25.000Z",
+          "event_type": null,
+          "team": "Manchester United",
+          "player": null,
+          "confidence": null,
+          "impact": null
+        }
+      ]
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 5,
+            "over": 2.01,
+            "under": 1.78,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:39Z",
+            "link": "https://www.coolbet.com/en/sports/match/6446501"
+          },
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 5.5,
+            "over": 2.15,
+            "under": 1.66,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:57Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/386245078-tps-kalpa"
+          }
+        ],
+        "edges": [
+          {
+            "line": 5,
+            "side": "over",
+            "odds": 2.01,
+            "odds_effective": 2.01,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6446501",
+            "model_prob": 0.4084,
+            "implied_prob": 0.4697,
+            "edge": -0.1792,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5,
+            "side": "under",
+            "odds": 1.78,
+            "odds_effective": 1.78,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6446501",
+            "model_prob": 0.5916,
+            "implied_prob": 0.5303,
+            "edge": 0.0531,
+            "flag": "strong",
+            "kelly_fraction": 0.017,
+            "stake_suggestion": 1.7
+          },
+          {
+            "line": 5.5,
+            "side": "over",
+            "odds": 2.15,
+            "odds_effective": 2.15,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/386245078-tps-kalpa",
+            "model_prob": 0.4084,
+            "implied_prob": 0.4357,
+            "edge": -0.122,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5.5,
+            "side": "under",
+            "odds": 1.66,
+            "odds_effective": 1.66,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/386245078-tps-kalpa",
+            "model_prob": 0.5916,
+            "implied_prob": 0.5643,
+            "edge": -0.0179,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-11-09:TPS-KAL",
+      "league": "Liiga",
+      "kickoff": "2026-11-09T16:30:00.000Z",
+      "home": {
+        "name": "TPS",
+        "short": "TPS",
+        "color": "#57606A"
+      },
+      "away": {
+        "name": "KalPa",
+        "short": "KAL",
+        "color": "#57606A"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 1.95,
+          "draw": 4.15,
+          "away": 3.23,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:57Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/386245078-tps-kalpa"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 2.08,
+          "draw": 4,
+          "away": 3.35,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:39Z",
+          "link": "https://www.coolbet.com/en/sports/match/6446501"
+        },
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 2.02,
+          "draw": 3.9,
+          "away": 3.2,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:16Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028022299"
+        }
+      ],
+      "best": {
+        "home": 2.08,
+        "draw": 4.15,
+        "away": 3.35,
+        "home_effective": 2.08,
+        "draw_effective": 4.15,
+        "away_effective": 3.35,
+        "home_book": "Coolbet",
+        "draw_book": "1xBet",
+        "away_book": "Coolbet"
+      },
+      "market": {
+        "margin": 0.0202,
+        "implied": {
+          "home": 0.4675,
+          "draw": 0.2412,
+          "away": 0.2914
+        },
+        "sharp": {
+          "home": 0.4675,
+          "draw": 0.2412,
+          "away": 0.2914
+        },
+        "sharp_source": "mediaani (3 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 2.658,
+        "lambda_away": 2.49,
+        "probs": {
+          "home": 0.4504,
+          "draw": 0.238,
+          "away": 0.3116
+        },
+        "poisson_probs": {
+          "home": 0.4116,
+          "draw": 0.2308,
+          "away": 0.3576
+        },
+        "blend_weight": 0.3058823529411765,
+        "over25": 0.887,
+        "btts": 0.8546,
+        "top_scores": [
+          {
+            "score": "2-2",
+            "p": 0.0638
+          },
+          {
+            "score": "3-2",
+            "p": 0.0565
+          },
+          {
+            "score": "2-3",
+            "p": 0.053
+          },
+          {
+            "score": "2-1",
+            "p": 0.0513
+          },
+          {
+            "score": "1-2",
+            "p": 0.048
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (TPS, 19 ottelua) / tämä + viime kausi (KAL, 18 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 76 % → paino markkinaa vastaan 31 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 1.06,
+          "defense": 1.01
+        },
+        "away_strength": {
+          "attack": 1.06,
+          "defense": 0.95
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.08,
+            "odds_effective": 2.08,
+            "book": "Coolbet",
+            "model_prob": 0.4504,
+            "implied_prob": 0.4675,
+            "edge": -0.0632,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.15,
+            "odds_effective": 4.15,
+            "book": "1xBet",
+            "model_prob": 0.238,
+            "implied_prob": 0.2412,
+            "edge": -0.0123,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 3.35,
+            "odds_effective": 3.35,
+            "book": "Coolbet",
+            "model_prob": 0.3116,
+            "implied_prob": 0.2914,
+            "edge": 0.0439,
+            "flag": "candidate",
+            "kelly_fraction": 0.0047,
+            "stake_suggestion": 0.47
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 9,
+          "played": 19,
+          "form": "WLLDW",
+          "gf_pg": 2.74,
+          "ga_pg": 2.42,
+          "home_gf_pg": 3.22,
+          "away_gf_pg": 2.3,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.63,
+          "elo": 1495,
+          "elo_change": 70,
+          "elo_rank": 9
+        },
+        "away": {
+          "rank": 12,
+          "played": 18,
+          "form": "LWWWL",
+          "gf_pg": 2.56,
+          "ga_pg": 2.22,
+          "home_gf_pg": 3.1,
+          "away_gf_pg": 1.88,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.39,
+          "elo": 1525,
+          "elo_change": -20,
+          "elo_rank": 7
+        },
+        "h2h": []
+      },
+      "news": []
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 5.5,
+            "over": 1.95,
+            "under": 1.8,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:57Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387094896-hifk-jokerit"
+          },
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 5.5,
+            "over": 2,
+            "under": 1.79,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:39Z",
+            "link": "https://www.coolbet.com/en/sports/match/6455550"
+          }
+        ],
+        "edges": [
+          {
+            "line": 5.5,
+            "side": "over",
+            "odds": 2,
+            "odds_effective": 2,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6455550",
+            "model_prob": 0.5267,
+            "implied_prob": 0.4737,
+            "edge": 0.0535,
+            "flag": "strong",
+            "kelly_fraction": 0.0134,
+            "stake_suggestion": 1.34
+          },
+          {
+            "line": 5.5,
+            "side": "under",
+            "odds": 1.8,
+            "odds_effective": 1.8,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387094896-hifk-jokerit",
+            "model_prob": 0.4733,
+            "implied_prob": 0.5263,
+            "edge": -0.1481,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-11-11:HIF-JOK",
+      "league": "Liiga",
+      "kickoff": "2026-11-11T16:30:00.000Z",
+      "home": {
+        "name": "HIFK",
+        "short": "HIF",
+        "color": "#BF3989"
+      },
+      "away": {
+        "name": "Jokerit",
+        "short": "JOK",
+        "color": "#BF3989"
+      },
+      "odds": [
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 2.02,
+          "draw": 4.25,
+          "away": 2.95,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:16Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028022300"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 2.2,
+          "draw": 4.05,
+          "away": 3.05,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:39Z",
+          "link": "https://www.coolbet.com/en/sports/match/6455550"
+        },
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 2.06,
+          "draw": 4.2,
+          "away": 2.94,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:57Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387094896-hifk-jokerit"
+        }
+      ],
+      "best": {
+        "home": 2.2,
+        "draw": 4.25,
+        "away": 3.05,
+        "home_effective": 2.2,
+        "draw_effective": 4.25,
+        "away_effective": 3.05,
+        "home_book": "Coolbet",
+        "draw_book": "Unibet (SE)",
+        "away_book": "Coolbet"
+      },
+      "market": {
+        "margin": 0.0177,
+        "implied": {
+          "home": 0.457,
+          "draw": 0.2241,
+          "away": 0.3189
+        },
+        "sharp": {
+          "home": 0.457,
+          "draw": 0.2241,
+          "away": 0.3189
+        },
+        "sharp_source": "mediaani (3 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 3.459,
+        "lambda_away": 2.4,
+        "probs": {
+          "home": 0.4875,
+          "draw": 0.2162,
+          "away": 0.2963
+        },
+        "poisson_probs": {
+          "home": 0.5568,
+          "draw": 0.1982,
+          "away": 0.245
+        },
+        "blend_weight": 0.3058823529411765,
+        "over25": 0.9308,
+        "btts": 0.8816,
+        "top_scores": [
+          {
+            "score": "3-2",
+            "p": 0.0573
+          },
+          {
+            "score": "2-2",
+            "p": 0.0497
+          },
+          {
+            "score": "4-2",
+            "p": 0.0495
+          },
+          {
+            "score": "3-1",
+            "p": 0.0477
+          },
+          {
+            "score": "3-3",
+            "p": 0.0458
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (HIF, 19 ottelua) / tämä kausi (JOK, 18 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 76 % → paino markkinaa vastaan 31 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 1.08,
+          "defense": 1.12
+        },
+        "away_strength": {
+          "attack": 0.92,
+          "defense": 1.23
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.2,
+            "odds_effective": 2.2,
+            "book": "Coolbet",
+            "model_prob": 0.4875,
+            "implied_prob": 0.457,
+            "edge": 0.0725,
+            "flag": "strong",
+            "kelly_fraction": 0.0151,
+            "stake_suggestion": 1.51
+          },
+          {
+            "side": "draw",
+            "odds": 4.25,
+            "odds_effective": 4.25,
+            "book": "Unibet (SE)",
+            "model_prob": 0.2162,
+            "implied_prob": 0.2241,
+            "edge": -0.0811,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 3.05,
+            "odds_effective": 3.05,
+            "book": "Coolbet",
+            "model_prob": 0.2963,
+            "implied_prob": 0.3189,
+            "edge": -0.0963,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 11,
+          "played": 19,
+          "form": "WWWLW",
+          "gf_pg": 2.74,
+          "ga_pg": 2.74,
+          "home_gf_pg": 3.5,
+          "away_gf_pg": 2.18,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.42,
+          "elo": 1517,
+          "elo_change": 17,
+          "elo_rank": 8
+        },
+        "away": {
+          "rank": 16,
+          "played": 18,
+          "form": "LDWLD",
+          "gf_pg": 2.22,
+          "ga_pg": 3.22,
+          "home_gf_pg": 1.63,
+          "away_gf_pg": 2.7,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 0.83,
+          "elo": 1448,
+          "elo_change": -67,
+          "elo_rank": 14
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "Pikakomennus! HIFK-vahti maa­joukkueeseen",
+          "url": "https://www.iltalehti.fi/jaakiekko/a/ab6d5052-62a6-4679-b612-57f9aafde2cc?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-11-08T14:01:28.000Z",
+          "event_type": "lineup_change",
+          "team": "HIFK",
+          "player": null,
+          "confidence": 0.4,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        },
+        {
+          "title": "HIFK: Uusi valmentaja heti mukaan",
+          "url": "https://www.is.fi/sm-liiga/art-2000012393149.html",
+          "source": "IS jääkiekko",
+          "published_at": "2026-11-06T08:08:00.000Z",
+          "event_type": "manager_change",
+          "team": "HIFK",
+          "player": null,
+          "confidence": 0.4,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        }
+      ]
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 4.5,
+            "over": 1.76,
+            "under": 2,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:57Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387092986-ilves-pelicans"
+          },
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 4.5,
+            "over": 1.95,
+            "under": 1.83,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:39Z",
+            "link": "https://www.coolbet.com/en/sports/match/6455551"
+          }
+        ],
+        "edges": [
+          {
+            "line": 4.5,
+            "side": "over",
+            "odds": 1.95,
+            "odds_effective": 1.95,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6455551",
+            "model_prob": 0.4113,
+            "implied_prob": 0.5063,
+            "edge": -0.198,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 4.5,
+            "side": "under",
+            "odds": 2,
+            "odds_effective": 2,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387092986-ilves-pelicans",
+            "model_prob": 0.5887,
+            "implied_prob": 0.4937,
+            "edge": 0.1775,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-11-11:ILV-PEL",
+      "league": "Liiga",
+      "kickoff": "2026-11-11T16:30:00.000Z",
+      "home": {
+        "name": "Ilves",
+        "short": "ILV",
+        "color": "#238636"
+      },
+      "away": {
+        "name": "Pelicans",
+        "short": "PEL",
+        "color": "#0E7490"
+      },
+      "odds": [
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 1.72,
+          "draw": 4.2,
+          "away": 4.1,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:16Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028022302"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 1.86,
+          "draw": 3.95,
+          "away": 4.15,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:39Z",
+          "link": "https://www.coolbet.com/en/sports/match/6455551"
+        },
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 1.68,
+          "draw": 4.35,
+          "away": 4.2,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:57Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387092986-ilves-pelicans"
+        }
+      ],
+      "best": {
+        "home": 1.86,
+        "draw": 4.35,
+        "away": 4.2,
+        "home_effective": 1.86,
+        "draw_effective": 4.35,
+        "away_effective": 4.2,
+        "home_book": "Coolbet",
+        "draw_book": "1xBet",
+        "away_book": "1xBet"
+      },
+      "market": {
+        "margin": 0.0056,
+        "implied": {
+          "home": 0.5467,
+          "draw": 0.2239,
+          "away": 0.2294
+        },
+        "sharp": {
+          "home": 0.5467,
+          "draw": 0.2239,
+          "away": 0.2294
+        },
+        "sharp_source": "mediaani (3 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 2.452,
+        "lambda_away": 1.756,
+        "probs": {
+          "home": 0.5317,
+          "draw": 0.2311,
+          "away": 0.2372
+        },
+        "poisson_probs": {
+          "home": 0.4971,
+          "draw": 0.2476,
+          "away": 0.2553
+        },
+        "blend_weight": 0.30303030303030304,
+        "over25": 0.7907,
+        "btts": 0.7592,
+        "top_scores": [
+          {
+            "score": "2-1",
+            "p": 0.0786
+          },
+          {
+            "score": "2-2",
+            "p": 0.069
+          },
+          {
+            "score": "1-1",
+            "p": 0.0673
+          },
+          {
+            "score": "3-1",
+            "p": 0.0642
+          },
+          {
+            "score": "3-2",
+            "p": 0.0564
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (ILV, 20 ottelua) / tämä + viime kausi (PEL, 17 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 76 % → paino markkinaa vastaan 30 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 1.03,
+          "defense": 0.82
+        },
+        "away_strength": {
+          "attack": 0.92,
+          "defense": 0.91
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 1.86,
+            "odds_effective": 1.86,
+            "book": "Coolbet",
+            "model_prob": 0.5317,
+            "implied_prob": 0.5467,
+            "edge": -0.011,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.35,
+            "odds_effective": 4.35,
+            "book": "1xBet",
+            "model_prob": 0.2311,
+            "implied_prob": 0.2239,
+            "edge": 0.0053,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 4.2,
+            "odds_effective": 4.2,
+            "book": "1xBet",
+            "model_prob": 0.2372,
+            "implied_prob": 0.2294,
+            "edge": -0.0038,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 2,
+          "played": 20,
+          "form": "WDLDW",
+          "gf_pg": 2.45,
+          "ga_pg": 1.9,
+          "home_gf_pg": 3,
+          "away_gf_pg": 2.08,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.85,
+          "elo": 1588,
+          "elo_change": -17,
+          "elo_rank": 3
+        },
+        "away": {
+          "rank": 13,
+          "played": 17,
+          "form": "WDWLL",
+          "gf_pg": 2.29,
+          "ga_pg": 2.18,
+          "home_gf_pg": 2.5,
+          "away_gf_pg": 2,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.41,
+          "elo": 1454,
+          "elo_change": 14,
+          "elo_rank": 13
+        },
+        "h2h": []
+      },
+      "news": []
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 5.5,
+            "over": 1.85,
+            "under": 1.9,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:57Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387094130-jyp-jyvaskyla-oulun-karpat"
+          },
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 5.5,
+            "over": 1.87,
+            "under": 1.9,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:39Z",
+            "link": "https://www.coolbet.com/en/sports/match/6455554"
+          }
+        ],
+        "edges": [
+          {
+            "line": 5.5,
+            "side": "over",
+            "odds": 1.87,
+            "odds_effective": 1.87,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6455554",
+            "model_prob": 0.5801,
+            "implied_prob": 0.504,
+            "edge": 0.0848,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          },
+          {
+            "line": 5.5,
+            "side": "under",
+            "odds": 1.9,
+            "odds_effective": 1.9,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387094130-jyp-jyvaskyla-oulun-karpat",
+            "model_prob": 0.4199,
+            "implied_prob": 0.496,
+            "edge": -0.2022,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-11-11:JYP-KÄR",
+      "league": "Liiga",
+      "kickoff": "2026-11-11T16:30:00.000Z",
+      "home": {
+        "name": "JYP",
+        "short": "JYP",
+        "color": "#238636"
+      },
+      "away": {
+        "name": "Kärpät",
+        "short": "KÄR",
+        "color": "#57606A"
+      },
+      "odds": [
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 1.94,
+          "draw": 4.25,
+          "away": 3.15,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:16Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028022740"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 2.02,
+          "draw": 4.2,
+          "away": 3.35,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:39Z",
+          "link": "https://www.coolbet.com/en/sports/match/6455554"
+        },
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 1.95,
+          "draw": 4.3,
+          "away": 3.15,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:57Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387094130-jyp-jyvaskyla-oulun-karpat"
+        }
+      ],
+      "best": {
+        "home": 2.02,
+        "draw": 4.3,
+        "away": 3.35,
+        "home_effective": 2.02,
+        "draw_effective": 4.3,
+        "away_effective": 3.35,
+        "home_book": "Coolbet",
+        "draw_book": "1xBet",
+        "away_book": "Coolbet"
+      },
+      "market": {
+        "margin": 0.0261,
+        "implied": {
+          "home": 0.4825,
+          "draw": 0.2203,
+          "away": 0.2972
+        },
+        "sharp": {
+          "home": 0.4825,
+          "draw": 0.2203,
+          "away": 0.2972
+        },
+        "sharp_source": "mediaani (3 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 3.545,
+        "lambda_away": 2.651,
+        "probs": {
+          "home": 0.4968,
+          "draw": 0.2135,
+          "away": 0.2897
+        },
+        "poisson_probs": {
+          "home": 0.5298,
+          "draw": 0.1978,
+          "away": 0.2724
+        },
+        "blend_weight": 0.30303030303030304,
+        "over25": 0.9456,
+        "btts": 0.9031,
+        "top_scores": [
+          {
+            "score": "3-2",
+            "p": 0.0538
+          },
+          {
+            "score": "4-2",
+            "p": 0.0477
+          },
+          {
+            "score": "3-3",
+            "p": 0.0476
+          },
+          {
+            "score": "2-2",
+            "p": 0.0455
+          },
+          {
+            "score": "4-3",
+            "p": 0.0422
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (JYP, 17 ottelua) / tämä + viime kausi (KÄR, 20 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 76 % → paino markkinaa vastaan 30 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 1.32,
+          "defense": 1.12
+        },
+        "away_strength": {
+          "attack": 1.02,
+          "defense": 1.03
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.02,
+            "odds_effective": 2.02,
+            "book": "Coolbet",
+            "model_prob": 0.4968,
+            "implied_prob": 0.4825,
+            "edge": 0.0035,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.3,
+            "odds_effective": 4.3,
+            "book": "1xBet",
+            "model_prob": 0.2135,
+            "implied_prob": 0.2203,
+            "edge": -0.082,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 3.35,
+            "odds_effective": 3.35,
+            "book": "Coolbet",
+            "model_prob": 0.2897,
+            "implied_prob": 0.2972,
+            "edge": -0.0295,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 4,
+          "played": 17,
+          "form": "WWLWD",
+          "gf_pg": 3.35,
+          "ga_pg": 2.76,
+          "home_gf_pg": 3.5,
+          "away_gf_pg": 3.27,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 2.06,
+          "elo": 1607,
+          "elo_change": 17,
+          "elo_rank": 1
+        },
+        "away": {
+          "rank": 7,
+          "played": 20,
+          "form": "DWLWL",
+          "gf_pg": 2.45,
+          "ga_pg": 2.4,
+          "home_gf_pg": 3.09,
+          "away_gf_pg": 1.67,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.65,
+          "elo": 1535,
+          "elo_change": -25,
+          "elo_rank": 5
+        },
+        "h2h": []
+      },
+      "news": []
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 4.5,
+            "over": 1.8,
+            "under": 1.95,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:57Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387094132-mikkelin-jukurit-assat"
+          },
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 4.5,
+            "over": 1.99,
+            "under": 1.8,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:39Z",
+            "link": "https://www.coolbet.com/en/sports/match/6455552"
+          }
+        ],
+        "edges": [
+          {
+            "line": 4.5,
+            "side": "over",
+            "odds": 1.99,
+            "odds_effective": 1.99,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6455552",
+            "model_prob": 0.4018,
+            "implied_prob": 0.4949,
+            "edge": -0.2004,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 4.5,
+            "side": "under",
+            "odds": 1.95,
+            "odds_effective": 1.95,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387094132-mikkelin-jukurit-assat",
+            "model_prob": 0.5982,
+            "implied_prob": 0.5051,
+            "edge": 0.1665,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-11-11:JUK-ÄSS",
+      "league": "Liiga",
+      "kickoff": "2026-11-11T16:30:00.000Z",
+      "home": {
+        "name": "Jukurit",
+        "short": "JUK",
+        "color": "#1F6FEB"
+      },
+      "away": {
+        "name": "Ässät",
+        "short": "ÄSS",
+        "color": "#8250DF"
+      },
+      "odds": [
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 2.48,
+          "draw": 3.55,
+          "away": 2.65,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:16Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028022739"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 2.62,
+          "draw": 3.65,
+          "away": 2.67,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:39Z",
+          "link": "https://www.coolbet.com/en/sports/match/6455552"
+        },
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 2.35,
+          "draw": 3.92,
+          "away": 2.59,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:57Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387094132-mikkelin-jukurit-assat"
+        }
+      ],
+      "best": {
+        "home": 2.62,
+        "draw": 3.92,
+        "away": 2.67,
+        "home_effective": 2.62,
+        "draw_effective": 3.92,
+        "away_effective": 2.67,
+        "home_book": "Coolbet",
+        "draw_book": "1xBet",
+        "away_book": "Coolbet"
+      },
+      "market": {
+        "margin": 0.0113,
+        "implied": {
+          "home": 0.3771,
+          "draw": 0.2634,
+          "away": 0.3595
+        },
+        "sharp": {
+          "home": 0.3771,
+          "draw": 0.2634,
+          "away": 0.3595
+        },
+        "sharp_source": "mediaani (3 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 2.272,
+        "lambda_away": 1.888,
+        "probs": {
+          "home": 0.3962,
+          "draw": 0.2617,
+          "away": 0.3421
+        },
+        "poisson_probs": {
+          "home": 0.4385,
+          "draw": 0.258,
+          "away": 0.3035
+        },
+        "blend_weight": 0.3111111111111111,
+        "over25": 0.7842,
+        "btts": 0.7643,
+        "top_scores": [
+          {
+            "score": "2-1",
+            "p": 0.0761
+          },
+          {
+            "score": "2-2",
+            "p": 0.0719
+          },
+          {
+            "score": "1-1",
+            "p": 0.0704
+          },
+          {
+            "score": "1-2",
+            "p": 0.0633
+          },
+          {
+            "score": "3-1",
+            "p": 0.0576
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (JUK, 20 ottelua) / tämä + viime kausi (ÄSS, 20 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 78 % → paino markkinaa vastaan 31 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 0.9,
+          "defense": 0.85
+        },
+        "away_strength": {
+          "attack": 0.95,
+          "defense": 0.96
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.62,
+            "odds_effective": 2.62,
+            "book": "Coolbet",
+            "model_prob": 0.3962,
+            "implied_prob": 0.3771,
+            "edge": 0.038,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 3.92,
+            "odds_effective": 3.92,
+            "book": "1xBet",
+            "model_prob": 0.2617,
+            "implied_prob": 0.2634,
+            "edge": 0.0259,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 2.67,
+            "odds_effective": 2.67,
+            "book": "Coolbet",
+            "model_prob": 0.3421,
+            "implied_prob": 0.3595,
+            "edge": -0.0866,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 3,
+          "played": 20,
+          "form": "WLDDW",
+          "gf_pg": 2.25,
+          "ga_pg": 1.95,
+          "home_gf_pg": 1.82,
+          "away_gf_pg": 2.78,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.8,
+          "elo": 1476,
+          "elo_change": 96,
+          "elo_rank": 12
+        },
+        "away": {
+          "rank": 6,
+          "played": 20,
+          "form": "LLLWW",
+          "gf_pg": 2.25,
+          "ga_pg": 2.3,
+          "home_gf_pg": 2.44,
+          "away_gf_pg": 2.09,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.7,
+          "elo": 1489,
+          "elo_change": 19,
+          "elo_rank": 10
+        },
+        "h2h": []
+      },
+      "news": []
+    },
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 5,
+            "over": 1.85,
+            "under": 1.92,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:39Z",
+            "link": "https://www.coolbet.com/en/sports/match/6455553"
+          },
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 5.5,
+            "over": 2.15,
+            "under": 1.66,
+            "commission": 0,
+            "fetched_at": "2026-11-08T14:48:57Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387092988-kiekko-espoo-vaasan-sport"
+          }
+        ],
+        "edges": [
+          {
+            "line": 5,
+            "side": "over",
+            "odds": 1.85,
+            "odds_effective": 1.85,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6455553",
+            "model_prob": 0.0527,
+            "implied_prob": 0.5093,
+            "edge": -0.9025,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5,
+            "side": "under",
+            "odds": 1.92,
+            "odds_effective": 1.92,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6455553",
+            "model_prob": 0.9473,
+            "implied_prob": 0.4907,
+            "edge": 0.8188,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          },
+          {
+            "line": 5.5,
+            "side": "over",
+            "odds": 2.15,
+            "odds_effective": 2.15,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387092988-kiekko-espoo-vaasan-sport",
+            "model_prob": 0.0527,
+            "implied_prob": 0.4357,
+            "edge": -0.8867,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5.5,
+            "side": "under",
+            "odds": 1.66,
+            "odds_effective": 1.66,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387092988-kiekko-espoo-vaasan-sport",
+            "model_prob": 0.9473,
+            "implied_prob": 0.5643,
+            "edge": 0.5725,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-11-11:KIE-SPO",
+      "league": "Liiga",
+      "kickoff": "2026-11-11T16:30:00.000Z",
+      "home": {
+        "name": "Kiekko-Espoo",
+        "short": "KIE",
+        "color": "#0E7490"
+      },
+      "away": {
+        "name": "Sport",
+        "short": "SPO",
+        "color": "#8250DF"
+      },
+      "odds": [
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 1.61,
+          "draw": 4.35,
+          "away": 4.75,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:49:16Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028022388"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 1.67,
+          "draw": 4.45,
+          "away": 4.85,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:39Z",
+          "link": "https://www.coolbet.com/en/sports/match/6455553"
+        },
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 1.65,
+          "draw": 4.5,
+          "away": 4.27,
+          "commission": 0,
+          "fetched_at": "2026-11-08T14:48:57Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/387092988-kiekko-espoo-vaasan-sport"
+        }
+      ],
+      "best": {
+        "home": 1.67,
+        "draw": 4.5,
+        "away": 4.85,
+        "home_effective": 1.67,
+        "draw_effective": 4.5,
+        "away_effective": 4.85,
+        "home_book": "Coolbet",
+        "draw_book": "1xBet",
+        "away_book": "Coolbet"
+      },
+      "market": {
+        "margin": 0.0272,
+        "implied": {
+          "home": 0.5825,
+          "draw": 0.2169,
+          "away": 0.2006
+        },
+        "sharp": {
+          "home": 0.5825,
+          "draw": 0.2169,
+          "away": 0.2006
+        },
+        "sharp_source": "mediaani (3 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 1.502,
+        "lambda_away": 1.147,
+        "probs": {
+          "home": 0.5579,
+          "draw": 0.2335,
+          "away": 0.2086
+        },
+        "poisson_probs": {
+          "home": 0.4066,
+          "draw": 0.3355,
+          "away": 0.2578
+        },
+        "blend_weight": 0.13999999999999999,
+        "over25": 0.4939,
+        "btts": 0.5366,
+        "top_scores": [
+          {
+            "score": "1-1",
+            "p": 0.1279
+          },
+          {
+            "score": "1-0",
+            "p": 0.1001
+          },
+          {
+            "score": "2-1",
+            "p": 0.0915
+          },
+          {
+            "score": "2-0",
+            "p": 0.0797
+          },
+          {
+            "score": "0-0",
+            "p": 0.0768
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Kausiennakko (Ristikaksi — Liiga-kausiennakko 2026-27): KIE #15 vs SPO #16. Ei pelattuja otteluita — luku on ennakon lähtöarvo, ei mittaus."
+          },
+          {
+            "reason": "KIE — + Ykkösmaalivahti Rimpinen (eliittiä), useita \"omia poikia\" – tuo sydäntä ja ryhtiä  ·  − Kapeahko rosteri (etenkin hyökkäys), kliinisten viimeistelijöiden puute, ei varaa loukkaantumisille"
+          },
+          {
+            "reason": "SPO — + Ennakkoluulottomuus, altavastaajan rooli, vastustajien mahdollinen aliarviointi  ·  − Liigan heikoimpia materiaaleja, paljon \"palkkasotureita\", maalivahtiosasto epävarma (Ortio/Härkönen)"
+          }
+        ],
+        "home_strength": {
+          "attack": 0.87,
+          "defense": 1.14
+        },
+        "away_strength": {
+          "attack": 0.84,
+          "defense": 1.16
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 1.67,
+            "odds_effective": 1.67,
+            "book": "Coolbet",
+            "model_prob": 0.5579,
+            "implied_prob": 0.5825,
+            "edge": -0.0683,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.5,
+            "odds_effective": 4.5,
+            "book": "1xBet",
+            "model_prob": 0.2335,
+            "implied_prob": 0.2169,
+            "edge": 0.0508,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 4.85,
+            "odds_effective": 4.85,
+            "book": "Coolbet",
+            "model_prob": 0.2086,
+            "implied_prob": 0.2006,
+            "edge": 0.0117,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 11,
+          "played": 0,
+          "form": "",
+          "gf_pg": 0,
+          "ga_pg": 0,
+          "home_gf_pg": null,
+          "away_gf_pg": null,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": null,
+          "elo": 1489,
+          "elo_change": 79,
+          "elo_rank": 11,
+          "elo_provisional": true
+        },
+        "away": {
+          "rank": 17,
+          "played": 0,
+          "form": "",
+          "gf_pg": 0,
+          "ga_pg": 0,
+          "home_gf_pg": null,
+          "away_gf_pg": null,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": null,
+          "elo": 1355,
+          "elo_change": -40,
+          "elo_rank": 17,
+          "elo_provisional": true
+        },
+        "h2h": []
+      },
+      "news": [],
+      "preview": {
+        "source": {
+          "name": "Ristikaksi — Liiga-kausiennakko 2026-27",
+          "url": "https://www.ristikaksi.com/urheilusarjat/liiga-kausiennakko-2026-27",
+          "readAt": "2026-09-01"
+        },
+        "home": {
+          "rank": 15,
+          "elo": 1410,
+          "strengths": [
+            "Ykkösmaalivahti Rimpinen (eliittiä)",
+            "useita \"omia poikia\" – tuo sydäntä ja ryhtiä"
+          ],
+          "weaknesses": [
+            "Kapeahko rosteri (etenkin hyökkäys)",
+            "kliinisten viimeistelijöiden puute",
+            "ei varaa loukkaantumisille"
+          ],
+          "arrivals": [
+            "Jere Sallinen",
+            "Ville Lajunen",
+            "Connor Corcoran"
+          ],
+          "departures": [
+            "Cameron Hillis",
+            "Kasper Kulonummi",
+            "Santeri Virtanen"
+          ]
+        },
+        "away": {
+          "rank": 16,
+          "elo": 1395,
+          "strengths": [
+            "Ennakkoluulottomuus",
+            "altavastaajan rooli",
+            "vastustajien mahdollinen aliarviointi"
+          ],
+          "weaknesses": [
+            "Liigan heikoimpia materiaaleja",
+            "paljon \"palkkasotureita\"",
+            "maalivahtiosasto epävarma (Ortio/Härkönen)"
+          ]
+        }
+      }
+    }
+  ]
+}
