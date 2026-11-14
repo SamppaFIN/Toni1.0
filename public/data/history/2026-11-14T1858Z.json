@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-14T18:58:27.264Z",
+  "sport": "football",
+  "source": "live",
+  "providers": [
+    "The Odds API",
+    "Ristikaksi — Liiga-kausiennakko 2026-27 + toteutuneet tulokset (Elo)",
+    "liiga.fi/api/v2",
+    "RSS-uutissyötteet"
+  ],
+  "leagues": [
+    "Liiga"
+  ],
+  "matches": [
+    {
+      "totals": {
+        "books": [
+          {
+            "bookmaker": "Coolbet",
+            "key": "coolbet",
+            "line": 5,
+            "over": 1.93,
+            "under": 1.85,
+            "commission": 0,
+            "fetched_at": "2026-11-14T18:58:16Z",
+            "link": "https://www.coolbet.com/en/sports/match/6478921"
+          },
+          {
+            "bookmaker": "1xBet",
+            "key": "onexbet",
+            "line": 5.5,
+            "over": 2.2,
+            "under": 1.63,
+            "commission": 0,
+            "fetched_at": "2026-11-14T18:57:28Z",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/395259116-ilves-saipa"
+          }
+        ],
+        "edges": [
+          {
+            "line": 5,
+            "side": "over",
+            "odds": 1.93,
+            "odds_effective": 1.93,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6478921",
+            "model_prob": 0.324,
+            "implied_prob": 0.4894,
+            "edge": -0.3746,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5,
+            "side": "under",
+            "odds": 1.85,
+            "odds_effective": 1.85,
+            "book": "Coolbet",
+            "link": "https://www.coolbet.com/en/sports/match/6478921",
+            "model_prob": 0.676,
+            "implied_prob": 0.5106,
+            "edge": 0.2505,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          },
+          {
+            "line": 5.5,
+            "side": "over",
+            "odds": 2.2,
+            "odds_effective": 2.2,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/395259116-ilves-saipa",
+            "model_prob": 0.324,
+            "implied_prob": 0.4256,
+            "edge": -0.2871,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "line": 5.5,
+            "side": "under",
+            "odds": 1.63,
+            "odds_effective": 1.63,
+            "book": "1xBet",
+            "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/395259116-ilves-saipa",
+            "model_prob": 0.676,
+            "implied_prob": 0.5744,
+            "edge": 0.1018,
+            "flag": "strong",
+            "kelly_fraction": 0.02,
+            "stake_suggestion": 2
+          }
+        ]
+      },
+      "id": "icehockey_liiga:2026-11-15:ILV-SAI",
+      "league": "Liiga",
+      "kickoff": "2026-11-15T13:00:00.000Z",
+      "home": {
+        "name": "Ilves",
+        "short": "ILV",
+        "color": "#238636"
+      },
+      "away": {
+        "name": "SaiPa",
+        "short": "SAI",
+        "color": "#8250DF"
+      },
+      "odds": [
+        {
+          "bookmaker": "1xBet",
+          "key": "onexbet",
+          "market": "1X2",
+          "home": 1.9,
+          "draw": 4.2,
+          "away": 3.36,
+          "commission": 0,
+          "fetched_at": "2026-11-14T18:57:28Z",
+          "link": "https://1xbet.com/en/line/football/7082-finland-elite-league/395259116-ilves-saipa"
+        },
+        {
+          "bookmaker": "Unibet (SE)",
+          "key": "unibet_se",
+          "market": "1X2",
+          "home": 1.87,
+          "draw": 4.2,
+          "away": 3.45,
+          "commission": 0,
+          "fetched_at": "2026-11-14T18:57:45Z",
+          "link": "https://www.unibet.se/betting/sports/event/1028022298"
+        },
+        {
+          "bookmaker": "Coolbet",
+          "key": "coolbet",
+          "market": "1X2",
+          "home": 2.05,
+          "draw": 3.95,
+          "away": 3.5,
+          "commission": 0,
+          "fetched_at": "2026-11-14T18:58:16Z",
+          "link": "https://www.coolbet.com/en/sports/match/6478921"
+        }
+      ],
+      "best": {
+        "home": 2.05,
+        "draw": 4.2,
+        "away": 3.5,
+        "home_effective": 2.05,
+        "draw_effective": 4.2,
+        "away_effective": 3.5,
+        "home_book": "Coolbet",
+        "draw_book": "1xBet",
+        "away_book": "Coolbet"
+      },
+      "market": {
+        "margin": 0.0116,
+        "implied": {
+          "home": 0.4965,
+          "draw": 0.2246,
+          "away": 0.2788
+        },
+        "sharp": {
+          "home": 0.4965,
+          "draw": 0.2246,
+          "away": 0.2788
+        },
+        "sharp_source": "mediaani (3 toimistoa)"
+      },
+      "model": {
+        "method": "poisson+sharp-blend",
+        "lambda_home": 2.467,
+        "lambda_away": 2.195,
+        "probs": {
+          "home": 0.4741,
+          "draw": 0.2304,
+          "away": 0.2955
+        },
+        "poisson_probs": {
+          "home": 0.424,
+          "draw": 0.2433,
+          "away": 0.3328
+        },
+        "blend_weight": 0.3085714285714286,
+        "over25": 0.8437,
+        "btts": 0.8157,
+        "top_scores": [
+          {
+            "score": "2-2",
+            "p": 0.0694
+          },
+          {
+            "score": "2-1",
+            "p": 0.0632
+          },
+          {
+            "score": "3-2",
+            "p": 0.057
+          },
+          {
+            "score": "1-2",
+            "p": 0.0562
+          },
+          {
+            "score": "1-1",
+            "p": 0.0538
+          }
+        ],
+        "adjustments": [
+          {
+            "reason": "Voimat: tämä + viime kausi (ILV, 22 ottelua) / tämä + viime kausi (SAI, 19 ottelua)"
+          },
+          {
+            "reason": "Mallin luottamus 77 % → paino markkinaa vastaan 31 % (täysi 40 %). Kausidataa riittävästi."
+          }
+        ],
+        "home_strength": {
+          "attack": 1.04,
+          "defense": 0.82
+        },
+        "away_strength": {
+          "attack": 1.14,
+          "defense": 0.88
+        }
+      },
+      "analysis": {
+        "edges": [
+          {
+            "side": "home",
+            "odds": 2.05,
+            "odds_effective": 2.05,
+            "book": "Coolbet",
+            "model_prob": 0.4741,
+            "implied_prob": 0.4965,
+            "edge": -0.0281,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "draw",
+            "odds": 4.2,
+            "odds_effective": 4.2,
+            "book": "1xBet",
+            "model_prob": 0.2304,
+            "implied_prob": 0.2246,
+            "edge": -0.0323,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          },
+          {
+            "side": "away",
+            "odds": 3.5,
+            "odds_effective": 3.5,
+            "book": "Coolbet",
+            "model_prob": 0.2955,
+            "implied_prob": 0.2788,
+            "edge": 0.0342,
+            "flag": "none",
+            "kelly_fraction": 0,
+            "stake_suggestion": 0
+          }
+        ],
+        "news_window": false,
+        "bankroll_basis": 100
+      },
+      "stats": {
+        "home": {
+          "rank": 4,
+          "played": 22,
+          "form": "LDWWL",
+          "gf_pg": 2.55,
+          "ga_pg": 1.95,
+          "home_gf_pg": 3.11,
+          "away_gf_pg": 2.15,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.82,
+          "elo": 1586,
+          "elo_change": -19,
+          "elo_rank": 3
+        },
+        "away": {
+          "rank": 6,
+          "played": 19,
+          "form": "WWLLW",
+          "gf_pg": 2.79,
+          "ga_pg": 2.11,
+          "home_gf_pg": 2.55,
+          "away_gf_pg": 3.13,
+          "xg_pg": null,
+          "rest_days": null,
+          "ppg": 1.95,
+          "elo": 1542,
+          "elo_change": 57,
+          "elo_rank": 4
+        },
+        "h2h": []
+      },
+      "news": [
+        {
+          "title": "SM-liigassa jysähti kova pelikielto",
+          "url": "https://www.iltalehti.fi/smliiga/a/cafb69bb-6fc8-427f-9574-85583d4b101a?utm_source=rss",
+          "source": "Iltalehti jääkiekko",
+          "published_at": "2026-11-14T17:15:23.000Z",
+          "event_type": "suspension",
+          "team": "Ilves",
+          "player": null,
+          "confidence": 0.5,
+          "impact": "Tunnistettu avainsanoista — ei LLM-erittelyä, ei vaikuta malliin"
+        }
+      ]
+    }
+  ]
+}
